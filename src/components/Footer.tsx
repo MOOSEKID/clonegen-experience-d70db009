@@ -1,4 +1,3 @@
-
 import { Link } from 'react-router-dom';
 import { MapPin, Mail, Phone, Twitter, Instagram, Linkedin, Youtube, Facebook } from 'lucide-react';
 
@@ -11,7 +10,7 @@ const Footer = () => {
           <div className="space-y-6">
             <div className="flex items-center">
               <img 
-                src="/public/lovable-uploads/50d3d473-1f3f-40d6-b895-c64a2e29ca1d.png" 
+                src="/lovable-uploads/50d3d473-1f3f-40d6-b895-c64a2e29ca1d.png" 
                 alt="Uptown Gym Logo" 
                 className="h-16 w-auto object-contain"
               />

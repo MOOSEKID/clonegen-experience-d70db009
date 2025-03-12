@@ -1,3 +1,4 @@
+
 import { Link, useLocation } from 'react-router-dom';
 import { Home, BarChart2, Calendar, Dumbbell, Heart, Award, MapPin, Settings, LogOut } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -38,7 +39,7 @@ const CustomerSidebar = ({ isOpen }: CustomerSidebarProps) => {
         <Link to="/" className={cn("flex items-center", isOpen ? "justify-start" : "justify-center")}>
           <div className="h-12 w-auto">
             <img 
-              src="/public/lovable-uploads/50d3d473-1f3f-40d6-b895-c64a2e29ca1d.png" 
+              src="/lovable-uploads/50d3d473-1f3f-40d6-b895-c64a2e29ca1d.png" 
               alt="Uptown Gym Logo" 
               className="h-full w-auto object-contain"
             />

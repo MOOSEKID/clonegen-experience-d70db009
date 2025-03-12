@@ -80,7 +80,7 @@ const Header = () => {
         <Link to="/" className="flex items-center space-x-2">
           <div className="h-12 w-auto">
             <img 
-              src="/public/lovable-uploads/50d3d473-1f3f-40d6-b895-c64a2e29ca1d.png" 
+              src="/lovable-uploads/50d3d473-1f3f-40d6-b895-c64a2e29ca1d.png" 
               alt="Uptown Gym Logo" 
               className="h-full w-auto object-contain"
             />

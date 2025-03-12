@@ -14,7 +14,7 @@ const Index = () => {
     <main className="min-h-screen">
       <Helmet>
         <title>Uptown Gym - Your Fitness Partner</title>
-        <link rel="icon" href="/public/lovable-uploads/50d3d473-1f3f-40d6-b895-c64a2e29ca1d.png" type="image/png" />
+        <link rel="icon" href="/lovable-uploads/50d3d473-1f3f-40d6-b895-c64a2e29ca1d.png" type="image/png" />
       </Helmet>
       <Hero />
       <Features />
