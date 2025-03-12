@@ -49,7 +49,6 @@ const Header = () => {
 
   const navItems = [
     { label: 'Home', path: '/' },
-    { label: 'About Us', path: '/about-us' },
     { label: 'Membership', path: '/membership' },
     { label: 'Classes', path: '/classes' },
     { label: 'Blogs', path: '/blogs' },
@@ -63,6 +62,7 @@ const Header = () => {
   ];
 
   const companyItems = [
+    { label: 'About Us', path: '/about-us' },
     { label: 'Contact Us', path: '/contact-us' },
     { label: 'Timetable', path: '/timetable' },
     { label: 'Opening Times', path: '/opening-times' },
