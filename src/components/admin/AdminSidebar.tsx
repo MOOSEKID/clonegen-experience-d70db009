@@ -82,9 +82,9 @@ const AdminSidebar = ({ isOpen }: AdminSidebarProps) => {
           <Link to="/" className="flex items-center gap-2">
             {isOpen ? (
               <img 
-                src="/public/lovable-uploads/50d3d473-1f3f-40d6-b895-c64a2e29ca1d.png" 
+                src="/lovable-uploads/01fa474e-e83a-48f4-9ffc-2047ca448aa7.png" 
                 alt="Uptown Gym Logo" 
-                className="h-12 w-auto object-contain"
+                className="h-16 w-auto object-contain"
               />
             ) : (
               <div className="bg-gym-orange p-2 rounded-lg">

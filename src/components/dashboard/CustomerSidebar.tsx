@@ -37,9 +37,9 @@ const CustomerSidebar = ({ isOpen }: CustomerSidebarProps) => {
     >
       <div className="p-4 flex justify-center">
         <Link to="/" className={cn("flex items-center", isOpen ? "justify-start" : "justify-center")}>
-          <div className="h-12 w-auto">
+          <div className="h-16 w-auto">
             <img 
-              src="/lovable-uploads/50d3d473-1f3f-40d6-b895-c64a2e29ca1d.png" 
+              src="/lovable-uploads/01fa474e-e83a-48f4-9ffc-2047ca448aa7.png" 
               alt="Uptown Gym Logo" 
               className="h-full w-auto object-contain"
             />
