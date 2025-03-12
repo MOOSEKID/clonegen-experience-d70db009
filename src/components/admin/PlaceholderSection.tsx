@@ -6,14 +6,24 @@ interface PlaceholderSectionProps {
   icon: React.ReactNode;
   description: string;
   className?: string;
+  onClick?: () => void;
 }
 
-const PlaceholderSection = ({ title, icon, description, className }: PlaceholderSectionProps) => {
+const PlaceholderSection = ({ 
+  title, 
+  icon, 
+  description, 
+  className,
+  onClick 
+}: PlaceholderSectionProps) => {
   return (
-    <div className={cn(
-      "bg-white border border-gray-200 rounded-lg shadow-sm p-8 flex flex-col items-center justify-center text-center",
-      className
-    )}>
+    <div 
+      className={cn(
+        "bg-white border border-gray-200 rounded-lg shadow-sm p-8 flex flex-col items-center justify-center text-center cursor-pointer hover:border-gym-orange/50 transition-all",
+        className
+      )}
+      onClick={onClick}
+    >
       <div className="bg-gym-orange/10 p-4 rounded-full mb-4">
         {icon}
       </div>
