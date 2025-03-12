@@ -1,5 +1,5 @@
 
-import { Dumbbell, Heart, Yoga } from 'lucide-react';
+import { Dumbbell, Heart, Activity } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 const FitnessGoals = () => {
@@ -14,7 +14,7 @@ const FitnessGoals = () => {
     },
     {
       title: "Yoga",
-      icon: Yoga,
+      icon: Activity,
       progress: 48,
       details: "1500 minutes/3 month",
       color: "bg-orange-500",
