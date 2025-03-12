@@ -1,6 +1,7 @@
 
 import { useEffect } from 'react';
 import { Dumbbell, HeartPulse, Trophy, Users } from 'lucide-react';
+import { Link } from 'react-router-dom';
 
 const Services = () => {
   useEffect(() => {
@@ -12,22 +13,26 @@ const Services = () => {
     {
       icon: <Dumbbell className="text-gym-orange" size={48} />,
       title: 'Modern Equipment',
-      description: 'Access to state-of-the-art fitness equipment designed for all skill levels and fitness goals.'
+      description: 'Access to state-of-the-art fitness equipment designed for all skill levels and fitness goals.',
+      link: '/services/fitness-facilities'
     },
     {
       icon: <HeartPulse className="text-gym-orange" size={48} />,
       title: 'Spa & Wellness',
-      description: 'Rejuvenate your body and mind with our comprehensive spa and sauna services.'
+      description: 'Rejuvenate your body and mind with our comprehensive spa and sauna services.',
+      link: '/services/spa-wellness'
     },
     {
       icon: <Trophy className="text-gym-orange" size={48} />,
       title: 'Expert Trainers',
-      description: 'Work with our certified personal trainers to achieve your fitness goals faster and safer.'
+      description: 'Work with our certified personal trainers to achieve your fitness goals faster and safer.',
+      link: '/services'
     },
     {
       icon: <Users className="text-gym-orange" size={48} />,
       title: 'Youth Programs',
-      description: 'Special programs designed for young athletes to develop skills and stay active.'
+      description: 'Special programs designed for young athletes to develop skills and stay active.',
+      link: '/services/youth-programs'
     }
   ];
 
@@ -38,8 +43,9 @@ const Services = () => {
         
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
           {services.map((service, index) => (
-            <div 
+            <Link 
               key={index}
+              to={service.link}
               className="bg-white rounded-lg shadow-md overflow-hidden transition-all duration-300 hover:shadow-lg hover:-translate-y-1"
             >
               <div className="p-6">
@@ -47,7 +53,7 @@ const Services = () => {
                 <h3 className="text-xl font-bold mb-3 text-gym-dark">{service.title}</h3>
                 <p className="text-gray-600">{service.description}</p>
               </div>
-            </div>
+            </Link>
           ))}
         </div>
         

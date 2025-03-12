@@ -9,6 +9,9 @@ import Footer from "@/components/Footer";
 import Index from "./pages/Index";
 import AboutUs from "./pages/AboutUs";
 import Services from "./pages/Services";
+import FitnessFacilities from "./pages/FitnessFacilities";
+import YouthPrograms from "./pages/YouthPrograms";
+import SpaWellness from "./pages/SpaWellness";
 import Membership from "./pages/Membership";
 import Classes from "./pages/Classes";
 import Blogs from "./pages/Blogs";
@@ -30,6 +33,9 @@ const App = () => (
               <Route path="/" element={<Index />} />
               <Route path="/about-us" element={<AboutUs />} />
               <Route path="/services" element={<Services />} />
+              <Route path="/services/fitness-facilities" element={<FitnessFacilities />} />
+              <Route path="/services/youth-programs" element={<YouthPrograms />} />
+              <Route path="/services/spa-wellness" element={<SpaWellness />} />
               <Route path="/membership" element={<Membership />} />
               <Route path="/classes" element={<Classes />} />
               <Route path="/blogs" element={<Blogs />} />
