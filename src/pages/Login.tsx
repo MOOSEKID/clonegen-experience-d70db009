@@ -7,6 +7,15 @@ import { Input } from '@/components/ui/input';
 import { toast } from 'sonner';
 import { Eye, EyeOff } from 'lucide-react';
 
+// Demo user data - in a real app, this would come from a database
+const DEMO_USERS = [
+  { email: 'admin@example.com', password: 'admin123', isAdmin: true, name: 'Admin User' },
+  { email: 'user@example.com', password: 'user123', isAdmin: false, name: 'Regular User' },
+  { email: 'john@example.com', password: 'john123', isAdmin: false, name: 'John Doe' },
+  { email: 'jane@example.com', password: 'jane123', isAdmin: false, name: 'Jane Smith' },
+  { email: 'test@example.com', password: 'test123', isAdmin: false, name: 'Test User' }
+];
+
 const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -28,37 +37,36 @@ const Login = () => {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
-    // Demo login, would be replaced with real authentication
-    let isAdmin = false;
-    let username = "";
+    // Find user in demo data
+    const user = DEMO_USERS.find(user => user.email === email && user.password === password);
     
-    if (email === 'admin@example.com' && password === 'admin123') {
-      isAdmin = true;
-      username = "Admin User";
-    } else if (email === 'user@example.com' && password === 'user123') {
-      isAdmin = false;
-      username = "Regular User";
+    if (user) {
+      // Set login status in localStorage
+      localStorage.setItem('isLoggedIn', 'true');
+      localStorage.setItem('isAdmin', user.isAdmin ? 'true' : 'false');
+      localStorage.setItem('userEmail', email);
+      localStorage.setItem('userName', user.name);
+      
+      // Set cookies with expiry (30 days)
+      const expiryDate = new Date();
+      expiryDate.setDate(expiryDate.getDate() + 30);
+      document.cookie = `session_active=true; path=/; expires=${expiryDate.toUTCString()}`;
+      document.cookie = `user_role=${user.isAdmin ? 'admin' : 'user'}; path=/; expires=${expiryDate.toUTCString()}`;
+      
+      toast.success('Login successful! Redirecting...');
+      
+      // Navigate based on user role
+      navigate(user.isAdmin ? '/admin' : from);
     } else {
-      toast.error('Invalid credentials. Please try again.');
-      return;
+      // Provide more helpful error message
+      if (email === '' || password === '') {
+        toast.error('Please enter both email and password');
+      } else if (DEMO_USERS.some(user => user.email === email)) {
+        toast.error('Incorrect password. Please try again.');
+      } else {
+        toast.error('Invalid credentials. For demo, try: user@example.com / user123');
+      }
     }
-    
-    // Set login status in localStorage
-    localStorage.setItem('isLoggedIn', 'true');
-    localStorage.setItem('isAdmin', isAdmin ? 'true' : 'false');
-    localStorage.setItem('userEmail', email);
-    localStorage.setItem('userName', username);
-    
-    // Set cookies with expiry (30 days)
-    const expiryDate = new Date();
-    expiryDate.setDate(expiryDate.getDate() + 30);
-    document.cookie = `session_active=true; path=/; expires=${expiryDate.toUTCString()}`;
-    document.cookie = `user_role=${isAdmin ? 'admin' : 'user'}; path=/; expires=${expiryDate.toUTCString()}`;
-    
-    toast.success('Login successful! Redirecting...');
-    
-    // Navigate based on user role
-    navigate(isAdmin ? '/admin' : from);
   };
 
   const togglePasswordVisibility = () => {
