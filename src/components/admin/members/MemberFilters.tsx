@@ -12,9 +12,16 @@ import { toast } from 'sonner';
 
 interface MemberFiltersProps {
   selectedMembers: number[];
+  onFilterChange?: (filter: string) => void;
 }
 
-const MemberFilters = ({ selectedMembers }: MemberFiltersProps) => {
+const MemberFilters = ({ selectedMembers, onFilterChange }: MemberFiltersProps) => {
+  const handleFilterClick = (filter: string) => {
+    if (onFilterChange) {
+      onFilterChange(filter);
+    }
+  };
+
   return (
     <div className="flex gap-2">
       <DropdownMenu>
@@ -26,13 +33,25 @@ const MemberFilters = ({ selectedMembers }: MemberFiltersProps) => {
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent>
-          <DropdownMenuItem>All Members</DropdownMenuItem>
-          <DropdownMenuItem>Active Members</DropdownMenuItem>
-          <DropdownMenuItem>Inactive Members</DropdownMenuItem>
+          <DropdownMenuItem onClick={() => handleFilterClick('all')}>
+            All Members
+          </DropdownMenuItem>
+          <DropdownMenuItem onClick={() => handleFilterClick('active')}>
+            Active Members
+          </DropdownMenuItem>
+          <DropdownMenuItem onClick={() => handleFilterClick('inactive')}>
+            Inactive Members
+          </DropdownMenuItem>
           <DropdownMenuSeparator />
-          <DropdownMenuItem>Premium</DropdownMenuItem>
-          <DropdownMenuItem>Standard</DropdownMenuItem>
-          <DropdownMenuItem>Basic</DropdownMenuItem>
+          <DropdownMenuItem onClick={() => handleFilterClick('premium')}>
+            Premium
+          </DropdownMenuItem>
+          <DropdownMenuItem onClick={() => handleFilterClick('standard')}>
+            Standard
+          </DropdownMenuItem>
+          <DropdownMenuItem onClick={() => handleFilterClick('basic')}>
+            Basic
+          </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
       
