@@ -21,6 +21,18 @@ import ContactUs from "./pages/ContactUs";
 import Timetable from "./pages/Timetable";
 import OpeningTimes from "./pages/OpeningTimes";
 import ShopPage from "./pages/Shop";
+import AdminLayout from "./pages/admin/AdminLayout";
+import AdminDashboard from "./pages/admin/Dashboard";
+import AdminMembers from "./pages/admin/Members";
+import AdminClasses from "./pages/admin/Classes";
+import AdminTrainers from "./pages/admin/Trainers";
+import AdminPayments from "./pages/admin/Payments";
+import AdminWorkouts from "./pages/admin/Workouts";
+import AdminShop from "./pages/admin/Shop";
+import AdminContent from "./pages/admin/Content";
+import AdminReports from "./pages/admin/Reports";
+import AdminSettings from "./pages/admin/Settings";
+import AdminSupport from "./pages/admin/Support";
 
 const queryClient = new QueryClient();
 
@@ -48,6 +60,22 @@ const App = () => (
               <Route path="/contact-us" element={<ContactUs />} />
               <Route path="/timetable" element={<Timetable />} />
               <Route path="/opening-times" element={<OpeningTimes />} />
+              
+              {/* Admin Routes */}
+              <Route path="/admin" element={<AdminLayout />}>
+                <Route index element={<AdminDashboard />} />
+                <Route path="members" element={<AdminMembers />} />
+                <Route path="classes" element={<AdminClasses />} />
+                <Route path="trainers" element={<AdminTrainers />} />
+                <Route path="payments" element={<AdminPayments />} />
+                <Route path="workouts" element={<AdminWorkouts />} />
+                <Route path="shop" element={<AdminShop />} />
+                <Route path="content" element={<AdminContent />} />
+                <Route path="reports" element={<AdminReports />} />
+                <Route path="settings" element={<AdminSettings />} />
+                <Route path="support" element={<AdminSupport />} />
+              </Route>
+              
               <Route path="*" element={<NotFound />} />
             </Routes>
           </div>
