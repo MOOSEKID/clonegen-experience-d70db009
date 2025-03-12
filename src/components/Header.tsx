@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { cn } from '@/lib/utils';
@@ -26,13 +25,11 @@ const Header = () => {
   }, []);
 
   useEffect(() => {
-    // Close mobile menu and dropdowns when route changes
     setIsMenuOpen(false);
     setIsCompanyDropdownOpen(false);
     setIsServicesDropdownOpen(false);
   }, [location]);
 
-  // Close dropdown when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       const target = event.target as HTMLElement;
@@ -55,7 +52,6 @@ const Header = () => {
   const navItems = [
     { label: 'Home', path: '/' },
     { label: 'About Us', path: '/about-us' },
-    // Services is now a dropdown
     { label: 'Membership', path: '/membership' },
     { label: 'Classes', path: '/classes' },
     { label: 'Blogs', path: '/blogs' },
@@ -77,7 +73,7 @@ const Header = () => {
     <header 
       className={cn(
         'fixed top-0 left-0 right-0 z-50 transition-all duration-300 w-full',
-        isScrolled ? 'bg-gym-dark shadow-lg py-2' : 'bg-transparent py-4'
+        isScrolled ? 'bg-gym-darkblue shadow-lg py-2' : 'bg-gym-dark/90 backdrop-blur-md py-4'
       )}
     >
       <div className="container-custom flex items-center justify-between">
@@ -89,14 +85,13 @@ const Header = () => {
           </div>
         </Link>
 
-        {/* Desktop Navigation */}
-        <nav className="hidden md:flex items-center space-x-6">
+        <nav className="hidden md:flex items-center space-x-8">
           {navItems.map((item) => (
             <Link
               key={item.path}
               to={item.path}
               className={cn(
-                'nav-link text-white',
+                'nav-link text-white/90 hover:text-white',
                 isActive(item.path) ? 'active' : ''
               )}
             >
@@ -104,12 +99,11 @@ const Header = () => {
             </Link>
           ))}
 
-          {/* Services Dropdown */}
           <div className="services-dropdown relative">
             <button
               onClick={() => setIsServicesDropdownOpen(!isServicesDropdownOpen)}
               className={cn(
-                'nav-link text-white flex items-center',
+                'nav-link text-white/90 hover:text-white flex items-center',
                 (isActive('/services')) ? 'active' : ''
               )}
             >
@@ -118,14 +112,14 @@ const Header = () => {
             </button>
 
             {isServicesDropdownOpen && (
-              <div className="absolute top-full left-0 mt-2 w-48 bg-white rounded-md shadow-lg overflow-hidden z-50 animate-fade-in">
+              <div className="absolute top-full left-0 mt-2 w-48 bg-gym-darkblue rounded-md shadow-lg overflow-hidden z-50 animate-fade-in border border-gym-dark/20">
                 {serviceItems.map((item) => (
                   <Link
                     key={item.path}
                     to={item.path}
                     className={cn(
-                      'block px-4 py-3 text-gray-700 hover:bg-gray-100 transition-colors',
-                      isActive(item.path) ? 'bg-gray-100 font-medium' : ''
+                      'block px-4 py-3 text-white/80 hover:text-white hover:bg-gym-dark/50 transition-colors',
+                      isActive(item.path) ? 'bg-gym-dark/50 text-white' : ''
                     )}
                   >
                     {item.label}
@@ -135,12 +129,11 @@ const Header = () => {
             )}
           </div>
 
-          {/* Company Dropdown */}
           <div className="company-dropdown relative">
             <button
               onClick={() => setIsCompanyDropdownOpen(!isCompanyDropdownOpen)}
               className={cn(
-                'nav-link text-white flex items-center',
+                'nav-link text-white/90 hover:text-white flex items-center',
                 (isActive('/contact-us') || isActive('/timetable')) ? 'active' : ''
               )}
             >
@@ -149,14 +142,14 @@ const Header = () => {
             </button>
 
             {isCompanyDropdownOpen && (
-              <div className="absolute top-full left-0 mt-2 w-48 bg-white rounded-md shadow-lg overflow-hidden z-50 animate-fade-in">
+              <div className="absolute top-full left-0 mt-2 w-48 bg-gym-darkblue rounded-md shadow-lg overflow-hidden z-50 animate-fade-in border border-gym-dark/20">
                 {companyItems.map((item) => (
                   <Link
                     key={item.path}
                     to={item.path}
                     className={cn(
-                      'block px-4 py-3 text-gray-700 hover:bg-gray-100 transition-colors',
-                      isActive(item.path) ? 'bg-gray-100 font-medium' : ''
+                      'block px-4 py-3 text-white/80 hover:text-white hover:bg-gym-dark/50 transition-colors',
+                      isActive(item.path) ? 'bg-gym-dark/50 text-white' : ''
                     )}
                   >
                     {item.label}
@@ -173,18 +166,16 @@ const Header = () => {
           </Button>
         </div>
 
-        {/* Mobile Menu Button */}
         <button
-          className="md:hidden text-white"
+          className="md:hidden text-white/90 hover:text-white"
           onClick={() => setIsMenuOpen(!isMenuOpen)}
           aria-label={isMenuOpen ? 'Close menu' : 'Open menu'}
         >
           {isMenuOpen ? <X size={24} /> : <Menu size={24} />}
         </button>
 
-        {/* Mobile Navigation */}
         {isMenuOpen && (
-          <div className="absolute top-full left-0 right-0 bg-gym-dark shadow-lg p-4 md:hidden animate-fade-in">
+          <div className="absolute top-full left-0 right-0 bg-gym-darkblue shadow-lg p-4 md:hidden animate-fade-in">
             <nav className="flex flex-col space-y-4">
               {navItems.map((item) => (
                 <Link
@@ -199,9 +190,8 @@ const Header = () => {
                 </Link>
               ))}
               
-              {/* Mobile Services Section */}
-              <div className="py-2 border-t border-gray-700">
-                <div className="flex items-center mb-2 text-white">
+              <div className="py-2 border-t border-white/10">
+                <div className="flex items-center mb-2 text-white/90">
                   <Dumbbell size={16} className="mr-2" />
                   <span className="font-medium">Services</span>
                 </div>
@@ -211,8 +201,8 @@ const Header = () => {
                       key={item.path}
                       to={item.path}
                       className={cn(
-                        'block text-white opacity-90 hover:opacity-100',
-                        isActive(item.path) ? 'font-medium opacity-100' : ''
+                        'block text-white/80 hover:text-white transition-colors',
+                        isActive(item.path) ? 'text-white font-medium' : ''
                       )}
                     >
                       {item.label}
@@ -221,9 +211,8 @@ const Header = () => {
                 </div>
               </div>
               
-              {/* Mobile Company Section */}
-              <div className="py-2 border-t border-gray-700">
-                <div className="flex items-center mb-2 text-white">
+              <div className="py-2 border-t border-white/10">
+                <div className="flex items-center mb-2 text-white/90">
                   <Building size={16} className="mr-2" />
                   <span className="font-medium">Company</span>
                 </div>
@@ -233,8 +222,8 @@ const Header = () => {
                       key={item.path}
                       to={item.path}
                       className={cn(
-                        'block text-white opacity-90 hover:opacity-100',
-                        isActive(item.path) ? 'font-medium opacity-100' : ''
+                        'block text-white/80 hover:text-white transition-colors',
+                        isActive(item.path) ? 'text-white font-medium' : ''
                       )}
                     >
                       {item.label}
