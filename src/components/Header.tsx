@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { cn } from '@/lib/utils';
@@ -30,12 +29,10 @@ const Header = () => {
   }, []);
 
   useEffect(() => {
-    // Check authentication status
     const checkAuth = () => {
       const loggedIn = localStorage.getItem('isLoggedIn') === 'true' || document.cookie.includes('session_active=true');
       const admin = localStorage.getItem('isAdmin') === 'true' || document.cookie.includes('user_role=admin');
       
-      // Ensure localStorage and cookies are in sync
       if (loggedIn && localStorage.getItem('isLoggedIn') !== 'true') {
         localStorage.setItem('isLoggedIn', 'true');
       }
@@ -50,7 +47,6 @@ const Header = () => {
     
     checkAuth();
     
-    // Check on route change and periodically
     const interval = setInterval(checkAuth, 2000);
     return () => clearInterval(interval);
   }, [location.pathname]);
@@ -90,12 +86,6 @@ const Header = () => {
     { label: 'Classes', path: '/classes' },
     { label: 'Blogs', path: '/blogs' },
     { label: 'Shop', path: '/shop', icon: ShoppingBag },
-    { 
-      label: 'Dashboard', 
-      path: isAdmin ? '/admin' : '/dashboard', 
-      icon: LayoutDashboard,
-      action: handleDashboardClick
-    },
   ];
 
   const serviceItems = [
@@ -112,7 +102,13 @@ const Header = () => {
     { label: 'Opening Times', path: '/opening-times' },
   ];
   
-  // Create authentication items (moved outside of navItems)
+  const dashboardItem = { 
+    label: 'Dashboard', 
+    path: isAdmin ? '/admin' : '/dashboard', 
+    icon: LayoutDashboard,
+    action: handleDashboardClick
+  };
+  
   const authItems = isLoggedIn 
     ? [
         {
@@ -160,6 +156,7 @@ const Header = () => {
           navItems={navItems}
           serviceItems={serviceItems}
           companyItems={companyItems}
+          dashboardItem={dashboardItem}
           authItems={authItems}
           isServicesDropdownOpen={isServicesDropdownOpen}
           setIsServicesDropdownOpen={setIsServicesDropdownOpen}
@@ -181,6 +178,7 @@ const Header = () => {
           navItems={navItems}
           serviceItems={serviceItems}
           companyItems={companyItems}
+          dashboardItem={dashboardItem}
           authItems={authItems}
           isLoggedIn={isLoggedIn}
         />

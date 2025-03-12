@@ -17,6 +17,7 @@ interface MobileMenuProps {
   navItems: NavItem[];
   serviceItems: { label: string; path: string }[];
   companyItems: { label: string; path: string }[];
+  dashboardItem: NavItem;
   authItems: NavItem[];
   isLoggedIn?: boolean;
 }
@@ -25,7 +26,8 @@ const MobileMenu = ({
   isOpen, 
   navItems, 
   serviceItems, 
-  companyItems, 
+  companyItems,
+  dashboardItem,
   authItems, 
   isLoggedIn = false 
 }: MobileMenuProps) => {
@@ -57,6 +59,15 @@ const MobileMenu = ({
           Icon={Building} 
           items={companyItems} 
         />
+
+        {/* Dashboard item placed between Company dropdown and auth buttons */}
+        <MobileNavItem 
+          path={dashboardItem.path} 
+          icon={dashboardItem.icon}
+          action={dashboardItem.action}
+        >
+          {dashboardItem.label}
+        </MobileNavItem>
         
         <div className="flex gap-3 pt-3 border-t border-white/10">
           {authItems.map((item) => (

@@ -17,6 +17,7 @@ interface DesktopNavProps {
   navItems: NavItem[];
   serviceItems: { label: string; path: string }[];
   companyItems: { label: string; path: string }[];
+  dashboardItem: NavItem;
   authItems: NavItem[];
   isServicesDropdownOpen: boolean;
   setIsServicesDropdownOpen: React.Dispatch<React.SetStateAction<boolean>>;
@@ -29,6 +30,7 @@ const DesktopNav = ({
   navItems, 
   serviceItems, 
   companyItems,
+  dashboardItem,
   authItems,
   isServicesDropdownOpen,
   setIsServicesDropdownOpen,
@@ -96,6 +98,31 @@ const DesktopNav = ({
           isOpenState={[isCompanyDropdownOpen, setIsCompanyDropdownOpen]}
           className="company-dropdown"
         />
+
+        {/* Dashboard button/link - now positioned between Company dropdown and auth items */}
+        {dashboardItem.action ? (
+          <button
+            onClick={dashboardItem.action}
+            className={cn(
+              'nav-link text-white/90 hover:text-white flex items-center gap-1',
+              isActive(dashboardItem.path) ? 'active' : ''
+            )}
+          >
+            {dashboardItem.icon && <dashboardItem.icon size={18} />}
+            {dashboardItem.label}
+          </button>
+        ) : (
+          <Link
+            to={dashboardItem.path}
+            className={cn(
+              'nav-link text-white/90 hover:text-white flex items-center gap-1',
+              isActive(dashboardItem.path) ? 'active' : ''
+            )}
+          >
+            {dashboardItem.icon && <dashboardItem.icon size={18} />}
+            {dashboardItem.label}
+          </Link>
+        )}
       </nav>
 
       <div className="hidden md:flex items-center space-x-4">
