@@ -9,14 +9,30 @@ interface MobileNavItemProps {
   children: ReactNode;
   icon?: LucideIcon;
   isExternalLink?: boolean;
+  action?: () => void;
 }
 
-const MobileNavItem = ({ path, children, icon: Icon, isExternalLink = false }: MobileNavItemProps) => {
+const MobileNavItem = ({ path, children, icon: Icon, isExternalLink = false, action }: MobileNavItemProps) => {
   const location = useLocation();
   
   const isActive = (path: string) => {
     return location.pathname === path || location.pathname.startsWith(path + '/');
   };
+
+  if (action) {
+    return (
+      <button
+        onClick={action}
+        className={cn(
+          'nav-link text-white flex items-center gap-2 w-full text-left',
+          isActive(path) ? 'active' : ''
+        )}
+      >
+        {Icon && <Icon size={18} />}
+        {children}
+      </button>
+    );
+  }
 
   if (isExternalLink) {
     return (

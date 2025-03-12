@@ -40,6 +40,7 @@ const MobileMenu = ({
             path={item.path} 
             icon={item.icon}
             isExternalLink={item.isExternalLink}
+            action={item.action}
           >
             {item.label}
           </MobileNavItem>

@@ -10,6 +10,7 @@ interface NavItem {
   path: string;
   icon?: LucideIcon;
   action?: () => void;
+  isExternalLink?: boolean;
 }
 
 interface DesktopNavProps {
@@ -53,17 +54,31 @@ const DesktopNav = ({
     <>
       <nav className="hidden md:flex items-center space-x-8">
         {navItems.map((item) => (
-          <Link
-            key={item.path}
-            to={item.path}
-            className={cn(
-              'nav-link text-white/90 hover:text-white flex items-center gap-1',
-              isActive(item.path) ? 'active' : ''
-            )}
-          >
-            {item.icon && <item.icon size={18} />}
-            {item.label}
-          </Link>
+          item.action ? (
+            <button
+              key={item.path}
+              onClick={item.action}
+              className={cn(
+                'nav-link text-white/90 hover:text-white flex items-center gap-1',
+                isActive(item.path) ? 'active' : ''
+              )}
+            >
+              {item.icon && <item.icon size={18} />}
+              {item.label}
+            </button>
+          ) : (
+            <Link
+              key={item.path}
+              to={item.path}
+              className={cn(
+                'nav-link text-white/90 hover:text-white flex items-center gap-1',
+                isActive(item.path) ? 'active' : ''
+              )}
+            >
+              {item.icon && <item.icon size={18} />}
+              {item.label}
+            </Link>
+          )
         ))}
 
         <HeaderDropdown
@@ -85,7 +100,7 @@ const DesktopNav = ({
 
       <div className="hidden md:flex items-center space-x-4">
         {authItems.map((item) => (
-          item.label === 'Logout' ? (
+          item.action ? (
             <Button 
               key={item.path}
               variant="outline" 

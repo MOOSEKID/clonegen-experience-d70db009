@@ -1,6 +1,6 @@
 
 import { useState, useEffect } from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 import { Menu, X, ShoppingBag, User, LayoutDashboard } from 'lucide-react';
 import DesktopNav from './header/DesktopNav';
@@ -14,6 +14,7 @@ const Header = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
   const location = useLocation();
+  const navigate = useNavigate();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -75,12 +76,26 @@ const Header = () => {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, [isCompanyDropdownOpen, isServicesDropdownOpen]);
 
+  const handleDashboardClick = () => {
+    if (!isLoggedIn) {
+      navigate('/login', { state: { from: '/dashboard' } });
+      return;
+    }
+    navigate(isAdmin ? '/admin' : '/dashboard');
+  };
+
   const navItems = [
     { label: 'Home', path: '/' },
     { label: 'Membership', path: '/membership' },
     { label: 'Classes', path: '/classes' },
     { label: 'Blogs', path: '/blogs' },
     { label: 'Shop', path: '/shop', icon: ShoppingBag },
+    { 
+      label: 'Dashboard', 
+      path: isAdmin ? '/admin' : '/dashboard', 
+      icon: LayoutDashboard,
+      action: handleDashboardClick
+    },
   ];
 
   const serviceItems = [
@@ -100,11 +115,6 @@ const Header = () => {
   // Create authentication items (moved outside of navItems)
   const authItems = isLoggedIn 
     ? [
-        { 
-          label: 'Dashboard', 
-          path: isAdmin ? '/admin' : '/dashboard', 
-          icon: LayoutDashboard 
-        },
         {
           label: 'Logout',
           path: '/logout',
