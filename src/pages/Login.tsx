@@ -33,6 +33,7 @@ const Login = () => {
         // Set admin authentication in localStorage
         localStorage.setItem('isAdmin', 'true');
         localStorage.setItem('userEmail', email);
+        localStorage.setItem('userName', 'Admin');
         
         toast.success('Admin login successful!');
         
@@ -47,13 +48,14 @@ const Login = () => {
         // Set user authentication in localStorage
         localStorage.setItem('isLoggedIn', 'true');
         localStorage.setItem('userEmail', email);
+        localStorage.setItem('userName', email.split('@')[0]); // Set a default username
         
         toast.success('Login successful!');
         
         // Use a small timeout to ensure the toast appears before redirect
         setTimeout(() => {
           setIsLoading(false);
-          navigate('/');
+          navigate('/dashboard');
         }, 500);
       }
     } catch (error) {
