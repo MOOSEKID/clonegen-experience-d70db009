@@ -83,16 +83,6 @@ const Header = () => {
     { label: 'Shop', path: '/shop', icon: ShoppingBag },
   ];
 
-  // Add Dashboard link if logged in
-  if (isLoggedIn) {
-    const dashboardPath = isAdmin ? '/admin' : '/dashboard';
-    navItems.push({ 
-      label: 'Dashboard', 
-      path: dashboardPath, 
-      icon: LayoutDashboard 
-    });
-  }
-
   const serviceItems = [
     { label: 'All Services', path: '/services' },
     { label: 'Fitness Facilities', path: '/services/fitness-facilities' },
@@ -106,6 +96,37 @@ const Header = () => {
     { label: 'Timetable', path: '/timetable' },
     { label: 'Opening Times', path: '/opening-times' },
   ];
+  
+  // Create authentication items (moved outside of navItems)
+  const authItems = isLoggedIn 
+    ? [
+        { 
+          label: 'Dashboard', 
+          path: isAdmin ? '/admin' : '/dashboard', 
+          icon: LayoutDashboard 
+        },
+        {
+          label: 'Logout',
+          path: '/logout',
+          icon: User,
+          action: () => {
+            localStorage.removeItem('isLoggedIn');
+            localStorage.removeItem('isAdmin');
+            localStorage.removeItem('userEmail');
+            localStorage.removeItem('userName');
+            document.cookie = "session_active=; path=/; max-age=0";
+            document.cookie = "user_role=; path=/; max-age=0";
+            window.location.href = '/login';
+          }
+        }
+      ]
+    : [
+        {
+          label: 'Login',
+          path: '/login',
+          icon: User
+        }
+      ];
 
   return (
     <header 
@@ -129,6 +150,7 @@ const Header = () => {
           navItems={navItems}
           serviceItems={serviceItems}
           companyItems={companyItems}
+          authItems={authItems}
           isServicesDropdownOpen={isServicesDropdownOpen}
           setIsServicesDropdownOpen={setIsServicesDropdownOpen}
           isCompanyDropdownOpen={isCompanyDropdownOpen}
@@ -149,6 +171,7 @@ const Header = () => {
           navItems={navItems}
           serviceItems={serviceItems}
           companyItems={companyItems}
+          authItems={authItems}
           isLoggedIn={isLoggedIn}
         />
       </div>

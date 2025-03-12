@@ -9,12 +9,14 @@ interface NavItem {
   label: string;
   path: string;
   icon?: LucideIcon;
+  action?: () => void;
 }
 
 interface DesktopNavProps {
   navItems: NavItem[];
   serviceItems: { label: string; path: string }[];
   companyItems: { label: string; path: string }[];
+  authItems: NavItem[];
   isServicesDropdownOpen: boolean;
   setIsServicesDropdownOpen: React.Dispatch<React.SetStateAction<boolean>>;
   isCompanyDropdownOpen: boolean;
@@ -26,6 +28,7 @@ const DesktopNav = ({
   navItems, 
   serviceItems, 
   companyItems,
+  authItems,
   isServicesDropdownOpen,
   setIsServicesDropdownOpen,
   isCompanyDropdownOpen,
@@ -81,23 +84,32 @@ const DesktopNav = ({
       </nav>
 
       <div className="hidden md:flex items-center space-x-4">
-        {!isLoggedIn ? (
-          <Button isLink href="/login" variant="outline" size="sm">
-            Login
-          </Button>
-        ) : (
-          <Button isLink href="/logout" variant="outline" size="sm" onClick={(e) => {
-            e.preventDefault();
-            localStorage.removeItem('isLoggedIn');
-            localStorage.removeItem('isAdmin');
-            localStorage.removeItem('userEmail');
-            document.cookie = "session_active=; path=/; max-age=0";
-            document.cookie = "user_role=; path=/; max-age=0";
-            window.location.href = '/login';
-          }}>
-            Logout
-          </Button>
-        )}
+        {authItems.map((item) => (
+          item.label === 'Logout' ? (
+            <Button 
+              key={item.path}
+              variant="outline" 
+              size="sm" 
+              onClick={item.action}
+              className="flex items-center gap-1"
+            >
+              {item.icon && <item.icon size={16} />}
+              {item.label}
+            </Button>
+          ) : (
+            <Button 
+              key={item.path}
+              isLink 
+              href={item.path} 
+              variant="outline" 
+              size="sm"
+              className="flex items-center gap-1"
+            >
+              {item.icon && <item.icon size={16} />}
+              {item.label}
+            </Button>
+          )
+        ))}
       </div>
     </>
   );

@@ -1,5 +1,5 @@
 
-import { Building, Dumbbell, LucideIcon, Settings, User } from 'lucide-react';
+import { Building, Dumbbell, LucideIcon } from 'lucide-react';
 import { Button } from '../Button';
 import MobileNavItem from './MobileNavItem';
 import MobileDropdownSection from './MobileDropdownSection';
@@ -9,6 +9,7 @@ interface NavItem {
   path: string;
   icon?: LucideIcon;
   isExternalLink?: boolean;
+  action?: () => void;
 }
 
 interface MobileMenuProps {
@@ -16,21 +17,19 @@ interface MobileMenuProps {
   navItems: NavItem[];
   serviceItems: { label: string; path: string }[];
   companyItems: { label: string; path: string }[];
+  authItems: NavItem[];
   isLoggedIn?: boolean;
 }
 
-const MobileMenu = ({ isOpen, navItems, serviceItems, companyItems, isLoggedIn = false }: MobileMenuProps) => {
+const MobileMenu = ({ 
+  isOpen, 
+  navItems, 
+  serviceItems, 
+  companyItems, 
+  authItems, 
+  isLoggedIn = false 
+}: MobileMenuProps) => {
   if (!isOpen) return null;
-
-  const handleLogout = (e: React.MouseEvent) => {
-    e.preventDefault();
-    localStorage.removeItem('isLoggedIn');
-    localStorage.removeItem('isAdmin');
-    localStorage.removeItem('userEmail');
-    document.cookie = "session_active=; path=/; max-age=0";
-    document.cookie = "user_role=; path=/; max-age=0";
-    window.location.href = '/login';
-  };
 
   return (
     <div className="absolute top-full left-0 right-0 bg-gym-darkblue shadow-lg p-4 md:hidden animate-fade-in">
@@ -59,27 +58,32 @@ const MobileMenu = ({ isOpen, navItems, serviceItems, companyItems, isLoggedIn =
         />
         
         <div className="flex gap-3 pt-3 border-t border-white/10">
-          {!isLoggedIn ? (
-            <>
-              <Button isLink href="/login" variant="outline" size="sm" className="flex-1">
-                Login
+          {authItems.map((item) => (
+            item.action ? (
+              <Button 
+                key={item.path}
+                variant="outline" 
+                size="sm" 
+                className="flex-1 gap-2"
+                onClick={item.action}
+              >
+                {item.icon && <item.icon size={16} />}
+                {item.label}
               </Button>
-              <Button isLink href="/admin" variant="primary" size="sm" className="flex-1 gap-2">
-                <Settings size={16} />
-                Admin
+            ) : (
+              <Button 
+                key={item.path}
+                isLink 
+                href={item.path} 
+                variant="outline" 
+                size="sm" 
+                className="flex-1 gap-2"
+              >
+                {item.icon && <item.icon size={16} />}
+                {item.label}
               </Button>
-            </>
-          ) : (
-            <Button 
-              variant="outline" 
-              size="sm" 
-              className="flex-1 gap-2"
-              onClick={handleLogout}
-            >
-              <User size={16} />
-              Logout
-            </Button>
-          )}
+            )
+          ))}
         </div>
       </nav>
     </div>
