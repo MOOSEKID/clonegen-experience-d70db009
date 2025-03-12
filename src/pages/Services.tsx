@@ -1,6 +1,6 @@
 
 import { useEffect } from 'react';
-import { Dumbbell, HeartPulse, Trophy, Users } from 'lucide-react';
+import { Dumbbell, HeartPulse, Trophy, Waves, Users } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 const Services = () => {
@@ -12,27 +12,57 @@ const Services = () => {
   const services = [
     {
       icon: <Dumbbell className="text-gym-orange" size={48} />,
-      title: 'Modern Equipment',
-      description: 'Access to state-of-the-art fitness equipment designed for all skill levels and fitness goals.',
+      title: 'Fitness Facilities',
+      description: 'State-of-the-art equipment and training areas designed for all fitness levels and goals.',
       link: '/services/fitness-facilities'
     },
     {
       icon: <HeartPulse className="text-gym-orange" size={48} />,
       title: 'Spa & Wellness',
-      description: 'Rejuvenate your body and mind with our comprehensive spa and sauna services.',
+      description: 'Rejuvenate your body and mind with our comprehensive spa and wellness services.',
       link: '/services/spa-wellness'
     },
     {
-      icon: <Trophy className="text-gym-orange" size={48} />,
-      title: 'Expert Trainers',
-      description: 'Work with our certified personal trainers to achieve your fitness goals faster and safer.',
-      link: '/services'
+      icon: <Waves className="text-gym-orange" size={48} />,
+      title: 'Swimming',
+      description: 'Olympic-sized pools, swimming lessons, and aqua fitness classes for all ages.',
+      link: '/services/spa-wellness#swimming'
     },
     {
       icon: <Users className="text-gym-orange" size={48} />,
       title: 'Youth Programs',
       description: 'Special programs designed for young athletes to develop skills and stay active.',
       link: '/services/youth-programs'
+    }
+  ];
+
+  const additionalServices = [
+    {
+      title: 'Fitness',
+      services: [
+        'Group fitness classes including yoga, spinning, HIIT, and more',
+        'Personal training sessions with certified trainers',
+        'CrossFit and functional training zones',
+        'Strength and conditioning programs'
+      ]
+    },
+    {
+      title: 'Wellness',
+      services: [
+        'Nutrition counseling and personalized diet plans',
+        'Health screening and fitness assessments',
+        'Meditation and mindfulness sessions',
+        'Stress management workshops'
+      ]
+    },
+    {
+      title: 'Specialized Programs',
+      services: [
+        'Corporate wellness programs and team-building activities',
+        'Rehabilitation and recovery services',
+        'Sports-specific training for athletes',
+        'Weight management programs'
+      ]
     }
   ];
 
@@ -57,15 +87,17 @@ const Services = () => {
           ))}
         </div>
         
-        <div className="mt-16 bg-white rounded-lg shadow-md p-8">
-          <h2 className="text-2xl font-bold mb-6 text-gym-dark">Additional Services</h2>
-          <ul className="space-y-4 list-disc pl-6">
-            <li className="text-gray-700">Group fitness classes including yoga, spinning, HIIT, and more</li>
-            <li className="text-gray-700">Nutrition counseling and personalized diet plans</li>
-            <li className="text-gray-700">Swimming lessons for all ages and skill levels</li>
-            <li className="text-gray-700">Corporate wellness programs and team-building activities</li>
-            <li className="text-gray-700">Rehabilitation and recovery services</li>
-          </ul>
+        <div className="mt-16">
+          {additionalServices.map((category, index) => (
+            <div key={index} className="bg-white rounded-lg shadow-md p-8 mb-8">
+              <h2 className="text-2xl font-bold mb-6 text-gym-dark">{category.title}</h2>
+              <ul className="space-y-4 list-disc pl-6">
+                {category.services.map((service, i) => (
+                  <li key={i} className="text-gray-700">{service}</li>
+                ))}
+              </ul>
+            </div>
+          ))}
         </div>
       </div>
     </main>

@@ -12,7 +12,7 @@ const Membership = () => {
   const plans = [
     {
       name: 'Basic',
-      price: '49',
+      price: '40,000',
       period: 'month',
       description: 'Perfect for beginners',
       features: [
@@ -27,7 +27,7 @@ const Membership = () => {
     },
     {
       name: 'Premium',
-      price: '89',
+      price: '75,000',
       period: 'month',
       description: 'Most popular choice',
       features: [
@@ -43,7 +43,7 @@ const Membership = () => {
     },
     {
       name: 'Ultimate',
-      price: '149',
+      price: '125,000',
       period: 'month',
       description: 'For serious athletes',
       features: [
@@ -57,6 +57,57 @@ const Membership = () => {
       ],
       buttonText: 'Get Started',
       highlighted: false
+    }
+  ];
+
+  const serviceCategories = [
+    {
+      title: 'Fitness',
+      icon: '💪',
+      services: [
+        'State-of-the-art cardio equipment',
+        'Free weights and resistance machines',
+        'Functional training zones',
+        'Group HIIT sessions',
+        'CrossFit area',
+        'Powerlifting platforms'
+      ]
+    },
+    {
+      title: 'Spa & Wellness',
+      icon: '🧖',
+      services: [
+        'Hot stone massage therapy',
+        'Swedish and deep tissue massage',
+        'Hydro-therapy sessions',
+        'Facial treatments',
+        'Steam rooms and saunas',
+        'Relaxation lounge'
+      ]
+    },
+    {
+      title: 'Swimming',
+      icon: '🏊',
+      services: [
+        'Olympic-sized swimming pool',
+        'Heated indoor pool',
+        'Swimming lessons for all ages',
+        'Aqua aerobics classes',
+        'Hydrotherapy pool',
+        'Lifeguard supervision'
+      ]
+    },
+    {
+      title: 'Specialized Programs',
+      icon: '🏆',
+      services: [
+        'Weight management programs',
+        'Senior fitness classes',
+        'Prenatal and postnatal training',
+        'Rehabilitation services',
+        'Sports-specific conditioning',
+        'Nutrition and diet planning'
+      ]
     }
   ];
 
@@ -85,7 +136,7 @@ const Membership = () => {
                 <h3 className="text-2xl font-bold mb-2 text-gym-dark">{plan.name}</h3>
                 <p className="text-gray-600 mb-6">{plan.description}</p>
                 <div className="mb-8">
-                  <span className="text-4xl font-bold text-gym-dark">${plan.price}</span>
+                  <span className="text-4xl font-bold text-gym-dark">RWF {plan.price}</span>
                   <span className="text-gray-500 ml-1">/ {plan.period}</span>
                 </div>
                 <ul className="space-y-3 mb-8">
@@ -107,6 +158,29 @@ const Membership = () => {
           ))}
         </div>
         
+        <div className="mt-16">
+          <h2 className="text-3xl font-bold mb-8 text-gym-dark">Our Services</h2>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            {serviceCategories.map((category, index) => (
+              <div key={index} className="bg-white rounded-lg shadow-md p-8">
+                <div className="flex items-center mb-4">
+                  <span className="text-3xl mr-3">{category.icon}</span>
+                  <h3 className="text-2xl font-bold text-gym-dark">{category.title}</h3>
+                </div>
+                <ul className="space-y-2">
+                  {category.services.map((service, i) => (
+                    <li key={i} className="flex items-start">
+                      <Check className="text-gym-orange mr-2 flex-shrink-0 mt-1" size={18} />
+                      <span className="text-gray-700">{service}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ))}
+          </div>
+        </div>
+        
         <div className="mt-16 bg-white rounded-lg shadow-md p-8">
           <h2 className="text-2xl font-bold mb-6 text-gym-dark">Membership Benefits</h2>
           <p className="text-gray-700 mb-4">
@@ -118,6 +192,8 @@ const Membership = () => {
             <li className="text-gray-700">Access to member-only events</li>
             <li className="text-gray-700">Mobile app for tracking workouts</li>
             <li className="text-gray-700">Discounts on merchandise and supplements</li>
+            <li className="text-gray-700">Towel service</li>
+            <li className="text-gray-700">Fitness assessment every 3 months</li>
           </ul>
         </div>
       </div>
