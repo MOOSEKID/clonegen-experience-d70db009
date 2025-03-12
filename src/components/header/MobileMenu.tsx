@@ -34,7 +34,7 @@ const MobileMenu = ({
   if (!isOpen) return null;
 
   return (
-    <div className="absolute top-full left-0 right-0 bg-gym-darkblue shadow-lg p-4 md:hidden animate-fade-in">
+    <div className="absolute top-full left-0 right-0 bg-gym-darkblue shadow-lg p-4 md:hidden animate-fade-in z-50">
       <nav className="flex flex-col space-y-4">
         {navItems.map((item) => (
           <MobileNavItem 
