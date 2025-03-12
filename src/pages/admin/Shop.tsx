@@ -1,6 +1,8 @@
+
 import { useState } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import PlaceholderSection from '@/components/admin/PlaceholderSection';
+import { ShoppingBag, Tag, Package } from 'lucide-react';
 
 // This is just a placeholder component
 // In a real app, this would be fetching data from an API
@@ -30,6 +32,7 @@ const AdminShop = () => {
             title="Product Management" 
             description="Here you can manage all your gym products, supplements, and merchandise."
             ctaText="Add New Product"
+            icon={<Package className="h-6 w-6 text-gym-orange" />}
             features={[
               "Inventory Management",
               "Product Categories",
@@ -44,6 +47,7 @@ const AdminShop = () => {
             title="Order Management" 
             description="Track and manage customer orders, process refunds, and check delivery status."
             ctaText="View All Orders"
+            icon={<ShoppingBag className="h-6 w-6 text-gym-orange" />}
             features={[
               "Order Processing",
               "Payment Status",
@@ -58,6 +62,7 @@ const AdminShop = () => {
             title="Promotions & Discounts" 
             description="Create and manage special offers, discount codes, and promotional campaigns."
             ctaText="Create Promotion"
+            icon={<Tag className="h-6 w-6 text-gym-orange" />}
             features={[
               "Discount Codes",
               "Bundle Offers",
