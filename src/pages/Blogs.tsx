@@ -1,4 +1,3 @@
-
 import { useEffect } from 'react';
 import { CalendarDays, User, ArrowRight } from 'lucide-react';
 import { Button } from '@/components/Button';
@@ -32,7 +31,7 @@ const Blogs = () => {
       image: 'https://images.unsplash.com/photo-1593164842264-990881bd9237?q=80&w=2787&auto=format&fit=crop'
     },
     {
-      title: 'Beginner's Guide to Strength Training',
+      title: "Beginner's Guide to Strength Training",
       author: 'David Park',
       date: 'August 12, 2023',
       excerpt: 'Everything you need to know to start a safe and effective strength training program from scratch.',
