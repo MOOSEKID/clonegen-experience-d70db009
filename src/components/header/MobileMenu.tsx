@@ -1,12 +1,18 @@
 
-import { Building, Dumbbell } from 'lucide-react';
+import { Building, Dumbbell, LucideIcon } from 'lucide-react';
 import { Button } from '../Button';
 import MobileNavItem from './MobileNavItem';
 import MobileDropdownSection from './MobileDropdownSection';
 
+interface NavItem {
+  label: string;
+  path: string;
+  icon?: LucideIcon;
+}
+
 interface MobileMenuProps {
   isOpen: boolean;
-  navItems: { label: string; path: string }[];
+  navItems: NavItem[];
   serviceItems: { label: string; path: string }[];
   companyItems: { label: string; path: string }[];
 }
@@ -18,7 +24,7 @@ const MobileMenu = ({ isOpen, navItems, serviceItems, companyItems }: MobileMenu
     <div className="absolute top-full left-0 right-0 bg-gym-darkblue shadow-lg p-4 md:hidden animate-fade-in">
       <nav className="flex flex-col space-y-4">
         {navItems.map((item) => (
-          <MobileNavItem key={item.path} path={item.path}>
+          <MobileNavItem key={item.path} path={item.path} icon={item.icon}>
             {item.label}
           </MobileNavItem>
         ))}

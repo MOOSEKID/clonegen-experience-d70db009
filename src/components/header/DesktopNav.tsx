@@ -3,9 +3,16 @@ import { Link, useLocation } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 import HeaderDropdown from './HeaderDropdown';
 import { Button } from '../Button';
+import { LucideIcon } from 'lucide-react';
+
+interface NavItem {
+  label: string;
+  path: string;
+  icon?: LucideIcon;
+}
 
 interface DesktopNavProps {
-  navItems: { label: string; path: string }[];
+  navItems: NavItem[];
   serviceItems: { label: string; path: string }[];
   companyItems: { label: string; path: string }[];
   isServicesDropdownOpen: boolean;
@@ -45,10 +52,11 @@ const DesktopNav = ({
             key={item.path}
             to={item.path}
             className={cn(
-              'nav-link text-white/90 hover:text-white',
+              'nav-link text-white/90 hover:text-white flex items-center gap-1',
               isActive(item.path) ? 'active' : ''
             )}
           >
+            {item.icon && <item.icon size={18} />}
             {item.label}
           </Link>
         ))}

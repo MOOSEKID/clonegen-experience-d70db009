@@ -2,7 +2,7 @@
 import { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { cn } from '@/lib/utils';
-import { Menu, X } from 'lucide-react';
+import { Menu, X, ShoppingBag } from 'lucide-react';
 import DesktopNav from './header/DesktopNav';
 import MobileMenu from './header/MobileMenu';
 
@@ -52,6 +52,7 @@ const Header = () => {
     { label: 'Membership', path: '/membership' },
     { label: 'Classes', path: '/classes' },
     { label: 'Blogs', path: '/blogs' },
+    { label: 'Shop', path: '/shop', icon: ShoppingBag },
   ];
 
   const serviceItems = [

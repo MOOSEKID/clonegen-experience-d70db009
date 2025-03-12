@@ -20,6 +20,7 @@ import NotFound from "./pages/NotFound";
 import ContactUs from "./pages/ContactUs";
 import Timetable from "./pages/Timetable";
 import OpeningTimes from "./pages/OpeningTimes";
+import ShopPage from "./pages/Shop";
 
 const queryClient = new QueryClient();
 
@@ -42,6 +43,7 @@ const App = () => (
               <Route path="/membership" element={<Membership />} />
               <Route path="/classes" element={<Classes />} />
               <Route path="/blogs" element={<Blogs />} />
+              <Route path="/shop" element={<ShopPage />} />
               <Route path="/login" element={<Login />} />
               <Route path="/contact-us" element={<ContactUs />} />
               <Route path="/timetable" element={<Timetable />} />
