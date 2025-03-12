@@ -2,13 +2,14 @@
 import { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { cn } from '@/lib/utils';
-import { Menu, X, ChevronDown, Building } from 'lucide-react';
+import { Menu, X, ChevronDown, Building, Dumbbell } from 'lucide-react';
 import { Button } from './Button';
 
 const Header = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isCompanyDropdownOpen, setIsCompanyDropdownOpen] = useState(false);
+  const [isServicesDropdownOpen, setIsServicesDropdownOpen] = useState(false);
   const location = useLocation();
 
   useEffect(() => {
@@ -28,6 +29,7 @@ const Header = () => {
     // Close mobile menu and dropdowns when route changes
     setIsMenuOpen(false);
     setIsCompanyDropdownOpen(false);
+    setIsServicesDropdownOpen(false);
   }, [location]);
 
   // Close dropdown when clicking outside
@@ -37,23 +39,33 @@ const Header = () => {
       if (!target.closest('.company-dropdown') && isCompanyDropdownOpen) {
         setIsCompanyDropdownOpen(false);
       }
+      if (!target.closest('.services-dropdown') && isServicesDropdownOpen) {
+        setIsServicesDropdownOpen(false);
+      }
     };
 
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, [isCompanyDropdownOpen]);
+  }, [isCompanyDropdownOpen, isServicesDropdownOpen]);
 
   const isActive = (path: string) => {
-    return location.pathname === path;
+    return location.pathname === path || location.pathname.startsWith(path + '/');
   };
 
   const navItems = [
     { label: 'Home', path: '/' },
     { label: 'About Us', path: '/about-us' },
-    { label: 'Services', path: '/services' },
+    // Services is now a dropdown
     { label: 'Membership', path: '/membership' },
     { label: 'Classes', path: '/classes' },
     { label: 'Blogs', path: '/blogs' },
+  ];
+
+  const serviceItems = [
+    { label: 'All Services', path: '/services' },
+    { label: 'Fitness Facilities', path: '/services/fitness-facilities' },
+    { label: 'Youth Programs', path: '/services/youth-programs' },
+    { label: 'Spa & Wellness', path: '/services/spa-wellness' },
   ];
 
   const companyItems = [
@@ -91,6 +103,37 @@ const Header = () => {
               {item.label}
             </Link>
           ))}
+
+          {/* Services Dropdown */}
+          <div className="services-dropdown relative">
+            <button
+              onClick={() => setIsServicesDropdownOpen(!isServicesDropdownOpen)}
+              className={cn(
+                'nav-link text-white flex items-center',
+                (isActive('/services')) ? 'active' : ''
+              )}
+            >
+              <span>Services</span>
+              <ChevronDown size={16} className="ml-1" />
+            </button>
+
+            {isServicesDropdownOpen && (
+              <div className="absolute top-full left-0 mt-2 w-48 bg-white rounded-md shadow-lg overflow-hidden z-50 animate-fade-in">
+                {serviceItems.map((item) => (
+                  <Link
+                    key={item.path}
+                    to={item.path}
+                    className={cn(
+                      'block px-4 py-3 text-gray-700 hover:bg-gray-100 transition-colors',
+                      isActive(item.path) ? 'bg-gray-100 font-medium' : ''
+                    )}
+                  >
+                    {item.label}
+                  </Link>
+                ))}
+              </div>
+            )}
+          </div>
 
           {/* Company Dropdown */}
           <div className="company-dropdown relative">
@@ -155,6 +198,28 @@ const Header = () => {
                   {item.label}
                 </Link>
               ))}
+              
+              {/* Mobile Services Section */}
+              <div className="py-2 border-t border-gray-700">
+                <div className="flex items-center mb-2 text-white">
+                  <Dumbbell size={16} className="mr-2" />
+                  <span className="font-medium">Services</span>
+                </div>
+                <div className="space-y-3 pl-6">
+                  {serviceItems.map((item) => (
+                    <Link
+                      key={item.path}
+                      to={item.path}
+                      className={cn(
+                        'block text-white opacity-90 hover:opacity-100',
+                        isActive(item.path) ? 'font-medium opacity-100' : ''
+                      )}
+                    >
+                      {item.label}
+                    </Link>
+                  ))}
+                </div>
+              </div>
               
               {/* Mobile Company Section */}
               <div className="py-2 border-t border-gray-700">
