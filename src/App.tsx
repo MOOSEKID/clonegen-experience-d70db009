@@ -22,6 +22,8 @@ import ContactUs from "./pages/ContactUs";
 import Timetable from "./pages/Timetable";
 import OpeningTimes from "./pages/OpeningTimes";
 import ShopPage from "./pages/Shop";
+import CategoryPage from "./pages/shop/CategoryPage";
+import ProductPage from "./pages/shop/ProductPage";
 import AdminLayout from "./pages/admin/AdminLayout";
 import AdminDashboard from "./pages/admin/Dashboard";
 import AdminMembers from "./pages/admin/Members";
@@ -64,6 +66,8 @@ const App = () => (
                   <Route path="/classes" element={<Classes />} />
                   <Route path="/blogs" element={<Blogs />} />
                   <Route path="/shop" element={<ShopPage />} />
+                  <Route path="/shop/category/:categoryId" element={<CategoryPage />} />
+                  <Route path="/shop/product/:productId" element={<ProductPage />} />
                   <Route path="/login" element={<Login />} />
                   <Route path="/signup" element={<Signup />} />
                   <Route path="/contact-us" element={<ContactUs />} />

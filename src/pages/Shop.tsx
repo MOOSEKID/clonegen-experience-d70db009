@@ -1,100 +1,51 @@
 
 import React from 'react';
-import { Dumbbell, ShoppingBag, Shirt, Utensils } from 'lucide-react';
+import { Dumbbell, ShoppingBag, Shirt, Utensils, Filter, Search } from 'lucide-react';
+import { categories, products, getProductsByCategory } from '@/data/shopData';
+import CategoryCard from '@/components/shop/CategoryCard';
+import ProductGrid from '@/components/shop/ProductGrid';
+import { Button } from '@/components/ui/button';
+import { Product } from '@/components/shop/ProductCard';
 
 const ShopPage = () => {
-  // Product categories with their respective products
-  const productCategories = [
-    {
-      id: 'supplements',
-      name: 'Supplements',
-      icon: <Utensils className="h-6 w-6 text-gym-orange" />,
-      products: [
-        {
-          id: 'protein-whey',
-          name: 'Premium Whey Protein',
-          price: 35000,
-          image: '/placeholder.svg',
-          description: 'High-quality whey protein with 24g protein per serving'
-        },
-        {
-          id: 'pre-workout',
-          name: 'Pre-Workout Formula',
-          price: 29500,
-          image: '/placeholder.svg',
-          description: 'Energy-boosting formula with caffeine and BCAAs'
-        },
-        {
-          id: 'creatine',
-          name: 'Pure Creatine Monohydrate',
-          price: 22000,
-          image: '/placeholder.svg',
-          description: '500g of pure creatine to enhance strength and recovery'
-        }
-      ]
-    },
-    {
-      id: 'equipment',
-      name: 'Equipment',
-      icon: <Dumbbell className="h-6 w-6 text-gym-orange" />,
-      products: [
-        {
-          id: 'kettlebell',
-          name: 'Kettlebell Set',
-          price: 85000,
-          image: '/placeholder.svg',
-          description: 'Set of 3 kettlebells (8kg, 12kg, 16kg)'
-        },
-        {
-          id: 'resistance-bands',
-          name: 'Resistance Bands Pack',
-          price: 25000,
-          image: '/placeholder.svg',
-          description: '5 bands of varying resistance levels with handles'
-        },
-        {
-          id: 'yoga-mat',
-          name: 'Premium Yoga Mat',
-          price: 30000,
-          image: '/placeholder.svg',
-          description: 'Non-slip, eco-friendly yoga mat with carrying strap'
-        }
-      ]
-    },
-    {
-      id: 'apparel',
-      name: 'Apparel',
-      icon: <Shirt className="h-6 w-6 text-gym-orange" />,
-      products: [
-        {
-          id: 'mens-tank',
-          name: 'Men\'s Performance Tank',
-          price: 18000,
-          image: '/placeholder.svg',
-          description: 'Breathable, quick-dry fabric for intense workouts'
-        },
-        {
-          id: 'women-leggings',
-          name: 'Women\'s Compression Leggings',
-          price: 24000,
-          image: '/placeholder.svg',
-          description: 'High-waist, squat-proof leggings with pocket'
-        },
-        {
-          id: 'workout-shorts',
-          name: 'Training Shorts',
-          price: 16500,
-          image: '/placeholder.svg',
-          description: 'Lightweight, stretchy shorts for maximum mobility'
-        }
-      ]
-    }
-  ];
-
-  // Format price in Rwanda francs
-  const formatPrice = (price: number) => {
-    return `${price.toLocaleString()} RWF`;
+  const [searchTerm, setSearchTerm] = React.useState('');
+  const [cartItems, setCartItems] = React.useState<Product[]>([]);
+  
+  // Function to add products to cart
+  const addToCart = (product: Product) => {
+    setCartItems(prev => [...prev, product]);
+    
+    // Show a toast notification
+    const toast = document.createElement('div');
+    toast.className = 'fixed top-4 right-4 bg-gym-orange text-white px-4 py-2 rounded shadow-lg animate-in fade-in slide-in-from-top-4 z-50';
+    toast.textContent = `${product.name} added to cart`;
+    document.body.appendChild(toast);
+    
+    setTimeout(() => {
+      toast.classList.add('animate-out', 'fade-out', 'slide-out-to-top-4');
+      setTimeout(() => toast.remove(), 300);
+    }, 2000);
   };
+
+  // Get the icon component by name
+  const getIconComponent = (iconName: string) => {
+    switch (iconName) {
+      case 'Utensils':
+        return <Utensils className="w-6 h-6 text-gym-orange" />;
+      case 'Dumbbell':
+        return <Dumbbell className="w-6 h-6 text-gym-orange" />;
+      case 'Shirt':
+        return <Shirt className="w-6 h-6 text-gym-orange" />;
+      default:
+        return <ShoppingBag className="w-6 h-6 text-gym-orange" />;
+    }
+  };
+
+  // Filter products by search term
+  const filteredProducts = products.filter(product => 
+    product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    product.description.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
   return (
     <div className="bg-gym-light min-h-screen pt-24 pb-16">
@@ -106,42 +57,65 @@ const ShopPage = () => {
           </p>
         </div>
 
-        {productCategories.map((category) => (
-          <div key={category.id} className="mb-16">
-            <div className="flex items-center gap-3 mb-6">
-              {category.icon}
-              <h2 className="text-2xl md:text-3xl font-bold text-gym-dark">{category.name}</h2>
+        {/* Search and Filter */}
+        <div className="mb-10">
+          <div className="bg-white rounded-lg shadow p-4 flex flex-col md:flex-row gap-4">
+            <div className="relative flex-grow">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={18} />
+              <input 
+                type="text" 
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                placeholder="Search products..." 
+                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gym-orange focus:border-transparent"
+              />
             </div>
-            
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {category.products.map((product) => (
-                <div 
-                  key={product.id} 
-                  className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-300"
-                >
-                  <div className="bg-gray-200 h-48 flex items-center justify-center">
-                    <img 
-                      src={product.image} 
-                      alt={product.name} 
-                      className="h-32 w-32 object-contain"
-                    />
-                  </div>
-                  <div className="p-6">
-                    <h3 className="text-xl font-semibold text-gym-dark mb-2">{product.name}</h3>
-                    <p className="text-gray-600 mb-4 h-12 line-clamp-2">{product.description}</p>
-                    <div className="flex items-center justify-between">
-                      <span className="text-lg font-bold text-gym-orange">{formatPrice(product.price)}</span>
-                      <button className="bg-gym-orange hover:bg-gym-orange/90 text-white px-4 py-2 rounded-md flex items-center gap-2 transition-colors">
-                        <ShoppingBag size={18} />
-                        Add to Cart
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
+            <Button variant="outline" className="flex items-center gap-2">
+              <Filter size={18} /> Filters
+            </Button>
+            <Button variant="default" className="bg-gym-orange hover:bg-gym-orange/90 flex items-center gap-2">
+              <ShoppingBag size={18} /> 
+              Cart ({cartItems.length})
+            </Button>
           </div>
-        ))}
+        </div>
+
+        {/* Categories Section */}
+        <div className="mb-16">
+          <div className="flex items-center gap-3 mb-6">
+            <h2 className="text-2xl md:text-3xl font-bold text-gym-dark">Shop by Category</h2>
+          </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {categories.map((category) => (
+              <CategoryCard 
+                key={category.id}
+                id={category.id}
+                name={category.name}
+                icon={getIconComponent(category.icon)}
+                description={category.description}
+                productCount={category.productCount}
+              />
+            ))}
+          </div>
+        </div>
+
+        {/* Featured Products Section */}
+        <div className="mb-16">
+          <div className="flex items-center justify-between gap-3 mb-6">
+            <h2 className="text-2xl md:text-3xl font-bold text-gym-dark">
+              {searchTerm ? 'Search Results' : 'Featured Products'}
+            </h2>
+          </div>
+          
+          {filteredProducts.length > 0 ? (
+            <ProductGrid products={filteredProducts} addToCart={addToCart} />
+          ) : (
+            <div className="text-center py-10">
+              <p className="text-gray-500">No products found matching your search.</p>
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );
