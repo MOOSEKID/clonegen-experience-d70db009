@@ -16,7 +16,7 @@ const Login = () => {
     password: 'Uptown@250'
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
     
@@ -27,31 +27,39 @@ const Login = () => {
       return;
     }
     
-    // Check if admin login
-    if (email === adminCredentials.email && password === adminCredentials.password) {
-      // Set admin authentication in localStorage
-      localStorage.setItem('isAdmin', 'true');
-      localStorage.setItem('userEmail', email);
-      
-      // Delay to simulate API call
-      setTimeout(() => {
-        setIsLoading(false);
+    try {
+      // Check if admin login
+      if (email === adminCredentials.email && password === adminCredentials.password) {
+        // Set admin authentication in localStorage
+        localStorage.setItem('isAdmin', 'true');
+        localStorage.setItem('userEmail', email);
+        
         toast.success('Admin login successful!');
-        navigate('/admin');
-      }, 1000);
-    } 
-    // Regular user login
-    else {
-      // Set user authentication in localStorage
-      localStorage.setItem('isLoggedIn', 'true');
-      localStorage.setItem('userEmail', email);
-      
-      // Delay to simulate API call
-      setTimeout(() => {
-        setIsLoading(false);
+        
+        // Use a small timeout to ensure the toast appears before redirect
+        setTimeout(() => {
+          setIsLoading(false);
+          navigate('/admin');
+        }, 500);
+      } 
+      // Regular user login
+      else {
+        // Set user authentication in localStorage
+        localStorage.setItem('isLoggedIn', 'true');
+        localStorage.setItem('userEmail', email);
+        
         toast.success('Login successful!');
-        navigate('/');
-      }, 1000);
+        
+        // Use a small timeout to ensure the toast appears before redirect
+        setTimeout(() => {
+          setIsLoading(false);
+          navigate('/');
+        }, 500);
+      }
+    } catch (error) {
+      console.error('Login error:', error);
+      toast.error('Login failed. Please try again.');
+      setIsLoading(false);
     }
   };
 
