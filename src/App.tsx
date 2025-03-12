@@ -17,6 +17,8 @@ import Classes from "./pages/Classes";
 import Blogs from "./pages/Blogs";
 import Login from "./pages/Login";
 import NotFound from "./pages/NotFound";
+import ContactUs from "./pages/ContactUs";
+import Timetable from "./pages/Timetable";
 
 const queryClient = new QueryClient();
 
@@ -40,6 +42,8 @@ const App = () => (
               <Route path="/classes" element={<Classes />} />
               <Route path="/blogs" element={<Blogs />} />
               <Route path="/login" element={<Login />} />
+              <Route path="/contact-us" element={<ContactUs />} />
+              <Route path="/timetable" element={<Timetable />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </div>
