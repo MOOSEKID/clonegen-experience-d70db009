@@ -14,16 +14,23 @@ const DashboardLayout = () => {
   // Check user authentication
   useEffect(() => {
     const checkAuth = () => {
-      // Get user authentication status
-      const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
-      
-      if (!isLoggedIn) {
-        toast.error('You must be logged in to access this page');
+      try {
+        // Get user authentication status
+        const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
+        
+        if (!isLoggedIn) {
+          toast.error('You must be logged in to access this page');
+          navigate('/login');
+        } else {
+          setIsAuthenticated(true);
+        }
+      } catch (error) {
+        console.error('Authentication check error:', error);
+        toast.error('Authentication error. Please log in again.');
         navigate('/login');
-      } else {
-        setIsAuthenticated(true);
+      } finally {
+        setIsLoading(false);
       }
-      setIsLoading(false);
     };
 
     checkAuth();
@@ -42,7 +49,7 @@ const DashboardLayout = () => {
   }
 
   if (!isAuthenticated) {
-    return null; // Or a loading spinner
+    return null; // The navigate in useEffect will handle redirection
   }
 
   return (

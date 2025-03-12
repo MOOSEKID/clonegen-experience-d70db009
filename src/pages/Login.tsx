@@ -37,11 +37,11 @@ const Login = () => {
         
         toast.success('Admin login successful!');
         
-        // Use a small timeout to ensure the toast appears before redirect
+        // Navigate after a small delay to ensure toast appears
         setTimeout(() => {
           setIsLoading(false);
           navigate('/admin');
-        }, 500);
+        }, 1000);
       } 
       // Regular user login
       else {
@@ -52,11 +52,11 @@ const Login = () => {
         
         toast.success('Login successful!');
         
-        // Use a small timeout to ensure the toast appears before redirect
+        // Navigate after a small delay to ensure toast appears and localStorage is set
         setTimeout(() => {
           setIsLoading(false);
           navigate('/dashboard');
-        }, 500);
+        }, 1000);
       }
     } catch (error) {
       console.error('Login error:', error);
