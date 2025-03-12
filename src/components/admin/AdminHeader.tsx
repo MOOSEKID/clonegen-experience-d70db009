@@ -1,6 +1,6 @@
 
-import { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import {
   Bell,
   Search,
@@ -30,6 +30,14 @@ interface AdminHeaderProps {
 
 const AdminHeader = ({ toggleSidebar }: AdminHeaderProps) => {
   const [isDarkMode, setIsDarkMode] = useState(false);
+  const [userEmail, setUserEmail] = useState<string | null>(null);
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    // Get user email from localStorage
+    const email = localStorage.getItem('userEmail');
+    setUserEmail(email);
+  }, []);
 
   const toggleDarkMode = () => {
     setIsDarkMode(!isDarkMode);
@@ -38,8 +46,10 @@ const AdminHeader = ({ toggleSidebar }: AdminHeaderProps) => {
 
   const handleLogout = () => {
     localStorage.removeItem('isAdmin');
+    localStorage.removeItem('userEmail');
+    localStorage.removeItem('isLoggedIn');
     toast.success('Logged out successfully');
-    window.location.href = '/login';
+    navigate('/login');
   };
 
   return (
@@ -93,7 +103,7 @@ const AdminHeader = ({ toggleSidebar }: AdminHeaderProps) => {
               <div className="h-8 w-8 rounded-full bg-gym-orange/20 flex items-center justify-center">
                 <User size={16} className="text-gym-orange" />
               </div>
-              <span className="hidden md:inline-block">Admin</span>
+              <span className="hidden md:inline-block">{userEmail ? userEmail.split('@')[0] : 'Admin'}</span>
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="w-56">

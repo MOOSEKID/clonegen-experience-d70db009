@@ -8,13 +8,13 @@ import { toast } from 'sonner';
 const AdminLayout = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const navigate = useNavigate();
 
-  // Mock authentication check - would need to be replaced with actual auth logic
+  // Check admin authentication
   useEffect(() => {
-    // Simulate checking authentication
     const checkAuth = () => {
-      // Mock admin authentication for demo
+      // Get admin authentication status
       const isAdmin = localStorage.getItem('isAdmin') === 'true';
       
       if (!isAdmin) {
@@ -23,6 +23,7 @@ const AdminLayout = () => {
       } else {
         setIsAuthenticated(true);
       }
+      setIsLoading(false);
     };
 
     checkAuth();
@@ -31,6 +32,14 @@ const AdminLayout = () => {
   const toggleSidebar = () => {
     setIsSidebarOpen(!isSidebarOpen);
   };
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-gym-orange"></div>
+      </div>
+    );
+  }
 
   if (!isAuthenticated) {
     return null; // Or a loading spinner

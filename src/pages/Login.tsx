@@ -1,25 +1,58 @@
 
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/Button';
 import { toast } from 'sonner';
 
 const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  const navigate = useNavigate();
+
+  // Admin credentials
+  const adminCredentials = {
+    email: 'mangana.mustafa@gmail.com',
+    password: 'Uptown@250'
+  };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    setIsLoading(true);
     
     // Simple validation
     if (!email || !password) {
       toast.error('Please fill in all fields');
+      setIsLoading(false);
       return;
     }
     
-    // Mock login - would connect to auth service in real app
-    toast.success('Login successful!');
-    console.log('Login attempt with:', { email });
+    // Check if admin login
+    if (email === adminCredentials.email && password === adminCredentials.password) {
+      // Set admin authentication in localStorage
+      localStorage.setItem('isAdmin', 'true');
+      localStorage.setItem('userEmail', email);
+      
+      // Delay to simulate API call
+      setTimeout(() => {
+        setIsLoading(false);
+        toast.success('Admin login successful!');
+        navigate('/admin');
+      }, 1000);
+    } 
+    // Regular user login
+    else {
+      // Set user authentication in localStorage
+      localStorage.setItem('isLoggedIn', 'true');
+      localStorage.setItem('userEmail', email);
+      
+      // Delay to simulate API call
+      setTimeout(() => {
+        setIsLoading(false);
+        toast.success('Login successful!');
+        navigate('/');
+      }, 1000);
+    }
   };
 
   return (
@@ -75,8 +108,8 @@ const Login = () => {
             </label>
           </div>
           
-          <Button type="submit" className="w-full">
-            Sign In
+          <Button type="submit" className="w-full" disabled={isLoading}>
+            {isLoading ? 'Signing in...' : 'Sign In'}
           </Button>
           
           <div className="text-center text-sm text-gray-600">
