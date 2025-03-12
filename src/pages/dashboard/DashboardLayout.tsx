@@ -23,6 +23,8 @@ const DashboardLayout = () => {
           navigate('/login');
         } else {
           setIsAuthenticated(true);
+          // Set session cookie to maintain login state
+          document.cookie = "session_active=true; path=/; max-age=604800"; // 7 days
         }
       } catch (error) {
         console.error('Authentication check error:', error);

@@ -2,7 +2,7 @@
 import { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { cn } from '@/lib/utils';
-import { Menu, X, ShoppingBag } from 'lucide-react';
+import { Menu, X, ShoppingBag, User } from 'lucide-react';
 import DesktopNav from './header/DesktopNav';
 import MobileMenu from './header/MobileMenu';
 
@@ -11,6 +11,8 @@ const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isCompanyDropdownOpen, setIsCompanyDropdownOpen] = useState(false);
   const [isServicesDropdownOpen, setIsServicesDropdownOpen] = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
   const location = useLocation();
 
   useEffect(() => {
@@ -25,6 +27,22 @@ const Header = () => {
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
+
+  useEffect(() => {
+    // Check authentication status
+    const checkAuth = () => {
+      const loggedIn = localStorage.getItem('isLoggedIn') === 'true';
+      const admin = localStorage.getItem('isAdmin') === 'true';
+      setIsLoggedIn(loggedIn);
+      setIsAdmin(admin);
+    };
+    
+    checkAuth();
+    
+    // Check on route change
+    const interval = setInterval(checkAuth, 2000);
+    return () => clearInterval(interval);
+  }, [location.pathname]);
 
   useEffect(() => {
     setIsMenuOpen(false);
@@ -54,6 +72,12 @@ const Header = () => {
     { label: 'Blogs', path: '/blogs' },
     { label: 'Shop', path: '/shop', icon: ShoppingBag },
   ];
+
+  // Add Dashboard link if logged in
+  if (isLoggedIn) {
+    const dashboardPath = isAdmin ? '/admin' : '/dashboard';
+    navItems.push({ label: 'Dashboard', path: dashboardPath, icon: User });
+  }
 
   const serviceItems = [
     { label: 'All Services', path: '/services' },
@@ -95,6 +119,7 @@ const Header = () => {
           setIsServicesDropdownOpen={setIsServicesDropdownOpen}
           isCompanyDropdownOpen={isCompanyDropdownOpen}
           setIsCompanyDropdownOpen={setIsCompanyDropdownOpen}
+          isLoggedIn={isLoggedIn}
         />
 
         <button
@@ -110,6 +135,7 @@ const Header = () => {
           navItems={navItems}
           serviceItems={serviceItems}
           companyItems={companyItems}
+          isLoggedIn={isLoggedIn}
         />
       </div>
     </header>

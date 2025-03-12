@@ -1,5 +1,5 @@
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/Button';
 import { toast } from 'sonner';
@@ -9,6 +9,19 @@ const Login = () => {
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
+
+  // Check if already logged in
+  useEffect(() => {
+    const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
+    if (isLoggedIn) {
+      // If admin
+      if (localStorage.getItem('isAdmin') === 'true') {
+        navigate('/admin');
+      } else {
+        navigate('/dashboard');
+      }
+    }
+  }, [navigate]);
 
   // Admin credentials
   const adminCredentials = {
@@ -35,6 +48,10 @@ const Login = () => {
         localStorage.setItem('userEmail', email);
         localStorage.setItem('userName', 'Admin');
         
+        // Set persistent cookie
+        document.cookie = "session_active=true; path=/; max-age=604800"; // 7 days
+        document.cookie = "user_role=admin; path=/; max-age=604800";
+        
         toast.success('Admin login successful!');
         
         // Navigate after a small delay to ensure toast appears
@@ -49,6 +66,10 @@ const Login = () => {
         localStorage.setItem('isLoggedIn', 'true');
         localStorage.setItem('userEmail', email);
         localStorage.setItem('userName', email.split('@')[0]); // Set a default username
+        
+        // Set persistent cookie
+        document.cookie = "session_active=true; path=/; max-age=604800"; // 7 days
+        document.cookie = "user_role=user; path=/; max-age=604800";
         
         toast.success('Login successful!');
         

@@ -19,6 +19,7 @@ interface DesktopNavProps {
   setIsServicesDropdownOpen: React.Dispatch<React.SetStateAction<boolean>>;
   isCompanyDropdownOpen: boolean;
   setIsCompanyDropdownOpen: React.Dispatch<React.SetStateAction<boolean>>;
+  isLoggedIn?: boolean;
 }
 
 const DesktopNav = ({ 
@@ -28,7 +29,8 @@ const DesktopNav = ({
   isServicesDropdownOpen,
   setIsServicesDropdownOpen,
   isCompanyDropdownOpen,
-  setIsCompanyDropdownOpen
+  setIsCompanyDropdownOpen,
+  isLoggedIn = false
 }: DesktopNavProps) => {
   const location = useLocation();
 
@@ -79,9 +81,23 @@ const DesktopNav = ({
       </nav>
 
       <div className="hidden md:flex items-center space-x-4">
-        <Button isLink href="/login" variant="outline" size="sm">
-          Login
-        </Button>
+        {!isLoggedIn ? (
+          <Button isLink href="/login" variant="outline" size="sm">
+            Login
+          </Button>
+        ) : (
+          <Button isLink href="/logout" variant="outline" size="sm" onClick={(e) => {
+            e.preventDefault();
+            localStorage.removeItem('isLoggedIn');
+            localStorage.removeItem('isAdmin');
+            localStorage.removeItem('userEmail');
+            document.cookie = "session_active=; path=/; max-age=0";
+            document.cookie = "user_role=; path=/; max-age=0";
+            window.location.href = '/login';
+          }}>
+            Logout
+          </Button>
+        )}
       </div>
     </>
   );
