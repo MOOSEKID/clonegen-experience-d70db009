@@ -80,13 +80,16 @@ const AdminSidebar = ({ isOpen }: AdminSidebarProps) => {
         {/* Logo */}
         <div className="py-6 flex items-center justify-center">
           <Link to="/" className="flex items-center gap-2">
-            <div className="bg-gym-orange p-2 rounded-lg">
-              <Dumbbell className="h-6 w-6 text-white" />
-            </div>
-            {isOpen && (
-              <span className="text-xl font-bold text-gym-dark">
-                Uptown Admin
-              </span>
+            {isOpen ? (
+              <img 
+                src="/public/lovable-uploads/50d3d473-1f3f-40d6-b895-c64a2e29ca1d.png" 
+                alt="Uptown Gym Logo" 
+                className="h-12 w-auto object-contain"
+              />
+            ) : (
+              <div className="bg-gym-orange p-2 rounded-lg">
+                <Dumbbell className="h-6 w-6 text-white" />
+              </div>
             )}
           </Link>
         </div>

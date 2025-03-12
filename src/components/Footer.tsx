@@ -9,10 +9,12 @@ const Footer = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
           {/* Logo and Tagline */}
           <div className="space-y-6">
-            <div className="flex items-center space-x-2">
-              <span className="text-3xl font-bold">
-                <span className="text-gym-orange">Uptown</span>Gym
-              </span>
+            <div className="flex items-center">
+              <img 
+                src="/public/lovable-uploads/50d3d473-1f3f-40d6-b895-c64a2e29ca1d.png" 
+                alt="Uptown Gym Logo" 
+                className="h-16 w-auto object-contain"
+              />
             </div>
             <p className="text-gray-300 max-w-md">
               Fitness and Wellbeing is a journey, lifestyle, work life balance or an interest 

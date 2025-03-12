@@ -78,10 +78,12 @@ const Header = () => {
     >
       <div className="container-custom flex items-center justify-between">
         <Link to="/" className="flex items-center space-x-2">
-          <div className="relative h-12 w-32 flex items-center">
-            <span className="text-white font-bold text-2xl">
-              <span className="text-gym-orange">Uptown</span>Gym
-            </span>
+          <div className="h-12 w-auto">
+            <img 
+              src="/public/lovable-uploads/50d3d473-1f3f-40d6-b895-c64a2e29ca1d.png" 
+              alt="Uptown Gym Logo" 
+              className="h-full w-auto object-contain"
+            />
           </div>
         </Link>
 
