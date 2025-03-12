@@ -19,6 +19,7 @@ import Login from "./pages/Login";
 import NotFound from "./pages/NotFound";
 import ContactUs from "./pages/ContactUs";
 import Timetable from "./pages/Timetable";
+import OpeningTimes from "./pages/OpeningTimes";
 
 const queryClient = new QueryClient();
 
@@ -44,6 +45,7 @@ const App = () => (
               <Route path="/login" element={<Login />} />
               <Route path="/contact-us" element={<ContactUs />} />
               <Route path="/timetable" element={<Timetable />} />
+              <Route path="/opening-times" element={<OpeningTimes />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </div>
