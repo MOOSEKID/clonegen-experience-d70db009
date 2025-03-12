@@ -15,16 +15,22 @@ const DashboardLayout = () => {
   useEffect(() => {
     const checkAuth = () => {
       try {
-        // Get user authentication status
+        // Get user authentication status from localStorage and cookies
         const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
+        const sessionActive = document.cookie.includes('session_active=true');
         
-        if (!isLoggedIn) {
+        if (!isLoggedIn && !sessionActive) {
           toast.error('You must be logged in to access this page');
           navigate('/login');
         } else {
+          // Ensure both storage mechanisms are synchronized
+          if (!isLoggedIn && sessionActive) {
+            localStorage.setItem('isLoggedIn', 'true');
+          }
+          
           setIsAuthenticated(true);
-          // Set session cookie to maintain login state
-          document.cookie = "session_active=true; path=/; max-age=604800"; // 7 days
+          // Refresh session cookie to maintain login state
+          document.cookie = "session_active=true; path=/; max-age=2592000"; // 30 days
         }
       } catch (error) {
         console.error('Authentication check error:', error);

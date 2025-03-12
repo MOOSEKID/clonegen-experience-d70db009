@@ -14,16 +14,33 @@ const AdminLayout = () => {
   // Check admin authentication
   useEffect(() => {
     const checkAuth = () => {
-      // Get admin authentication status
-      const isAdmin = localStorage.getItem('isAdmin') === 'true';
-      
-      if (!isAdmin) {
-        toast.error('You must be logged in as an administrator');
+      try {
+        // Get admin authentication status from localStorage and cookies
+        const isAdmin = localStorage.getItem('isAdmin') === 'true';
+        const sessionActive = document.cookie.includes('session_active=true');
+        const isAdminRole = document.cookie.includes('user_role=admin');
+        
+        if ((!isAdmin || !sessionActive) && !isAdminRole) {
+          toast.error('You must be logged in as an administrator');
+          navigate('/login');
+        } else {
+          // Ensure both storage mechanisms are synchronized
+          if (!isAdmin && isAdminRole) {
+            localStorage.setItem('isAdmin', 'true');
+          }
+          
+          setIsAuthenticated(true);
+          // Refresh session cookie to maintain login state
+          document.cookie = "session_active=true; path=/; max-age=2592000"; // 30 days
+          document.cookie = "user_role=admin; path=/; max-age=2592000"; // 30 days
+        }
+      } catch (error) {
+        console.error('Authentication check error:', error);
+        toast.error('Authentication error. Please log in again.');
         navigate('/login');
-      } else {
-        setIsAuthenticated(true);
+      } finally {
+        setIsLoading(false);
       }
-      setIsLoading(false);
     };
 
     checkAuth();

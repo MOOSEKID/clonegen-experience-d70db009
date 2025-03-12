@@ -2,7 +2,7 @@
 import { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { cn } from '@/lib/utils';
-import { Menu, X, ShoppingBag, User } from 'lucide-react';
+import { Menu, X, ShoppingBag, User, LayoutDashboard } from 'lucide-react';
 import DesktopNav from './header/DesktopNav';
 import MobileMenu from './header/MobileMenu';
 
@@ -31,15 +31,25 @@ const Header = () => {
   useEffect(() => {
     // Check authentication status
     const checkAuth = () => {
-      const loggedIn = localStorage.getItem('isLoggedIn') === 'true';
-      const admin = localStorage.getItem('isAdmin') === 'true';
+      const loggedIn = localStorage.getItem('isLoggedIn') === 'true' || document.cookie.includes('session_active=true');
+      const admin = localStorage.getItem('isAdmin') === 'true' || document.cookie.includes('user_role=admin');
+      
+      // Ensure localStorage and cookies are in sync
+      if (loggedIn && localStorage.getItem('isLoggedIn') !== 'true') {
+        localStorage.setItem('isLoggedIn', 'true');
+      }
+      
+      if (admin && localStorage.getItem('isAdmin') !== 'true') {
+        localStorage.setItem('isAdmin', 'true');
+      }
+      
       setIsLoggedIn(loggedIn);
       setIsAdmin(admin);
     };
     
     checkAuth();
     
-    // Check on route change
+    // Check on route change and periodically
     const interval = setInterval(checkAuth, 2000);
     return () => clearInterval(interval);
   }, [location.pathname]);
@@ -76,7 +86,11 @@ const Header = () => {
   // Add Dashboard link if logged in
   if (isLoggedIn) {
     const dashboardPath = isAdmin ? '/admin' : '/dashboard';
-    navItems.push({ label: 'Dashboard', path: dashboardPath, icon: User });
+    navItems.push({ 
+      label: 'Dashboard', 
+      path: dashboardPath, 
+      icon: LayoutDashboard 
+    });
   }
 
   const serviceItems = [

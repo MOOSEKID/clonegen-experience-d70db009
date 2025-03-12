@@ -13,9 +13,12 @@ const Login = () => {
   // Check if already logged in
   useEffect(() => {
     const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
-    if (isLoggedIn) {
+    const isAdmin = localStorage.getItem('isAdmin') === 'true';
+    const sessionActive = document.cookie.includes('session_active=true');
+    
+    if (isLoggedIn || sessionActive) {
       // If admin
-      if (localStorage.getItem('isAdmin') === 'true') {
+      if (isAdmin || document.cookie.includes('user_role=admin')) {
         navigate('/admin');
       } else {
         navigate('/dashboard');
@@ -44,13 +47,14 @@ const Login = () => {
       // Check if admin login
       if (email === adminCredentials.email && password === adminCredentials.password) {
         // Set admin authentication in localStorage
+        localStorage.setItem('isLoggedIn', 'true');
         localStorage.setItem('isAdmin', 'true');
         localStorage.setItem('userEmail', email);
         localStorage.setItem('userName', 'Admin');
         
-        // Set persistent cookie
-        document.cookie = "session_active=true; path=/; max-age=604800"; // 7 days
-        document.cookie = "user_role=admin; path=/; max-age=604800";
+        // Set persistent cookie with longer expiration
+        document.cookie = "session_active=true; path=/; max-age=2592000"; // 30 days
+        document.cookie = "user_role=admin; path=/; max-age=2592000"; // 30 days
         
         toast.success('Admin login successful!');
         
@@ -67,9 +71,9 @@ const Login = () => {
         localStorage.setItem('userEmail', email);
         localStorage.setItem('userName', email.split('@')[0]); // Set a default username
         
-        // Set persistent cookie
-        document.cookie = "session_active=true; path=/; max-age=604800"; // 7 days
-        document.cookie = "user_role=user; path=/; max-age=604800";
+        // Set persistent cookie with longer expiration
+        document.cookie = "session_active=true; path=/; max-age=2592000"; // 30 days
+        document.cookie = "user_role=user; path=/; max-age=2592000"; // 30 days
         
         toast.success('Login successful!');
         
