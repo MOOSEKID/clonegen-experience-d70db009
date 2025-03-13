@@ -1,8 +1,6 @@
 
 import { FileDown } from 'lucide-react';
 import { CSVLink } from 'react-csv';
-import jsPDF from 'jspdf';
-import autoTable from 'jspdf-autotable';
 import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
