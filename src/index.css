@@ -34,6 +34,11 @@
     --ring: 222.2 84% 4.9%;
 
     --radius: 0.5rem;
+    
+    /* Gym specific colors */
+    --gym-orange: 24 100% 50%;
+    --gym-dark: 223 47% 11%;
+    --gym-darkblue: 215 28% 17%;
   }
 
   .dark {
@@ -143,4 +148,28 @@
   transform: translateY(0);
 }
 
+/* Custom Admin dashboard styles */
+.admin-stat-card {
+  @apply transition-all duration-300 hover:shadow-md;
+}
+
+.admin-card-icon {
+  @apply rounded-full p-3 transition-all duration-300;
+}
+
+/* Dark mode toggle animation */
+.theme-toggle {
+  @apply transition-transform duration-300;
+}
+
+.theme-toggle.dark {
+  @apply rotate-180;
+}
+
+/* Admin sidebar transitions */
+.sidebar-transition {
+  @apply transition-all duration-300 ease-in-out;
+}
+
 /* Add other custom styles below */
+

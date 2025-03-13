@@ -12,7 +12,7 @@ import {
   ArrowDown,
   ChevronDown,
 } from 'lucide-react';
-import { Button } from '@/components/Button';
+import { Button } from '@/components/ui/button';
 import {
   Card,
   CardContent,
@@ -26,6 +26,11 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import {
+  ChartContainer,
+  ChartTooltip,
+  ChartTooltipContent,
+} from '@/components/ui/chart';
 import { 
   Area,
   AreaChart, 
@@ -70,6 +75,30 @@ const classAttendanceData = [
 ];
 
 const COLORS = ['#8B5CF6', '#3B82F6', '#06B6D4', '#10B981', '#F59E0B'];
+
+const chartConfig = {
+  members: {
+    label: "Members",
+    theme: {
+      light: "#8B5CF6",
+      dark: "#A78BFA",
+    },
+  },
+  revenue: {
+    label: "Revenue",
+    theme: {
+      light: "#3B82F6",
+      dark: "#60A5FA",
+    },
+  },
+  class: {
+    label: "Classes",
+    theme: {
+      light: "#10B981",
+      dark: "#34D399",
+    },
+  },
+};
 
 const AdminDashboard = () => {
   const [timeFilter, setTimeFilter] = useState('weekly');
@@ -205,24 +234,30 @@ const AdminDashboard = () => {
           </CardHeader>
           <CardContent>
             <div className="h-80">
-              <ResponsiveContainer width="100%" height="100%">
-                <AreaChart
-                  data={membershipData}
-                  margin={{ top: 10, right: 30, left: 0, bottom: 0 }}
-                >
-                  <CartesianGrid strokeDasharray="3 3" opacity={0.1} />
-                  <XAxis dataKey="name" />
-                  <YAxis />
-                  <Tooltip />
-                  <Area 
-                    type="monotone" 
-                    dataKey="members" 
-                    stroke="#8B5CF6" 
-                    fill="#8B5CF6" 
-                    fillOpacity={0.2} 
-                  />
-                </AreaChart>
-              </ResponsiveContainer>
+              <ChartContainer
+                config={chartConfig}
+              >
+                <ResponsiveContainer width="100%" height="100%">
+                  <AreaChart
+                    data={membershipData}
+                    margin={{ top: 10, right: 30, left: 0, bottom: 0 }}
+                  >
+                    <CartesianGrid strokeDasharray="3 3" opacity={0.1} />
+                    <XAxis dataKey="name" />
+                    <YAxis />
+                    <ChartTooltip
+                      content={<ChartTooltipContent labelKey="members" />}
+                    />
+                    <Area 
+                      type="monotone" 
+                      dataKey="members" 
+                      stroke="#8B5CF6" 
+                      fill="#8B5CF6" 
+                      fillOpacity={0.2} 
+                    />
+                  </AreaChart>
+                </ResponsiveContainer>
+              </ChartContainer>
             </div>
           </CardContent>
         </Card>
@@ -234,18 +269,24 @@ const AdminDashboard = () => {
           </CardHeader>
           <CardContent>
             <div className="h-80">
-              <ResponsiveContainer width="100%" height="100%">
-                <BarChart
-                  data={revenueData}
-                  margin={{ top: 10, right: 30, left: 0, bottom: 0 }}
-                >
-                  <CartesianGrid strokeDasharray="3 3" opacity={0.1} />
-                  <XAxis dataKey="name" />
-                  <YAxis />
-                  <Tooltip />
-                  <Bar dataKey="revenue" fill="#3B82F6" radius={[4, 4, 0, 0]} />
-                </BarChart>
-              </ResponsiveContainer>
+              <ChartContainer
+                config={chartConfig}
+              >
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart
+                    data={revenueData}
+                    margin={{ top: 10, right: 30, left: 0, bottom: 0 }}
+                  >
+                    <CartesianGrid strokeDasharray="3 3" opacity={0.1} />
+                    <XAxis dataKey="name" />
+                    <YAxis />
+                    <ChartTooltip
+                      content={<ChartTooltipContent labelKey="revenue" />}
+                    />
+                    <Bar dataKey="revenue" fill="#3B82F6" radius={[4, 4, 0, 0]} />
+                  </BarChart>
+                </ResponsiveContainer>
+              </ChartContainer>
             </div>
           </CardContent>
         </Card>
@@ -260,27 +301,33 @@ const AdminDashboard = () => {
           </CardHeader>
           <CardContent>
             <div className="h-64 flex justify-center">
-              <ResponsiveContainer width="100%" height="100%">
-                <PieChart>
-                  <Pie
-                    data={classAttendanceData}
-                    cx="50%"
-                    cy="50%"
-                    innerRadius={60}
-                    outerRadius={80}
-                    fill="#8884d8"
-                    paddingAngle={5}
-                    dataKey="value"
-                    label
-                  >
-                    {classAttendanceData.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                    ))}
-                  </Pie>
-                  <Tooltip />
-                  <Legend />
-                </PieChart>
-              </ResponsiveContainer>
+              <ChartContainer
+                config={chartConfig}
+              >
+                <ResponsiveContainer width="100%" height="100%">
+                  <PieChart>
+                    <Pie
+                      data={classAttendanceData}
+                      cx="50%"
+                      cy="50%"
+                      innerRadius={60}
+                      outerRadius={80}
+                      fill="#8884d8"
+                      paddingAngle={5}
+                      dataKey="value"
+                      label
+                    >
+                      {classAttendanceData.map((entry, index) => (
+                        <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                      ))}
+                    </Pie>
+                    <ChartTooltip
+                      content={<ChartTooltipContent />}
+                    />
+                    <Legend />
+                  </PieChart>
+                </ResponsiveContainer>
+              </ChartContainer>
             </div>
           </CardContent>
         </Card>
