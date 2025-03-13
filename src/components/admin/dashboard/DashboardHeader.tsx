@@ -8,24 +8,13 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import ExportMenu from './ExportMenu';
-import { MembershipData, RevenueData, ClassAttendanceData } from '@/utils/exportUtils';
 
 interface DashboardHeaderProps {
   timeFilter: string;
   setTimeFilter: (filter: string) => void;
-  membershipData: MembershipData[];
-  revenueData: RevenueData[];
-  classAttendanceData: ClassAttendanceData[];
 }
 
-const DashboardHeader = ({ 
-  timeFilter, 
-  setTimeFilter,
-  membershipData,
-  revenueData,
-  classAttendanceData
-}: DashboardHeaderProps) => {
+const DashboardHeader = ({ timeFilter, setTimeFilter }: DashboardHeaderProps) => {
   return (
     <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
       <div>
@@ -56,11 +45,7 @@ const DashboardHeader = ({
           </DropdownMenuContent>
         </DropdownMenu>
         
-        <ExportMenu 
-          membershipData={membershipData} 
-          revenueData={revenueData} 
-          classAttendanceData={classAttendanceData} 
-        />
+        <Button>Download Report</Button>
       </div>
     </div>
   );
