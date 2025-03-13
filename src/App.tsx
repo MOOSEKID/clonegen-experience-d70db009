@@ -52,7 +52,8 @@ const queryClient = new QueryClient({
 });
 
 const App = () => {
-  // Force render initially to ensure content loads properly
+  console.log("App component rendering"); // Debug log
+  
   return (
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
