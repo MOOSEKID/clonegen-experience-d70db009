@@ -1,17 +1,44 @@
-
 import * as z from "zod";
 
 export const memberFormSchema = z.object({
-  // Basic Information
+  // Membership Details
+  membershipCategory: z.enum(['Individual', 'Company']).default('Individual'),
+  
+  // Dynamic validation based on membership category
   name: z.string().min(2, {
     message: "Name must be at least 2 characters.",
-  }),
+  }).optional()
+    .refine((val, ctx) => {
+      // Only required for Individual memberships
+      if (ctx.path[0] === 'name' && ctx.data.membershipCategory === 'Individual' && !val) {
+        return false;
+      }
+      return true;
+    }, { message: "Name is required for individual memberships." }),
+  
   email: z.string().email({
     message: "Invalid email address.",
-  }),
+  }).optional()
+    .refine((val, ctx) => {
+      // Only required for Individual memberships
+      if (ctx.path[0] === 'email' && ctx.data.membershipCategory === 'Individual' && !val) {
+        return false;
+      }
+      return true;
+    }, { message: "Email is required for individual memberships." }),
+  
   phone: z.string().min(9, {
     message: "Phone number must be at least 9 characters.",
-  }),
+  }).optional()
+    .refine((val, ctx) => {
+      // Only required for Individual memberships
+      if (ctx.path[0] === 'phone' && ctx.data.membershipCategory === 'Individual' && !val) {
+        return false;
+      }
+      return true;
+    }, { message: "Phone number is required for individual memberships." }),
+  
+  // Rest of the schema remains unchanged
   membershipType: z.enum(['Basic', 'Standard', 'Premium'], {
     required_error: "Please select a membership type.",
   }),
@@ -26,7 +53,6 @@ export const memberFormSchema = z.object({
   
   // Membership Details
   membershipPlan: z.enum(['Monthly', 'Quarterly', 'Yearly', 'Custom']).default('Monthly'),
-  membershipCategory: z.enum(['Individual', 'Company']).default('Individual'),
   
   // Additional Information
   trainerAssigned: z.string().optional(),
@@ -42,11 +68,35 @@ export const memberFormSchema = z.object({
   nfcCardId: z.string().optional(),
   fingerprintId: z.string().optional(),
   
-  // Company Membership Fields (Only required if membershipCategory is 'Company')
-  companyName: z.string().optional(),
+  // Company Membership Fields
+  companyName: z.string().optional()
+    .refine((val, ctx) => {
+      // Required for Company memberships
+      if (ctx.path[0] === 'companyName' && ctx.data.membershipCategory === 'Company' && !val) {
+        return false;
+      }
+      return true;
+    }, { message: "Company name is required for company memberships." }),
+  
   companyContactPerson: z.string().optional(),
-  companyEmail: z.string().email().optional(),
-  companyPhone: z.string().optional(),
+  companyEmail: z.string().email().optional()
+    .refine((val, ctx) => {
+      // Required for Company memberships
+      if (ctx.path[0] === 'companyEmail' && ctx.data.membershipCategory === 'Company' && !val) {
+        return false;
+      }
+      return true;
+    }, { message: "Company email is required for company memberships." }),
+  
+  companyPhone: z.string().optional()
+    .refine((val, ctx) => {
+      // Required for Company memberships
+      if (ctx.path[0] === 'companyPhone' && ctx.data.membershipCategory === 'Company' && !val) {
+        return false;
+      }
+      return true;
+    }, { message: "Company phone is required for company memberships." }),
+  
   companyAddress: z.string().optional(),
   companyTIN: z.string().optional(),
   companyLogo: z.string().optional(),

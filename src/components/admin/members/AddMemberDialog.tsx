@@ -54,7 +54,7 @@ const AddMemberDialog = ({ isOpen, onClose, onAddMember }: AddMemberDialogProps)
       companyName: "",
       companyContactPerson: "",
       companyEmail: "",
-      companyPhone: "",
+      companyPhone: "+250",
       companyAddress: "",
       companyTIN: "",
       companyLogo: "",
@@ -76,41 +76,58 @@ const AddMemberDialog = ({ isOpen, onClose, onAddMember }: AddMemberDialogProps)
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   
+  // Watch for membership category to handle dynamic validation
+  const membershipCategory = form.watch("membershipCategory");
+  
+  // Update validation mode when membership category changes
+  useEffect(() => {
+    // Clear validation errors when switching between membership types
+    form.clearErrors();
+  }, [membershipCategory, form]);
+  
   const onSubmit = async (values: MemberFormValues) => {
     setIsSubmitting(true);
     try {
       // Transform the data for the onAddMember function
       const memberData = {
-        name: values.name, // Required field
-        email: values.email, // Required field
-        phone: values.phone, // Required field
+        membershipCategory: values.membershipCategory,
         membershipType: values.membershipType, // Required field
         status: values.status, // Required field with default 'Active'
-        membershipCategory: values.membershipCategory,
+        membershipPlan: values.membershipPlan,
+      } as Omit<Member, "id" | "startDate" | "endDate" | "lastCheckin">;
+      
+      // Add fields based on membership category
+      if (values.membershipCategory === 'Individual') {
+        // For Individual membership, include personal details
+        memberData.name = values.name!; // Required for individuals
+        memberData.email = values.email!; // Required for individuals
+        memberData.phone = values.phone!; // Required for individuals
+        
         // Convert Date object to string format if it exists
-        dateOfBirth: values.dateOfBirth ? values.dateOfBirth.toISOString().split('T')[0] : undefined,
-        gender: values.gender,
-        address: values.address,
-        emergencyContact: values.emergencyContact 
+        if (values.dateOfBirth) {
+          memberData.dateOfBirth = values.dateOfBirth.toISOString().split('T')[0];
+        }
+        
+        memberData.gender = values.gender;
+        memberData.address = values.address;
+        memberData.emergencyContact = values.emergencyContact 
           ? (values.emergencyContactPhone 
               ? `${values.emergencyContact} (${values.emergencyContactPhone})` 
               : values.emergencyContact)
-          : undefined,
-        membershipPlan: values.membershipPlan,
-        trainerAssigned: values.trainerAssigned,
-        workoutGoals: values.workoutGoals,
-        medicalConditions: values.medicalConditions,
-        preferredWorkoutTime: values.preferredWorkoutTime,
-        paymentStatus: values.paymentStatus,
-        discountsUsed: values.discountsUsed,
-        notes: values.notes,
-        profilePicture: values.profilePicture,
-        nfcCardId: values.nfcCardId,
-        fingerprintId: values.fingerprintId,
-      } as Omit<Member, "id" | "startDate" | "endDate" | "lastCheckin">;
-      
-      // Add company-specific fields if membershipCategory is 'Company'
-      if (values.membershipCategory === 'Company') {
+          : undefined;
+        
+        memberData.trainerAssigned = values.trainerAssigned;
+        memberData.workoutGoals = values.workoutGoals;
+        memberData.medicalConditions = values.medicalConditions;
+        memberData.preferredWorkoutTime = values.preferredWorkoutTime;
+        
+        // Add individual-to-company linking fields if appropriate
+        if (values.linkedToCompany) {
+          memberData.linkedToCompany = values.linkedToCompany;
+          memberData.linkedCompanyName = values.linkedCompanyName;
+        }
+      } else {
+        // For Company membership, include company details
         memberData.companyName = values.companyName;
         memberData.companyContactPerson = values.companyContactPerson;
         memberData.companyEmail = values.companyEmail;
@@ -124,13 +141,27 @@ const AddMemberDialog = ({ isOpen, onClose, onAddMember }: AddMemberDialogProps)
         memberData.paymentMode = values.paymentMode;
         memberData.subscriptionModel = values.subscriptionModel;
         memberData.corporateDiscount = values.corporateDiscount;
+        
+        // If contact person exists, use it as the name field for the record
+        if (values.companyContactPerson) {
+          memberData.name = values.companyContactPerson;
+          memberData.email = values.companyEmail;
+          memberData.phone = values.companyPhone;
+        } else {
+          // Use company name as the name field if no contact person
+          memberData.name = values.companyName!;
+          memberData.email = values.companyEmail;
+          memberData.phone = values.companyPhone;
+        }
       }
       
-      // Add individual-to-company linking fields if appropriate
-      if (values.membershipCategory === 'Individual' && values.linkedToCompany) {
-        memberData.linkedToCompany = values.linkedToCompany;
-        memberData.linkedCompanyName = values.linkedCompanyName;
-      }
+      // Common fields for both types
+      memberData.paymentStatus = values.paymentStatus;
+      memberData.discountsUsed = values.discountsUsed;
+      memberData.notes = values.notes;
+      memberData.profilePicture = values.profilePicture;
+      memberData.nfcCardId = values.nfcCardId;
+      memberData.fingerprintId = values.fingerprintId;
       
       onAddMember(memberData);
       onClose();

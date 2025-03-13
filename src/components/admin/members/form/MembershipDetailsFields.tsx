@@ -1,9 +1,9 @@
 
-import React from "react";
+import React, { useEffect } from "react";
 import { FormField, FormItem, FormLabel, FormControl, FormMessage } from "@/components/ui/form";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Control } from "react-hook-form";
+import { Control, useWatch, useFormContext } from "react-hook-form";
 import { z } from "zod";
 import { memberFormSchema } from "./MemberFormSchema";
 
@@ -12,6 +12,47 @@ interface MembershipDetailsFieldsProps {
 }
 
 const MembershipDetailsFields = ({ control }: MembershipDetailsFieldsProps) => {
+  const { setValue, getValues, watch } = useFormContext();
+  
+  // Watch for changes in membershipCategory and companyContactPerson
+  const membershipCategory = useWatch({
+    control,
+    name: "membershipCategory",
+  });
+  
+  const companyContactPerson = useWatch({
+    control,
+    name: "companyContactPerson",
+  });
+  
+  const companyEmail = useWatch({
+    control,
+    name: "companyEmail",
+  });
+  
+  const companyPhone = useWatch({
+    control,
+    name: "companyPhone",
+  });
+  
+  // Effect to handle auto-filling or clearing individual fields when toggling membership category
+  useEffect(() => {
+    if (membershipCategory === 'Company') {
+      // For company membership, clear individual fields unless there's a contact person
+      if (companyContactPerson) {
+        // Auto-fill from company contact person if available
+        setValue('name', companyContactPerson);
+        setValue('email', companyEmail || '');
+        setValue('phone', companyPhone || '');
+      } else {
+        // Clear individual fields
+        setValue('name', '');
+        setValue('email', '');
+        setValue('phone', '');
+      }
+    }
+  }, [membershipCategory, companyContactPerson, companyEmail, companyPhone, setValue]);
+
   return (
     <div className="space-y-4">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

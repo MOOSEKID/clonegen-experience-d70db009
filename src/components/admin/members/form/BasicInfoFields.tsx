@@ -3,7 +3,7 @@ import React from "react";
 import { User, Mail, Phone } from "lucide-react";
 import { FormField, FormItem, FormLabel, FormControl, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { Control } from "react-hook-form";
+import { Control, useWatch } from "react-hook-form";
 import { z } from "zod";
 import { memberFormSchema } from "./MemberFormSchema";
 
@@ -12,6 +12,26 @@ interface BasicInfoFieldsProps {
 }
 
 const BasicInfoFields = ({ control }: BasicInfoFieldsProps) => {
+  const membershipCategory = useWatch({
+    control,
+    name: "membershipCategory",
+    defaultValue: "Individual"
+  });
+
+  const isCompany = membershipCategory === "Company";
+  
+  // If it's a company membership, we don't show individual fields
+  if (isCompany) {
+    return (
+      <div className="bg-blue-50 p-4 rounded-md border border-blue-200">
+        <h4 className="text-sm font-medium text-blue-800">Company Membership</h4>
+        <p className="text-xs text-blue-600 mt-1">
+          Individual details are not required for company memberships. Please fill in the company details below.
+        </p>
+      </div>
+    );
+  }
+
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
       <FormField

@@ -14,11 +14,20 @@ interface CompanyPhoneFieldProps {
 const CompanyPhoneField = ({ control }: CompanyPhoneFieldProps) => {
   // Helper function to format phone number as user types
   const formatPhoneNumber = (value: string) => {
+    // Remove any non-digit characters except for the + at the beginning
+    let formatted = value.replace(/[^\d+]/g, '');
+    
     // Ensure it starts with + if not empty
-    if (value && !value.startsWith('+')) {
-      return `+${value}`;
+    if (formatted && !formatted.startsWith('+')) {
+      formatted = `+${formatted}`;
     }
-    return value;
+    
+    // If empty, default to Rwanda code
+    if (!formatted) {
+      formatted = '+250';
+    }
+    
+    return formatted;
   };
 
   return (
