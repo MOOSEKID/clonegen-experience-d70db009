@@ -1,7 +1,6 @@
-
 import { useState } from 'react';
-import { Edit, Trash2, MoreVertical, Check, X } from 'lucide-react';
-import { ClassType } from '@/hooks/useClassesData';
+import { Edit, Trash2, MoreVertical, Users } from 'lucide-react';
+import { ClassType, MemberInfo } from '@/hooks/useClassesData';
 import { 
   Table, 
   TableHeader, 
@@ -19,16 +18,27 @@ import {
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import EditClassDialog from './EditClassDialog';
+import ManageAttendeesDialog from './ManageAttendeesDialog';
 
 interface ClassesTableProps {
   classes: ClassType[];
   isLoading: boolean;
   onEdit: (updatedClass: ClassType) => void;
   onDelete: (classId: number) => void;
+  onBookClass: (classId: number, member: MemberInfo) => void;
+  onCancelBooking: (classId: number, memberId: number) => void;
 }
 
-const ClassesTable = ({ classes, isLoading, onEdit, onDelete }: ClassesTableProps) => {
+const ClassesTable = ({ 
+  classes, 
+  isLoading, 
+  onEdit, 
+  onDelete,
+  onBookClass,
+  onCancelBooking
+}: ClassesTableProps) => {
   const [editingClass, setEditingClass] = useState<ClassType | null>(null);
+  const [managingAttendees, setManagingAttendees] = useState<ClassType | null>(null);
 
   const getClassTypeColor = (type: string) => {
     switch (type) {
@@ -143,6 +153,13 @@ const ClassesTable = ({ classes, isLoading, onEdit, onDelete }: ClassesTableProp
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
                       <DropdownMenuItem 
+                        onClick={() => setManagingAttendees(classItem)}
+                        className="cursor-pointer"
+                      >
+                        <Users className="h-4 w-4 mr-2" />
+                        <span>Manage Attendees</span>
+                      </DropdownMenuItem>
+                      <DropdownMenuItem 
                         onClick={() => setEditingClass(classItem)}
                         className="cursor-pointer"
                       >
@@ -176,6 +193,18 @@ const ClassesTable = ({ classes, isLoading, onEdit, onDelete }: ClassesTableProp
             onEdit(updatedClass);
             setEditingClass(null);
           }}
+        />
+      )}
+
+      {managingAttendees && (
+        <ManageAttendeesDialog
+          open={!!managingAttendees}
+          classData={managingAttendees}
+          onOpenChange={(open) => {
+            if (!open) setManagingAttendees(null);
+          }}
+          onBookClass={onBookClass}
+          onCancelBooking={onCancelBooking}
         />
       )}
     </>

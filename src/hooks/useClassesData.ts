@@ -2,6 +2,12 @@
 import { useState, useEffect } from 'react';
 import { toast } from 'sonner';
 
+export interface MemberInfo {
+  id: number;
+  name: string;
+  email: string;
+}
+
 export interface ClassType {
   id: number;
   name: string;
@@ -10,13 +16,23 @@ export interface ClassType {
   trainer: string;
   capacity: number;
   enrolled: number;
+  enrolledMembers: MemberInfo[];
   waitlist: number;
+  waitlistMembers: MemberInfo[];
   day: string;
   time: string;
   duration: number;
   room: string;
   status: 'scheduled' | 'canceled' | 'full';
 }
+
+const mockMembers: MemberInfo[] = [
+  { id: 1, name: 'John Smith', email: 'john.smith@example.com' },
+  { id: 2, name: 'Sarah Johnson', email: 'sarah.johnson@example.com' },
+  { id: 3, name: 'Michael Brown', email: 'michael.brown@example.com' },
+  { id: 4, name: 'Emily Davis', email: 'emily.davis@example.com' },
+  { id: 5, name: 'Robert Wilson', email: 'robert.wilson@example.com' },
+];
 
 const mockClasses: ClassType[] = [
   {
@@ -27,7 +43,9 @@ const mockClasses: ClassType[] = [
     trainer: 'Sarah Johnson',
     capacity: 20,
     enrolled: 15,
+    enrolledMembers: mockMembers.slice(0, 3),
     waitlist: 0,
+    waitlistMembers: [],
     day: 'Monday',
     time: '08:00',
     duration: 60,
@@ -131,6 +149,7 @@ export const useClassesData = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [filterType, setFilterType] = useState<string>('all');
   const [filteredClasses, setFilteredClasses] = useState<ClassType[]>([]);
+  const [notificationsEnabled, setNotificationsEnabled] = useState<boolean>(false);
 
   useEffect(() => {
     // Simulate API fetch
@@ -173,14 +192,31 @@ export const useClassesData = () => {
     
     setClasses(prevClasses => [...prevClasses, classWithId]);
     toast.success(`${newClass.name} class added successfully!`);
+    
+    if (notificationsEnabled) {
+      sendNotification(`New class added: ${newClass.name}`);
+    }
+    
     return classWithId;
   };
 
   const updateClass = (updatedClass: ClassType) => {
+    const originalClass = classes.find(c => c.id === updatedClass.id);
+    
     setClasses(prevClasses => 
       prevClasses.map(c => c.id === updatedClass.id ? updatedClass : c)
     );
     toast.success(`${updatedClass.name} updated successfully!`);
+    
+    if (notificationsEnabled && originalClass) {
+      // Check for significant changes that would warrant a notification
+      if (originalClass.day !== updatedClass.day || 
+          originalClass.time !== updatedClass.time ||
+          originalClass.trainer !== updatedClass.trainer ||
+          originalClass.status !== updatedClass.status) {
+        sendNotification(`Class update: ${updatedClass.name} has been modified`);
+      }
+    }
   };
 
   const deleteClass = (classId: number) => {
@@ -188,7 +224,120 @@ export const useClassesData = () => {
     setClasses(prevClasses => prevClasses.filter(c => c.id !== classId));
     if (classToDelete) {
       toast.success(`${classToDelete.name} deleted successfully!`);
+      
+      if (notificationsEnabled) {
+        sendNotification(`Class canceled: ${classToDelete.name}`);
+      }
     }
+  };
+
+  const bookClass = (classId: number, member: MemberInfo) => {
+    setClasses(prevClasses => 
+      prevClasses.map(c => {
+        if (c.id === classId) {
+          // Check if class is full
+          if (c.enrolled >= c.capacity) {
+            // Add to waitlist
+            return {
+              ...c,
+              waitlist: c.waitlist + 1,
+              waitlistMembers: [...c.waitlistMembers, member]
+            };
+          } else {
+            // Add to enrolled
+            const updatedEnrolled = c.enrolled + 1;
+            const updatedStatus = updatedEnrolled >= c.capacity ? 'full' : c.status;
+            
+            return {
+              ...c,
+              enrolled: updatedEnrolled,
+              enrolledMembers: [...c.enrolledMembers, member],
+              status: updatedStatus
+            };
+          }
+        }
+        return c;
+      })
+    );
+    
+    const classInfo = classes.find(c => c.id === classId);
+    if (classInfo) {
+      if (classInfo.enrolled >= classInfo.capacity) {
+        toast.info(`Added to waitlist for ${classInfo.name}`);
+      } else {
+        toast.success(`Successfully booked ${classInfo.name}`);
+      }
+    }
+  };
+
+  const cancelBooking = (classId: number, memberId: number) => {
+    setClasses(prevClasses => 
+      prevClasses.map(c => {
+        if (c.id === classId) {
+          // Check if member is in waitlist
+          const inWaitlist = c.waitlistMembers.some(m => m.id === memberId);
+          
+          if (inWaitlist) {
+            return {
+              ...c,
+              waitlist: c.waitlist - 1,
+              waitlistMembers: c.waitlistMembers.filter(m => m.id !== memberId)
+            };
+          } else {
+            // Remove from enrolled
+            const updatedEnrolled = c.enrolled - 1;
+            const updatedStatus = updatedEnrolled < c.capacity ? 'scheduled' : c.status;
+            
+            // If there are people on waitlist, move one to enrolled
+            let updatedWaitlist = c.waitlist;
+            let updatedWaitlistMembers = [...c.waitlistMembers];
+            let updatedEnrolledMembers = c.enrolledMembers.filter(m => m.id !== memberId);
+            
+            if (c.waitlist > 0) {
+              const memberToMove = updatedWaitlistMembers[0];
+              updatedWaitlist -= 1;
+              updatedWaitlistMembers = updatedWaitlistMembers.slice(1);
+              updatedEnrolledMembers = [...updatedEnrolledMembers, memberToMove];
+              
+              // Notify the member who got moved from waitlist
+              if (notificationsEnabled) {
+                sendNotification(
+                  `You've been moved from the waitlist to enrolled for ${c.name}`,
+                  memberToMove.email
+                );
+              }
+            }
+            
+            return {
+              ...c,
+              enrolled: updatedEnrolled < 0 ? 0 : updatedEnrolled,
+              enrolledMembers: updatedEnrolledMembers,
+              waitlist: updatedWaitlist,
+              waitlistMembers: updatedWaitlistMembers,
+              status: updatedStatus
+            };
+          }
+        }
+        return c;
+      })
+    );
+    
+    const classInfo = classes.find(c => c.id === classId);
+    if (classInfo) {
+      toast.success(`Successfully canceled booking for ${classInfo.name}`);
+    }
+  };
+
+  const toggleNotifications = () => {
+    setNotificationsEnabled(prev => !prev);
+    toast.success(`Email notifications ${notificationsEnabled ? 'disabled' : 'enabled'}`);
+    return !notificationsEnabled;
+  };
+
+  const sendNotification = (message: string, recipient?: string) => {
+    // In a real application, this would connect to an email service
+    console.log(`NOTIFICATION: ${message}${recipient ? ` to ${recipient}` : ' to all enrolled members'}`);
+    toast.info('Notification sent to members');
   };
 
   return {
@@ -200,6 +349,11 @@ export const useClassesData = () => {
     updateClass,
     deleteClass,
     filterClasses,
-    setFilterType
+    setFilterType,
+    bookClass,
+    cancelBooking,
+    toggleNotifications,
+    notificationsEnabled,
+    sendNotification
   };
 };

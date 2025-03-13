@@ -1,6 +1,6 @@
 
 import { useState } from 'react';
-import { Plus, Filter, Calendar, Grid3X3 } from 'lucide-react';
+import { Grid3X3, Calendar } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import ClassesHeader from '@/components/admin/classes/ClassesHeader';
@@ -21,7 +21,11 @@ const AdminClasses = () => {
     filterClasses,
     filteredClasses,
     filterType,
-    setFilterType
+    setFilterType,
+    bookClass,
+    cancelBooking,
+    toggleNotifications,
+    notificationsEnabled
   } = useClassesData();
 
   return (
@@ -30,6 +34,8 @@ const AdminClasses = () => {
         onAddClass={() => setShowAddClassDialog(true)}
         onFilterChange={(filter) => setFilterType(filter)}
         filterType={filterType}
+        onToggleNotifications={toggleNotifications}
+        notificationsEnabled={notificationsEnabled}
       />
       
       <div className="bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden">
@@ -61,6 +67,8 @@ const AdminClasses = () => {
               isLoading={isLoading}
               onEdit={updateClass}
               onDelete={deleteClass}
+              onBookClass={bookClass}
+              onCancelBooking={cancelBooking}
             />
           ) : (
             <ClassesCalendar classes={filteredClasses} />
