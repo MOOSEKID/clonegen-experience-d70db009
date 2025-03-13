@@ -10,12 +10,15 @@ interface PreferredWorkoutTimeFieldProps {
   control: Control<z.infer<typeof memberFormSchema>>;
 }
 
+// Define the workout time option type to match the schema
+type WorkoutTimeOption = "Morning" | "Afternoon" | "Evening" | "Anytime";
+
 const PreferredWorkoutTimeField = ({ control }: PreferredWorkoutTimeFieldProps) => {
   const timeOptions = [
-    { id: "morning", label: "Morning", value: "Morning" },
-    { id: "afternoon", label: "Afternoon", value: "Afternoon" },
-    { id: "evening", label: "Evening", value: "Evening" },
-    { id: "anytime", label: "Anytime", value: "Anytime" },
+    { id: "morning", label: "Morning", value: "Morning" as WorkoutTimeOption },
+    { id: "afternoon", label: "Afternoon", value: "Afternoon" as WorkoutTimeOption },
+    { id: "evening", label: "Evening", value: "Evening" as WorkoutTimeOption },
+    { id: "anytime", label: "Anytime", value: "Anytime" as WorkoutTimeOption },
   ];
 
   return (
@@ -60,3 +63,4 @@ const PreferredWorkoutTimeField = ({ control }: PreferredWorkoutTimeFieldProps) 
 };
 
 export default PreferredWorkoutTimeField;
+

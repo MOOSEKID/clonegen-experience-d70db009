@@ -100,7 +100,8 @@ const AddMemberDialog = ({ isOpen, onClose, onAddMember }: AddMemberDialogProps)
         phone: values.phone, // Required field
         membershipType: values.membershipType, // Required field
         status: values.status, // Required field with default 'Active'
-        dateOfBirth: values.dateOfBirth,
+        // Convert Date object to string format if it exists
+        dateOfBirth: values.dateOfBirth ? values.dateOfBirth.toISOString().split('T')[0] : undefined,
         gender: values.gender,
         address: values.address,
         emergencyContact: values.emergencyContact 
