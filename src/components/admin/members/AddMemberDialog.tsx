@@ -5,14 +5,14 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { toast } from "sonner";
-import { Member } from "@/types/memberTypes";
+import { Member, MemberFormAction } from "@/types/memberTypes";
 import { memberFormSchema, MemberFormValues } from "./form/MemberFormSchema";
 import MemberDialogContent from "./dialog/MemberDialogContent";
 
 interface AddMemberDialogProps {
   isOpen: boolean;
   onClose: () => void;
-  onAddMember: (member: Omit<Member, "id" | "startDate" | "endDate" | "lastCheckin">) => void;
+  onAddMember: (member: Omit<Member, "id" | "startDate" | "endDate" | "lastCheckin"> & MemberFormAction) => void;
   isCreating?: boolean;
 }
 
@@ -111,13 +111,13 @@ const AddMemberDialog = ({ isOpen, onClose, onAddMember, isCreating = false }: A
         status: values.status,
         membershipPlan: values.membershipPlan,
         
-        // Authentication Setup
+        // Authentication Setup - these go into MemberFormAction
         generateUsername: values.generateUsername,
         username: values.username,
         generateTemporaryPassword: values.generateTemporaryPassword,
         temporaryPassword: values.temporaryPassword,
         sendCredentials: values.sendCredentials,
-      } as Omit<Member, "id" | "startDate" | "endDate" | "lastCheckin">;
+      } as Omit<Member, "id" | "startDate" | "endDate" | "lastCheckin"> & MemberFormAction;
       
       // Add fields based on membership category
       if (values.membershipCategory === 'Individual') {
@@ -183,11 +183,8 @@ const AddMemberDialog = ({ isOpen, onClose, onAddMember, isCreating = false }: A
       memberData.nfcCardId = values.nfcCardId;
       memberData.fingerprintId = values.fingerprintId;
       
-      const success = await onAddMember(memberData);
-      
-      if (success !== false) {
-        onClose();
-      }
+      onAddMember(memberData);
+      onClose();
     } catch (error) {
       console.error("Error adding member:", error);
       toast.error("Failed to add member", {

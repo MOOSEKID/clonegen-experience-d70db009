@@ -1,6 +1,6 @@
 
 import { useState } from 'react';
-import { Member } from '@/hooks/useMembers';
+import { Member, MemberFormAction } from '@/types/memberTypes';
 import MemberHeader from './MemberHeader';
 import MembersToolbar from './MembersToolbar';
 import MemberTable from './MemberTable';
@@ -28,7 +28,7 @@ interface MembersContainerProps {
   onPageChange: (page: number) => void;
   onPrevPage: () => void;
   onNextPage: () => void;
-  onAddMember: (member: Omit<Member, "id" | "startDate" | "endDate" | "lastCheckin">) => Promise<boolean> | boolean;
+  onAddMember: (member: Omit<Member, "id" | "startDate" | "endDate" | "lastCheckin"> & MemberFormAction) => Promise<boolean> | boolean;
   onImportMembers: (members: Omit<Member, "id">[]) => void;
 }
 

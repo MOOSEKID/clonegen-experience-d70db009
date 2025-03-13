@@ -1,6 +1,6 @@
 
 import { useState } from 'react';
-import { Member } from '@/types/memberTypes';
+import { Member, MemberFormAction } from '@/types/memberTypes';
 import { mockMembers } from '@/data/memberData';
 import { useMemberActions } from './members/useMemberActions';
 import { useMemberFilters } from './members/useMemberFilters';

@@ -1,4 +1,3 @@
-
 export interface Member {
   id: number;
   name: string;
@@ -65,6 +64,13 @@ export interface Member {
     checkInTime: string;
     checkOutTime?: string;
   }>;
+}
+
+// Need to add these types for form handling
+export interface MemberFormAction {
+  generateUsername?: boolean;
+  generateTemporaryPassword?: boolean;
+  sendCredentials?: boolean;
 }
 
 export interface CompanyInvoice {

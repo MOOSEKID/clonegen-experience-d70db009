@@ -1,7 +1,7 @@
 
 import { useState } from 'react';
 import { toast } from 'sonner';
-import { Member } from '@/types/memberTypes';
+import { Member, MemberFormAction } from '@/types/memberTypes';
 import { 
   generateUsername, 
   makeUsernameUnique, 
@@ -23,7 +23,7 @@ export const useMemberCreation = (
       .map(m => m.username as string);
   };
 
-  const addMember = async (memberData: Omit<Member, "id" | "startDate" | "endDate" | "lastCheckin">) => {
+  const addMember = async (memberData: Omit<Member, "id" | "startDate" | "endDate" | "lastCheckin"> & MemberFormAction) => {
     setIsCreating(true);
     
     try {
@@ -58,7 +58,7 @@ export const useMemberCreation = (
       
       // Generate authentication credentials if needed
       let username = '';
-      let temporaryPassword = '';
+      let tempPassword = '';
       
       // Only generate for individual members
       if (memberData.membershipCategory === 'Individual') {
@@ -78,9 +78,9 @@ export const useMemberCreation = (
         
         // Generate or use provided password
         if (memberData.generateTemporaryPassword) {
-          temporaryPassword = generateTemporaryPassword();
+          tempPassword = generateTemporaryPassword();
         } else {
-          temporaryPassword = memberData.temporaryPassword || '';
+          tempPassword = memberData.temporaryPassword || '';
         }
         
         // Send credentials if requested
@@ -89,7 +89,7 @@ export const useMemberCreation = (
             await sendCredentialsByEmail(
               memberData.email, 
               username, 
-              temporaryPassword
+              tempPassword
             );
           }
           
@@ -97,15 +97,24 @@ export const useMemberCreation = (
             await sendCredentialsBySMS(
               memberData.phone, 
               username, 
-              temporaryPassword
+              tempPassword
             );
           }
         }
       }
       
+      // Extract form-specific fields before creating the member object
+      const { 
+        generateUsername: genUsername, 
+        generateTemporaryPassword: genPassword, 
+        temporaryPassword, 
+        sendCredentials,
+        ...cleanedMemberData 
+      } = memberData;
+      
       const newMember: Member = {
         id: newId,
-        ...memberData,
+        ...cleanedMemberData,
         startDate: today,
         endDate: endDate.toISOString().split('T')[0],
         lastCheckin: today,
@@ -122,16 +131,7 @@ export const useMemberCreation = (
           : [{ date: today, checkInTime: new Date().toLocaleTimeString() }]
       };
       
-      // Remove form-specific fields before saving
-      const { 
-        generateUsername, 
-        generateTemporaryPassword, 
-        temporaryPassword, 
-        sendCredentials,
-        ...cleanedMember 
-      } = newMember as any;
-      
-      setMembers([...members, cleanedMember]);
+      setMembers([...members, newMember]);
       
       // Show appropriate success message based on membership type
       if (memberData.membershipCategory === "Company") {
@@ -215,19 +215,19 @@ export const useMemberCreation = (
     const newEmployees = employees.map((employee, index) => {
       // Generate username and password for each employee
       let username = '';
-      let temporaryPassword = '';
+      let tempPassword = '';
       
       if (employee.name) {
         const baseUsername = generateUsername(employee.name);
         username = makeUsernameUnique(baseUsername, getAllUsernames());
-        temporaryPassword = generateTemporaryPassword();
+        tempPassword = generateTemporaryPassword();
         
         // Send credentials
         if (employee.email) {
-          sendCredentialsByEmail(employee.email, username, temporaryPassword);
+          sendCredentialsByEmail(employee.email, username, tempPassword);
         }
         if (employee.phone) {
-          sendCredentialsBySMS(employee.phone, username, temporaryPassword);
+          sendCredentialsBySMS(employee.phone, username, tempPassword);
         }
       }
       
