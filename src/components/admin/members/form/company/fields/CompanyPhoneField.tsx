@@ -1,6 +1,6 @@
 
 import React from "react";
-import { FormField, FormItem, FormLabel, FormControl, FormMessage } from "@/components/ui/form";
+import { FormField, FormItem, FormLabel, FormControl, FormMessage, FormDescription } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Phone } from "lucide-react";
 import { Control } from "react-hook-form";
@@ -12,6 +12,15 @@ interface CompanyPhoneFieldProps {
 }
 
 const CompanyPhoneField = ({ control }: CompanyPhoneFieldProps) => {
+  // Helper function to format phone number as user types
+  const formatPhoneNumber = (value: string) => {
+    // Ensure it starts with + if not empty
+    if (value && !value.startsWith('+')) {
+      return `+${value}`;
+    }
+    return value;
+  };
+
   return (
     <FormField
       control={control}
@@ -22,8 +31,19 @@ const CompanyPhoneField = ({ control }: CompanyPhoneFieldProps) => {
             <Phone size={16} /> Company Phone
           </FormLabel>
           <FormControl>
-            <Input placeholder="+250788123456" {...field} />
+            <Input 
+              placeholder="+250788123456" 
+              {...field} 
+              value={field.value || "+250"} 
+              onChange={(e) => {
+                const formattedValue = formatPhoneNumber(e.target.value);
+                field.onChange(formattedValue);
+              }}
+            />
           </FormControl>
+          <FormDescription className="text-xs text-muted-foreground">
+            Enter phone number in international format (e.g., +250 for Rwanda)
+          </FormDescription>
           <FormMessage />
         </FormItem>
       )}
