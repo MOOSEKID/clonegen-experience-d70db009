@@ -13,7 +13,7 @@ interface VideoElementProps {
 
 const VideoElement = ({ element, isEditing, onUpdate }: VideoElementProps) => {
   const { properties = {} } = element;
-  const { align = 'left', padding = 'medium' } = properties;
+  const { align = 'left', padding = 'medium', autoplay = false, loop = false } = properties;
   
   // Determine padding class
   const paddingClass = {
@@ -23,6 +23,30 @@ const VideoElement = ({ element, isEditing, onUpdate }: VideoElementProps) => {
     large: 'p-6',
   }[padding] || 'p-4';
 
+  // Construct iframe attributes based on properties
+  const getIframeAttributes = () => {
+    const baseAttributes = {
+      className: "absolute top-0 left-0 w-full h-full rounded-md",
+      src: element.content,
+      title: "Video",
+      frameBorder: "0",
+      allow: "accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+    };
+    
+    // Add autoplay to allow attribute if enabled
+    if (autoplay) {
+      baseAttributes.allow = `${baseAttributes.allow}; autoplay`;
+    }
+    
+    // Add additional attributes
+    return {
+      ...baseAttributes,
+      allowFullScreen: true,
+      autoPlay: autoplay,
+      loop: loop,
+    };
+  };
+
   return (
     <div className={paddingClass}>
       {element.content ? (
@@ -31,12 +55,7 @@ const VideoElement = ({ element, isEditing, onUpdate }: VideoElementProps) => {
           style={{ margin: align === 'center' ? '0 auto' : align === 'right' ? '0 0 0 auto' : '0' }}
         >
           <iframe
-            className="absolute top-0 left-0 w-full h-full rounded-md"
-            src={element.content}
-            title="Video"
-            frameBorder="0"
-            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-            allowFullScreen
+            {...getIframeAttributes()}
           ></iframe>
         </div>
       ) : (
