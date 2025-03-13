@@ -6,6 +6,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { Control } from "react-hook-form";
 import { z } from "zod";
 import { memberFormSchema } from "./MemberFormSchema";
+import WorkoutGoalsField from "./WorkoutGoalsField";
+import PreferredWorkoutTimeField from "./PreferredWorkoutTimeField";
 
 interface AdditionalInfoFieldsProps {
   control: Control<z.infer<typeof memberFormSchema>>;
@@ -27,23 +29,12 @@ const AdditionalInfoFields = ({ control }: AdditionalInfoFieldsProps) => {
           </FormItem>
         )}
       />
-      <FormField
-        control={control}
-        name="workoutGoals"
-        render={({ field }) => (
-          <FormItem>
-            <FormLabel>Workout Goals</FormLabel>
-            <FormControl>
-              <Textarea 
-                placeholder="Member's workout goals"
-                className="resize-none"
-                {...field} 
-              />
-            </FormControl>
-            <FormMessage />
-          </FormItem>
-        )}
-      />
+      
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <WorkoutGoalsField control={control} />
+        <PreferredWorkoutTimeField control={control} />
+      </div>
+      
       <FormField
         control={control}
         name="medicalConditions"
@@ -61,6 +52,7 @@ const AdditionalInfoFields = ({ control }: AdditionalInfoFieldsProps) => {
           </FormItem>
         )}
       />
+      
       <FormField
         control={control}
         name="notes"

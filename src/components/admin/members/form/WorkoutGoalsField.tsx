@@ -6,28 +6,29 @@ import { Control } from "react-hook-form";
 import { z } from "zod";
 import { memberFormSchema } from "./MemberFormSchema";
 
-interface GenderFieldProps {
+interface WorkoutGoalsFieldProps {
   control: Control<z.infer<typeof memberFormSchema>>;
 }
 
-const GenderField = ({ control }: GenderFieldProps) => {
+const WorkoutGoalsField = ({ control }: WorkoutGoalsFieldProps) => {
   return (
     <FormField
       control={control}
-      name="gender"
+      name="workoutGoals"
       render={({ field }) => (
         <FormItem>
-          <FormLabel>Gender</FormLabel>
+          <FormLabel>Workout Goals</FormLabel>
           <Select onValueChange={field.onChange} value={field.value}>
             <FormControl>
               <SelectTrigger>
-                <SelectValue placeholder="Select gender" />
+                <SelectValue placeholder="Select workout goal" />
               </SelectTrigger>
             </FormControl>
             <SelectContent>
-              <SelectItem value="Male">Male</SelectItem>
-              <SelectItem value="Female">Female</SelectItem>
-              <SelectItem value="Other">Other</SelectItem>
+              <SelectItem value="Weight Loss">Weight Loss</SelectItem>
+              <SelectItem value="Muscle Gain">Muscle Gain</SelectItem>
+              <SelectItem value="Endurance">Endurance</SelectItem>
+              <SelectItem value="General Fitness">General Fitness</SelectItem>
             </SelectContent>
           </Select>
           <FormMessage />
@@ -37,4 +38,4 @@ const GenderField = ({ control }: GenderFieldProps) => {
   );
 };
 
-export default GenderField;
+export default WorkoutGoalsField;
