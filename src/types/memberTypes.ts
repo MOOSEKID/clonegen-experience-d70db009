@@ -71,6 +71,9 @@ export interface MemberFormAction {
   generateUsername?: boolean;
   generateTemporaryPassword?: boolean;
   sendCredentials?: boolean;
+  temporaryPassword?: string;
+  adminSetupRequired?: boolean;
+  hasAdminUser?: boolean;
 }
 
 export interface CompanyInvoice {
