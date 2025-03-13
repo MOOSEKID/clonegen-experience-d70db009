@@ -1,6 +1,6 @@
 
 export interface MemberInfo {
-  id: number;
+  id: string;
   name: string;
   email: string;
 }

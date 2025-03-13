@@ -1,4 +1,3 @@
-
 import { supabase } from '@/integrations/supabase/client';
 import { MemberInfo } from '@/types/classTypes';
 
@@ -31,12 +30,11 @@ export const getAvailableMembers = async (
     
     // Convert Supabase members to MemberInfo format and filter out enrolled/waitlisted
     return data
+      .filter(member => member && member.id) // Ensure member and member.id exist
       .map(member => ({
         id: member.id,
         name: member.name,
-        email: member.email,
-        phone: member.phone || '',
-        membershipType: member.membershiptype
+        email: member.email
       }))
       .filter(member => 
         !enrolledIds.has(member.id) && 
@@ -61,42 +59,50 @@ export const fetchMembers = async () => {
       return [];
     }
     
+    // Ensure data is not null before mapping
+    if (!data) return [];
+    
     // Convert database field names to camelCase for frontend
-    return data.map(member => ({
-      id: member.id,
-      name: member.name,
-      email: member.email,
-      phone: member.phone,
-      membershipType: member.membershiptype,
-      startDate: member.startdate,
-      endDate: member.enddate,
-      status: member.status,
-      lastCheckin: member.lastcheckin,
-      dateOfBirth: member.dateofbirth,
-      gender: member.gender,
-      address: member.address,
-      emergencyContact: member.emergencycontact,
-      membershipPlan: member.membershipplan,
-      membershipCategory: member.membershipcategory,
-      trainerAssigned: member.trainerassigned,
-      workoutGoals: member.workoutgoals,
-      medicalConditions: member.medicalconditions,
-      preferredWorkoutTime: member.preferredworkouttime,
-      paymentStatus: member.paymentstatus,
-      discountsUsed: member.discountsused,
-      notes: member.notes,
-      profilePicture: member.profilepicture,
-      nfcCardId: member.nfccardid,
-      fingerprintId: member.fingerprintid,
-      username: member.username,
-      passwordResetRequired: member.passwordresetrequired,
-      accountEnabled: member.accountenabled,
-      lastLogin: member.lastlogin,
-      linkedToCompany: member.linkedtocompany,
-      linkedCompanyId: member.linkedcompanyid,
-      created_at: member.created_at,
-      updated_at: member.updated_at
-    }));
+    return data.map(member => {
+      // Ensure member is not null before accessing properties
+      if (!member) return null;
+      
+      return {
+        id: member.id,
+        name: member.name,
+        email: member.email,
+        phone: member.phone,
+        membershipType: member.membershiptype,
+        startDate: member.startdate,
+        endDate: member.enddate,
+        status: member.status,
+        lastCheckin: member.lastcheckin,
+        dateOfBirth: member.dateofbirth,
+        gender: member.gender,
+        address: member.address,
+        emergencyContact: member.emergencycontact,
+        membershipPlan: member.membershipplan,
+        membershipCategory: member.membershipcategory,
+        trainerAssigned: member.trainerassigned,
+        workoutGoals: member.workoutgoals,
+        medicalConditions: member.medicalconditions,
+        preferredWorkoutTime: member.preferredworkouttime,
+        paymentStatus: member.paymentstatus,
+        discountsUsed: member.discountsused,
+        notes: member.notes,
+        profilePicture: member.profilepicture,
+        nfcCardId: member.nfccardid,
+        fingerprintId: member.fingerprintid,
+        username: member.username,
+        passwordResetRequired: member.passwordresetrequired,
+        accountEnabled: member.accountenabled,
+        lastLogin: member.lastlogin,
+        linkedToCompany: member.linkedtocompany,
+        linkedCompanyId: member.linkedcompanyid,
+        created_at: member.created_at,
+        updated_at: member.updated_at
+      };
+    }).filter(Boolean); // Filter out any null values
   } catch (error) {
     console.error('Error in fetchMembers:', error);
     return [];
