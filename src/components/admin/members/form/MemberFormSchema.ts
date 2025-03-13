@@ -4,39 +4,51 @@ export const memberFormSchema = z.object({
   // Membership Details
   membershipCategory: z.enum(['Individual', 'Company']).default('Individual'),
   
-  // Dynamic validation based on membership category
+  // Individual fields with conditional validation
   name: z.string().min(2, {
     message: "Name must be at least 2 characters.",
   }).optional()
-    .refine((val, ctx) => {
+    .superRefine((val, ctx) => {
       // Only required for Individual memberships
-      if (ctx.path[0] === 'name' && ctx.data.membershipCategory === 'Individual' && !val) {
+      if (ctx.data.membershipCategory === 'Individual' && !val) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: "Name is required for individual memberships."
+        });
         return false;
       }
       return true;
-    }, { message: "Name is required for individual memberships." }),
+    }),
   
   email: z.string().email({
     message: "Invalid email address.",
   }).optional()
-    .refine((val, ctx) => {
+    .superRefine((val, ctx) => {
       // Only required for Individual memberships
-      if (ctx.path[0] === 'email' && ctx.data.membershipCategory === 'Individual' && !val) {
+      if (ctx.data.membershipCategory === 'Individual' && !val) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: "Email is required for individual memberships."
+        });
         return false;
       }
       return true;
-    }, { message: "Email is required for individual memberships." }),
+    }),
   
   phone: z.string().min(9, {
     message: "Phone number must be at least 9 characters.",
   }).optional()
-    .refine((val, ctx) => {
+    .superRefine((val, ctx) => {
       // Only required for Individual memberships
-      if (ctx.path[0] === 'phone' && ctx.data.membershipCategory === 'Individual' && !val) {
+      if (ctx.data.membershipCategory === 'Individual' && !val) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: "Phone number is required for individual memberships."
+        });
         return false;
       }
       return true;
-    }, { message: "Phone number is required for individual memberships." }),
+    }),
   
   // Rest of the schema remains unchanged
   membershipType: z.enum(['Basic', 'Standard', 'Premium'], {
@@ -70,32 +82,44 @@ export const memberFormSchema = z.object({
   
   // Company Membership Fields
   companyName: z.string().optional()
-    .refine((val, ctx) => {
+    .superRefine((val, ctx) => {
       // Required for Company memberships
-      if (ctx.path[0] === 'companyName' && ctx.data.membershipCategory === 'Company' && !val) {
+      if (ctx.data.membershipCategory === 'Company' && !val) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: "Company name is required for company memberships."
+        });
         return false;
       }
       return true;
-    }, { message: "Company name is required for company memberships." }),
+    }),
   
   companyContactPerson: z.string().optional(),
   companyEmail: z.string().email().optional()
-    .refine((val, ctx) => {
+    .superRefine((val, ctx) => {
       // Required for Company memberships
-      if (ctx.path[0] === 'companyEmail' && ctx.data.membershipCategory === 'Company' && !val) {
+      if (ctx.data.membershipCategory === 'Company' && !val) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: "Company email is required for company memberships."
+        });
         return false;
       }
       return true;
-    }, { message: "Company email is required for company memberships." }),
+    }),
   
   companyPhone: z.string().optional()
-    .refine((val, ctx) => {
+    .superRefine((val, ctx) => {
       // Required for Company memberships
-      if (ctx.path[0] === 'companyPhone' && ctx.data.membershipCategory === 'Company' && !val) {
+      if (ctx.data.membershipCategory === 'Company' && !val) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: "Company phone is required for company memberships."
+        });
         return false;
       }
       return true;
-    }, { message: "Company phone is required for company memberships." }),
+    }),
   
   companyAddress: z.string().optional(),
   companyTIN: z.string().optional(),
@@ -113,6 +137,10 @@ export const memberFormSchema = z.object({
   // Individual linking to company
   linkedToCompany: z.boolean().default(false),
   linkedCompanyName: z.string().optional(),
+  
+  // Company admin user (to be added later)
+  hasAdminUser: z.boolean().default(false),
+  adminSetupRequired: z.boolean().default(true),
 });
 
 export type MemberFormValues = z.infer<typeof memberFormSchema>;

@@ -1,8 +1,9 @@
 
 import React, { useEffect } from "react";
-import { FormField, FormItem, FormLabel, FormControl, FormMessage } from "@/components/ui/form";
+import { FormField, FormItem, FormLabel, FormControl, FormMessage, FormDescription } from "@/components/ui/form";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
+import { AlertCircle } from "lucide-react";
 import { Control, useWatch, useFormContext } from "react-hook-form";
 import { z } from "zod";
 import { memberFormSchema } from "./MemberFormSchema";
@@ -38,20 +39,16 @@ const MembershipDetailsFields = ({ control }: MembershipDetailsFieldsProps) => {
   // Effect to handle auto-filling or clearing individual fields when toggling membership category
   useEffect(() => {
     if (membershipCategory === 'Company') {
-      // For company membership, clear individual fields unless there's a contact person
-      if (companyContactPerson) {
-        // Auto-fill from company contact person if available
-        setValue('name', companyContactPerson);
-        setValue('email', companyEmail || '');
-        setValue('phone', companyPhone || '');
-      } else {
-        // Clear individual fields
-        setValue('name', '');
-        setValue('email', '');
-        setValue('phone', '');
-      }
+      // For company membership, clear individual fields
+      setValue('name', '');
+      setValue('email', '');
+      setValue('phone', '');
+      
+      // Set admin setup required flag
+      setValue('adminSetupRequired', true);
+      setValue('hasAdminUser', false);
     }
-  }, [membershipCategory, companyContactPerson, companyEmail, companyPhone, setValue]);
+  }, [membershipCategory, setValue]);
 
   return (
     <div className="space-y-4">
@@ -101,6 +98,19 @@ const MembershipDetailsFields = ({ control }: MembershipDetailsFieldsProps) => {
           )}
         />
       </div>
+      
+      {membershipCategory === 'Company' && (
+        <div className="bg-amber-50 p-3 rounded-md border border-amber-200 flex items-start gap-2">
+          <AlertCircle className="text-amber-600 mt-0.5" size={16} />
+          <div>
+            <p className="text-sm text-amber-800 font-medium">Admin User Setup</p>
+            <p className="text-xs text-amber-700 mt-0.5">
+              You can assign an admin user for this company after registration. 
+              The admin will have access to manage staff, view invoices, and track attendance.
+            </p>
+          </div>
+        </div>
+      )}
       
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <FormField

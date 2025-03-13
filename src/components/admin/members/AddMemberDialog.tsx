@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { useForm } from 'react-hook-form';
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { toast } from "sonner";
 import { Member } from "@/types/memberTypes";
 import { memberFormSchema, MemberFormValues } from "./form/MemberFormSchema";
 import MemberDialogContent from "./dialog/MemberDialogContent";
@@ -71,6 +72,10 @@ const AddMemberDialog = ({ isOpen, onClose, onAddMember }: AddMemberDialogProps)
       // Individual linking to company
       linkedToCompany: false,
       linkedCompanyName: "",
+      
+      // Company admin user
+      hasAdminUser: false,
+      adminSetupRequired: true,
     },
   });
 
@@ -142,17 +147,14 @@ const AddMemberDialog = ({ isOpen, onClose, onAddMember }: AddMemberDialogProps)
         memberData.subscriptionModel = values.subscriptionModel;
         memberData.corporateDiscount = values.corporateDiscount;
         
-        // If contact person exists, use it as the name field for the record
-        if (values.companyContactPerson) {
-          memberData.name = values.companyContactPerson;
-          memberData.email = values.companyEmail;
-          memberData.phone = values.companyPhone;
-        } else {
-          // Use company name as the name field if no contact person
-          memberData.name = values.companyName!;
-          memberData.email = values.companyEmail;
-          memberData.phone = values.companyPhone;
-        }
+        // Use company name as the name field
+        memberData.name = values.companyName!;
+        memberData.email = values.companyEmail;
+        memberData.phone = values.companyPhone;
+        
+        // Set admin setup flag
+        memberData.adminSetupRequired = values.adminSetupRequired;
+        memberData.hasAdminUser = values.hasAdminUser;
       }
       
       // Common fields for both types
@@ -164,9 +166,22 @@ const AddMemberDialog = ({ isOpen, onClose, onAddMember }: AddMemberDialogProps)
       memberData.fingerprintId = values.fingerprintId;
       
       onAddMember(memberData);
+      
+      // Show success toast with different messages based on membership type
+      if (values.membershipCategory === 'Company') {
+        toast.success("Company added successfully!", {
+          description: "Remember to set up an admin user for this company later."
+        });
+      } else {
+        toast.success("Member added successfully!");
+      }
+      
       onClose();
     } catch (error) {
       console.error("Error adding member:", error);
+      toast.error("Failed to add member", {
+        description: "Please try again or contact support."
+      });
     } finally {
       setIsSubmitting(false);
     }

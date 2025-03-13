@@ -3,6 +3,7 @@ import React from "react";
 import { User, Mail, Phone } from "lucide-react";
 import { FormField, FormItem, FormLabel, FormControl, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Control, useWatch } from "react-hook-form";
 import { z } from "zod";
 import { memberFormSchema } from "./MemberFormSchema";
@@ -20,7 +21,7 @@ const BasicInfoFields = ({ control }: BasicInfoFieldsProps) => {
 
   const isCompany = membershipCategory === "Company";
   
-  // If it's a company membership, we don't show individual fields
+  // If it's a company membership, we show information banner instead of individual fields
   if (isCompany) {
     return (
       <div className="bg-blue-50 p-4 rounded-md border border-blue-200">
@@ -79,16 +80,18 @@ const BasicInfoFields = ({ control }: BasicInfoFieldsProps) => {
         render={({ field }) => (
           <FormItem>
             <FormLabel>Membership Type</FormLabel>
-            <FormControl>
-              <select
-                {...field}
-                className="w-full h-10 px-3 py-2 rounded-md border border-input bg-background"
-              >
-                <option value="Basic">Basic</option>
-                <option value="Standard">Standard</option>
-                <option value="Premium">Premium</option>
-              </select>
-            </FormControl>
+            <Select onValueChange={field.onChange} defaultValue={field.value}>
+              <FormControl>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select membership type" />
+                </SelectTrigger>
+              </FormControl>
+              <SelectContent>
+                <SelectItem value="Basic">Basic</SelectItem>
+                <SelectItem value="Standard">Standard</SelectItem>
+                <SelectItem value="Premium">Premium</SelectItem>
+              </SelectContent>
+            </Select>
             <FormMessage />
           </FormItem>
         )}
