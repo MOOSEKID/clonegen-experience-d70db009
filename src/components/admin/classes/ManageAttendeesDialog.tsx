@@ -15,7 +15,7 @@ interface ManageAttendeesDialogProps {
   onOpenChange: (open: boolean) => void;
   classData: ClassType;
   onBookClass: (classId: number, member: MemberInfo) => void;
-  onCancelBooking: (classId: number, memberId: number) => void;
+  onCancelBooking: (classId: number, memberId: string) => void;
 }
 
 const ManageAttendeesDialog = ({ 
@@ -49,7 +49,7 @@ const ManageAttendeesDialog = ({
     onBookClass(classData.id, member);
   };
 
-  const handleRemoveMember = (memberId: number) => {
+  const handleRemoveMember = (memberId: string) => {
     onCancelBooking(classData.id, memberId);
   };
 

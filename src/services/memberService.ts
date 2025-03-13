@@ -14,7 +14,7 @@ export const getAvailableMembers = async (
     // Get members from Supabase
     let query = supabase
       .from('members')
-      .select('id, name, email, phone, membershiptype')
+      .select('id, name, email')
       .eq('status', 'Active');
     
     if (searchTerm) {
@@ -27,6 +27,8 @@ export const getAvailableMembers = async (
       console.error('Error fetching members:', error);
       return [];
     }
+    
+    if (!data) return [];
     
     // Convert Supabase members to MemberInfo format and filter out enrolled/waitlisted
     return data
@@ -71,36 +73,36 @@ export const fetchMembers = async () => {
         id: member.id,
         name: member.name,
         email: member.email,
-        phone: member.phone,
-        membershipType: member.membershiptype,
-        startDate: member.startdate,
-        endDate: member.enddate,
-        status: member.status,
-        lastCheckin: member.lastcheckin,
-        dateOfBirth: member.dateofbirth,
-        gender: member.gender,
-        address: member.address,
-        emergencyContact: member.emergencycontact,
-        membershipPlan: member.membershipplan,
-        membershipCategory: member.membershipcategory,
-        trainerAssigned: member.trainerassigned,
-        workoutGoals: member.workoutgoals,
-        medicalConditions: member.medicalconditions,
-        preferredWorkoutTime: member.preferredworkouttime,
-        paymentStatus: member.paymentstatus,
-        discountsUsed: member.discountsused,
-        notes: member.notes,
-        profilePicture: member.profilepicture,
-        nfcCardId: member.nfccardid,
-        fingerprintId: member.fingerprintid,
-        username: member.username,
-        passwordResetRequired: member.passwordresetrequired,
-        accountEnabled: member.accountenabled,
-        lastLogin: member.lastlogin,
-        linkedToCompany: member.linkedtocompany,
-        linkedCompanyId: member.linkedcompanyid,
-        created_at: member.created_at,
-        updated_at: member.updated_at
+        phone: member.phone || '',
+        membershipType: member.membershiptype || '',
+        startDate: member.startdate || '',
+        endDate: member.enddate || '',
+        status: member.status || 'Active',
+        lastCheckin: member.lastcheckin || '',
+        dateOfBirth: member.dateofbirth || '',
+        gender: member.gender || '',
+        address: member.address || '',
+        emergencyContact: member.emergencycontact || '',
+        membershipPlan: member.membershipplan || '',
+        membershipCategory: member.membershipcategory || '',
+        trainerAssigned: member.trainerassigned || '',
+        workoutGoals: member.workoutgoals || '',
+        medicalConditions: member.medicalconditions || '',
+        preferredWorkoutTime: member.preferredworkouttime || [],
+        paymentStatus: member.paymentstatus || '',
+        discountsUsed: member.discountsused || '',
+        notes: member.notes || '',
+        profilePicture: member.profilepicture || '',
+        nfcCardId: member.nfccardid || '',
+        fingerprintId: member.fingerprintid || '',
+        username: member.username || '',
+        passwordResetRequired: member.passwordresetrequired ?? true,
+        accountEnabled: member.accountenabled ?? true,
+        lastLogin: member.lastlogin || '',
+        linkedToCompany: member.linkedtocompany ?? false,
+        linkedCompanyId: member.linkedcompanyid || '',
+        created_at: member.created_at || '',
+        updated_at: member.updated_at || ''
       };
     }).filter(Boolean); // Filter out any null values
   } catch (error) {
@@ -271,16 +273,22 @@ export const updateMemberStatus = async (id, newStatus) => {
       return null;
     }
     
+    if (!data || data.length === 0) {
+      return null;
+    }
+    
+    const member = data[0];
+    
     return {
-      id: data[0].id,
-      name: data[0].name,
-      email: data[0].email,
-      phone: data[0].phone,
-      membershipType: data[0].membershiptype,
-      startDate: data[0].startdate,
-      endDate: data[0].enddate,
-      status: data[0].status,
-      lastCheckin: data[0].lastcheckin,
+      id: member.id,
+      name: member.name,
+      email: member.email,
+      phone: member.phone || '',
+      membershipType: member.membershiptype || '',
+      startDate: member.startdate || '',
+      endDate: member.enddate || '',
+      status: member.status || 'Active',
+      lastCheckin: member.lastcheckin || '',
       // Add other fields as needed
     };
   } catch (error) {
