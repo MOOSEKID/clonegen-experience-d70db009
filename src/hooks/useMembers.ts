@@ -12,6 +12,18 @@ export interface Member {
   endDate: string;
   status: string;
   lastCheckin: string;
+  dateOfBirth?: string;
+  gender?: string;
+  address?: string;
+  emergencyContact?: string;
+  membershipPlan?: string;
+  trainerAssigned?: string;
+  workoutGoals?: string;
+  medicalConditions?: string;
+  preferredWorkoutTime?: string;
+  paymentStatus?: string;
+  discountsUsed?: string;
+  notes?: string;
 }
 
 export const useMembers = () => {
@@ -19,12 +31,12 @@ export const useMembers = () => {
   const [selectedMembers, setSelectedMembers] = useState<number[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
-  const [memberPerPage] = useState(5); // Show 5 members per page like in the image
+  const [memberPerPage] = useState(5);
   const [filterType, setFilterType] = useState('all');
 
   const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchTerm(e.target.value);
-    setCurrentPage(1); // Reset to first page on new search
+    setCurrentPage(1);
   };
 
   const handleStatusChange = (memberId: number, newStatus: string) => {
@@ -42,7 +54,7 @@ export const useMembers = () => {
 
   const handleFilterChange = (filter: string) => {
     setFilterType(filter);
-    setCurrentPage(1); // Reset to first page on new filter
+    setCurrentPage(1);
   };
 
   const toggleMemberSelection = (memberId: number) => {
@@ -93,14 +105,23 @@ export const useMembers = () => {
   const addMember = (memberData: Omit<Member, "id" | "startDate" | "endDate" | "lastCheckin">) => {
     const newId = members.length > 0 ? Math.max(...members.map(m => m.id)) + 1 : 1;
     const today = new Date().toISOString().split('T')[0];
-    const nextYear = new Date();
-    nextYear.setFullYear(nextYear.getFullYear() + 1);
+    
+    let endDate = new Date();
+    if (memberData.membershipPlan === "Monthly") {
+      endDate.setMonth(endDate.getMonth() + 1);
+    } else if (memberData.membershipPlan === "Quarterly") {
+      endDate.setMonth(endDate.getMonth() + 3);
+    } else if (memberData.membershipPlan === "Yearly") {
+      endDate.setFullYear(endDate.getFullYear() + 1);
+    } else {
+      endDate.setFullYear(endDate.getFullYear() + 1);
+    }
     
     const newMember: Member = {
       id: newId,
       ...memberData,
       startDate: today,
-      endDate: nextYear.toISOString().split('T')[0],
+      endDate: endDate.toISOString().split('T')[0],
       lastCheckin: today
     };
     
