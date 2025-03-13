@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
 import { 
@@ -35,15 +34,15 @@ import { pageContentData } from '@/data/cmsData';
 interface ContentEditorProps {
   selectedPage: string;
   onContentChange: () => void;
+  className?: string;
 }
 
-const ContentEditor = ({ selectedPage, onContentChange }: ContentEditorProps) => {
+const ContentEditor = ({ selectedPage, onContentChange, className = '' }: ContentEditorProps) => {
   const [pageContent, setPageContent] = useState<any[]>([]);
   const [selectedElement, setSelectedElement] = useState<any>(null);
   const [isPreviewMode, setIsPreviewMode] = useState(false);
   
   useEffect(() => {
-    // Load content for the selected page
     const content = pageContentData[selectedPage] || [];
     setPageContent(content);
     setSelectedElement(null);
@@ -138,7 +137,7 @@ const ContentEditor = ({ selectedPage, onContentChange }: ContentEditorProps) =>
   };
 
   return (
-    <div className="flex flex-1 h-full">
+    <div className={`flex flex-1 h-full ${className}`}>
       <div className={`flex-1 overflow-auto border-r border-gray-200 ${isPreviewMode ? 'bg-gray-50' : ''}`}>
         <div className="p-4 border-b border-gray-200 flex justify-between items-center">
           <h3 className="text-sm font-medium text-gray-700">

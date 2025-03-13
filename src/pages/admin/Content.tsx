@@ -1,9 +1,9 @@
-
 import { useState } from 'react';
-import { FileText, Image, Layout, Video, DollarSign, Search } from 'lucide-react';
+import { FileText, Image, Layout, Video, DollarSign, Search, Monitor } from 'lucide-react';
 import ContentEditor from '@/components/admin/content/ContentEditor';
 import MediaLibrary from '@/components/admin/content/MediaLibrary';
 import PageSelector from '@/components/admin/content/PageSelector';
+import SitePreview from '@/components/admin/content/SitePreview';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
@@ -12,6 +12,7 @@ const AdminContent = () => {
   const [selectedPage, setSelectedPage] = useState('home');
   const [isDirty, setIsDirty] = useState(false);
   const [isPublishing, setIsPublishing] = useState(false);
+  const [showPreview, setShowPreview] = useState(false);
 
   const handleSaveDraft = () => {
     toast.success("Draft saved successfully");
@@ -42,6 +43,14 @@ const AdminContent = () => {
         </div>
         
         <div className="flex space-x-3">
+          <Button 
+            variant="outline" 
+            onClick={() => setShowPreview(!showPreview)}
+            className={showPreview ? "bg-gray-100" : ""}
+          >
+            <Monitor className="h-4 w-4 mr-2" />
+            {showPreview ? "Hide Preview" : "Show Preview"}
+          </Button>
           <Button 
             variant="outline" 
             onClick={handleSaveDraft}
@@ -86,10 +95,20 @@ const AdminContent = () => {
           <TabsContent value="editor" className="p-0">
             <div className="flex h-[calc(100vh-280px)]">
               <PageSelector selectedPage={selectedPage} onSelectPage={setSelectedPage} />
-              <ContentEditor 
-                selectedPage={selectedPage} 
-                onContentChange={() => setIsDirty(true)} 
-              />
+              
+              <div className={`flex-1 ${showPreview ? 'flex' : ''}`}>
+                <ContentEditor 
+                  selectedPage={selectedPage} 
+                  onContentChange={() => setIsDirty(true)}
+                  className={showPreview ? 'w-1/2 border-r' : 'w-full'}
+                />
+                
+                {showPreview && (
+                  <div className="w-1/2 p-4 overflow-auto">
+                    <SitePreview selectedPage={selectedPage} />
+                  </div>
+                )}
+              </div>
             </div>
           </TabsContent>
           
