@@ -97,4 +97,50 @@
   }
 }
 
-/* Add any other custom styles below */
+/* Hero section styles */
+.hero-overlay {
+  @apply absolute inset-0 bg-black/50;
+}
+
+.vertical-orange-line {
+  @apply absolute left-0 top-0 bottom-0 w-1 bg-gym-orange;
+}
+
+/* Slide-in animation for hero text */
+.animate-slide-in {
+  animation: slideIn 0.8s ease-out forwards;
+}
+
+@keyframes slideIn {
+  0% {
+    opacity: 0;
+    transform: translateX(-20px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+/* Feature section styles */
+.feature-arrow {
+  @apply text-gym-orange transition-transform duration-300;
+}
+
+.feature-item:hover .feature-arrow {
+  @apply translate-x-1;
+}
+
+/* Slide up animation for staggered content */
+.slide-up {
+  opacity: 0;
+  transform: translateY(20px);
+  transition: opacity 0.5s ease, transform 0.5s ease;
+}
+
+.slide-up.show {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Add other custom styles below */

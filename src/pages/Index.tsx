@@ -2,7 +2,9 @@
 import { useEffect } from 'react';
 import Hero from '@/components/Hero';
 import Features from '@/components/Features';
+import FitnessClasses from '@/components/FitnessClasses';
 import Testimonials from '@/components/Testimonials';
+import MembershipPricing from '@/components/MembershipPricing';
 import Trainers from '@/components/Trainers';
 import { Helmet } from 'react-helmet';
 import { Button } from '@/components/Button';
@@ -23,8 +25,10 @@ const Index = () => {
       </Helmet>
       <Hero />
       <Features />
+      <FitnessClasses />
       <Trainers />
       <Testimonials />
+      <MembershipPricing />
       
       {/* Call to Action Section */}
       <section className="py-20 bg-white">
