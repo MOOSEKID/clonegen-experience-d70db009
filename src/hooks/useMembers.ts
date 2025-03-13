@@ -92,6 +92,52 @@ export const useMembers = () => {
     }
   };
 
+  // New function to add a member
+  const addMember = (memberData: Omit<Member, "id" | "startDate" | "endDate" | "lastCheckin">) => {
+    const newId = members.length > 0 ? Math.max(...members.map(m => m.id)) + 1 : 1;
+    const today = new Date().toISOString().split('T')[0];
+    const nextYear = new Date();
+    nextYear.setFullYear(nextYear.getFullYear() + 1);
+    
+    const newMember: Member = {
+      id: newId,
+      ...memberData,
+      startDate: today,
+      endDate: nextYear.toISOString().split('T')[0],
+      lastCheckin: today
+    };
+    
+    setMembers([...members, newMember]);
+    toast.success(`${memberData.name} added successfully`);
+  };
+
+  // New function to import members
+  const importMembers = (importedMembers: Omit<Member, "id">[]) => {
+    const lastId = members.length > 0 ? Math.max(...members.map(m => m.id)) : 0;
+    
+    const newMembers = importedMembers.map((member, index) => {
+      const today = new Date().toISOString().split('T')[0];
+      const nextYear = new Date();
+      nextYear.setFullYear(nextYear.getFullYear() + 1);
+      
+      // Fill in missing fields if they don't exist in imported data
+      return {
+        id: lastId + index + 1,
+        name: member.name,
+        email: member.email,
+        phone: member.phone || "",
+        membershipType: member.membershipType || "Standard",
+        startDate: member.startDate || today,
+        endDate: member.endDate || nextYear.toISOString().split('T')[0],
+        status: member.status || "Active",
+        lastCheckin: member.lastCheckin || today
+      };
+    });
+    
+    setMembers([...members, ...newMembers]);
+    toast.success(`${newMembers.length} members imported successfully`);
+  };
+
   // Apply filters based on search term and filter type
   const filteredMembers = members.filter(member => {
     const matchesSearch = 
@@ -136,6 +182,8 @@ export const useMembers = () => {
     toggleMemberSelection,
     selectAllMembers,
     handleBulkAction,
+    addMember,
+    importMembers,
     paginate,
     nextPage,
     prevPage,

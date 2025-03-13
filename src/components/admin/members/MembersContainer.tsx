@@ -1,10 +1,12 @@
 
+import { useState } from 'react';
 import { Member } from '@/hooks/useMembers';
 import MemberHeader from './MemberHeader';
 import MembersToolbar from './MembersToolbar';
 import MemberTable from './MemberTable';
 import MemberPagination from './MemberPagination';
-import { toast } from 'sonner';
+import AddMemberDialog from './AddMemberDialog';
+import ImportMembersDialog from './ImportMembersDialog';
 
 interface MembersContainerProps {
   members: Member[];
@@ -25,6 +27,8 @@ interface MembersContainerProps {
   onPageChange: (page: number) => void;
   onPrevPage: () => void;
   onNextPage: () => void;
+  onAddMember: (member: Omit<Member, "id" | "startDate" | "endDate" | "lastCheckin">) => void;
+  onImportMembers: (members: Omit<Member, "id">[]) => void;
 }
 
 const MembersContainer = ({
@@ -45,19 +49,19 @@ const MembersContainer = ({
   onBulkAction,
   onPageChange,
   onPrevPage,
-  onNextPage
+  onNextPage,
+  onAddMember,
+  onImportMembers
 }: MembersContainerProps) => {
+  const [isAddMemberOpen, setIsAddMemberOpen] = useState(false);
+  const [isImportOpen, setIsImportOpen] = useState(false);
   
-  const handleAddMember = () => {
-    // In a real app, this would open a modal to add a new member
-    toast.info('Add member functionality will be implemented in a future update');
-  };
-
   return (
     <div className="space-y-6">
       <MemberHeader 
         selectedCount={selectedMembers.length} 
-        onAddMember={handleAddMember}
+        onAddMember={() => setIsAddMemberOpen(true)}
+        onImport={() => setIsImportOpen(true)}
         members={members}
       />
       
@@ -92,6 +96,18 @@ const MembersContainer = ({
           onNextPage={onNextPage}
         />
       </div>
+
+      <AddMemberDialog 
+        isOpen={isAddMemberOpen}
+        onClose={() => setIsAddMemberOpen(false)}
+        onAddMember={onAddMember}
+      />
+
+      <ImportMembersDialog
+        isOpen={isImportOpen}
+        onClose={() => setIsImportOpen(false)}
+        onImportMembers={onImportMembers}
+      />
     </div>
   );
 };

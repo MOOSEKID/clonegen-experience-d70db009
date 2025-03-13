@@ -19,6 +19,8 @@ const AdminMembers = () => {
     toggleMemberSelection,
     selectAllMembers,
     handleBulkAction,
+    addMember,
+    importMembers,
     paginate,
     nextPage,
     prevPage,
@@ -41,6 +43,8 @@ const AdminMembers = () => {
       onSelectAll={selectAllMembers}
       onFilterChange={handleFilterChange}
       onBulkAction={handleBulkAction}
+      onAddMember={addMember}
+      onImportMembers={importMembers}
       onPageChange={paginate}
       onPrevPage={prevPage}
       onNextPage={nextPage}

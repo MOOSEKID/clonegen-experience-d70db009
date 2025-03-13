@@ -1,24 +1,19 @@
 
 import { Plus, Upload, Download } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { toast } from 'sonner';
 import { exportToPDF } from '@/utils/exportUtils';
+import { Member } from '@/hooks/useMembers';
 
 interface MemberHeaderProps {
   selectedCount?: number;
-  onAddMember?: () => void;
-  members?: any[];
+  onAddMember: () => void;
+  onImport: () => void;
+  members: Member[];
 }
 
-const MemberHeader = ({ selectedCount = 0, onAddMember, members = [] }: MemberHeaderProps) => {
-  const handleImport = () => {
-    // In a real app, this would open a file upload dialog
-    toast.info('Import functionality coming soon');
-  };
-
+const MemberHeader = ({ selectedCount = 0, onAddMember, onImport, members = [] }: MemberHeaderProps) => {
   const handleExport = () => {
     if (!members || members.length === 0) {
-      toast.error('No members to export');
       return;
     }
 
@@ -32,7 +27,6 @@ const MemberHeader = ({ selectedCount = 0, onAddMember, members = [] }: MemberHe
     ];
 
     exportToPDF('Members List', members, columns);
-    toast.success('Members exported to PDF');
   };
 
   return (
@@ -51,7 +45,7 @@ const MemberHeader = ({ selectedCount = 0, onAddMember, members = [] }: MemberHe
           variant="outline" 
           size="sm" 
           className="gap-2"
-          onClick={handleImport}
+          onClick={onImport}
         >
           <Upload size={16} />
           <span>Import</span>
@@ -68,13 +62,7 @@ const MemberHeader = ({ selectedCount = 0, onAddMember, members = [] }: MemberHe
         <Button 
           size="sm" 
           className="gap-2 bg-gym-orange hover:bg-gym-orange/90"
-          onClick={() => {
-            if (onAddMember) {
-              onAddMember();
-            } else {
-              toast.info('Add member functionality coming soon');
-            }
-          }}
+          onClick={onAddMember}
         >
           <Plus size={16} />
           <span>Add Member</span>
