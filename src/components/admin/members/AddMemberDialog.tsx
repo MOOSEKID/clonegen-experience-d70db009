@@ -32,6 +32,8 @@ const memberSchema = z.object({
   status: z.string().min(1, { message: "Please select a status" })
 });
 
+type MemberFormValues = z.infer<typeof memberSchema>;
+
 interface AddMemberDialogProps {
   isOpen: boolean;
   onClose: () => void;
@@ -39,7 +41,7 @@ interface AddMemberDialogProps {
 }
 
 const AddMemberDialog = ({ isOpen, onClose, onAddMember }: AddMemberDialogProps) => {
-  const form = useForm<z.infer<typeof memberSchema>>({
+  const form = useForm<MemberFormValues>({
     resolver: zodResolver(memberSchema),
     defaultValues: {
       name: "",
@@ -50,7 +52,8 @@ const AddMemberDialog = ({ isOpen, onClose, onAddMember }: AddMemberDialogProps)
     }
   });
 
-  const handleSubmit = (values: z.infer<typeof memberSchema>) => {
+  const handleSubmit = (values: MemberFormValues) => {
+    // All fields are required by the schema, so this is safe to pass
     onAddMember(values);
     form.reset();
     onClose();

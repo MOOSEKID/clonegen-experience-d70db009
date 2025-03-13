@@ -3,6 +3,7 @@ import { Plus, Upload, Download } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { exportToPDF } from '@/utils/exportUtils';
 import { Member } from '@/hooks/useMembers';
+import { toast } from 'sonner';
 
 interface MemberHeaderProps {
   selectedCount?: number;
@@ -14,6 +15,7 @@ interface MemberHeaderProps {
 const MemberHeader = ({ selectedCount = 0, onAddMember, onImport, members = [] }: MemberHeaderProps) => {
   const handleExport = () => {
     if (!members || members.length === 0) {
+      toast.error("No members available to export");
       return;
     }
 
@@ -27,6 +29,7 @@ const MemberHeader = ({ selectedCount = 0, onAddMember, onImport, members = [] }
     ];
 
     exportToPDF('Members List', members, columns);
+    toast.success("Members exported to PDF successfully");
   };
 
   return (

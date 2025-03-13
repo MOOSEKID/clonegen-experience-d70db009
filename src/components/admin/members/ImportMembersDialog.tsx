@@ -13,6 +13,7 @@ import { Button } from "@/components/ui/button";
 import { Upload, FileText, AlertCircle } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Member } from "@/hooks/useMembers";
+import { toast } from "sonner";
 
 interface ImportMembersDialogProps {
   isOpen: boolean;
@@ -113,6 +114,7 @@ const ImportMembersDialog = ({ isOpen, onClose, onImportMembers }: ImportMembers
       }
 
       onImportMembers(importedMembers);
+      toast.success(`Imported ${importedMembers.length} members successfully`);
       handleClose();
     } catch (err) {
       setError("Failed to parse file. Please check the file format.");

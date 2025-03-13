@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { toast } from 'sonner';
 import { mockMembers } from '@/components/admin/members/MemberData';
@@ -68,7 +67,6 @@ export const useMembers = () => {
       return;
     }
 
-    // Handle different bulk actions
     if (action === 'activate') {
       setMembers(members.map(member => 
         selectedMembers.includes(member.id) ? { ...member, status: 'Active' } : member
@@ -92,7 +90,6 @@ export const useMembers = () => {
     }
   };
 
-  // New function to add a member
   const addMember = (memberData: Omit<Member, "id" | "startDate" | "endDate" | "lastCheckin">) => {
     const newId = members.length > 0 ? Math.max(...members.map(m => m.id)) + 1 : 1;
     const today = new Date().toISOString().split('T')[0];
@@ -111,7 +108,6 @@ export const useMembers = () => {
     toast.success(`${memberData.name} added successfully`);
   };
 
-  // New function to import members
   const importMembers = (importedMembers: Omit<Member, "id">[]) => {
     const lastId = members.length > 0 ? Math.max(...members.map(m => m.id)) : 0;
     
@@ -120,7 +116,6 @@ export const useMembers = () => {
       const nextYear = new Date();
       nextYear.setFullYear(nextYear.getFullYear() + 1);
       
-      // Fill in missing fields if they don't exist in imported data
       return {
         id: lastId + index + 1,
         name: member.name,
@@ -138,7 +133,6 @@ export const useMembers = () => {
     toast.success(`${newMembers.length} members imported successfully`);
   };
 
-  // Apply filters based on search term and filter type
   const filteredMembers = members.filter(member => {
     const matchesSearch = 
       member.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -156,7 +150,6 @@ export const useMembers = () => {
     return matchesSearch;
   });
 
-  // Get current members for pagination
   const indexOfLastMember = currentPage * memberPerPage;
   const indexOfFirstMember = indexOfLastMember - memberPerPage;
   const currentMembers = filteredMembers.slice(indexOfFirstMember, indexOfLastMember);
