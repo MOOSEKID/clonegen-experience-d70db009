@@ -13,9 +13,10 @@ interface AddMemberDialogProps {
   isOpen: boolean;
   onClose: () => void;
   onAddMember: (member: Omit<Member, "id" | "startDate" | "endDate" | "lastCheckin">) => void;
+  isCreating?: boolean;
 }
 
-const AddMemberDialog = ({ isOpen, onClose, onAddMember }: AddMemberDialogProps) => {
+const AddMemberDialog = ({ isOpen, onClose, onAddMember, isCreating = false }: AddMemberDialogProps) => {
   const form = useForm<MemberFormValues>({
     resolver: zodResolver(memberFormSchema),
     defaultValues: {
@@ -36,6 +37,13 @@ const AddMemberDialog = ({ isOpen, onClose, onAddMember }: AddMemberDialogProps)
       // Membership Details
       membershipCategory: "Individual",
       membershipPlan: "Monthly",
+      
+      // Authentication Setup
+      generateUsername: true,
+      username: "",
+      generateTemporaryPassword: true,
+      temporaryPassword: "",
+      sendCredentials: true,
       
       // Additional Information
       trainerAssigned: "",
@@ -91,14 +99,24 @@ const AddMemberDialog = ({ isOpen, onClose, onAddMember }: AddMemberDialogProps)
   }, [membershipCategory, form]);
   
   const onSubmit = async (values: MemberFormValues) => {
+    // Prevent duplicate submissions
+    if (isSubmitting || isCreating) return;
+    
     setIsSubmitting(true);
     try {
       // Transform the data for the onAddMember function
       const memberData = {
         membershipCategory: values.membershipCategory,
-        membershipType: values.membershipType, // Required field
-        status: values.status, // Required field with default 'Active'
+        membershipType: values.membershipType,
+        status: values.status,
         membershipPlan: values.membershipPlan,
+        
+        // Authentication Setup
+        generateUsername: values.generateUsername,
+        username: values.username,
+        generateTemporaryPassword: values.generateTemporaryPassword,
+        temporaryPassword: values.temporaryPassword,
+        sendCredentials: values.sendCredentials,
       } as Omit<Member, "id" | "startDate" | "endDate" | "lastCheckin">;
       
       // Add fields based on membership category
@@ -165,18 +183,11 @@ const AddMemberDialog = ({ isOpen, onClose, onAddMember }: AddMemberDialogProps)
       memberData.nfcCardId = values.nfcCardId;
       memberData.fingerprintId = values.fingerprintId;
       
-      onAddMember(memberData);
+      const success = await onAddMember(memberData);
       
-      // Show success toast with different messages based on membership type
-      if (values.membershipCategory === 'Company') {
-        toast.success("Company added successfully!", {
-          description: "Remember to set up an admin user for this company later."
-        });
-      } else {
-        toast.success("Member added successfully!");
+      if (success !== false) {
+        onClose();
       }
-      
-      onClose();
     } catch (error) {
       console.error("Error adding member:", error);
       toast.error("Failed to add member", {
@@ -199,7 +210,7 @@ const AddMemberDialog = ({ isOpen, onClose, onAddMember }: AddMemberDialogProps)
       <DialogContent className="sm:max-w-[700px] max-h-[90vh] overflow-y-auto">
         <MemberDialogContent 
           form={form} 
-          isSubmitting={isSubmitting} 
+          isSubmitting={isSubmitting || isCreating} 
           onClose={onClose} 
           onSubmit={onSubmit}
         />

@@ -18,6 +18,7 @@ import AuthenticationFields from "../form/AuthenticationFields";
 import AdditionalInfoFields from "../form/AdditionalInfoFields";
 import CompanyMembershipFields from "../form/CompanyMembershipFields";
 import IndividualCompanyLinkField from "../form/IndividualCompanyLinkField";
+import AuthenticationSetupFields from "../form/AuthenticationSetupFields";
 
 interface MemberDialogContentProps {
   form: UseFormReturn<z.infer<typeof memberFormSchema>>;
@@ -59,9 +60,15 @@ const MemberDialogContent = ({ form, isSubmitting, onClose, onSubmit }: MemberDi
             />
           )}
           
+          {/* Authentication Setup Section */}
+          <div className="space-y-4">
+            <h3 className="text-sm font-medium">Account & Login Setup</h3>
+            <AuthenticationSetupFields control={form.control} />
+          </div>
+          
           {/* Authentication Section */}
           <div className="space-y-4">
-            <h3 className="text-sm font-medium">Authentication</h3>
+            <h3 className="text-sm font-medium">Gym Access Authentication</h3>
             <AuthenticationFields control={form.control} />
           </div>
           

@@ -12,6 +12,7 @@ const AdminMembers = () => {
     currentPage,
     totalPages,
     filterType,
+    isCreating,
     handleSearch,
     handleStatusChange,
     handleDelete,
@@ -36,6 +37,7 @@ const AdminMembers = () => {
       selectedMembers={selectedMembers}
       searchTerm={searchTerm}
       filterType={filterType}
+      isCreating={isCreating}
       onSearchChange={handleSearch}
       onStatusChange={handleStatusChange}
       onDelete={handleDelete}

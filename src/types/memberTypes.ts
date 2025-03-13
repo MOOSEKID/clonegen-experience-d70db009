@@ -26,6 +26,13 @@ export interface Member {
   nfcCardId?: string;
   fingerprintId?: string;
   
+  // Authentication fields
+  username?: string;
+  passwordResetRequired?: boolean;
+  accountEnabled?: boolean;
+  lastLogin?: string;
+  temporaryPassword?: string; // Only used during creation, not stored
+  
   // Company-specific fields
   companyName?: string;
   companyContactPerson?: string;
@@ -47,6 +54,10 @@ export interface Member {
   // Individual member linked to company
   linkedToCompany?: boolean;
   linkedCompanyName?: string;
+  
+  // Company admin user setup
+  hasAdminUser?: boolean; 
+  adminSetupRequired?: boolean;
   
   // Attendance tracking (for reporting)
   attendanceHistory?: Array<{
@@ -84,3 +95,17 @@ export interface AttendanceRecord {
   checkOutTime?: string;
   duration?: number; // In minutes
 }
+
+// User credentials for authentication
+export interface UserCredentials {
+  username: string;
+  password: string;
+}
+
+// Auth actions that admins can perform
+export type AuthAction = 
+  | 'reset_password'
+  | 'change_username'
+  | 'disable_account'
+  | 'enable_account'
+  | 'force_password_reset';

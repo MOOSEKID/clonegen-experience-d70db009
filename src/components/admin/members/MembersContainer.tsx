@@ -17,6 +17,7 @@ interface MembersContainerProps {
   selectedMembers: number[];
   searchTerm: string;
   filterType: string;
+  isCreating?: boolean;
   onSearchChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   onStatusChange: (memberId: number, newStatus: string) => void;
   onDelete: (memberId: number) => void;
@@ -27,7 +28,7 @@ interface MembersContainerProps {
   onPageChange: (page: number) => void;
   onPrevPage: () => void;
   onNextPage: () => void;
-  onAddMember: (member: Omit<Member, "id" | "startDate" | "endDate" | "lastCheckin">) => void;
+  onAddMember: (member: Omit<Member, "id" | "startDate" | "endDate" | "lastCheckin">) => Promise<boolean> | boolean;
   onImportMembers: (members: Omit<Member, "id">[]) => void;
 }
 
@@ -40,6 +41,7 @@ const MembersContainer = ({
   selectedMembers,
   searchTerm,
   filterType,
+  isCreating = false,
   onSearchChange,
   onStatusChange,
   onDelete,
@@ -101,6 +103,7 @@ const MembersContainer = ({
         isOpen={isAddMemberOpen}
         onClose={() => setIsAddMemberOpen(false)}
         onAddMember={onAddMember}
+        isCreating={isCreating}
       />
 
       <ImportMembersDialog

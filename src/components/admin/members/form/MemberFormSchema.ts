@@ -10,7 +10,7 @@ export const memberFormSchema = z.object({
   }).optional()
     .superRefine((val, ctx) => {
       // Only required for Individual memberships
-      if (ctx.data.membershipCategory === 'Individual' && !val) {
+      if (ctx.path[0] === 'name' && ctx.parent.membershipCategory === 'Individual' && !val) {
         ctx.addIssue({
           code: z.ZodIssueCode.custom,
           message: "Name is required for individual memberships."
@@ -25,7 +25,7 @@ export const memberFormSchema = z.object({
   }).optional()
     .superRefine((val, ctx) => {
       // Only required for Individual memberships
-      if (ctx.data.membershipCategory === 'Individual' && !val) {
+      if (ctx.path[0] === 'email' && ctx.parent.membershipCategory === 'Individual' && !val) {
         ctx.addIssue({
           code: z.ZodIssueCode.custom,
           message: "Email is required for individual memberships."
@@ -40,7 +40,7 @@ export const memberFormSchema = z.object({
   }).optional()
     .superRefine((val, ctx) => {
       // Only required for Individual memberships
-      if (ctx.data.membershipCategory === 'Individual' && !val) {
+      if (ctx.path[0] === 'phone' && ctx.parent.membershipCategory === 'Individual' && !val) {
         ctx.addIssue({
           code: z.ZodIssueCode.custom,
           message: "Phone number is required for individual memberships."
@@ -49,6 +49,33 @@ export const memberFormSchema = z.object({
       }
       return true;
     }),
+  
+  // Authentication fields
+  generateUsername: z.boolean().default(true),
+  username: z.string().optional()
+    .superRefine((val, ctx) => {
+      if (ctx.path[0] === 'username' && !ctx.parent.generateUsername && !val) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: "Username is required when not auto-generating."
+        });
+      }
+      return true;
+    }),
+  
+  generateTemporaryPassword: z.boolean().default(true),
+  temporaryPassword: z.string().optional()
+    .superRefine((val, ctx) => {
+      if (ctx.path[0] === 'temporaryPassword' && !ctx.parent.generateTemporaryPassword && !val) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: "Password is required when not auto-generating."
+        });
+      }
+      return true;
+    }),
+  
+  sendCredentials: z.boolean().default(true),
   
   // Rest of the schema remains unchanged
   membershipType: z.enum(['Basic', 'Standard', 'Premium'], {
@@ -84,7 +111,7 @@ export const memberFormSchema = z.object({
   companyName: z.string().optional()
     .superRefine((val, ctx) => {
       // Required for Company memberships
-      if (ctx.data.membershipCategory === 'Company' && !val) {
+      if (ctx.path[0] === 'companyName' && ctx.parent.membershipCategory === 'Company' && !val) {
         ctx.addIssue({
           code: z.ZodIssueCode.custom,
           message: "Company name is required for company memberships."
@@ -98,7 +125,7 @@ export const memberFormSchema = z.object({
   companyEmail: z.string().email().optional()
     .superRefine((val, ctx) => {
       // Required for Company memberships
-      if (ctx.data.membershipCategory === 'Company' && !val) {
+      if (ctx.path[0] === 'companyEmail' && ctx.parent.membershipCategory === 'Company' && !val) {
         ctx.addIssue({
           code: z.ZodIssueCode.custom,
           message: "Company email is required for company memberships."
@@ -111,7 +138,7 @@ export const memberFormSchema = z.object({
   companyPhone: z.string().optional()
     .superRefine((val, ctx) => {
       // Required for Company memberships
-      if (ctx.data.membershipCategory === 'Company' && !val) {
+      if (ctx.path[0] === 'companyPhone' && ctx.parent.membershipCategory === 'Company' && !val) {
         ctx.addIssue({
           code: z.ZodIssueCode.custom,
           message: "Company phone is required for company memberships."

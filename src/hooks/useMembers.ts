@@ -36,7 +36,8 @@ export const useMembers = () => {
 
   const {
     addMember,
-    importMembers
+    importMembers,
+    isCreating
   } = useMemberCreation(members, setMembers);
 
   return {
@@ -48,6 +49,7 @@ export const useMembers = () => {
     currentPage,
     totalPages,
     filterType,
+    isCreating,
     handleSearch,
     handleStatusChange,
     handleDelete,
