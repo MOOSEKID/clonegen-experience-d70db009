@@ -24,6 +24,7 @@ import {
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Member } from "@/hooks/useMembers";
 
+// Define schema with required fields to match Member type
 const memberSchema = z.object({
   name: z.string().min(2, { message: "Name must be at least 2 characters" }),
   email: z.string().email({ message: "Please enter a valid email address" }),
@@ -32,6 +33,7 @@ const memberSchema = z.object({
   status: z.string().min(1, { message: "Please select a status" })
 });
 
+// This ensures our form values type matches exactly what's expected
 type MemberFormValues = z.infer<typeof memberSchema>;
 
 interface AddMemberDialogProps {
@@ -53,8 +55,15 @@ const AddMemberDialog = ({ isOpen, onClose, onAddMember }: AddMemberDialogProps)
   });
 
   const handleSubmit = (values: MemberFormValues) => {
-    // All fields are required by the schema, so this is safe to pass
-    onAddMember(values);
+    // Since we've defined MemberFormValues to match the required type exactly,
+    // we can safely pass it to onAddMember
+    onAddMember({
+      name: values.name,
+      email: values.email,
+      phone: values.phone,
+      membershipType: values.membershipType,
+      status: values.status
+    });
     form.reset();
     onClose();
   };
