@@ -19,16 +19,7 @@ import {
   XAxis, 
   YAxis 
 } from 'recharts';
-
-// Mock data for the chart
-const revenueData = [
-  { name: 'Jan', revenue: 12000 },
-  { name: 'Feb', revenue: 15000 },
-  { name: 'Mar', revenue: 18000 },
-  { name: 'Apr', revenue: 20000 },
-  { name: 'May', revenue: 22000 },
-  { name: 'Jun', revenue: 25000 },
-];
+import { RevenueData } from '@/utils/exportUtils';
 
 const chartConfig = {
   revenue: {
@@ -40,7 +31,11 @@ const chartConfig = {
   },
 };
 
-const RevenueChart = () => {
+interface RevenueChartProps {
+  data: RevenueData[];
+}
+
+const RevenueChart = ({ data }: RevenueChartProps) => {
   return (
     <Card>
       <CardHeader>
@@ -54,7 +49,7 @@ const RevenueChart = () => {
           >
             <ResponsiveContainer width="100%" height="100%">
               <BarChart
-                data={revenueData}
+                data={data}
                 margin={{ top: 10, right: 30, left: 0, bottom: 0 }}
               >
                 <CartesianGrid strokeDasharray="3 3" opacity={0.1} />

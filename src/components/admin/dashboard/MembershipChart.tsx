@@ -19,16 +19,7 @@ import {
   XAxis, 
   YAxis 
 } from 'recharts';
-
-// Mock data for the chart
-const membershipData = [
-  { name: 'Jan', members: 400 },
-  { name: 'Feb', members: 500 },
-  { name: 'Mar', members: 600 },
-  { name: 'Apr', members: 700 },
-  { name: 'May', members: 800 },
-  { name: 'Jun', members: 950 },
-];
+import { MembershipData } from '@/utils/exportUtils';
 
 const chartConfig = {
   members: {
@@ -40,7 +31,11 @@ const chartConfig = {
   },
 };
 
-const MembershipChart = () => {
+interface MembershipChartProps {
+  data: MembershipData[];
+}
+
+const MembershipChart = ({ data }: MembershipChartProps) => {
   return (
     <Card>
       <CardHeader>
@@ -54,7 +49,7 @@ const MembershipChart = () => {
           >
             <ResponsiveContainer width="100%" height="100%">
               <AreaChart
-                data={membershipData}
+                data={data}
                 margin={{ top: 10, right: 30, left: 0, bottom: 0 }}
               >
                 <CartesianGrid strokeDasharray="3 3" opacity={0.1} />

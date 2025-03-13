@@ -18,15 +18,7 @@ import {
   PieChart, 
   ResponsiveContainer 
 } from 'recharts';
-
-// Mock data for the chart
-const classAttendanceData = [
-  { name: 'Yoga', value: 30 },
-  { name: 'HIIT', value: 25 },
-  { name: 'Cardio', value: 20 },
-  { name: 'Weight', value: 15 },
-  { name: 'Zumba', value: 10 },
-];
+import { ClassAttendanceData } from '@/utils/exportUtils';
 
 const COLORS = ['#8B5CF6', '#3B82F6', '#06B6D4', '#10B981', '#F59E0B'];
 
@@ -40,7 +32,11 @@ const chartConfig = {
   },
 };
 
-const ClassAttendanceChart = () => {
+interface ClassAttendanceChartProps {
+  data: ClassAttendanceData[];
+}
+
+const ClassAttendanceChart = ({ data }: ClassAttendanceChartProps) => {
   return (
     <Card className="col-span-1">
       <CardHeader>
@@ -55,7 +51,7 @@ const ClassAttendanceChart = () => {
             <ResponsiveContainer width="100%" height="100%">
               <PieChart>
                 <Pie
-                  data={classAttendanceData}
+                  data={data}
                   cx="50%"
                   cy="50%"
                   innerRadius={60}
@@ -65,7 +61,7 @@ const ClassAttendanceChart = () => {
                   dataKey="value"
                   label
                 >
-                  {classAttendanceData.map((entry, index) => (
+                  {data.map((entry, index) => (
                     <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                   ))}
                 </Pie>
