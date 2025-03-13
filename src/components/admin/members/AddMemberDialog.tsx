@@ -3,31 +3,10 @@ import * as React from "react";
 import { useState, useEffect } from "react";
 import { useForm } from 'react-hook-form';
 import { zodResolver } from "@hookform/resolvers/zod";
-
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogDescription,
-  DialogFooter,
-} from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
-import { Form } from "@/components/ui/form";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Member } from "@/types/memberTypes";
 import { memberFormSchema, MemberFormValues } from "./form/MemberFormSchema";
-
-// Import all form field components
-import BasicInfoFields from "./form/BasicInfoFields";
-import MembershipDetailsFields from "./form/MembershipDetailsFields";
-import DateOfBirthField from "./form/DateOfBirthField";
-import GenderField from "./form/GenderField";
-import AddressField from "./form/AddressField";
-import EmergencyContactField from "./form/EmergencyContactField";
-import AuthenticationFields from "./form/AuthenticationFields";
-import AdditionalInfoFields from "./form/AdditionalInfoFields";
-import CompanyMembershipFields from "./form/CompanyMembershipFields";
-import IndividualCompanyLinkField from "./form/IndividualCompanyLinkField";
+import MemberDialogContent from "./dialog/MemberDialogContent";
 
 interface AddMemberDialogProps {
   isOpen: boolean;
@@ -96,7 +75,6 @@ const AddMemberDialog = ({ isOpen, onClose, onAddMember }: AddMemberDialogProps)
   });
 
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const membershipCategory = form.watch("membershipCategory");
   
   const onSubmit = async (values: MemberFormValues) => {
     setIsSubmitting(true);
@@ -173,86 +151,12 @@ const AddMemberDialog = ({ isOpen, onClose, onAddMember }: AddMemberDialogProps)
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-[700px] max-h-[90vh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle>Add New Member</DialogTitle>
-          <DialogDescription>
-            Create a new member profile by filling out the form below.
-          </DialogDescription>
-        </DialogHeader>
-        
-        <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-            {/* Membership Type Selection */}
-            <div className="space-y-4">
-              <div className="bg-orange-50 p-3 rounded-md border border-orange-200">
-                <h3 className="text-sm font-medium text-orange-800">Membership Category</h3>
-                <p className="text-xs text-orange-700 mt-1">
-                  Choose whether this is an individual membership or a company membership.
-                  Company memberships include additional fields for corporate billing and employee management.
-                </p>
-              </div>
-              <MembershipDetailsFields control={form.control} />
-            </div>
-            
-            {/* Basic Information Section */}
-            <div className="space-y-4">
-              <h3 className="text-sm font-medium">Basic Information</h3>
-              <BasicInfoFields control={form.control} />
-            </div>
-            
-            {/* Conditional Fields based on Membership Category */}
-            {membershipCategory === "Company" ? (
-              <CompanyMembershipFields 
-                control={form.control} 
-                visible={membershipCategory === "Company"} 
-              />
-            ) : (
-              <>
-                {/* Personal Details Section */}
-                <div className="space-y-4">
-                  <h3 className="text-sm font-medium">Personal Details</h3>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <DateOfBirthField control={form.control} />
-                    <GenderField control={form.control} />
-                  </div>
-                  <AddressField control={form.control} />
-                  <EmergencyContactField control={form.control} />
-                </div>
-                
-                {/* Individual Company Link */}
-                <IndividualCompanyLinkField 
-                  control={form.control} 
-                  visible={membershipCategory === "Individual"} 
-                />
-              </>
-            )}
-            
-            {/* Authentication Section */}
-            <div className="space-y-4">
-              <h3 className="text-sm font-medium">Authentication</h3>
-              <AuthenticationFields control={form.control} />
-            </div>
-            
-            {/* Additional Information Section */}
-            <div className="space-y-4">
-              <h3 className="text-sm font-medium">Additional Information</h3>
-              <AdditionalInfoFields control={form.control} />
-            </div>
-
-            <DialogFooter>
-              <Button type="button" variant="outline" onClick={onClose}>
-                Cancel
-              </Button>
-              <Button 
-                type="submit" 
-                disabled={isSubmitting} 
-                className="bg-gym-orange hover:bg-gym-orange/90"
-              >
-                {isSubmitting ? "Submitting..." : "Add Member"}
-              </Button>
-            </DialogFooter>
-          </form>
-        </Form>
+        <MemberDialogContent 
+          form={form} 
+          isSubmitting={isSubmitting} 
+          onClose={onClose} 
+          onSubmit={onSubmit}
+        />
       </DialogContent>
     </Dialog>
   );
