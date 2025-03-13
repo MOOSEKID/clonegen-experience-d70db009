@@ -37,6 +37,7 @@ export const useMembers = () => {
   const {
     addMember,
     importMembers,
+    importCompanyEmployees,
     isCreating
   } = useMemberCreation(members, setMembers);
 
@@ -59,6 +60,7 @@ export const useMembers = () => {
     handleBulkAction: (action: string) => handleBulkAction(action, filteredMembers),
     addMember,
     importMembers,
+    importCompanyEmployees,
     paginate,
     nextPage,
     prevPage,
