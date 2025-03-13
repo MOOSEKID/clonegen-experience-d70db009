@@ -19,10 +19,13 @@ export const useMembers = () => {
   const [members, setMembers] = useState<Member[]>(mockMembers);
   const [selectedMembers, setSelectedMembers] = useState<number[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
+  const [currentPage, setCurrentPage] = useState(1);
+  const [memberPerPage] = useState(5); // Show 5 members per page like in the image
+  const [filterType, setFilterType] = useState('all');
 
   const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchTerm(e.target.value);
-    // In a real app, you would search the database here
+    setCurrentPage(1); // Reset to first page on new search
   };
 
   const handleStatusChange = (memberId: number, newStatus: string) => {
@@ -34,7 +37,13 @@ export const useMembers = () => {
 
   const handleDelete = (memberId: number) => {
     setMembers(members.filter(member => member.id !== memberId));
+    setSelectedMembers(selectedMembers.filter(id => id !== memberId));
     toast.success('Member deleted successfully');
+  };
+
+  const handleFilterChange = (filter: string) => {
+    setFilterType(filter);
+    setCurrentPage(1); // Reset to first page on new filter
   };
 
   const toggleMemberSelection = (memberId: number) => {
@@ -46,29 +55,89 @@ export const useMembers = () => {
   };
 
   const selectAllMembers = () => {
-    if (selectedMembers.length === members.length) {
+    if (selectedMembers.length === filteredMembers.length) {
       setSelectedMembers([]);
     } else {
-      setSelectedMembers(members.map(member => member.id));
+      setSelectedMembers(filteredMembers.map(member => member.id));
     }
   };
 
-  const filteredMembers = members.filter(member =>
-    member.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    member.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    member.phone.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    member.membershipType.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const handleBulkAction = (action: string) => {
+    if (selectedMembers.length === 0) {
+      toast.error('No members selected');
+      return;
+    }
+
+    // Handle different bulk actions
+    if (action === 'activate') {
+      setMembers(members.map(member => 
+        selectedMembers.includes(member.id) ? { ...member, status: 'Active' } : member
+      ));
+      toast.success(`${selectedMembers.length} members activated`);
+    } else if (action === 'deactivate') {
+      setMembers(members.map(member => 
+        selectedMembers.includes(member.id) ? { ...member, status: 'Inactive' } : member
+      ));
+      toast.success(`${selectedMembers.length} members deactivated`);
+    } else if (action === 'delete') {
+      setMembers(members.filter(member => !selectedMembers.includes(member.id)));
+      setSelectedMembers([]);
+      toast.success(`${selectedMembers.length} members deleted`);
+    } else if (action === 'export') {
+      toast.success(`Exporting data for ${selectedMembers.length} members`);
+    } else if (action === 'email') {
+      toast.success(`Sending email reminder to ${selectedMembers.length} members`);
+    } else if (action === 'sms') {
+      toast.success(`Sending SMS reminder to ${selectedMembers.length} members`);
+    }
+  };
+
+  // Apply filters based on search term and filter type
+  const filteredMembers = members.filter(member => {
+    const matchesSearch = 
+      member.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      member.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      member.phone.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      member.membershipType.toLowerCase().includes(searchTerm.toLowerCase());
+    
+    if (filterType === 'all') return matchesSearch;
+    if (filterType === 'active') return matchesSearch && member.status === 'Active';
+    if (filterType === 'inactive') return matchesSearch && member.status === 'Inactive';
+    if (filterType === 'premium') return matchesSearch && member.membershipType === 'Premium';
+    if (filterType === 'standard') return matchesSearch && member.membershipType === 'Standard';
+    if (filterType === 'basic') return matchesSearch && member.membershipType === 'Basic';
+    
+    return matchesSearch;
+  });
+
+  // Get current members for pagination
+  const indexOfLastMember = currentPage * memberPerPage;
+  const indexOfFirstMember = indexOfLastMember - memberPerPage;
+  const currentMembers = filteredMembers.slice(indexOfFirstMember, indexOfLastMember);
+  const totalPages = Math.ceil(filteredMembers.length / memberPerPage);
+
+  const paginate = (pageNumber: number) => setCurrentPage(pageNumber);
+  const nextPage = () => setCurrentPage(prev => Math.min(prev + 1, totalPages));
+  const prevPage = () => setCurrentPage(prev => Math.max(prev - 1, 1));
 
   return {
     members,
     selectedMembers,
     searchTerm,
     filteredMembers,
+    currentMembers,
+    currentPage,
+    totalPages,
+    filterType,
     handleSearch,
     handleStatusChange,
     handleDelete,
+    handleFilterChange,
     toggleMemberSelection,
     selectAllMembers,
+    handleBulkAction,
+    paginate,
+    nextPage,
+    prevPage,
   };
 };

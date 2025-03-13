@@ -1,6 +1,6 @@
 
-import { CheckCircle, XCircle, Edit, Trash2, ChevronDown } from 'lucide-react';
-import { Button } from '@/components/Button';
+import { ChevronDown } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -20,33 +20,42 @@ const MemberActions = ({ memberId, status, onStatusChange, onDelete }: MemberAct
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="ghost" size="sm">
-          <ChevronDown size={16} />
+        <Button variant="ghost" size="sm" className="px-2">
+          <ChevronDown size={16} className="text-gray-500" />
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end">
-        <DropdownMenuItem>
-          <Edit className="mr-2 h-4 w-4" />
-          <span>Edit</span>
+      <DropdownMenuContent align="end" className="w-[200px]">
+        <DropdownMenuItem onClick={() => console.log('View profile', memberId)}>
+          View Profile
+        </DropdownMenuItem>
+        <DropdownMenuItem onClick={() => console.log('Edit member', memberId)}>
+          Edit Details
         </DropdownMenuItem>
         {status === 'Active' ? (
-          <DropdownMenuItem onClick={() => onStatusChange(memberId, 'Inactive')}>
-            <XCircle className="mr-2 h-4 w-4" />
-            <span>Mark Inactive</span>
+          <DropdownMenuItem onClick={() => onStatusChange(memberId, 'Inactive')} className="text-red-600">
+            Deactivate Member
           </DropdownMenuItem>
         ) : (
-          <DropdownMenuItem onClick={() => onStatusChange(memberId, 'Active')}>
-            <CheckCircle className="mr-2 h-4 w-4" />
-            <span>Mark Active</span>
+          <DropdownMenuItem onClick={() => onStatusChange(memberId, 'Active')} className="text-green-600">
+            Activate Member
           </DropdownMenuItem>
         )}
+        <DropdownMenuSeparator />
+        <DropdownMenuItem onClick={() => console.log('Send email', memberId)}>
+          Send Email
+        </DropdownMenuItem>
+        <DropdownMenuItem onClick={() => console.log('Send SMS', memberId)}>
+          Send SMS
+        </DropdownMenuItem>
+        <DropdownMenuItem onClick={() => console.log('Log check-in', memberId)}>
+          Log Check-in
+        </DropdownMenuItem>
         <DropdownMenuSeparator />
         <DropdownMenuItem 
           className="text-red-600"
           onClick={() => onDelete(memberId)}
         >
-          <Trash2 className="mr-2 h-4 w-4" />
-          <span>Delete</span>
+          Delete Member
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>

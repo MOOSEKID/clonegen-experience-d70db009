@@ -23,6 +23,7 @@ interface Member {
 interface MemberTableProps {
   members: Member[];
   filteredMembers: Member[];
+  currentMembers: Member[];
   selectedMembers: number[];
   toggleMemberSelection: (memberId: number) => void;
   selectAllMembers: () => void;
@@ -33,13 +34,14 @@ interface MemberTableProps {
 const MemberTable = ({
   members,
   filteredMembers,
+  currentMembers,
   selectedMembers,
   toggleMemberSelection,
   selectAllMembers,
   handleStatusChange,
   handleDelete
 }: MemberTableProps) => {
-  const allSelected = selectedMembers.length === members.length && members.length > 0;
+  const allSelected = selectedMembers.length === filteredMembers.length && filteredMembers.length > 0;
   
   return (
     <div className="overflow-x-auto">
@@ -50,8 +52,8 @@ const MemberTable = ({
           hasMembers={members.length > 0}
         />
         <TableBody>
-          {filteredMembers.length > 0 ? (
-            filteredMembers.map((member) => (
+          {currentMembers.length > 0 ? (
+            currentMembers.map((member) => (
               <MemberTableRow
                 key={member.id}
                 member={member}

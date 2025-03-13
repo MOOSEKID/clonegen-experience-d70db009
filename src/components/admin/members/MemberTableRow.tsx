@@ -33,8 +33,8 @@ const MemberTableRow = ({
   onDelete 
 }: MemberTableRowProps) => {
   return (
-    <TableRow key={member.id}>
-      <TableCell>
+    <TableRow key={member.id} className="border-b border-gray-100">
+      <TableCell className="px-4 py-4 w-[50px]">
         <input
           type="checkbox"
           className="h-4 w-4 rounded border-gray-300 text-gym-orange focus:ring-gym-orange"
@@ -42,11 +42,19 @@ const MemberTableRow = ({
           onChange={() => onToggleSelect(member.id)}
         />
       </TableCell>
-      <TableCell className="font-medium">{member.name}</TableCell>
-      <TableCell>{member.email}</TableCell>
-      <TableCell>{member.phone}</TableCell>
-      <TableCell>{member.membershipType}</TableCell>
-      <TableCell>
+      <TableCell className="px-4 py-4 font-medium">{member.name}</TableCell>
+      <TableCell className="px-4 py-4">
+        <a href={`mailto:${member.email}`} className="text-blue-600 hover:underline">
+          {member.email}
+        </a>
+      </TableCell>
+      <TableCell className="px-4 py-4">
+        <a href={`tel:${member.phone.replace(/\s+/g, '')}`} className="text-blue-600 hover:underline">
+          {member.phone}
+        </a>
+      </TableCell>
+      <TableCell className="px-4 py-4">{member.membershipType}</TableCell>
+      <TableCell className="px-4 py-4">
         <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium
           ${member.status === 'Active' 
             ? 'bg-green-100 text-green-800' 
@@ -55,9 +63,9 @@ const MemberTableRow = ({
           {member.status}
         </span>
       </TableCell>
-      <TableCell>{member.endDate}</TableCell>
-      <TableCell>{member.lastCheckin}</TableCell>
-      <TableCell className="text-right">
+      <TableCell className="px-4 py-4">{member.endDate}</TableCell>
+      <TableCell className="px-4 py-4">{member.lastCheckin}</TableCell>
+      <TableCell className="px-4 py-4 text-right">
         <MemberActions 
           memberId={member.id} 
           status={member.status} 
