@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -27,7 +26,9 @@ const AddClassDialog = ({ open, onOpenChange, onAddClass }: AddClassDialogProps)
     time: '08:00',
     duration: 60,
     room: '',
-    status: 'scheduled'
+    status: 'scheduled',
+    enrolledMembers: [],
+    waitlistMembers: []
   });
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -73,7 +74,9 @@ const AddClassDialog = ({ open, onOpenChange, onAddClass }: AddClassDialogProps)
       time: '08:00',
       duration: 60,
       room: '',
-      status: 'scheduled'
+      status: 'scheduled',
+      enrolledMembers: [],
+      waitlistMembers: []
     });
   };
 
