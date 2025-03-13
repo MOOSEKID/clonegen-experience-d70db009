@@ -28,25 +28,36 @@ const ManageAttendeesDialog = ({
   const [activeTab, setActiveTab] = useState('enrolled');
   const [searchTerm, setSearchTerm] = useState('');
   const [availableMembers, setAvailableMembers] = useState<MemberInfo[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
 
   // Fetch available members when dialog opens or search term changes
   useEffect(() => {
     if (open) {
       const fetchMembers = async () => {
-        const members = await getAvailableMembers(
-          classData.enrolledMembers,
-          classData.waitlistMembers,
-          searchTerm
-        );
-        setAvailableMembers(members);
+        setIsLoading(true);
+        try {
+          const members = await getAvailableMembers(
+            classData.enrolledMembers,
+            classData.waitlistMembers,
+            searchTerm
+          );
+          setAvailableMembers(members);
+        } catch (error) {
+          console.error('Error fetching available members:', error);
+        } finally {
+          setIsLoading(false);
+        }
       };
       
       fetchMembers();
     }
   }, [open, searchTerm, classData.enrolledMembers, classData.waitlistMembers]);
 
-  const handleAddMember = (member: MemberInfo) => {
-    onBookClass(classData.id, member);
+  const handleAddMember = (memberId: string) => {
+    const member = availableMembers.find(m => m.id === memberId);
+    if (member) {
+      onBookClass(classData.id, member);
+    }
   };
 
   const handleRemoveMember = (memberId: string) => {
@@ -114,7 +125,11 @@ const ManageAttendeesDialog = ({
             </TabsContent>
             
             <TabsContent value="add">
-              {availableMembers.length === 0 ? (
+              {isLoading ? (
+                <div className="text-center py-6 text-gray-500">
+                  Loading available members...
+                </div>
+              ) : availableMembers.length === 0 ? (
                 <div className="text-center py-6 text-gray-500">
                   {searchTerm 
                     ? "No matching members found." 
@@ -124,10 +139,7 @@ const ManageAttendeesDialog = ({
                 <MemberList
                   members={availableMembers}
                   action="add"
-                  onAction={(memberId) => {
-                    const member = availableMembers.find(m => m.id === memberId);
-                    if (member) handleAddMember(member);
-                  }}
+                  onAction={handleAddMember}
                   emptyMessage="No available members found."
                   searchTerm=""
                   classIsFull={classData.enrolled >= classData.capacity}

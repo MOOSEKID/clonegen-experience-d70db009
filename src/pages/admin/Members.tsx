@@ -44,14 +44,14 @@ const AdminMembers = () => {
       onStatusChange={handleStatusChange}
       onDelete={handleDelete}
       onToggleSelect={toggleMemberSelection}
-      onSelectAll={selectAllMembers}
+      onSelectAll={() => selectAllMembers(filteredMembers)}
       onFilterChange={handleFilterChange}
-      onBulkAction={handleBulkAction}
-      onAddMember={addMember}
-      onImportMembers={importMembers}
+      onBulkAction={(action) => handleBulkAction(action, filteredMembers)}
       onPageChange={paginate}
       onPrevPage={prevPage}
       onNextPage={nextPage}
+      onAddMember={addMember}
+      onImportMembers={importMembers}
     />
   );
 };

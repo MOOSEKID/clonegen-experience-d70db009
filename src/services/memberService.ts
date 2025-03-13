@@ -1,3 +1,4 @@
+
 import { supabase } from '@/integrations/supabase/client';
 import { MemberInfo } from '@/types/classTypes';
 
@@ -70,9 +71,9 @@ export const fetchMembers = async () => {
       if (!member) return null;
       
       return {
-        id: member.id,
-        name: member.name,
-        email: member.email,
+        id: member.id || '',
+        name: member.name || '',
+        email: member.email || '',
         phone: member.phone || '',
         membershipType: member.membershiptype || '',
         startDate: member.startdate || '',
@@ -157,17 +158,22 @@ export const addMember = async (memberData) => {
     }
     
     // Convert back to camelCase for frontend
+    if (!data || data.length === 0) {
+      return null;
+    }
+
+    const member = data[0] || {};
+    
     return {
-      id: data[0].id,
-      name: data[0].name,
-      email: data[0].email,
-      phone: data[0].phone,
-      membershipType: data[0].membershiptype,
-      startDate: data[0].startdate,
-      endDate: data[0].enddate,
-      status: data[0].status,
-      lastCheckin: data[0].lastcheckin,
-      // Add other fields as needed
+      id: member.id || '',
+      name: member.name || '',
+      email: member.email || '',
+      phone: member.phone || '',
+      membershipType: member.membershiptype || '',
+      startDate: member.startdate || '',
+      endDate: member.enddate || '',
+      status: member.status || 'Active',
+      lastCheckin: member.lastcheckin || '',
     };
   } catch (error) {
     console.error('Error in addMember:', error);
@@ -222,18 +228,23 @@ export const updateMember = async (id, memberData) => {
       return null;
     }
     
+    if (!data || data.length === 0) {
+      return null;
+    }
+
+    const member = data[0] || {};
+    
     // Convert back to camelCase for frontend
     return {
-      id: data[0].id,
-      name: data[0].name,
-      email: data[0].email,
-      phone: data[0].phone,
-      membershipType: data[0].membershiptype,
-      startDate: data[0].startdate,
-      endDate: data[0].enddate,
-      status: data[0].status,
-      lastCheckin: data[0].lastcheckin,
-      // Add other fields as needed
+      id: member.id || '',
+      name: member.name || '',
+      email: member.email || '',
+      phone: member.phone || '',
+      membershipType: member.membershiptype || '',
+      startDate: member.startdate || '',
+      endDate: member.enddate || '',
+      status: member.status || 'Active',
+      lastCheckin: member.lastcheckin || '',
     };
   } catch (error) {
     console.error('Error in updateMember:', error);
@@ -277,19 +288,18 @@ export const updateMemberStatus = async (id, newStatus) => {
       return null;
     }
     
-    const member = data[0];
+    const member = data[0] || {};
     
     return {
-      id: member.id,
-      name: member.name,
-      email: member.email,
+      id: member.id || '',
+      name: member.name || '',
+      email: member.email || '',
       phone: member.phone || '',
       membershipType: member.membershiptype || '',
       startDate: member.startdate || '',
       endDate: member.enddate || '',
       status: member.status || 'Active',
       lastCheckin: member.lastcheckin || '',
-      // Add other fields as needed
     };
   } catch (error) {
     console.error('Error in updateMemberStatus:', error);

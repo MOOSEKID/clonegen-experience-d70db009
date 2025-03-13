@@ -1,6 +1,7 @@
+
 import { useState } from 'react';
 import { Edit, Trash2, MoreVertical, Users } from 'lucide-react';
-import { ClassType, MemberInfo } from '@/hooks/useClassesData';
+import { ClassType, MemberInfo } from '@/types/classTypes';
 import { 
   Table, 
   TableHeader, 
@@ -26,7 +27,7 @@ interface ClassesTableProps {
   onEdit: (updatedClass: ClassType) => void;
   onDelete: (classId: number) => void;
   onBookClass: (classId: number, member: MemberInfo) => void;
-  onCancelBooking: (classId: number, memberId: number) => void;
+  onCancelBooking: (classId: number, memberId: string) => void;
 }
 
 const ClassesTable = ({ 
