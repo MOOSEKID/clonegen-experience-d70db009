@@ -44,9 +44,9 @@ const AdminMembers = () => {
       onStatusChange={handleStatusChange}
       onDelete={handleDelete}
       onToggleSelect={toggleMemberSelection}
-      onSelectAll={selectAllMembers}
+      onSelectAll={() => selectAllMembers(filteredMembers)}
       onFilterChange={handleFilterChange}
-      onBulkAction={handleBulkAction}
+      onBulkAction={(action) => handleBulkAction(action, filteredMembers)}
       onAddMember={addMember}
       onImportMembers={importMembers}
       onPageChange={paginate}

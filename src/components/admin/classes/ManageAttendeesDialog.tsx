@@ -1,5 +1,5 @@
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -27,6 +27,23 @@ const ManageAttendeesDialog = ({
 }: ManageAttendeesDialogProps) => {
   const [activeTab, setActiveTab] = useState('enrolled');
   const [searchTerm, setSearchTerm] = useState('');
+  const [availableMembers, setAvailableMembers] = useState<MemberInfo[]>([]);
+
+  // Fetch available members when dialog opens or search term changes
+  useEffect(() => {
+    if (open) {
+      const fetchMembers = async () => {
+        const members = await getAvailableMembers(
+          classData.enrolledMembers,
+          classData.waitlistMembers,
+          searchTerm
+        );
+        setAvailableMembers(members);
+      };
+      
+      fetchMembers();
+    }
+  }, [open, searchTerm, classData.enrolledMembers, classData.waitlistMembers]);
 
   const handleAddMember = (member: MemberInfo) => {
     onBookClass(classData.id, member);
@@ -35,12 +52,6 @@ const ManageAttendeesDialog = ({
   const handleRemoveMember = (memberId: number) => {
     onCancelBooking(classData.id, memberId);
   };
-
-  const availableMembers = getAvailableMembers(
-    classData.enrolledMembers,
-    classData.waitlistMembers,
-    searchTerm
-  );
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>

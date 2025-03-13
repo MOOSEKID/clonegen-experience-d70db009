@@ -15,7 +15,7 @@ export const getAvailableMembers = async (
     // Get members from Supabase
     let query = supabase
       .from('members')
-      .select('id, name, email, phone, membershipType, status')
+      .select('id, name, email, phone, membershiptype')
       .eq('status', 'Active');
     
     if (searchTerm) {
@@ -36,7 +36,7 @@ export const getAvailableMembers = async (
         name: member.name,
         email: member.email,
         phone: member.phone || '',
-        membershipType: member.membershipType
+        membershipType: member.membershiptype
       }))
       .filter(member => 
         !enrolledIds.has(member.id) && 
@@ -61,7 +61,42 @@ export const fetchMembers = async () => {
       return [];
     }
     
-    return data;
+    // Convert database field names to camelCase for frontend
+    return data.map(member => ({
+      id: member.id,
+      name: member.name,
+      email: member.email,
+      phone: member.phone,
+      membershipType: member.membershiptype,
+      startDate: member.startdate,
+      endDate: member.enddate,
+      status: member.status,
+      lastCheckin: member.lastcheckin,
+      dateOfBirth: member.dateofbirth,
+      gender: member.gender,
+      address: member.address,
+      emergencyContact: member.emergencycontact,
+      membershipPlan: member.membershipplan,
+      membershipCategory: member.membershipcategory,
+      trainerAssigned: member.trainerassigned,
+      workoutGoals: member.workoutgoals,
+      medicalConditions: member.medicalconditions,
+      preferredWorkoutTime: member.preferredworkouttime,
+      paymentStatus: member.paymentstatus,
+      discountsUsed: member.discountsused,
+      notes: member.notes,
+      profilePicture: member.profilepicture,
+      nfcCardId: member.nfccardid,
+      fingerprintId: member.fingerprintid,
+      username: member.username,
+      passwordResetRequired: member.passwordresetrequired,
+      accountEnabled: member.accountenabled,
+      lastLogin: member.lastlogin,
+      linkedToCompany: member.linkedtocompany,
+      linkedCompanyId: member.linkedcompanyid,
+      created_at: member.created_at,
+      updated_at: member.updated_at
+    }));
   } catch (error) {
     console.error('Error in fetchMembers:', error);
     return [];
@@ -70,9 +105,42 @@ export const fetchMembers = async () => {
 
 export const addMember = async (memberData) => {
   try {
+    // Convert camelCase to database field names (lowercase)
+    const dbMemberData = {
+      name: memberData.name,
+      email: memberData.email,
+      phone: memberData.phone,
+      membershiptype: memberData.membershipType,
+      startdate: memberData.startDate,
+      enddate: memberData.endDate,
+      status: memberData.status,
+      dateofbirth: memberData.dateOfBirth,
+      gender: memberData.gender,
+      address: memberData.address,
+      emergencycontact: memberData.emergencyContact,
+      membershipplan: memberData.membershipPlan,
+      membershipcategory: memberData.membershipCategory,
+      trainerassigned: memberData.trainerAssigned,
+      workoutgoals: memberData.workoutGoals,
+      medicalconditions: memberData.medicalConditions,
+      preferredworkouttime: memberData.preferredWorkoutTime,
+      paymentstatus: memberData.paymentStatus,
+      discountsused: memberData.discountsUsed,
+      notes: memberData.notes,
+      profilepicture: memberData.profilePicture,
+      nfccardid: memberData.nfcCardId,
+      fingerprintid: memberData.fingerprintId,
+      username: memberData.username,
+      passwordresetrequired: memberData.passwordResetRequired,
+      accountenabled: memberData.accountEnabled,
+      lastlogin: memberData.lastLogin,
+      linkedtocompany: memberData.linkedToCompany,
+      linkedcompanyid: memberData.linkedCompanyId
+    };
+    
     const { data, error } = await supabase
       .from('members')
-      .insert([memberData])
+      .insert([dbMemberData])
       .select();
       
     if (error) {
@@ -80,7 +148,19 @@ export const addMember = async (memberData) => {
       return null;
     }
     
-    return data[0];
+    // Convert back to camelCase for frontend
+    return {
+      id: data[0].id,
+      name: data[0].name,
+      email: data[0].email,
+      phone: data[0].phone,
+      membershipType: data[0].membershiptype,
+      startDate: data[0].startdate,
+      endDate: data[0].enddate,
+      status: data[0].status,
+      lastCheckin: data[0].lastcheckin,
+      // Add other fields as needed
+    };
   } catch (error) {
     console.error('Error in addMember:', error);
     return null;
@@ -89,9 +169,43 @@ export const addMember = async (memberData) => {
 
 export const updateMember = async (id, memberData) => {
   try {
+    // Convert camelCase to database field names (lowercase)
+    const dbMemberData = {};
+    
+    // Map only the fields that are being updated
+    if (memberData.name) dbMemberData.name = memberData.name;
+    if (memberData.email) dbMemberData.email = memberData.email;
+    if (memberData.phone) dbMemberData.phone = memberData.phone;
+    if (memberData.membershipType) dbMemberData.membershiptype = memberData.membershipType;
+    if (memberData.startDate) dbMemberData.startdate = memberData.startDate;
+    if (memberData.endDate) dbMemberData.enddate = memberData.endDate;
+    if (memberData.status) dbMemberData.status = memberData.status;
+    if (memberData.dateOfBirth) dbMemberData.dateofbirth = memberData.dateOfBirth;
+    if (memberData.gender) dbMemberData.gender = memberData.gender;
+    if (memberData.address) dbMemberData.address = memberData.address;
+    if (memberData.emergencyContact) dbMemberData.emergencycontact = memberData.emergencyContact;
+    if (memberData.membershipPlan) dbMemberData.membershipplan = memberData.membershipPlan;
+    if (memberData.membershipCategory) dbMemberData.membershipcategory = memberData.membershipCategory;
+    if (memberData.trainerAssigned) dbMemberData.trainerassigned = memberData.trainerAssigned;
+    if (memberData.workoutGoals) dbMemberData.workoutgoals = memberData.workoutGoals;
+    if (memberData.medicalConditions) dbMemberData.medicalconditions = memberData.medicalConditions;
+    if (memberData.preferredWorkoutTime) dbMemberData.preferredworkouttime = memberData.preferredWorkoutTime;
+    if (memberData.paymentStatus) dbMemberData.paymentstatus = memberData.paymentStatus;
+    if (memberData.discountsUsed) dbMemberData.discountsused = memberData.discountsUsed;
+    if (memberData.notes) dbMemberData.notes = memberData.notes;
+    if (memberData.profilePicture) dbMemberData.profilepicture = memberData.profilePicture;
+    if (memberData.nfcCardId) dbMemberData.nfccardid = memberData.nfcCardId;
+    if (memberData.fingerprintId) dbMemberData.fingerprintid = memberData.fingerprintId;
+    if (memberData.username) dbMemberData.username = memberData.username;
+    if (memberData.passwordResetRequired !== undefined) dbMemberData.passwordresetrequired = memberData.passwordResetRequired;
+    if (memberData.accountEnabled !== undefined) dbMemberData.accountenabled = memberData.accountEnabled;
+    if (memberData.lastLogin) dbMemberData.lastlogin = memberData.lastLogin;
+    if (memberData.linkedToCompany !== undefined) dbMemberData.linkedtocompany = memberData.linkedToCompany;
+    if (memberData.linkedCompanyId) dbMemberData.linkedcompanyid = memberData.linkedCompanyId;
+    
     const { data, error } = await supabase
       .from('members')
-      .update(memberData)
+      .update(dbMemberData)
       .eq('id', id)
       .select();
       
@@ -100,7 +214,19 @@ export const updateMember = async (id, memberData) => {
       return null;
     }
     
-    return data[0];
+    // Convert back to camelCase for frontend
+    return {
+      id: data[0].id,
+      name: data[0].name,
+      email: data[0].email,
+      phone: data[0].phone,
+      membershipType: data[0].membershiptype,
+      startDate: data[0].startdate,
+      endDate: data[0].enddate,
+      status: data[0].status,
+      lastCheckin: data[0].lastcheckin,
+      // Add other fields as needed
+    };
   } catch (error) {
     console.error('Error in updateMember:', error);
     return null;
@@ -139,7 +265,18 @@ export const updateMemberStatus = async (id, newStatus) => {
       return null;
     }
     
-    return data[0];
+    return {
+      id: data[0].id,
+      name: data[0].name,
+      email: data[0].email,
+      phone: data[0].phone,
+      membershipType: data[0].membershiptype,
+      startDate: data[0].startdate,
+      endDate: data[0].enddate,
+      status: data[0].status,
+      lastCheckin: data[0].lastcheckin,
+      // Add other fields as needed
+    };
   } catch (error) {
     console.error('Error in updateMemberStatus:', error);
     return null;

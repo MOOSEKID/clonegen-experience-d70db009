@@ -182,15 +182,37 @@ export const useSupabaseMembers = () => {
   // Custom addMember function that uses Supabase
   const addMember = async (memberData: Omit<Member, "id" | "startDate" | "endDate" | "lastCheckin"> & MemberFormAction) => {
     try {
+      // Format data for Supabase - convert camelCase to snake_case
+      const dbMemberData = {
+        name: memberData.name,
+        email: memberData.email,
+        phone: memberData.phone,
+        membershiptype: memberData.membershipType,
+        startdate: new Date().toISOString(),
+        enddate: new Date(new Date().setMonth(new Date().getMonth() + 1)).toISOString(),
+        status: memberData.status || 'Active',
+        gender: memberData.gender,
+        address: memberData.address,
+        emergencycontact: memberData.emergencyContact,
+        membershipplan: memberData.membershipPlan || 'Monthly',
+        membershipcategory: memberData.membershipCategory || 'Individual',
+        trainerassigned: memberData.trainerAssigned,
+        workoutgoals: memberData.workoutGoals,
+        medicalconditions: memberData.medicalConditions,
+        preferredworkouttime: memberData.preferredWorkoutTime,
+        paymentstatus: memberData.paymentStatus || 'Pending',
+        discountsused: memberData.discountsUsed || 'No',
+        notes: memberData.notes,
+        username: memberData.username,
+        passwordresetrequired: memberData.passwordResetRequired !== undefined ? memberData.passwordResetRequired : true,
+        accountenabled: memberData.accountEnabled !== undefined ? memberData.accountEnabled : true,
+        linkedtocompany: memberData.linkedToCompany || false,
+        linkedcompanyid: memberData.linkedCompanyId
+      };
+        
       const { data, error } = await supabase
         .from('members')
-        .insert([{
-          ...memberData,
-          // Let Supabase handle these fields through defaults
-          startDate: new Date().toISOString(),
-          endDate: new Date(new Date().setMonth(new Date().getMonth() + 1)).toISOString(),
-          lastCheckin: new Date().toISOString(),
-        }])
+        .insert([dbMemberData])
         .select();
         
       if (error) {
