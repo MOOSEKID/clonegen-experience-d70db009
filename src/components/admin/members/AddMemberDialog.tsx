@@ -16,9 +16,16 @@ import { Button } from "@/components/ui/button";
 import { Form } from "@/components/ui/form";
 import { Member } from "@/types/memberTypes";
 import { memberFormSchema, MemberFormValues } from "./form/MemberFormSchema";
+
+// Import all form field components
 import BasicInfoFields from "./form/BasicInfoFields";
-import AuthenticationFields from "./form/AuthenticationFields";
+import MembershipDetailsFields from "./form/MembershipDetailsFields";
+import DateOfBirthField from "./form/DateOfBirthField";
+import GenderField from "./form/GenderField";
 import AddressField from "./form/AddressField";
+import EmergencyContactField from "./form/EmergencyContactField";
+import AuthenticationFields from "./form/AuthenticationFields";
+import AdditionalInfoFields from "./form/AdditionalInfoFields";
 
 interface AddMemberDialogProps {
   isOpen: boolean;
@@ -72,7 +79,7 @@ const AddMemberDialog = ({ isOpen, onClose, onAddMember }: AddMemberDialogProps)
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[625px]">
+      <DialogContent className="sm:max-w-[625px] max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Add New Member</DialogTitle>
           <DialogDescription>
@@ -80,10 +87,36 @@ const AddMemberDialog = ({ isOpen, onClose, onAddMember }: AddMemberDialogProps)
           </DialogDescription>
         </DialogHeader>
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-            <BasicInfoFields control={form.control} />
-            <AuthenticationFields control={form.control} />
-            <AddressField control={form.control} />
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+            <div className="space-y-4">
+              <h3 className="text-sm font-medium">Basic Information</h3>
+              <BasicInfoFields control={form.control} />
+            </div>
+            
+            <div className="space-y-4">
+              <h3 className="text-sm font-medium">Membership Details</h3>
+              <MembershipDetailsFields control={form.control} />
+            </div>
+            
+            <div className="space-y-4">
+              <h3 className="text-sm font-medium">Personal Details</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <DateOfBirthField control={form.control} />
+                <GenderField control={form.control} />
+              </div>
+              <AddressField control={form.control} />
+              <EmergencyContactField control={form.control} />
+            </div>
+            
+            <div className="space-y-4">
+              <h3 className="text-sm font-medium">Authentication</h3>
+              <AuthenticationFields control={form.control} />
+            </div>
+            
+            <div className="space-y-4">
+              <h3 className="text-sm font-medium">Additional Information</h3>
+              <AdditionalInfoFields control={form.control} />
+            </div>
 
             <DialogFooter>
               <Button type="button" variant="outline" onClick={onClose}>
