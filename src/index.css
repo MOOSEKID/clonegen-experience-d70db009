@@ -1,6 +1,4 @@
 
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Montserrat:wght@400;500;600;700;800&display=swap');
-
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -8,15 +6,15 @@
 @layer base {
   :root {
     --background: 0 0% 100%;
-    --foreground: 222 47% 11%;
+    --foreground: 222.2 84% 4.9%;
 
     --card: 0 0% 100%;
-    --card-foreground: 222 47% 11%;
+    --card-foreground: 222.2 84% 4.9%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 222 47% 11%;
+    --popover-foreground: 222.2 84% 4.9%;
 
-    --primary: 24 100% 50%;
+    --primary: 222.2 47.4% 11.2%;
     --primary-foreground: 210 40% 98%;
 
     --secondary: 210 40% 96.1%;
@@ -39,17 +37,17 @@
   }
 
   .dark {
-    --background: 222 47% 11%;
+    --background: 222.2 84% 4.9%;
     --foreground: 210 40% 98%;
 
-    --card: 222 47% 11%;
+    --card: 222.2 84% 4.9%;
     --card-foreground: 210 40% 98%;
 
-    --popover: 222 47% 11%;
+    --popover: 222.2 84% 4.9%;
     --popover-foreground: 210 40% 98%;
 
-    --primary: 24 100% 50%;
-    --primary-foreground: 0 0% 100%;
+    --primary: 210 40% 98%;
+    --primary-foreground: 222.2 47.4% 11.2%;
 
     --secondary: 217.2 32.6% 17.5%;
     --secondary-foreground: 210 40% 98%;
@@ -73,79 +71,30 @@
   * {
     @apply border-border;
   }
-
-  html {
-    scroll-behavior: smooth;
-  }
-
   body {
-    @apply bg-background text-foreground font-sans;
-  }
-
-  h1, h2, h3, h4, h5, h6 {
-    @apply font-heading font-bold;
+    @apply bg-background text-foreground;
   }
 }
 
-@layer components {
-  .container-custom {
-    @apply container mx-auto px-4 md:px-8;
+/* Container styles */
+.container-custom {
+  @apply max-w-7xl mx-auto px-4 sm:px-6 lg:px-8;
+}
+
+/* Animation classes */
+.animate-fade-in {
+  animation: fadeIn 0.8s ease-in-out forwards;
+}
+
+@keyframes fadeIn {
+  0% {
+    opacity: 0;
+    transform: translateY(20px);
   }
-  
-  .nav-link {
-    @apply relative px-2 py-1 transition-all duration-300 hover:text-gym-orange;
-  }
-  
-  .nav-link::after {
-    @apply content-[''] absolute w-0 h-[2px] bg-gym-orange left-0 bottom-0 transition-all duration-300;
-  }
-  
-  .nav-link:hover::after {
-    @apply w-full;
-  }
-  
-  .nav-link.active {
-    @apply text-gym-orange;
-  }
-  
-  .nav-link.active::after {
-    @apply w-full;
-  }
-  
-  .hero-overlay {
-    @apply absolute inset-0 bg-gradient-to-r from-gym-dark/80 to-gym-dark/60;
-  }
-  
-  .vertical-orange-line {
-    @apply absolute left-0 top-0 w-[6px] h-full bg-gym-orange;
-  }
-  
-  .slide-up {
-    @apply opacity-0 translate-y-8 transition-all duration-700;
-  }
-  
-  .slide-up.show {
-    @apply opacity-100 translate-y-0;
-  }
-  
-  .feature-arrow {
-    @apply text-gym-orange transition-transform duration-300 ease-in-out transform;
-  }
-  
-  .feature-item:hover .feature-arrow {
-    @apply translate-x-1;
-  }
-  
-  .floating-element {
-    animation: float 3s ease-in-out infinite;
-  }
-  
-  @keyframes float {
-    0%, 100% {
-      transform: translateY(0);
-    }
-    50% {
-      transform: translateY(-10px);
-    }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
   }
 }
+
+/* Add any other custom styles below */

@@ -10,16 +10,16 @@ interface TestimonialCardProps {
 const TestimonialCard = ({ testimonial, isActive }: TestimonialCardProps) => {
   return (
     <div
-      className={`absolute inset-0 transition-all duration-500 ${
+      className={`absolute inset-0 transition-all duration-500 transform ${
         isActive 
           ? 'opacity-100 translate-x-0 z-10' 
-          : 'opacity-0 translate-x-16 z-0'
+          : 'opacity-0 translate-x-16 z-0 pointer-events-none'
       }`}
       aria-hidden={!isActive}
     >
-      <div className="bg-gym-darkblue rounded-lg p-8 shadow-xl relative">
+      <div className="bg-gym-darkblue rounded-lg p-8 shadow-xl relative h-full">
         <Quote className="absolute text-gym-orange opacity-20 top-6 left-6" size={60} />
-        <div className="flex flex-col md:flex-row items-center gap-6">
+        <div className="flex flex-col md:flex-row items-center gap-6 h-full">
           <div className="w-24 h-24 rounded-full overflow-hidden border-4 border-gym-orange flex-shrink-0">
             <img 
               src={testimonial.image} 

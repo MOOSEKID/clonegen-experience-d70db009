@@ -12,6 +12,8 @@ const Testimonials = () => {
         entries.forEach(entry => {
           if (entry.isIntersecting) {
             entry.target.classList.add('animate-fade-in');
+            // Make sure we don't remove the class when scrolling away
+            observer.unobserve(entry.target);
           }
         });
       },
@@ -32,7 +34,8 @@ const Testimonials = () => {
   return (
     <section 
       ref={testimonialRef} 
-      className="py-20 bg-gym-dark text-white overflow-hidden opacity-0 transition-opacity duration-500"
+      className="py-20 bg-gym-dark text-white overflow-hidden opacity-0 transition-opacity duration-1000"
+      id="testimonials-section"
     >
       <div className="container-custom">
         <div className="text-center mb-12">

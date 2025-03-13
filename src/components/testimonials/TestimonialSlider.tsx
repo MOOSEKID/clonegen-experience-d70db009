@@ -8,6 +8,7 @@ const TestimonialSlider = () => {
   const [currentTestimonial, setCurrentTestimonial] = useState(0);
   const [isAnimating, setIsAnimating] = useState(false);
   const testimonialInterval = useRef<NodeJS.Timeout | null>(null);
+  const sliderRef = useRef<HTMLDivElement>(null);
 
   const nextTestimonial = () => {
     if (isAnimating) return;
@@ -60,10 +61,10 @@ const TestimonialSlider = () => {
   }, []);
 
   return (
-    <div className="relative">
+    <div className="relative" ref={sliderRef}>
       {/* Testimonial slider */}
       <div className="max-w-4xl mx-auto px-8">
-        <div className="relative min-h-[300px]">
+        <div className="relative min-h-[300px] md:min-h-[250px]">
           {TESTIMONIALS.map((testimonial, index) => (
             <TestimonialCard
               key={testimonial.id}
@@ -76,7 +77,7 @@ const TestimonialSlider = () => {
         {/* Navigation buttons */}
         <button 
           onClick={() => handleManualChange('prev')}
-          className="absolute left-0 top-1/2 -translate-y-1/2 bg-black/30 text-white p-2 rounded-full hover:bg-black/50 transition-colors z-10"
+          className="absolute left-0 top-1/2 -translate-y-1/2 bg-black/30 text-white p-2 rounded-full hover:bg-black/50 transition-colors z-20"
           aria-label="Previous testimonial"
           disabled={isAnimating}
         >
@@ -84,7 +85,7 @@ const TestimonialSlider = () => {
         </button>
         <button 
           onClick={() => handleManualChange('next')}
-          className="absolute right-0 top-1/2 -translate-y-1/2 bg-black/30 text-white p-2 rounded-full hover:bg-black/50 transition-colors z-10"
+          className="absolute right-0 top-1/2 -translate-y-1/2 bg-black/30 text-white p-2 rounded-full hover:bg-black/50 transition-colors z-20"
           aria-label="Next testimonial"
           disabled={isAnimating}
         >
