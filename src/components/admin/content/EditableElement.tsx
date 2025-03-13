@@ -1,7 +1,7 @@
 
 import { useState, useRef, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
-import { Pencil, Link, Image as ImageIcon } from 'lucide-react';
+import { Pencil, Link, Image as ImageIcon, Video } from 'lucide-react';
 import {
   Dialog,
   DialogContent,

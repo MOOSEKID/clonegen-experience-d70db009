@@ -22,11 +22,12 @@ import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { toast } from "sonner";
 
-// Mock data for media
+// Update the mock data to include thumbnail property for both images and videos
 const mockImages = [
   {
     id: 'img1',
     url: 'https://images.unsplash.com/photo-1534438327276-14e5300c3a48?q=80&w=2070&auto=format&fit=crop',
+    thumbnail: 'https://images.unsplash.com/photo-1534438327276-14e5300c3a48?q=80&w=2070&auto=format&fit=crop',
     name: 'gym-interior.jpg',
     type: 'image',
     size: '1.2 MB',
@@ -35,6 +36,7 @@ const mockImages = [
   {
     id: 'img2',
     url: 'https://images.unsplash.com/photo-1517838277536-f5f99be501cd?q=80&w=2070&auto=format&fit=crop',
+    thumbnail: 'https://images.unsplash.com/photo-1517838277536-f5f99be501cd?q=80&w=2070&auto=format&fit=crop',
     name: 'trainer.jpg',
     type: 'image',
     size: '856 KB',
@@ -43,6 +45,7 @@ const mockImages = [
   {
     id: 'img3',
     url: 'https://images.unsplash.com/photo-1581009146145-b5ef050c2e1e?q=80&w=2070&auto=format&fit=crop',
+    thumbnail: 'https://images.unsplash.com/photo-1581009146145-b5ef050c2e1e?q=80&w=2070&auto=format&fit=crop',
     name: 'weights.jpg',
     type: 'image',
     size: '1.5 MB',
@@ -51,6 +54,7 @@ const mockImages = [
   {
     id: 'img4',
     url: 'https://images.unsplash.com/photo-1549719386-74dfcbf7dbed?q=80&w=2074&auto=format&fit=crop',
+    thumbnail: 'https://images.unsplash.com/photo-1549719386-74dfcbf7dbed?q=80&w=2074&auto=format&fit=crop',
     name: 'boxing.jpg',
     type: 'image',
     size: '984 KB',
@@ -59,6 +63,7 @@ const mockImages = [
   {
     id: 'img5',
     url: 'https://images.unsplash.com/photo-1575052814086-f385e2e2ad1b?q=80&w=2070&auto=format&fit=crop',
+    thumbnail: 'https://images.unsplash.com/photo-1575052814086-f385e2e2ad1b?q=80&w=2070&auto=format&fit=crop',
     name: 'yoga.jpg',
     type: 'image',
     size: '1.1 MB',
@@ -67,6 +72,7 @@ const mockImages = [
   {
     id: 'img6',
     url: 'https://images.unsplash.com/photo-1600965962102-9d260a71890d?q=80&w=2070&auto=format&fit=crop',
+    thumbnail: 'https://images.unsplash.com/photo-1600965962102-9d260a71890d?q=80&w=2070&auto=format&fit=crop',
     name: 'swimming.jpg',
     type: 'image',
     size: '1.3 MB',
