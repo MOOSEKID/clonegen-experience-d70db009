@@ -11,7 +11,7 @@ export const useFormSubmission = (onAddMember: AddMemberFn, isCreating: boolean)
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { transformFormToMemberData } = useFormDataTransformer();
 
-  const submitForm = async (values: MemberFormValues) => {
+  const submitForm = async (values: MemberFormValues): Promise<boolean> => {
     // Prevent duplicate submissions
     if (isSubmitting || isCreating) {
       return false;

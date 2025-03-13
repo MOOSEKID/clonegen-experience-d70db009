@@ -22,6 +22,7 @@ const AddMemberDialog = ({ isOpen, onClose, onAddMember, isCreating = false }: A
       // Close the dialog on successful submission
       onClose();
     }
+    return success; // Make sure we return a value
   };
 
   return (

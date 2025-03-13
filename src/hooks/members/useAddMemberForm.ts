@@ -12,8 +12,8 @@ export const useAddMemberForm = (
   const form = useFormState(isOpen);
   const { isSubmitting, submitForm } = useFormSubmission(onAddMember, isCreating);
 
-  const onSubmit = async (values: MemberFormValues) => {
-    await submitForm(values);
+  const onSubmit = async (values: MemberFormValues): Promise<boolean> => {
+    return await submitForm(values);
   };
 
   return {

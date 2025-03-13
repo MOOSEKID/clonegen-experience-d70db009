@@ -1,3 +1,4 @@
+
 import * as z from "zod";
 
 export const memberFormSchema = z.object({
@@ -10,7 +11,7 @@ export const memberFormSchema = z.object({
   }).optional()
     .superRefine((val, ctx) => {
       // Only required for Individual memberships
-      if (ctx.path[0] === 'name' && ctx.data?.membershipCategory === 'Individual' && !val) {
+      if (ctx.path[0] === 'name' && ctx.input?.membershipCategory === 'Individual' && !val) {
         ctx.addIssue({
           code: z.ZodIssueCode.custom,
           message: "Name is required for individual memberships."
@@ -25,7 +26,7 @@ export const memberFormSchema = z.object({
   }).optional()
     .superRefine((val, ctx) => {
       // Only required for Individual memberships
-      if (ctx.path[0] === 'email' && ctx.data?.membershipCategory === 'Individual' && !val) {
+      if (ctx.path[0] === 'email' && ctx.input?.membershipCategory === 'Individual' && !val) {
         ctx.addIssue({
           code: z.ZodIssueCode.custom,
           message: "Email is required for individual memberships."
@@ -40,7 +41,7 @@ export const memberFormSchema = z.object({
   }).optional()
     .superRefine((val, ctx) => {
       // Only required for Individual memberships
-      if (ctx.path[0] === 'phone' && ctx.data?.membershipCategory === 'Individual' && !val) {
+      if (ctx.path[0] === 'phone' && ctx.input?.membershipCategory === 'Individual' && !val) {
         ctx.addIssue({
           code: z.ZodIssueCode.custom,
           message: "Phone number is required for individual memberships."
@@ -54,7 +55,7 @@ export const memberFormSchema = z.object({
   generateUsername: z.boolean().default(true),
   username: z.string().optional()
     .superRefine((val, ctx) => {
-      if (ctx.path[0] === 'username' && ctx.data?.generateUsername === false && !val) {
+      if (ctx.path[0] === 'username' && ctx.input?.generateUsername === false && !val) {
         ctx.addIssue({
           code: z.ZodIssueCode.custom,
           message: "Username is required when not auto-generating."
@@ -66,7 +67,7 @@ export const memberFormSchema = z.object({
   generateTemporaryPassword: z.boolean().default(true),
   temporaryPassword: z.string().optional()
     .superRefine((val, ctx) => {
-      if (ctx.path[0] === 'temporaryPassword' && ctx.data?.generateTemporaryPassword === false && !val) {
+      if (ctx.path[0] === 'temporaryPassword' && ctx.input?.generateTemporaryPassword === false && !val) {
         ctx.addIssue({
           code: z.ZodIssueCode.custom,
           message: "Password is required when not auto-generating."
@@ -111,7 +112,7 @@ export const memberFormSchema = z.object({
   companyName: z.string().optional()
     .superRefine((val, ctx) => {
       // Required for Company memberships
-      if (ctx.path[0] === 'companyName' && ctx.data?.membershipCategory === 'Company' && !val) {
+      if (ctx.path[0] === 'companyName' && ctx.input?.membershipCategory === 'Company' && !val) {
         ctx.addIssue({
           code: z.ZodIssueCode.custom,
           message: "Company name is required for company memberships."
@@ -125,7 +126,7 @@ export const memberFormSchema = z.object({
   companyEmail: z.string().email().optional()
     .superRefine((val, ctx) => {
       // Required for Company memberships
-      if (ctx.path[0] === 'companyEmail' && ctx.data?.membershipCategory === 'Company' && !val) {
+      if (ctx.path[0] === 'companyEmail' && ctx.input?.membershipCategory === 'Company' && !val) {
         ctx.addIssue({
           code: z.ZodIssueCode.custom,
           message: "Company email is required for company memberships."
@@ -138,7 +139,7 @@ export const memberFormSchema = z.object({
   companyPhone: z.string().optional()
     .superRefine((val, ctx) => {
       // Required for Company memberships
-      if (ctx.path[0] === 'companyPhone' && ctx.data?.membershipCategory === 'Company' && !val) {
+      if (ctx.path[0] === 'companyPhone' && ctx.input?.membershipCategory === 'Company' && !val) {
         ctx.addIssue({
           code: z.ZodIssueCode.custom,
           message: "Company phone is required for company memberships."
