@@ -23,13 +23,20 @@ const TestimonialSlider = () => {
     setTimeout(() => setIsAnimating(false), 500);
   };
 
-  const handleManualChange = (direction: 'prev' | 'next') => {
-    // Reset the interval when manually changing testimonials
+  const startAutoRotation = () => {
+    // Clear any existing interval first
     if (testimonialInterval.current) {
       clearInterval(testimonialInterval.current);
     }
     
-    // Change the testimonial
+    // Set new interval
+    testimonialInterval.current = setInterval(() => {
+      nextTestimonial();
+    }, 8000);
+  };
+
+  const handleManualChange = (direction: 'prev' | 'next') => {
+    // Reset the interval when manually changing testimonials
     if (direction === 'prev') {
       prevTestimonial();
     } else {
@@ -37,17 +44,14 @@ const TestimonialSlider = () => {
     }
     
     // Restart the interval
-    testimonialInterval.current = setInterval(() => {
-      nextTestimonial();
-    }, 8000);
+    startAutoRotation();
   };
 
-  // Auto slide testimonials
+  // Setup auto rotation on initial render
   useEffect(() => {
-    testimonialInterval.current = setInterval(() => {
-      nextTestimonial();
-    }, 8000); // Change testimonial every 8 seconds
-
+    startAutoRotation();
+    
+    // Cleanup on unmount
     return () => {
       if (testimonialInterval.current) {
         clearInterval(testimonialInterval.current);
@@ -59,7 +63,7 @@ const TestimonialSlider = () => {
     <div className="relative">
       {/* Testimonial slider */}
       <div className="max-w-4xl mx-auto px-8">
-        <div className="relative">
+        <div className="relative min-h-[300px]">
           {TESTIMONIALS.map((testimonial, index) => (
             <TestimonialCard
               key={testimonial.id}
@@ -95,12 +99,7 @@ const TestimonialSlider = () => {
             key={index}
             onClick={() => {
               setCurrentTestimonial(index);
-              if (testimonialInterval.current) {
-                clearInterval(testimonialInterval.current);
-              }
-              testimonialInterval.current = setInterval(() => {
-                nextTestimonial();
-              }, 8000);
+              startAutoRotation();
             }}
             className={`h-2 rounded-full transition-all duration-300 ${
               index === currentTestimonial ? 'w-8 bg-gym-orange' : 'w-2 bg-white/60'

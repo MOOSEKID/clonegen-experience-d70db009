@@ -30,7 +30,10 @@ const Testimonials = () => {
   }, []);
 
   return (
-    <section ref={testimonialRef} className="py-20 bg-gym-dark text-white overflow-hidden opacity-0">
+    <section 
+      ref={testimonialRef} 
+      className="py-20 bg-gym-dark text-white overflow-hidden opacity-0 transition-opacity duration-500"
+    >
       <div className="container-custom">
         <div className="text-center mb-12">
           <h2 className="text-3xl md:text-4xl font-bold mb-4">What Our Members Say</h2>
