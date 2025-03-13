@@ -4,6 +4,7 @@ import MemberHeader from './MemberHeader';
 import MembersToolbar from './MembersToolbar';
 import MemberTable from './MemberTable';
 import MemberPagination from './MemberPagination';
+import { toast } from 'sonner';
 
 interface MembersContainerProps {
   members: Member[];
@@ -46,10 +47,18 @@ const MembersContainer = ({
   onPrevPage,
   onNextPage
 }: MembersContainerProps) => {
+  
+  const handleAddMember = () => {
+    // In a real app, this would open a modal to add a new member
+    toast.info('Add member functionality will be implemented in a future update');
+  };
+
   return (
     <div className="space-y-6">
       <MemberHeader 
         selectedCount={selectedMembers.length} 
+        onAddMember={handleAddMember}
+        members={members}
       />
       
       <div className="bg-white rounded-lg border border-gray-200 shadow-sm">
