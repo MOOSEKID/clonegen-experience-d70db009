@@ -15,7 +15,7 @@ interface MembersContainerProps {
   currentMembers: Member[];
   currentPage: number;
   totalPages: number;
-  selectedMembers: string[];
+  selectedMembers: string[]; // Keep as string[] since member IDs are UUIDs (strings)
   searchTerm: string;
   filterType: string;
   isCreating?: boolean;
