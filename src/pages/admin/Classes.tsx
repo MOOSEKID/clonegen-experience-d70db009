@@ -1,34 +1,78 @@
 
-import { Calendar, Clock, Users } from 'lucide-react';
-import PlaceholderSection from '@/components/admin/PlaceholderSection';
+import { useState } from 'react';
+import { Plus, Filter, Calendar, Grid3X3 } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
+import ClassesHeader from '@/components/admin/classes/ClassesHeader';
+import ClassesTable from '@/components/admin/classes/ClassesTable';
+import ClassesCalendar from '@/components/admin/classes/ClassesCalendar';
+import AddClassDialog from '@/components/admin/classes/AddClassDialog';
+import { useClassesData } from '@/hooks/useClassesData';
 
 const AdminClasses = () => {
+  const [view, setView] = useState<'list' | 'calendar'>('list');
+  const [showAddClassDialog, setShowAddClassDialog] = useState(false);
+  const { 
+    classes, 
+    isLoading, 
+    addClass, 
+    updateClass, 
+    deleteClass,
+    filterClasses,
+    filteredClasses,
+    filterType,
+    setFilterType
+  } = useClassesData();
+
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold text-gray-800">Classes</h1>
-        <p className="text-gray-500">Manage your gym class schedules and bookings</p>
+      <ClassesHeader 
+        onAddClass={() => setShowAddClassDialog(true)}
+        onFilterChange={(filter) => setFilterType(filter)}
+        filterType={filterType}
+      />
+      
+      <div className="bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden">
+        <div className="p-4 border-b border-gray-200 flex justify-between items-center">
+          <h2 className="text-lg font-medium">Class Schedule</h2>
+          <Tabs 
+            defaultValue={view} 
+            value={view} 
+            onValueChange={(value) => setView(value as 'list' | 'calendar')}
+            className="h-9"
+          >
+            <TabsList className="bg-gray-100">
+              <TabsTrigger value="list" className="flex items-center gap-2 data-[state=active]:bg-white">
+                <Grid3X3 size={16} />
+                <span className="hidden sm:inline">List</span>
+              </TabsTrigger>
+              <TabsTrigger value="calendar" className="flex items-center gap-2 data-[state=active]:bg-white">
+                <Calendar size={16} />
+                <span className="hidden sm:inline">Calendar</span>
+              </TabsTrigger>
+            </TabsList>
+          </Tabs>
+        </div>
+
+        <div>
+          {view === 'list' ? (
+            <ClassesTable 
+              classes={filteredClasses}
+              isLoading={isLoading}
+              onEdit={updateClass}
+              onDelete={deleteClass}
+            />
+          ) : (
+            <ClassesCalendar classes={filteredClasses} />
+          )}
+        </div>
       </div>
       
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        <PlaceholderSection
-          title="Class Schedule"
-          icon={<Calendar className="h-6 w-6 text-gym-orange" />}
-          description="Create and manage class schedules, assign trainers, and set capacity limits."
-        />
-        
-        <PlaceholderSection
-          title="Class Bookings"
-          icon={<Users className="h-6 w-6 text-gym-orange" />}
-          description="View and manage member bookings, waitlists, and cancellations."
-        />
-        
-        <PlaceholderSection
-          title="Class Analytics"
-          icon={<Clock className="h-6 w-6 text-gym-orange" />}
-          description="Track attendance rates, popular classes, and optimize scheduling."
-        />
-      </div>
+      <AddClassDialog 
+        open={showAddClassDialog} 
+        onOpenChange={setShowAddClassDialog}
+        onAddClass={addClass}
+      />
     </div>
   );
 };
