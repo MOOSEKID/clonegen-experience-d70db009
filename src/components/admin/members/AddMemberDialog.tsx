@@ -8,7 +8,7 @@ import MemberDialogContent from "./dialog/MemberDialogContent";
 interface AddMemberDialogProps {
   isOpen: boolean;
   onClose: () => void;
-  onAddMember: (member: Omit<Member, "id" | "startDate" | "endDate" | "lastCheckin"> & MemberFormAction) => void;
+  onAddMember: (member: Omit<Member, "id" | "startDate" | "endDate" | "lastCheckin"> & MemberFormAction) => Promise<boolean> | boolean;
   isCreating?: boolean;
 }
 

@@ -13,7 +13,7 @@ export const useFormSubmission = (onAddMember: AddMemberFn, isCreating: boolean)
 
   const submitForm = async (values: MemberFormValues) => {
     // Prevent duplicate submissions
-    if (isSubmitting || isCreating) return;
+    if (isSubmitting || isCreating) return false;
     
     setIsSubmitting(true);
     try {
@@ -21,12 +21,14 @@ export const useFormSubmission = (onAddMember: AddMemberFn, isCreating: boolean)
       const memberData = transformFormToMemberData(values);
       
       // Call the onAddMember function provided by the parent
-      await onAddMember(memberData);
+      const result = await onAddMember(memberData);
+      return result;
     } catch (error) {
       console.error("Error adding member:", error);
       toast.error("Failed to add member", {
         description: "Please try again or contact support."
       });
+      return false;
     } finally {
       setIsSubmitting(false);
     }
