@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { CheckCircle, XCircle } from 'lucide-react';
-import { Member } from '@/hooks/useMembers';
+import { Member } from '@/types/memberTypes';
 import MemberActions from './MemberActions';
 
 interface MemberTableRowProps {
