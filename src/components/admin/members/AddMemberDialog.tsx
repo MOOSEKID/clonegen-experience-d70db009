@@ -76,10 +76,18 @@ const AddMemberDialog = ({ isOpen, onClose, onAddMember }: AddMemberDialogProps)
       companyContactPerson: "",
       companyEmail: "",
       companyPhone: "",
+      companyAddress: "",
+      companyTIN: "",
+      companyLogo: "",
       companyMembershipPlan: undefined,
       membersCovered: undefined,
       billingCycle: undefined,
       paymentMode: undefined,
+      subscriptionModel: undefined,
+      corporateDiscount: {
+        type: undefined,
+        value: undefined
+      },
       
       // Individual linking to company
       linkedToCompany: false,
@@ -100,6 +108,7 @@ const AddMemberDialog = ({ isOpen, onClose, onAddMember }: AddMemberDialogProps)
         phone: values.phone, // Required field
         membershipType: values.membershipType, // Required field
         status: values.status, // Required field with default 'Active'
+        membershipCategory: values.membershipCategory,
         // Convert Date object to string format if it exists
         dateOfBirth: values.dateOfBirth ? values.dateOfBirth.toISOString().split('T')[0] : undefined,
         gender: values.gender,
@@ -120,7 +129,30 @@ const AddMemberDialog = ({ isOpen, onClose, onAddMember }: AddMemberDialogProps)
         profilePicture: values.profilePicture,
         nfcCardId: values.nfcCardId,
         fingerprintId: values.fingerprintId,
-      };
+      } as Omit<Member, "id" | "startDate" | "endDate" | "lastCheckin">;
+      
+      // Add company-specific fields if membershipCategory is 'Company'
+      if (values.membershipCategory === 'Company') {
+        memberData.companyName = values.companyName;
+        memberData.companyContactPerson = values.companyContactPerson;
+        memberData.companyEmail = values.companyEmail;
+        memberData.companyPhone = values.companyPhone;
+        memberData.companyAddress = values.companyAddress;
+        memberData.companyTIN = values.companyTIN;
+        memberData.companyLogo = values.companyLogo;
+        memberData.companyMembershipPlan = values.companyMembershipPlan;
+        memberData.membersCovered = values.membersCovered;
+        memberData.billingCycle = values.billingCycle;
+        memberData.paymentMode = values.paymentMode;
+        memberData.subscriptionModel = values.subscriptionModel;
+        memberData.corporateDiscount = values.corporateDiscount;
+      }
+      
+      // Add individual-to-company linking fields if appropriate
+      if (values.membershipCategory === 'Individual' && values.linkedToCompany) {
+        memberData.linkedToCompany = values.linkedToCompany;
+        memberData.linkedCompanyName = values.linkedCompanyName;
+      }
       
       onAddMember(memberData);
       onClose();
@@ -150,41 +182,50 @@ const AddMemberDialog = ({ isOpen, onClose, onAddMember }: AddMemberDialogProps)
         
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+            {/* Membership Type Selection */}
+            <div className="space-y-4">
+              <div className="bg-orange-50 p-3 rounded-md border border-orange-200">
+                <h3 className="text-sm font-medium text-orange-800">Membership Category</h3>
+                <p className="text-xs text-orange-700 mt-1">
+                  Choose whether this is an individual membership or a company membership.
+                  Company memberships include additional fields for corporate billing and employee management.
+                </p>
+              </div>
+              <MembershipDetailsFields control={form.control} />
+            </div>
+            
             {/* Basic Information Section */}
             <div className="space-y-4">
               <h3 className="text-sm font-medium">Basic Information</h3>
               <BasicInfoFields control={form.control} />
             </div>
             
-            {/* Membership Details Section */}
-            <div className="space-y-4">
-              <h3 className="text-sm font-medium">Membership Details</h3>
-              <MembershipDetailsFields control={form.control} />
-              
-              {/* Conditional Fields based on Membership Category */}
-              {membershipCategory === "Company" ? (
-                <CompanyMembershipFields 
-                  control={form.control} 
-                  visible={membershipCategory === "Company"} 
-                />
-              ) : (
+            {/* Conditional Fields based on Membership Category */}
+            {membershipCategory === "Company" ? (
+              <CompanyMembershipFields 
+                control={form.control} 
+                visible={membershipCategory === "Company"} 
+              />
+            ) : (
+              <>
+                {/* Personal Details Section */}
+                <div className="space-y-4">
+                  <h3 className="text-sm font-medium">Personal Details</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <DateOfBirthField control={form.control} />
+                    <GenderField control={form.control} />
+                  </div>
+                  <AddressField control={form.control} />
+                  <EmergencyContactField control={form.control} />
+                </div>
+                
+                {/* Individual Company Link */}
                 <IndividualCompanyLinkField 
                   control={form.control} 
                   visible={membershipCategory === "Individual"} 
                 />
-              )}
-            </div>
-            
-            {/* Personal Details Section */}
-            <div className="space-y-4">
-              <h3 className="text-sm font-medium">Personal Details</h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <DateOfBirthField control={form.control} />
-                <GenderField control={form.control} />
-              </div>
-              <AddressField control={form.control} />
-              <EmergencyContactField control={form.control} />
-            </div>
+              </>
+            )}
             
             {/* Authentication Section */}
             <div className="space-y-4">

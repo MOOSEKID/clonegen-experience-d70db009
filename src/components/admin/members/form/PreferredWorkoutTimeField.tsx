@@ -63,4 +63,3 @@ const PreferredWorkoutTimeField = ({ control }: PreferredWorkoutTimeFieldProps) 
 };
 
 export default PreferredWorkoutTimeField;
-

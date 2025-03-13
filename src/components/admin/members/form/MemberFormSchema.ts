@@ -15,7 +15,7 @@ export const memberFormSchema = z.object({
   membershipType: z.enum(['Basic', 'Standard', 'Premium'], {
     required_error: "Please select a membership type.",
   }),
-  status: z.enum(['Active', 'Inactive']).default('Active'),
+  status: z.enum(['Active', 'Inactive', 'Pending']).default('Active'),
   
   // Personal Details
   dateOfBirth: z.date().optional(),
@@ -47,10 +47,18 @@ export const memberFormSchema = z.object({
   companyContactPerson: z.string().optional(),
   companyEmail: z.string().email().optional(),
   companyPhone: z.string().optional(),
-  companyMembershipPlan: z.enum(['Standard', 'Premium', 'Custom']).optional(),
+  companyAddress: z.string().optional(),
+  companyTIN: z.string().optional(),
+  companyLogo: z.string().optional(),
+  companyMembershipPlan: z.enum(['Standard', 'Premium', 'Enterprise', 'Custom']).optional(),
   membersCovered: z.number().optional(),
   billingCycle: z.enum(['Monthly', 'Quarterly', 'Annually']).optional(),
   paymentMode: z.enum(['Company Invoice', 'Direct Payment']).optional(),
+  subscriptionModel: z.enum(['Fixed Fee', 'Per-Signature']).optional(),
+  corporateDiscount: z.object({
+    type: z.enum(['Fixed Percentage', 'Tiered', 'Custom']).optional(),
+    value: z.number().optional()
+  }).optional(),
   
   // Individual linking to company
   linkedToCompany: z.boolean().default(false),
