@@ -13,7 +13,9 @@ export const useFormSubmission = (onAddMember: AddMemberFn, isCreating: boolean)
 
   const submitForm = async (values: MemberFormValues) => {
     // Prevent duplicate submissions
-    if (isSubmitting || isCreating) return false;
+    if (isSubmitting || isCreating) {
+      return false;
+    }
     
     setIsSubmitting(true);
     try {
@@ -21,7 +23,14 @@ export const useFormSubmission = (onAddMember: AddMemberFn, isCreating: boolean)
       const memberData = transformFormToMemberData(values);
       
       // Call the onAddMember function provided by the parent
-      const result = await onAddMember(memberData);
+      const result = await Promise.resolve(onAddMember(memberData));
+      
+      if (result) {
+        toast.success("Member added successfully", {
+          description: "The member has been added to the database."
+        });
+      }
+      
       return result;
     } catch (error) {
       console.error("Error adding member:", error);

@@ -14,15 +14,28 @@ interface AddMemberDialogProps {
 
 const AddMemberDialog = ({ isOpen, onClose, onAddMember, isCreating = false }: AddMemberDialogProps) => {
   const { form, isSubmitting, onSubmit } = useAddMemberForm(onAddMember, isCreating, isOpen);
+  
+  // Handle successful submission
+  const handleSubmit = async (values: any) => {
+    const success = await onSubmit(values);
+    if (success) {
+      // Close the dialog on successful submission
+      onClose();
+    }
+  };
 
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
+    <Dialog open={isOpen} onOpenChange={(open) => {
+      if (!open && !isSubmitting) {
+        onClose();
+      }
+    }}>
       <DialogContent className="sm:max-w-[700px] max-h-[90vh] overflow-y-auto">
         <MemberDialogContent 
           form={form} 
           isSubmitting={isSubmitting || isCreating} 
           onClose={onClose} 
-          onSubmit={onSubmit}
+          onSubmit={handleSubmit}
         />
       </DialogContent>
     </Dialog>
