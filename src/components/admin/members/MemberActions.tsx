@@ -1,61 +1,57 @@
 
-import { ChevronDown } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import React from 'react';
+import { MoreHorizontal, CheckCircle, XCircle, Trash2, Edit, Eye } from 'lucide-react';
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import { Button } from '@/components/ui/button';
 
 interface MemberActionsProps {
   memberId: number;
   status: string;
-  onStatusChange: (memberId: number, newStatus: string) => void;
-  onDelete: (memberId: number) => void;
+  onStatusChange: (id: number, status: string) => void;
+  onDelete: (id: number) => void;
 }
 
 const MemberActions = ({ memberId, status, onStatusChange, onDelete }: MemberActionsProps) => {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="ghost" size="sm" className="px-2">
-          <ChevronDown size={16} className="text-gray-500" />
+        <Button variant="ghost" className="h-8 w-8 p-0">
+          <span className="sr-only">Open menu</span>
+          <MoreHorizontal className="h-4 w-4" />
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="w-[200px]">
-        <DropdownMenuItem onClick={() => console.log('View profile', memberId)}>
-          View Profile
+      <DropdownMenuContent align="end">
+        <DropdownMenuLabel>Actions</DropdownMenuLabel>
+        <DropdownMenuItem className="cursor-pointer" onClick={() => console.log(`View member ${memberId}`)}>
+          <Eye className="mr-2 h-4 w-4" />
+          <span>View Details</span>
         </DropdownMenuItem>
-        <DropdownMenuItem onClick={() => console.log('Edit member', memberId)}>
-          Edit Details
+        <DropdownMenuItem className="cursor-pointer" onClick={() => console.log(`Edit member ${memberId}`)}>
+          <Edit className="mr-2 h-4 w-4" />
+          <span>Edit</span>
         </DropdownMenuItem>
+        <DropdownMenuSeparator />
         {status === 'Active' ? (
-          <DropdownMenuItem onClick={() => onStatusChange(memberId, 'Inactive')} className="text-red-600">
-            Deactivate Member
+          <DropdownMenuItem className="cursor-pointer" onClick={() => onStatusChange(memberId, 'Inactive')}>
+            <XCircle className="mr-2 h-4 w-4" />
+            <span>Deactivate</span>
           </DropdownMenuItem>
         ) : (
-          <DropdownMenuItem onClick={() => onStatusChange(memberId, 'Active')} className="text-green-600">
-            Activate Member
+          <DropdownMenuItem className="cursor-pointer" onClick={() => onStatusChange(memberId, 'Active')}>
+            <CheckCircle className="mr-2 h-4 w-4" />
+            <span>Activate</span>
           </DropdownMenuItem>
         )}
-        <DropdownMenuSeparator />
-        <DropdownMenuItem onClick={() => console.log('Send email', memberId)}>
-          Send Email
-        </DropdownMenuItem>
-        <DropdownMenuItem onClick={() => console.log('Send SMS', memberId)}>
-          Send SMS
-        </DropdownMenuItem>
-        <DropdownMenuItem onClick={() => console.log('Log check-in', memberId)}>
-          Log Check-in
-        </DropdownMenuItem>
-        <DropdownMenuSeparator />
-        <DropdownMenuItem 
-          className="text-red-600"
-          onClick={() => onDelete(memberId)}
-        >
-          Delete Member
+        <DropdownMenuItem className="cursor-pointer text-red-600" onClick={() => onDelete(memberId)}>
+          <Trash2 className="mr-2 h-4 w-4" />
+          <span>Delete</span>
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>

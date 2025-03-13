@@ -52,6 +52,13 @@ const MemberTableRow = ({
     return `${member.membershipType} (${plan})`;
   };
 
+  // Format preferred workout times
+  const formatWorkoutTimes = (times?: string[]) => {
+    if (!times || times.length === 0) return "Not specified";
+    if (times.includes("anytime")) return "Anytime";
+    return times.map(t => t.charAt(0).toUpperCase() + t.slice(1)).join(", ");
+  };
+
   return (
     <tr className="border-b border-gray-200 hover:bg-gray-50">
       <td className="pl-4 py-3">
@@ -64,9 +71,19 @@ const MemberTableRow = ({
       </td>
       <td className="px-4 py-3">
         <div className="flex items-center">
-          <div className="h-8 w-8 rounded-full bg-gym-orange/20 text-gym-orange flex items-center justify-center font-medium uppercase">
-            {member.name.charAt(0)}
-          </div>
+          {member.profilePicture ? (
+            <div className="h-8 w-8 rounded-full overflow-hidden mr-3">
+              <img 
+                src={member.profilePicture} 
+                alt={member.name} 
+                className="h-full w-full object-cover" 
+              />
+            </div>
+          ) : (
+            <div className="h-8 w-8 rounded-full bg-gym-orange/20 text-gym-orange flex items-center justify-center font-medium uppercase">
+              {member.name.charAt(0)}
+            </div>
+          )}
           <div className="ml-3">
             <div className="font-medium">{member.name}</div>
             <div className="text-xs text-gray-500">{member.email}</div>
@@ -81,7 +98,8 @@ const MemberTableRow = ({
       </td>
       <td className="px-4 py-3">
         <MemberActions 
-          member={member} 
+          memberId={member.id} 
+          status={member.status}
           onStatusChange={onStatusChange}
           onDelete={onDelete}
         />

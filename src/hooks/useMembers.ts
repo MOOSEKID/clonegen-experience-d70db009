@@ -20,10 +20,13 @@ export interface Member {
   trainerAssigned?: string;
   workoutGoals?: string;
   medicalConditions?: string;
-  preferredWorkoutTime?: string;
+  preferredWorkoutTime?: string[];
   paymentStatus?: string;
   discountsUsed?: string;
   notes?: string;
+  profilePicture?: string;
+  nfcCardId?: string;
+  fingerprintId?: string;
 }
 
 export const useMembers = () => {
