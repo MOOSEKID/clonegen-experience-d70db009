@@ -1,5 +1,5 @@
 
-import { useMembers } from '@/hooks/useMembers';
+import { useSupabaseMembers } from '@/hooks/members/useSupabaseMembers';
 import MembersContainer from '@/components/admin/members/MembersContainer';
 
 const AdminMembers = () => {
@@ -13,6 +13,7 @@ const AdminMembers = () => {
     totalPages,
     filterType,
     isCreating,
+    isLoading,
     handleSearch,
     handleStatusChange,
     handleDelete,
@@ -25,7 +26,7 @@ const AdminMembers = () => {
     paginate,
     nextPage,
     prevPage,
-  } = useMembers();
+  } = useSupabaseMembers();
 
   return (
     <MembersContainer
@@ -38,6 +39,7 @@ const AdminMembers = () => {
       searchTerm={searchTerm}
       filterType={filterType}
       isCreating={isCreating}
+      isLoading={isLoading}
       onSearchChange={handleSearch}
       onStatusChange={handleStatusChange}
       onDelete={handleDelete}

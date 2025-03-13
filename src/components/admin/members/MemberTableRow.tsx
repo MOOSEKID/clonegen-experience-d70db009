@@ -7,9 +7,9 @@ import MemberActions from './MemberActions';
 interface MemberTableRowProps {
   member: Member;
   isSelected: boolean;
-  onToggleSelect: (id: number) => void;
-  onStatusChange: (id: number, status: string) => void;
-  onDelete: (id: number) => void;
+  onToggleSelect: (id: string) => void;
+  onStatusChange: (id: string, status: string) => void;
+  onDelete: (id: string) => void;
 }
 
 const MemberTableRow = ({ 
@@ -65,7 +65,7 @@ const MemberTableRow = ({
         <input 
           type="checkbox" 
           checked={isSelected}
-          onChange={() => onToggleSelect(member.id)}
+          onChange={() => onToggleSelect(member.id as string)}
           className="rounded border-gray-300 text-gym-orange focus:ring-gym-orange"
         />
       </td>
@@ -98,7 +98,7 @@ const MemberTableRow = ({
       </td>
       <td className="px-4 py-3">
         <MemberActions 
-          memberId={member.id} 
+          memberId={member.id as string} 
           status={member.status}
           onStatusChange={onStatusChange}
           onDelete={onDelete}

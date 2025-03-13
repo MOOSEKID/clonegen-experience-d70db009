@@ -9,7 +9,330 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      [_ in never]: never
+      attendance_records: {
+        Row: {
+          checkintime: string
+          checkouttime: string | null
+          created_at: string | null
+          date: string
+          duration: number | null
+          id: string
+          memberid: string | null
+        }
+        Insert: {
+          checkintime: string
+          checkouttime?: string | null
+          created_at?: string | null
+          date?: string
+          duration?: number | null
+          id?: string
+          memberid?: string | null
+        }
+        Update: {
+          checkintime?: string
+          checkouttime?: string | null
+          created_at?: string | null
+          date?: string
+          duration?: number | null
+          id?: string
+          memberid?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "attendance_records_memberid_fkey"
+            columns: ["memberid"]
+            isOneToOne: false
+            referencedRelation: "members"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      companies: {
+        Row: {
+          adminsetuprequired: boolean | null
+          billingcycle: string | null
+          companyaddress: string | null
+          companycontactperson: string | null
+          companyemail: string
+          companylogo: string | null
+          companymembershipplan: string | null
+          companyname: string
+          companyphone: string | null
+          companytin: string | null
+          corporatediscounttype: string | null
+          corporatediscountvalue: number | null
+          created_at: string | null
+          enddate: string
+          hasadminuser: boolean | null
+          id: string
+          memberscovered: number | null
+          paymentmode: string | null
+          startdate: string
+          status: string
+          subscriptionmodel: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          adminsetuprequired?: boolean | null
+          billingcycle?: string | null
+          companyaddress?: string | null
+          companycontactperson?: string | null
+          companyemail: string
+          companylogo?: string | null
+          companymembershipplan?: string | null
+          companyname: string
+          companyphone?: string | null
+          companytin?: string | null
+          corporatediscounttype?: string | null
+          corporatediscountvalue?: number | null
+          created_at?: string | null
+          enddate: string
+          hasadminuser?: boolean | null
+          id?: string
+          memberscovered?: number | null
+          paymentmode?: string | null
+          startdate?: string
+          status?: string
+          subscriptionmodel?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          adminsetuprequired?: boolean | null
+          billingcycle?: string | null
+          companyaddress?: string | null
+          companycontactperson?: string | null
+          companyemail?: string
+          companylogo?: string | null
+          companymembershipplan?: string | null
+          companyname?: string
+          companyphone?: string | null
+          companytin?: string | null
+          corporatediscounttype?: string | null
+          corporatediscountvalue?: number | null
+          created_at?: string | null
+          enddate?: string
+          hasadminuser?: boolean | null
+          id?: string
+          memberscovered?: number | null
+          paymentmode?: string | null
+          startdate?: string
+          status?: string
+          subscriptionmodel?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      company_invoices: {
+        Row: {
+          companyid: string | null
+          created_at: string | null
+          duedate: string
+          id: string
+          invoicenumber: string
+          issuedate: string
+          items: Json | null
+          notes: string | null
+          status: string | null
+          totalamount: number
+          updated_at: string | null
+        }
+        Insert: {
+          companyid?: string | null
+          created_at?: string | null
+          duedate: string
+          id?: string
+          invoicenumber: string
+          issuedate?: string
+          items?: Json | null
+          notes?: string | null
+          status?: string | null
+          totalamount: number
+          updated_at?: string | null
+        }
+        Update: {
+          companyid?: string | null
+          created_at?: string | null
+          duedate?: string
+          id?: string
+          invoicenumber?: string
+          issuedate?: string
+          items?: Json | null
+          notes?: string | null
+          status?: string | null
+          totalamount?: number
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "company_invoices_companyid_fkey"
+            columns: ["companyid"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      members: {
+        Row: {
+          accountenabled: boolean | null
+          address: string | null
+          created_at: string | null
+          dateofbirth: string | null
+          discountsused: string | null
+          email: string
+          emergencycontact: string | null
+          enddate: string
+          fingerprintid: string | null
+          gender: string | null
+          id: string
+          lastcheckin: string | null
+          lastlogin: string | null
+          linkedcompanyid: string | null
+          linkedtocompany: boolean | null
+          medicalconditions: string | null
+          membershipcategory: string | null
+          membershipplan: string | null
+          membershiptype: string
+          name: string
+          nfccardid: string | null
+          notes: string | null
+          passwordresetrequired: boolean | null
+          paymentstatus: string | null
+          phone: string | null
+          preferredworkouttime: string[] | null
+          profilepicture: string | null
+          startdate: string
+          status: string
+          trainerassigned: string | null
+          updated_at: string | null
+          username: string | null
+          workoutgoals: string | null
+        }
+        Insert: {
+          accountenabled?: boolean | null
+          address?: string | null
+          created_at?: string | null
+          dateofbirth?: string | null
+          discountsused?: string | null
+          email: string
+          emergencycontact?: string | null
+          enddate: string
+          fingerprintid?: string | null
+          gender?: string | null
+          id?: string
+          lastcheckin?: string | null
+          lastlogin?: string | null
+          linkedcompanyid?: string | null
+          linkedtocompany?: boolean | null
+          medicalconditions?: string | null
+          membershipcategory?: string | null
+          membershipplan?: string | null
+          membershiptype: string
+          name: string
+          nfccardid?: string | null
+          notes?: string | null
+          passwordresetrequired?: boolean | null
+          paymentstatus?: string | null
+          phone?: string | null
+          preferredworkouttime?: string[] | null
+          profilepicture?: string | null
+          startdate?: string
+          status?: string
+          trainerassigned?: string | null
+          updated_at?: string | null
+          username?: string | null
+          workoutgoals?: string | null
+        }
+        Update: {
+          accountenabled?: boolean | null
+          address?: string | null
+          created_at?: string | null
+          dateofbirth?: string | null
+          discountsused?: string | null
+          email?: string
+          emergencycontact?: string | null
+          enddate?: string
+          fingerprintid?: string | null
+          gender?: string | null
+          id?: string
+          lastcheckin?: string | null
+          lastlogin?: string | null
+          linkedcompanyid?: string | null
+          linkedtocompany?: boolean | null
+          medicalconditions?: string | null
+          membershipcategory?: string | null
+          membershipplan?: string | null
+          membershiptype?: string
+          name?: string
+          nfccardid?: string | null
+          notes?: string | null
+          passwordresetrequired?: boolean | null
+          paymentstatus?: string | null
+          phone?: string | null
+          preferredworkouttime?: string[] | null
+          profilepicture?: string | null
+          startdate?: string
+          status?: string
+          trainerassigned?: string | null
+          updated_at?: string | null
+          username?: string | null
+          workoutgoals?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fk_linked_company"
+            columns: ["linkedcompanyid"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      trainers: {
+        Row: {
+          bio: string | null
+          created_at: string | null
+          email: string
+          hiredate: string | null
+          id: string
+          name: string
+          phone: string | null
+          profilepicture: string | null
+          schedule: Json | null
+          specialization: string[] | null
+          status: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          bio?: string | null
+          created_at?: string | null
+          email: string
+          hiredate?: string | null
+          id?: string
+          name: string
+          phone?: string | null
+          profilepicture?: string | null
+          schedule?: Json | null
+          specialization?: string[] | null
+          status?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          bio?: string | null
+          created_at?: string | null
+          email?: string
+          hiredate?: string | null
+          id?: string
+          name?: string
+          phone?: string | null
+          profilepicture?: string | null
+          schedule?: Json | null
+          specialization?: string[] | null
+          status?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
