@@ -70,40 +70,42 @@ export const fetchMembers = async () => {
       // Ensure member is not null before accessing properties
       if (!member) return null;
       
+      const memberData = member as Record<string, any>; // Use type assertion to avoid TS errors
+      
       return {
-        id: member.id || '',
-        name: member.name || '',
-        email: member.email || '',
-        phone: member.phone || '',
-        membershipType: member.membershiptype || '',
-        startDate: member.startdate || '',
-        endDate: member.enddate || '',
-        status: member.status || 'Active',
-        lastCheckin: member.lastcheckin || '',
-        dateOfBirth: member.dateofbirth || '',
-        gender: member.gender || '',
-        address: member.address || '',
-        emergencyContact: member.emergencycontact || '',
-        membershipPlan: member.membershipplan || '',
-        membershipCategory: member.membershipcategory || '',
-        trainerAssigned: member.trainerassigned || '',
-        workoutGoals: member.workoutgoals || '',
-        medicalConditions: member.medicalconditions || '',
-        preferredWorkoutTime: member.preferredworkouttime || [],
-        paymentStatus: member.paymentstatus || '',
-        discountsUsed: member.discountsused || '',
-        notes: member.notes || '',
-        profilePicture: member.profilepicture || '',
-        nfcCardId: member.nfccardid || '',
-        fingerprintId: member.fingerprintid || '',
-        username: member.username || '',
-        passwordResetRequired: member.passwordresetrequired ?? true,
-        accountEnabled: member.accountenabled ?? true,
-        lastLogin: member.lastlogin || '',
-        linkedToCompany: member.linkedtocompany ?? false,
-        linkedCompanyId: member.linkedcompanyid || '',
-        created_at: member.created_at || '',
-        updated_at: member.updated_at || ''
+        id: memberData.id || '',
+        name: memberData.name || '',
+        email: memberData.email || '',
+        phone: memberData.phone || '',
+        membershipType: memberData.membershiptype || '',
+        startDate: memberData.startdate || '',
+        endDate: memberData.enddate || '',
+        status: memberData.status || 'Active',
+        lastCheckin: memberData.lastcheckin || '',
+        dateOfBirth: memberData.dateofbirth || '',
+        gender: memberData.gender || '',
+        address: memberData.address || '',
+        emergencyContact: memberData.emergencycontact || '',
+        membershipPlan: memberData.membershipplan || '',
+        membershipCategory: memberData.membershipcategory || '',
+        trainerAssigned: memberData.trainerassigned || '',
+        workoutGoals: memberData.workoutgoals || '',
+        medicalConditions: memberData.medicalconditions || '',
+        preferredWorkoutTime: memberData.preferredworkouttime || [],
+        paymentStatus: memberData.paymentstatus || '',
+        discountsUsed: memberData.discountsused || '',
+        notes: memberData.notes || '',
+        profilePicture: memberData.profilepicture || '',
+        nfcCardId: memberData.nfccardid || '',
+        fingerprintId: memberData.fingerprintid || '',
+        username: memberData.username || '',
+        passwordResetRequired: memberData.passwordresetrequired ?? true,
+        accountEnabled: memberData.accountenabled ?? true,
+        lastLogin: memberData.lastlogin || '',
+        linkedToCompany: memberData.linkedtocompany ?? false,
+        linkedCompanyId: memberData.linkedcompanyid || '',
+        created_at: memberData.created_at || '',
+        updated_at: memberData.updated_at || ''
       };
     }).filter(Boolean); // Filter out any null values
   } catch (error) {
@@ -162,7 +164,8 @@ export const addMember = async (memberData) => {
       return null;
     }
 
-    const member = data[0] || {};
+    const memberResult = data[0] || {};
+    const member = memberResult as Record<string, any>; // Use type assertion
     
     return {
       id: member.id || '',
@@ -187,35 +190,35 @@ export const updateMember = async (id, memberData) => {
     const dbMemberData = {};
     
     // Map only the fields that are being updated
-    if (memberData.name) dbMemberData.name = memberData.name;
-    if (memberData.email) dbMemberData.email = memberData.email;
-    if (memberData.phone) dbMemberData.phone = memberData.phone;
-    if (memberData.membershipType) dbMemberData.membershiptype = memberData.membershipType;
-    if (memberData.startDate) dbMemberData.startdate = memberData.startDate;
-    if (memberData.endDate) dbMemberData.enddate = memberData.endDate;
-    if (memberData.status) dbMemberData.status = memberData.status;
-    if (memberData.dateOfBirth) dbMemberData.dateofbirth = memberData.dateOfBirth;
-    if (memberData.gender) dbMemberData.gender = memberData.gender;
-    if (memberData.address) dbMemberData.address = memberData.address;
-    if (memberData.emergencyContact) dbMemberData.emergencycontact = memberData.emergencyContact;
-    if (memberData.membershipPlan) dbMemberData.membershipplan = memberData.membershipPlan;
-    if (memberData.membershipCategory) dbMemberData.membershipcategory = memberData.membershipCategory;
-    if (memberData.trainerAssigned) dbMemberData.trainerassigned = memberData.trainerAssigned;
-    if (memberData.workoutGoals) dbMemberData.workoutgoals = memberData.workoutGoals;
-    if (memberData.medicalConditions) dbMemberData.medicalconditions = memberData.medicalConditions;
-    if (memberData.preferredWorkoutTime) dbMemberData.preferredworkouttime = memberData.preferredWorkoutTime;
-    if (memberData.paymentStatus) dbMemberData.paymentstatus = memberData.paymentStatus;
-    if (memberData.discountsUsed) dbMemberData.discountsused = memberData.discountsUsed;
-    if (memberData.notes) dbMemberData.notes = memberData.notes;
-    if (memberData.profilePicture) dbMemberData.profilepicture = memberData.profilePicture;
-    if (memberData.nfcCardId) dbMemberData.nfccardid = memberData.nfcCardId;
-    if (memberData.fingerprintId) dbMemberData.fingerprintid = memberData.fingerprintId;
-    if (memberData.username) dbMemberData.username = memberData.username;
-    if (memberData.passwordResetRequired !== undefined) dbMemberData.passwordresetrequired = memberData.passwordResetRequired;
-    if (memberData.accountEnabled !== undefined) dbMemberData.accountenabled = memberData.accountEnabled;
-    if (memberData.lastLogin) dbMemberData.lastlogin = memberData.lastLogin;
-    if (memberData.linkedToCompany !== undefined) dbMemberData.linkedtocompany = memberData.linkedToCompany;
-    if (memberData.linkedCompanyId) dbMemberData.linkedcompanyid = memberData.linkedCompanyId;
+    if (memberData.name) dbMemberData['name'] = memberData.name;
+    if (memberData.email) dbMemberData['email'] = memberData.email;
+    if (memberData.phone) dbMemberData['phone'] = memberData.phone;
+    if (memberData.membershipType) dbMemberData['membershiptype'] = memberData.membershipType;
+    if (memberData.startDate) dbMemberData['startdate'] = memberData.startDate;
+    if (memberData.endDate) dbMemberData['enddate'] = memberData.endDate;
+    if (memberData.status) dbMemberData['status'] = memberData.status;
+    if (memberData.dateOfBirth) dbMemberData['dateofbirth'] = memberData.dateOfBirth;
+    if (memberData.gender) dbMemberData['gender'] = memberData.gender;
+    if (memberData.address) dbMemberData['address'] = memberData.address;
+    if (memberData.emergencyContact) dbMemberData['emergencycontact'] = memberData.emergencyContact;
+    if (memberData.membershipPlan) dbMemberData['membershipplan'] = memberData.membershipPlan;
+    if (memberData.membershipCategory) dbMemberData['membershipcategory'] = memberData.membershipCategory;
+    if (memberData.trainerAssigned) dbMemberData['trainerassigned'] = memberData.trainerAssigned;
+    if (memberData.workoutGoals) dbMemberData['workoutgoals'] = memberData.workoutGoals;
+    if (memberData.medicalConditions) dbMemberData['medicalconditions'] = memberData.medicalConditions;
+    if (memberData.preferredWorkoutTime) dbMemberData['preferredworkouttime'] = memberData.preferredWorkoutTime;
+    if (memberData.paymentStatus) dbMemberData['paymentstatus'] = memberData.paymentStatus;
+    if (memberData.discountsUsed) dbMemberData['discountsused'] = memberData.discountsUsed;
+    if (memberData.notes) dbMemberData['notes'] = memberData.notes;
+    if (memberData.profilePicture) dbMemberData['profilepicture'] = memberData.profilePicture;
+    if (memberData.nfcCardId) dbMemberData['nfccardid'] = memberData.nfcCardId;
+    if (memberData.fingerprintId) dbMemberData['fingerprintid'] = memberData.fingerprintId;
+    if (memberData.username) dbMemberData['username'] = memberData.username;
+    if (memberData.passwordResetRequired !== undefined) dbMemberData['passwordresetrequired'] = memberData.passwordResetRequired;
+    if (memberData.accountEnabled !== undefined) dbMemberData['accountenabled'] = memberData.accountEnabled;
+    if (memberData.lastLogin) dbMemberData['lastlogin'] = memberData.lastLogin;
+    if (memberData.linkedToCompany !== undefined) dbMemberData['linkedtocompany'] = memberData.linkedToCompany;
+    if (memberData.linkedCompanyId) dbMemberData['linkedcompanyid'] = memberData.linkedCompanyId;
     
     const { data, error } = await supabase
       .from('members')
@@ -232,7 +235,8 @@ export const updateMember = async (id, memberData) => {
       return null;
     }
 
-    const member = data[0] || {};
+    const memberResult = data[0] || {};
+    const member = memberResult as Record<string, any>; // Use type assertion
     
     // Convert back to camelCase for frontend
     return {
@@ -288,7 +292,8 @@ export const updateMemberStatus = async (id, newStatus) => {
       return null;
     }
     
-    const member = data[0] || {};
+    const memberResult = data[0] || {};
+    const member = memberResult as Record<string, any>; // Use type assertion
     
     return {
       id: member.id || '',
