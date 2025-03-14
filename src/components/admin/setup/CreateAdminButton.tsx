@@ -1,9 +1,8 @@
 
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { createSpecificAdmin } from '@/utils/createAdmin';
 import { toast } from 'sonner';
-import { useAuth } from '@/contexts/AuthContext';
+import { useAuth } from '@/contexts/auth';
 
 export default function CreateAdminButton() {
   const [isCreating, setIsCreating] = useState(false);

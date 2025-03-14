@@ -5,7 +5,7 @@ import { BrowserRouter } from 'react-router-dom';
 import App from './App';
 import './index.css';
 import { Toaster } from 'sonner';
-import { AuthProvider } from './contexts/AuthContext';
+import { AuthProvider } from './contexts/auth';
 import { ErrorBoundary } from './components/ui/error-boundary';
 
 ReactDOM.createRoot(document.getElementById('root')!).render(

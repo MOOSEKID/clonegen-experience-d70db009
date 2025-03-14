@@ -1,11 +1,10 @@
-
 import { useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 import { Menu, X, ShoppingBag, User, LayoutDashboard, LogOut, Settings } from 'lucide-react';
 import DesktopNav from './header/DesktopNav';
 import MobileMenu from './header/MobileMenu';
-import { useAuth } from '@/contexts/AuthContext';
+import { useAuth } from '@/contexts/auth';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { 
   DropdownMenu,

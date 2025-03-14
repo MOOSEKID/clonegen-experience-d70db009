@@ -1,11 +1,10 @@
-
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { toast } from 'sonner';
-import { useAuth } from '@/contexts/AuthContext';
+import { useAuth } from '@/contexts/auth';
 import { supabase } from '@/integrations/supabase/client';
 
 import {
@@ -22,7 +21,6 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { User, Mail, Phone, MapPin, Clock, LogOut } from 'lucide-react';
 
-// Define form schema for profile updates
 const profileFormSchema = z.object({
   full_name: z.string().min(2, "Name must be at least 2 characters"),
   username: z.string().min(3, "Username must be at least 3 characters"),
@@ -33,13 +31,26 @@ const profileFormSchema = z.object({
 
 type ProfileFormValues = z.infer<typeof profileFormSchema>;
 
+interface ProfileData {
+  id: string;
+  full_name: string;
+  username: string;
+  avatar_url: string;
+  is_admin: boolean;
+  created_at: string;
+  updated_at: string;
+  role: string;
+  contact_number?: string;
+  gym_location?: string;
+  preferred_workout_time?: string;
+}
+
 const UserProfile = () => {
   const { user, signOut } = useAuth();
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
-  const [profileData, setProfileData] = useState<any>(null);
+  const [profileData, setProfileData] = useState<ProfileData | null>(null);
 
-  // Initialize form
   const form = useForm<ProfileFormValues>({
     resolver: zodResolver(profileFormSchema),
     defaultValues: {
@@ -51,7 +62,6 @@ const UserProfile = () => {
     },
   });
 
-  // Fetch profile data
   useEffect(() => {
     const fetchProfile = async () => {
       if (!user) {
@@ -72,7 +82,7 @@ const UserProfile = () => {
         }
 
         if (data) {
-          setProfileData(data);
+          setProfileData(data as ProfileData);
           form.reset({
             full_name: data.full_name || '',
             username: data.username || '',
@@ -91,7 +101,6 @@ const UserProfile = () => {
     fetchProfile();
   }, [user, navigate, form]);
 
-  // Handle form submission
   const onSubmit = async (values: ProfileFormValues) => {
     if (!user) return;
 
@@ -105,7 +114,7 @@ const UserProfile = () => {
           contact_number: values.contact_number,
           gym_location: values.gym_location,
           preferred_workout_time: values.preferred_workout_time,
-          updated_at: new Date(),
+          updated_at: new Date().toISOString(),
         })
         .eq('id', user.id);
 
@@ -115,14 +124,13 @@ const UserProfile = () => {
 
       toast.success('Profile updated successfully');
       
-      // Refresh profile data
       const { data } = await supabase
         .from('profiles')
         .select('*')
         .eq('id', user.id)
         .single();
       
-      setProfileData(data);
+      setProfileData(data as ProfileData);
     } catch (error: any) {
       toast.error(`Error updating profile: ${error.message}`);
     } finally {
@@ -136,7 +144,7 @@ const UserProfile = () => {
   };
 
   if (!user) {
-    return null; // Will redirect in useEffect
+    return null;
   }
 
   return (

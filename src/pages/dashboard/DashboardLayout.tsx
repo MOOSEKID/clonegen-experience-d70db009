@@ -1,10 +1,9 @@
-
 import { useState, useEffect } from 'react';
 import { Outlet, useNavigate } from 'react-router-dom';
 import CustomerSidebar from '@/components/dashboard/CustomerSidebar';
 import CustomerHeader from '@/components/dashboard/CustomerHeader';
 import { toast } from 'sonner';
-import { useAuth } from '@/contexts/AuthContext';
+import { useAuth } from '@/contexts/auth';
 
 const DashboardLayout = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
@@ -12,7 +11,6 @@ const DashboardLayout = () => {
   const navigate = useNavigate();
   const { user, isLoading: authLoading } = useAuth();
 
-  // Check user authentication
   useEffect(() => {
     if (!authLoading) {
       if (!user) {

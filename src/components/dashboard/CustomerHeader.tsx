@@ -1,8 +1,7 @@
-
 import { useState, useEffect } from 'react';
 import { Search, Bell, Menu, ChevronDown, User, LogOut, Settings, UserCircle } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { useAuth } from '@/contexts/AuthContext';
+import { useAuth } from '@/contexts/auth';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -17,7 +16,6 @@ const CustomerHeader = ({ toggleSidebar }: CustomerHeaderProps) => {
   const navigate = useNavigate();
   const { user, signOut } = useAuth();
   
-  // Fetch user profile
   useEffect(() => {
     const fetchProfile = async () => {
       if (!user) return;
@@ -39,7 +37,6 @@ const CustomerHeader = ({ toggleSidebar }: CustomerHeaderProps) => {
     fetchProfile();
   }, [user]);
   
-  // Get user details from supabase user or fallback to localStorage
   const userEmail = user?.email || localStorage.getItem('userEmail') || '';
   const userName = profile?.full_name || user?.user_metadata?.name || localStorage.getItem('userName') || 'User';
 

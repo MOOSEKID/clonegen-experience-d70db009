@@ -1,14 +1,12 @@
-
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { toast } from 'sonner';
-import { useAuth } from '@/contexts/AuthContext';
+import { useAuth } from '@/contexts/auth';
 import { supabase } from '@/integrations/supabase/client';
 
-// Import UI components
 import { Button } from '@/components/ui/button';
 import {
   Form,
@@ -21,7 +19,6 @@ import {
 import { Input } from '@/components/ui/input';
 import { Separator } from '@/components/ui/separator';
 
-// Define form schema
 const formSchema = z.object({
   email: z.string().email({
     message: "Please enter a valid email address.",
@@ -36,7 +33,6 @@ const Login = () => {
   const { signIn } = useAuth();
   const navigate = useNavigate();
   
-  // Initialize form
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -45,7 +41,6 @@ const Login = () => {
     },
   });
 
-  // Handle form submission
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     setIsLoading(true);
     try {

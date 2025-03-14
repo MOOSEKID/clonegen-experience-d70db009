@@ -1,10 +1,9 @@
-
 import { useState, useEffect } from 'react';
 import { Outlet, useNavigate } from 'react-router-dom';
 import AdminSidebar from '@/components/admin/AdminSidebar';
 import AdminHeader from '@/components/admin/AdminHeader';
 import { toast } from 'sonner';
-import { useAuth } from '@/contexts/AuthContext';
+import { useAuth } from '@/contexts/auth';
 
 const AdminLayout = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
@@ -12,7 +11,6 @@ const AdminLayout = () => {
   const navigate = useNavigate();
   const { user, isAdmin, isLoading: authLoading } = useAuth();
 
-  // Check admin authentication
   useEffect(() => {
     if (!authLoading) {
       if (!user) {
