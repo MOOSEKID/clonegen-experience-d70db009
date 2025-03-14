@@ -1,6 +1,7 @@
 
 import { supabase } from '@/integrations/supabase/client';
 import { MemberInfo } from '@/types/classTypes';
+import { Member } from '@/types/memberTypes';
 
 // Get members who are not enrolled or waitlisted in the class
 export const getAvailableMembers = async (
@@ -50,8 +51,10 @@ export const getAvailableMembers = async (
 };
 
 // Add new member service functions
-export const fetchMembers = async () => {
+export const fetchMembers = async (): Promise<Member[]> => {
   try {
+    console.log('Fetching members from Supabase...');
+    
     const { data, error } = await supabase
       .from('members')
       .select('*')
@@ -63,15 +66,19 @@ export const fetchMembers = async () => {
     }
     
     // Ensure data is not null before mapping
-    if (!data) return [];
+    if (!data) {
+      console.log('No member data returned from Supabase');
+      return [];
+    }
+    
+    console.log('Raw member data from Supabase:', data);
     
     // Convert database field names to camelCase for frontend
-    return data.map(member => {
-      // Ensure member is not null before accessing properties
-      if (!member) return null;
+    const members = data.map(memberData => {
+      // Ensure memberData is not null before accessing properties
+      if (!memberData) return null;
       
-      const memberData = member as Record<string, any>; // Use type assertion to avoid TS errors
-      
+      // Type assertion to avoid TS errors
       return {
         id: memberData.id || '',
         name: memberData.name || '',
@@ -106,16 +113,22 @@ export const fetchMembers = async () => {
         linkedCompanyId: memberData.linkedcompanyid || '',
         created_at: memberData.created_at || '',
         updated_at: memberData.updated_at || ''
-      };
-    }).filter(Boolean); // Filter out any null values
+      } as Member;
+    }).filter(Boolean) as Member[]; // Filter out any null values
+    
+    console.log(`Processed ${members.length} members with types applied`);
+    
+    return members;
   } catch (error) {
     console.error('Error in fetchMembers:', error);
     return [];
   }
 };
 
-export const addMember = async (memberData) => {
+export const addMember = async (memberData: Partial<Member>): Promise<Member | null> => {
   try {
+    console.log('Adding new member with data:', memberData);
+    
     // Convert camelCase to database field names (lowercase)
     const dbMemberData = {
       name: memberData.name,
@@ -159,35 +172,43 @@ export const addMember = async (memberData) => {
       return null;
     }
     
+    console.log('Response after adding member:', data);
+    
     // Convert back to camelCase for frontend
     if (!data || data.length === 0) {
+      console.log('No data returned after adding member');
       return null;
     }
 
-    const memberResult = data[0] || {};
-    const member = memberResult as Record<string, any>; // Use type assertion
+    const memberResult = data[0];
+    if (!memberResult) {
+      console.log('Member result is null after adding');
+      return null;
+    }
     
     return {
-      id: member.id || '',
-      name: member.name || '',
-      email: member.email || '',
-      phone: member.phone || '',
-      membershipType: member.membershiptype || '',
-      startDate: member.startdate || '',
-      endDate: member.enddate || '',
-      status: member.status || 'Active',
-      lastCheckin: member.lastcheckin || '',
-    };
+      id: memberResult.id || '',
+      name: memberResult.name || '',
+      email: memberResult.email || '',
+      phone: memberResult.phone || '',
+      membershipType: memberResult.membershiptype || '',
+      startDate: memberResult.startdate || '',
+      endDate: memberResult.enddate || '',
+      status: memberResult.status || 'Active',
+      lastCheckin: memberResult.lastcheckin || '',
+    } as Member;
   } catch (error) {
     console.error('Error in addMember:', error);
     return null;
   }
 };
 
-export const updateMember = async (id, memberData) => {
+export const updateMember = async (id: string, memberData: Partial<Member>): Promise<Member | null> => {
   try {
+    console.log(`Updating member with ID ${id}, data:`, memberData);
+    
     // Convert camelCase to database field names (lowercase)
-    const dbMemberData = {};
+    const dbMemberData: Record<string, any> = {};
     
     // Map only the fields that are being updated
     if (memberData.name) dbMemberData['name'] = memberData.name;
@@ -231,33 +252,41 @@ export const updateMember = async (id, memberData) => {
       return null;
     }
     
+    console.log('Response after updating member:', data);
+    
     if (!data || data.length === 0) {
+      console.log('No data returned after updating member');
       return null;
     }
 
-    const memberResult = data[0] || {};
-    const member = memberResult as Record<string, any>; // Use type assertion
+    const memberResult = data[0];
+    if (!memberResult) {
+      console.log('Member result is null after updating');
+      return null;
+    }
     
     // Convert back to camelCase for frontend
     return {
-      id: member.id || '',
-      name: member.name || '',
-      email: member.email || '',
-      phone: member.phone || '',
-      membershipType: member.membershiptype || '',
-      startDate: member.startdate || '',
-      endDate: member.enddate || '',
-      status: member.status || 'Active',
-      lastCheckin: member.lastcheckin || '',
-    };
+      id: memberResult.id || '',
+      name: memberResult.name || '',
+      email: memberResult.email || '',
+      phone: memberResult.phone || '',
+      membershipType: memberResult.membershiptype || '',
+      startDate: memberResult.startdate || '',
+      endDate: memberResult.enddate || '',
+      status: memberResult.status || 'Active',
+      lastCheckin: memberResult.lastcheckin || '',
+    } as Member;
   } catch (error) {
     console.error('Error in updateMember:', error);
     return null;
   }
 };
 
-export const deleteMember = async (id) => {
+export const deleteMember = async (id: string): Promise<boolean> => {
   try {
+    console.log(`Deleting member with ID ${id}`);
+    
     const { error } = await supabase
       .from('members')
       .delete()
@@ -268,6 +297,7 @@ export const deleteMember = async (id) => {
       return false;
     }
     
+    console.log('Member deleted successfully');
     return true;
   } catch (error) {
     console.error('Error in deleteMember:', error);
@@ -275,8 +305,10 @@ export const deleteMember = async (id) => {
   }
 };
 
-export const updateMemberStatus = async (id, newStatus) => {
+export const updateMemberStatus = async (id: string, newStatus: string): Promise<Member | null> => {
   try {
+    console.log(`Updating status for member ${id} to ${newStatus}`);
+    
     const { data, error } = await supabase
       .from('members')
       .update({ status: newStatus })
@@ -288,24 +320,30 @@ export const updateMemberStatus = async (id, newStatus) => {
       return null;
     }
     
+    console.log('Response after updating member status:', data);
+    
     if (!data || data.length === 0) {
+      console.log('No data returned after updating member status');
       return null;
     }
     
-    const memberResult = data[0] || {};
-    const member = memberResult as Record<string, any>; // Use type assertion
+    const memberResult = data[0];
+    if (!memberResult) {
+      console.log('Member result is null after updating status');
+      return null;
+    }
     
     return {
-      id: member.id || '',
-      name: member.name || '',
-      email: member.email || '',
-      phone: member.phone || '',
-      membershipType: member.membershiptype || '',
-      startDate: member.startdate || '',
-      endDate: member.enddate || '',
-      status: member.status || 'Active',
-      lastCheckin: member.lastcheckin || '',
-    };
+      id: memberResult.id || '',
+      name: memberResult.name || '',
+      email: memberResult.email || '',
+      phone: memberResult.phone || '',
+      membershipType: memberResult.membershiptype || '',
+      startDate: memberResult.startdate || '',
+      endDate: memberResult.enddate || '',
+      status: memberResult.status || 'Active',
+      lastCheckin: memberResult.lastcheckin || '',
+    } as Member;
   } catch (error) {
     console.error('Error in updateMemberStatus:', error);
     return null;
