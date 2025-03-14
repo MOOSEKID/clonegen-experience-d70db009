@@ -4,7 +4,7 @@ import { Link } from 'react-router-dom';
 import { ChevronDown } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
-export interface HeaderDropdownProps {
+interface HeaderDropdownProps {
   title: string;
   items: { label: string; path: string }[];
   isActive: boolean;
