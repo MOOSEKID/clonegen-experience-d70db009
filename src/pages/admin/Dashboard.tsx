@@ -1,25 +1,29 @@
 
-import { useState } from 'react';
+import React from 'react';
 import DashboardHeader from '@/components/admin/dashboard/DashboardHeader';
 import StatsSection from '@/components/admin/dashboard/StatsSection';
-import ChartsSection, { membershipData, revenueData } from '@/components/admin/dashboard/ChartsSection';
-import AdditionalInsights, { classAttendanceData } from '@/components/admin/dashboard/AdditionalInsights';
+import ChartsSection from '@/components/admin/dashboard/ChartsSection';
+import RecentActivities from '@/components/admin/dashboard/RecentActivities';
+import AdditionalInsights from '@/components/admin/dashboard/AdditionalInsights';
+import CreateAdminButton from '@/components/admin/setup/CreateAdminButton';
 
 const AdminDashboard = () => {
-  const [timeFilter, setTimeFilter] = useState('weekly');
-
   return (
-    <div className="space-y-6">
-      <DashboardHeader 
-        timeFilter={timeFilter} 
-        setTimeFilter={setTimeFilter} 
-        membershipData={membershipData}
-        revenueData={revenueData}
-        classAttendanceData={classAttendanceData}
-      />
+    <div className="space-y-8">
+      <DashboardHeader />
+      
+      {/* Admin Account Setup */}
+      <div className="flex justify-end mb-4">
+        <CreateAdminButton />
+      </div>
+      
       <StatsSection />
       <ChartsSection />
-      <AdditionalInsights />
+      
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <RecentActivities />
+        <AdditionalInsights />
+      </div>
     </div>
   );
 };
