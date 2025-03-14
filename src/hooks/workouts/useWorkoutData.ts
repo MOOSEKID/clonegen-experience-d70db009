@@ -1,5 +1,4 @@
 
-import { useState, useEffect } from 'react';
 import { useProgramData } from './useProgramData';
 import { useExerciseData } from './useExerciseData';
 
