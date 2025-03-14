@@ -100,7 +100,10 @@ const PerformanceTracking = () => {
                 </CardContent>
               </Card>
               
-              <PerformanceMetricsCard trainerId={selectedTrainer} trainerName={getTrainerName()} />
+              <PerformanceMetricsCard 
+                trainerId={selectedTrainer} 
+                trainerName={getTrainerName()} 
+              />
             </div>
           </TabsContent>
           
@@ -121,7 +124,11 @@ const PerformanceTracking = () => {
           </TabsContent>
           
           <TabsContent value="metrics" className="space-y-4">
-            <PerformanceMetricsCard trainerId={selectedTrainer} trainerName={getTrainerName()} fullView />
+            <PerformanceMetricsCard 
+              trainerId={selectedTrainer} 
+              trainerName={getTrainerName()} 
+              fullView={true} 
+            />
           </TabsContent>
         </Tabs>
       ) : (

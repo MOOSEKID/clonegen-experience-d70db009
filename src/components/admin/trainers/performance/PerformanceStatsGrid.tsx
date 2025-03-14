@@ -1,19 +1,24 @@
 
-import { Star, Users, BarChart2, Award } from 'lucide-react';
-import { PerformanceMetrics } from '@/hooks/trainers/useTrainerPerformance';
+import { useTrainerPerformance } from '@/hooks/trainers/useTrainerPerformance';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Users, Calendar, Award, Clock } from 'lucide-react';
 
 interface PerformanceStatsGridProps {
-  data: PerformanceMetrics;
-  isLoading: boolean;
+  trainerId: string;
 }
 
-const PerformanceStatsGrid = ({ data, isLoading }: PerformanceStatsGridProps) => {
+const PerformanceStatsGrid = ({ trainerId }: PerformanceStatsGridProps) => {
+  const { metrics, isLoading } = useTrainerPerformance(trainerId);
+
   if (isLoading) {
     return (
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        {[...Array(4)].map((_, index) => (
-          <Skeleton key={index} className="h-28 w-full" />
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        {[1, 2, 3, 4].map((i) => (
+          <div key={i} className="bg-white rounded-lg shadow p-4">
+            <Skeleton className="h-4 w-20 mb-2" />
+            <Skeleton className="h-8 w-24 mb-1" />
+            <Skeleton className="h-3 w-32" />
+          </div>
         ))}
       </div>
     );
@@ -21,50 +26,41 @@ const PerformanceStatsGrid = ({ data, isLoading }: PerformanceStatsGridProps) =>
 
   const stats = [
     {
-      title: "Average Rating",
-      value: data.averageRating.toFixed(1),
-      suffix: "/5",
-      icon: <Star className="h-5 w-5 text-yellow-500" />,
-      description: "Based on client reviews"
+      title: 'Active Clients',
+      value: metrics.activeClients,
+      change: '+5% from last month',
+      icon: <Users className="h-5 w-5 text-blue-500" />,
     },
     {
-      title: "Total Classes",
-      value: data.totalClasses.toString(),
-      icon: <BarChart2 className="h-5 w-5 text-blue-500" />,
-      description: "Classes conducted"
+      title: 'Sessions This Month',
+      value: metrics.thisMonthSessions,
+      change: `${metrics.sessionChangePercent}% from last month`,
+      icon: <Calendar className="h-5 w-5 text-green-500" />,
     },
     {
-      title: "Attendance Rate",
-      value: data.averageAttendance.toString(),
-      suffix: "%",
-      icon: <Users className="h-5 w-5 text-green-500" />,
-      description: "Average class attendance"
+      title: 'Rating',
+      value: metrics.averageRating.toFixed(1),
+      change: 'Based on 24 reviews',
+      icon: <Award className="h-5 w-5 text-amber-500" />,
     },
     {
-      title: "Retention Rate",
-      value: data.clientRetentionRate.toString(),
-      suffix: "%",
-      icon: <Award className="h-5 w-5 text-purple-500" />,
-      description: "Client retention rate"
-    }
+      title: 'Attendance Rate',
+      value: `${metrics.attendanceRate}%`,
+      change: 'Over the last 30 days',
+      icon: <Clock className="h-5 w-5 text-purple-500" />,
+    },
   ];
 
   return (
-    <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
       {stats.map((stat, index) => (
-        <div 
-          key={index} 
-          className="bg-white p-4 rounded-lg border border-gray-100 shadow-sm"
-        >
-          <div className="flex items-center justify-between mb-2">
-            <h3 className="text-gray-500 text-sm font-medium">{stat.title}</h3>
+        <div key={index} className="bg-white rounded-lg shadow p-4">
+          <div className="flex items-center justify-between">
+            <h3 className="text-sm font-medium text-gray-500">{stat.title}</h3>
             {stat.icon}
           </div>
-          <div className="flex items-baseline">
-            <span className="text-2xl font-bold text-gray-900 mr-1">{stat.value}</span>
-            {stat.suffix && <span className="text-gray-500">{stat.suffix}</span>}
-          </div>
-          <p className="text-xs text-gray-500 mt-1">{stat.description}</p>
+          <p className="text-2xl font-bold my-1">{stat.value}</p>
+          <p className="text-xs text-gray-500">{stat.change}</p>
         </div>
       ))}
     </div>

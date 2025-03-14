@@ -27,11 +27,11 @@ type TrainerFormValues = z.infer<typeof trainerFormSchema>;
 
 interface TrainerEditFormProps {
   trainer: TrainerProfile;
-  onSave: (data: Partial<TrainerProfile>) => Promise<void>;
+  onSubmit: (id: string, data: Partial<TrainerProfile>) => Promise<void>;
   onCancel: () => void;
 }
 
-const TrainerEditForm = ({ trainer, onSave, onCancel }: TrainerEditFormProps) => {
+const TrainerEditForm = ({ trainer, onSubmit, onCancel }: TrainerEditFormProps) => {
   const [newSpecialization, setNewSpecialization] = useState("");
   
   const form = useForm<TrainerFormValues>({
@@ -48,8 +48,8 @@ const TrainerEditForm = ({ trainer, onSave, onCancel }: TrainerEditFormProps) =>
     },
   });
 
-  const onSubmit = (data: TrainerFormValues) => {
-    onSave(data);
+  const handleFormSubmit = async (data: TrainerFormValues) => {
+    await onSubmit(trainer.id, data);
   };
 
   const addSpecialization = () => {
@@ -72,7 +72,7 @@ const TrainerEditForm = ({ trainer, onSave, onCancel }: TrainerEditFormProps) =>
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+      <form onSubmit={form.handleSubmit(handleFormSubmit)} className="space-y-6">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <FormField
             control={form.control}

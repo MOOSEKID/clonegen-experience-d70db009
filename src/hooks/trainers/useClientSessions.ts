@@ -66,9 +66,11 @@ export const useClientSessions = (trainerId?: string, clientId?: string) => {
           const formattedData = data.map(session => ({
             ...session,
             client_name: session.members?.name,
-            trainer_name: session.trainers?.name
+            trainer_name: session.trainers?.name,
+            // Ensure status is one of the valid types
+            status: (session.status as 'scheduled' | 'completed' | 'canceled' | 'no-show') || 'scheduled'
           }));
-          setSessions(formattedData);
+          setSessions(formattedData as ClientSession[]);
         }
       } catch (err) {
         console.error('Error fetching client sessions:', err);

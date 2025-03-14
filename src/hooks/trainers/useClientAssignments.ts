@@ -51,9 +51,11 @@ export const useClientAssignments = (trainerId?: string, clientId?: string) => {
           const formattedData = data.map(assignment => ({
             ...assignment,
             client_name: assignment.members?.name,
-            trainer_name: assignment.trainers?.name
+            trainer_name: assignment.trainers?.name,
+            // Ensure status is one of the valid types
+            status: (assignment.status as 'active' | 'paused' | 'ended') || 'active'
           }));
-          setAssignments(formattedData);
+          setAssignments(formattedData as ClientAssignment[]);
         }
       } catch (err) {
         console.error('Error fetching client assignments:', err);
