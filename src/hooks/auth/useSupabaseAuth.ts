@@ -123,9 +123,7 @@ export const useSupabaseAuth = () => {
           phone: userData.phone || '',
           membershiptype: 'Basic',
           status: 'Pending',
-          username: userData.email,
-          startdate: new Date().toISOString().split('T')[0],
-          enddate: new Date(new Date().setFullYear(new Date().getFullYear() + 1)).toISOString().split('T')[0]
+          username: userData.email
         });
         
         if (memberError) {

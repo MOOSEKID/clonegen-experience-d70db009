@@ -1,8 +1,6 @@
 
 import { supabase } from '@/integrations/supabase/client';
 
-export type ClassStatus = 'scheduled' | 'full' | 'canceled';
-
 export interface GymClass {
   id: string;
   name: string;
@@ -16,8 +14,7 @@ export interface GymClass {
   time: string;
   duration: number;
   room?: string;
-  status: ClassStatus;
-  enrollments?: ClassEnrollment[];
+  status: 'scheduled' | 'full' | 'canceled';
 }
 
 export interface ClassEnrollment {
@@ -59,7 +56,7 @@ export const fetchClasses = async (): Promise<GymClass[]> => {
       time: item.time,
       duration: item.duration,
       room: item.room,
-      status: (item.status as ClassStatus) || 'scheduled'
+      status: item.status
     }));
   } catch (error) {
     console.error('Error fetching classes:', error);
@@ -105,7 +102,7 @@ export const fetchClassWithEnrollments = async (classId: string): Promise<GymCla
         member_id: e.member_id,
         member_name: e.member?.name,
         member_email: e.member?.email,
-        status: e.status as 'enrolled' | 'waitlisted' | 'canceled',
+        status: e.status,
         enrollment_date: e.enrollment_date,
         waitlist_position: e.waitlist_position
       })) : [];
@@ -123,7 +120,7 @@ export const fetchClassWithEnrollments = async (classId: string): Promise<GymCla
       time: data.time,
       duration: data.duration,
       room: data.room,
-      status: (data.status as ClassStatus) || 'scheduled',
+      status: data.status,
       enrollments: formattedEnrollments
     };
   } catch (error) {
@@ -240,7 +237,7 @@ export const enrollMemberInClass = async (
     }
     
     // Update the class status if it's now full
-    if (!isClassFull && (classInfo.enrolled + 1) >= classInfo.capacity) {
+    if (!isClassFull && classInfo.enrolled + 1 >= classInfo.capacity) {
       await updateClass(classId, { status: 'full' });
     }
     
