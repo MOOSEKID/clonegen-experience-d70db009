@@ -16,6 +16,7 @@ interface AddClassDialogProps {
 const AddClassDialog = ({ open, onOpenChange, onAddClass }: AddClassDialogProps) => {
   const [classData, setClassData] = useState<Omit<ClassType, 'id'>>(getDefaultClassData());
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
@@ -92,6 +93,15 @@ const AddClassDialog = ({ open, onOpenChange, onAddClass }: AddClassDialogProps)
       ...prev,
       [name]: values
     }));
+    
+    // Clear error when field is changed
+    if (errors[name]) {
+      setErrors(prev => {
+        const newErrors = { ...prev };
+        delete newErrors[name];
+        return newErrors;
+      });
+    }
   };
 
   const validateForm = (): boolean => {
@@ -104,6 +114,7 @@ const AddClassDialog = ({ open, onOpenChange, onAddClass }: AddClassDialogProps)
     
     if (!classData.trainer && !classData.trainerId) {
       newErrors.trainer = 'Trainer is required';
+      newErrors.trainerId = 'Trainer is required';
     }
     
     if (!classData.day) {
@@ -138,11 +149,17 @@ const AddClassDialog = ({ open, onOpenChange, onAddClass }: AddClassDialogProps)
       }
     }
     
+    // Equipment validation
+    if (!classData.equipmentRequired || classData.equipmentRequired.length === 0) {
+      newErrors.equipmentRequired = 'At least one equipment option is required';
+    }
+    
+    console.log('Form validation errors:', newErrors);
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
     if (!validateForm()) {
@@ -150,11 +167,19 @@ const AddClassDialog = ({ open, onOpenChange, onAddClass }: AddClassDialogProps)
       return;
     }
     
-    onAddClass(classData);
-    onOpenChange(false);
-    // Reset form
-    setClassData(getDefaultClassData());
-    setErrors({});
+    try {
+      setIsSubmitting(true);
+      await onAddClass(classData);
+      onOpenChange(false);
+      // Reset form
+      setClassData(getDefaultClassData());
+      setErrors({});
+    } catch (error) {
+      console.error('Error submitting class:', error);
+      toast.error('Failed to create class. Please try again.');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const handleCancel = () => {
@@ -166,13 +191,14 @@ const AddClassDialog = ({ open, onOpenChange, onAddClass }: AddClassDialogProps)
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[650px]">
+      <DialogContent className="sm:max-w-[650px] max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Add New Class</DialogTitle>
         </DialogHeader>
         <form onSubmit={handleSubmit}>
           <ClassFormFields 
             classData={classData}
+            errors={errors}
             handleChange={handleChange}
             handleNumberChange={handleNumberChange}
             handleSelectChange={handleSelectChange}
@@ -180,15 +206,18 @@ const AddClassDialog = ({ open, onOpenChange, onAddClass }: AddClassDialogProps)
             handleMultiSelectChange={handleMultiSelectChange}
           />
           
-          <DialogFooter>
+          <DialogFooter className="mt-4 pt-2 border-t">
             <Button 
               type="button" 
               variant="outline" 
               onClick={handleCancel}
+              disabled={isSubmitting}
             >
               Cancel
             </Button>
-            <Button type="submit">Create Class</Button>
+            <Button type="submit" disabled={isSubmitting}>
+              {isSubmitting ? 'Creating...' : 'Create Class'}
+            </Button>
           </DialogFooter>
         </form>
       </DialogContent>

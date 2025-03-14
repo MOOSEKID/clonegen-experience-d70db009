@@ -18,7 +18,7 @@ export const getDefaultClassData = (): Omit<ClassType, 'id'> => ({
   enrolledMembers: [],
   waitlistMembers: [],
   classLevel: 'Beginner',
-  equipmentRequired: [],
+  equipmentRequired: ['yoga_mat'],
   recurrence: false,
   classFees: null,
   feeType: null

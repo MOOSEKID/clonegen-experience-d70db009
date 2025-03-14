@@ -20,15 +20,31 @@ export const useClassActions = (initialClasses: ClassType[] = []) => {
   
   const addClass = async (newClass: Omit<ClassType, 'id'>) => {
     try {
-      const newId = Math.max(...classes.map(c => c.id), 0) + 1;
-      const classWithId = {
+      // Validate required fields before proceeding
+      if (!newClass.name || !newClass.type || !newClass.day || !newClass.time || !newClass.duration || !newClass.room) {
+        throw new Error('Missing required fields');
+      }
+      
+      // Make sure either trainer name or trainerId exists
+      if (!newClass.trainer && !newClass.trainerId) {
+        throw new Error('Trainer is required');
+      }
+      
+      // Make sure newClass has waitlistMembers and enrolledMembers initialized
+      const classToAdd = {
         ...newClass,
-        id: newId,
         // Make sure these are initialized for a new class
         enrolled: 0,
         waitlist: 0,
         enrolledMembers: [],
         waitlistMembers: []
+      };
+      
+      // Generate a new ID for local state management
+      const newId = Math.max(...classes.map(c => c.id || 0), 0) + 1;
+      let classWithId = {
+        ...classToAdd,
+        id: newId
       };
       
       // First try to save to Supabase
@@ -44,11 +60,13 @@ export const useClassActions = (initialClasses: ClassType[] = []) => {
         status: newClass.status,
         trainer_id: newClass.trainerId || null,
         class_level: newClass.classLevel,
-        equipment_required: newClass.equipmentRequired,
-        recurrence: newClass.recurrence,
+        equipment_required: newClass.equipmentRequired || [],
+        recurrence: newClass.recurrence || false,
         class_fees: newClass.classFees,
         fee_type: newClass.feeType
       };
+      
+      console.log('Sending data to Supabase:', supabaseData);
       
       const { data, error } = await supabase
         .from('classes')
@@ -58,10 +76,11 @@ export const useClassActions = (initialClasses: ClassType[] = []) => {
         
       if (error) {
         console.error('Error saving class to Supabase:', error);
-        // Continue with local state management since we're falling back
+        throw new Error(`Database error: ${error.message}`);
       } else if (data) {
         // If success, use the returned ID from Supabase
-        // But we still need to keep our UI data structure
+        console.log('Created class in Supabase:', data);
+        // Convert the string ID from Supabase to a number for our local state
         classWithId.id = typeof data.id === 'string' ? parseInt(data.id) : data.id;
       }
       
@@ -75,7 +94,11 @@ export const useClassActions = (initialClasses: ClassType[] = []) => {
       return classWithId;
     } catch (error) {
       console.error('Error adding class:', error);
-      toast.error('Failed to add class');
+      if (error instanceof Error) {
+        toast.error(`Failed to add class: ${error.message}`);
+      } else {
+        toast.error('Failed to add class due to an unknown error');
+      }
       throw error;
     }
   };

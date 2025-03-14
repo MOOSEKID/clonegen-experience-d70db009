@@ -19,11 +19,13 @@ import {
   TooltipProvider, 
   TooltipTrigger 
 } from '@/components/ui/tooltip';
-import { Info, Loader2 } from 'lucide-react';
+import { Info, Loader2, AlertCircle } from 'lucide-react';
 import { useState, useEffect } from 'react';
+import { cn } from '@/lib/utils';
 
 interface ClassFormFieldsProps {
   classData: Omit<ClassType, 'id'>;
+  errors?: Record<string, string>;
   handleChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => void;
   handleNumberChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   handleSelectChange: (name: string, value: string) => void;
@@ -33,6 +35,7 @@ interface ClassFormFieldsProps {
 
 const ClassFormFields = ({
   classData,
+  errors = {},
   handleChange,
   handleNumberChange,
   handleSelectChange,
@@ -72,28 +75,44 @@ const ClassFormFields = ({
     }
   }, [classData.equipmentRequired]);
 
+  // Helper function to render error message
+  const ErrorMessage = ({ name }: { name: string }) => (
+    errors[name] ? (
+      <div className="text-red-500 text-sm mt-1 flex items-center gap-1">
+        <AlertCircle className="h-4 w-4" />
+        <span>{errors[name]}</span>
+      </div>
+    ) : null
+  );
+
   return (
     <div className="space-y-4 py-4">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div className="space-y-2">
-          <Label htmlFor="name">Class Name</Label>
+          <Label htmlFor="name" className={cn(errors.name && "text-red-500")}>
+            Class Name*
+          </Label>
           <Input 
             id="name" 
             name="name" 
             value={classData.name} 
             onChange={handleChange} 
             placeholder="Enter class name"
+            className={cn(errors.name && "border-red-500 focus-visible:ring-red-500")}
             required 
           />
+          <ErrorMessage name="name" />
         </div>
         
         <div className="space-y-2">
-          <Label htmlFor="type">Class Type</Label>
+          <Label htmlFor="type" className={cn(errors.type && "text-red-500")}>
+            Class Type*
+          </Label>
           <Select 
             value={classData.type} 
             onValueChange={(value) => handleSelectChange('type', value)}
           >
-            <SelectTrigger>
+            <SelectTrigger className={cn(errors.type && "border-red-500")}>
               <SelectValue placeholder="Select class type" />
             </SelectTrigger>
             <SelectContent>
@@ -105,6 +124,7 @@ const ClassFormFields = ({
               <SelectItem value="other">Other</SelectItem>
             </SelectContent>
           </Select>
+          <ErrorMessage name="type" />
         </div>
       </div>
       
@@ -122,7 +142,9 @@ const ClassFormFields = ({
       
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div className="space-y-2">
-          <Label htmlFor="trainer">Trainer</Label>
+          <Label htmlFor="trainer" className={cn((errors.trainer || errors.trainerId) && "text-red-500")}>
+            Trainer*
+          </Label>
           {loadingTrainers ? (
             <div className="flex items-center space-x-2 h-10 px-3 py-2 border rounded-md">
               <Loader2 className="h-4 w-4 animate-spin" />
@@ -139,7 +161,7 @@ const ClassFormFields = ({
                 }
               }}
             >
-              <SelectTrigger>
+              <SelectTrigger className={cn((errors.trainer || errors.trainerId) && "border-red-500")}>
                 <SelectValue placeholder="Select a trainer" />
               </SelectTrigger>
               <SelectContent>
@@ -151,11 +173,14 @@ const ClassFormFields = ({
               </SelectContent>
             </Select>
           )}
+          {(errors.trainer || errors.trainerId) && <ErrorMessage name={errors.trainer ? 'trainer' : 'trainerId'} />}
         </div>
         
         <div className="space-y-2">
           <div className="flex items-center space-x-2">
-            <Label htmlFor="capacity">Maximum Capacity</Label>
+            <Label htmlFor="capacity" className={cn(errors.capacity && "text-red-500")}>
+              Maximum Capacity*
+            </Label>
             <TooltipProvider>
               <Tooltip>
                 <TooltipTrigger>
@@ -176,19 +201,23 @@ const ClassFormFields = ({
             value={classData.capacity} 
             onChange={handleNumberChange}
             placeholder="Enter maximum capacity"
+            className={cn(errors.capacity && "border-red-500 focus-visible:ring-red-500")}
             required
           />
+          <ErrorMessage name="capacity" />
         </div>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div className="space-y-2">
-          <Label htmlFor="classLevel">Class Level</Label>
+          <Label htmlFor="classLevel" className={cn(errors.classLevel && "text-red-500")}>
+            Class Level*
+          </Label>
           <Select 
             value={classData.classLevel} 
             onValueChange={(value) => handleSelectChange('classLevel', value)}
           >
-            <SelectTrigger>
+            <SelectTrigger className={cn(errors.classLevel && "border-red-500")}>
               <SelectValue placeholder="Select class level" />
             </SelectTrigger>
             <SelectContent>
@@ -197,15 +226,18 @@ const ClassFormFields = ({
               <SelectItem value="Advanced">Advanced</SelectItem>
             </SelectContent>
           </Select>
+          <ErrorMessage name="classLevel" />
         </div>
         
         <div className="space-y-2">
-          <Label htmlFor="status">Class Status</Label>
+          <Label htmlFor="status" className={cn(errors.status && "text-red-500")}>
+            Class Status*
+          </Label>
           <Select 
             value={classData.status} 
             onValueChange={(value) => handleSelectChange('status', value)}
           >
-            <SelectTrigger>
+            <SelectTrigger className={cn(errors.status && "border-red-500")}>
               <SelectValue placeholder="Select class status" />
             </SelectTrigger>
             <SelectContent>
@@ -215,17 +247,20 @@ const ClassFormFields = ({
               <SelectItem value="canceled">Canceled</SelectItem>
             </SelectContent>
           </Select>
+          <ErrorMessage name="status" />
         </div>
       </div>
       
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <div className="space-y-2">
-          <Label htmlFor="day">Day</Label>
+          <Label htmlFor="day" className={cn(errors.day && "text-red-500")}>
+            Day*
+          </Label>
           <Select 
             value={classData.day} 
             onValueChange={(value) => handleSelectChange('day', value)}
           >
-            <SelectTrigger>
+            <SelectTrigger className={cn(errors.day && "border-red-500")}>
               <SelectValue placeholder="Select day" />
             </SelectTrigger>
             <SelectContent>
@@ -238,22 +273,29 @@ const ClassFormFields = ({
               <SelectItem value="Sunday">Sunday</SelectItem>
             </SelectContent>
           </Select>
+          <ErrorMessage name="day" />
         </div>
         
         <div className="space-y-2">
-          <Label htmlFor="time">Start Time</Label>
+          <Label htmlFor="time" className={cn(errors.time && "text-red-500")}>
+            Start Time*
+          </Label>
           <Input 
             id="time" 
             name="time" 
             type="time"
             value={classData.time} 
             onChange={handleChange}
+            className={cn(errors.time && "border-red-500 focus-visible:ring-red-500")}
             required
           />
+          <ErrorMessage name="time" />
         </div>
         
         <div className="space-y-2">
-          <Label htmlFor="duration">Duration (mins)</Label>
+          <Label htmlFor="duration" className={cn(errors.duration && "text-red-500")}>
+            Duration (mins)*
+          </Label>
           <Input 
             id="duration" 
             name="duration" 
@@ -262,22 +304,28 @@ const ClassFormFields = ({
             step="5"
             value={classData.duration} 
             onChange={handleNumberChange}
+            className={cn(errors.duration && "border-red-500 focus-visible:ring-red-500")}
             required
           />
+          <ErrorMessage name="duration" />
         </div>
       </div>
       
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div className="space-y-2">
-          <Label htmlFor="room">Room</Label>
+          <Label htmlFor="room" className={cn(errors.room && "text-red-500")}>
+            Room*
+          </Label>
           <Input 
             id="room" 
             name="room" 
             value={classData.room} 
             onChange={handleChange}
             placeholder="Enter room or location"
+            className={cn(errors.room && "border-red-500 focus-visible:ring-red-500")}
             required
           />
+          <ErrorMessage name="room" />
         </div>
         
         <div className="space-y-2 flex items-center">
@@ -301,8 +349,12 @@ const ClassFormFields = ({
 
       <div className="space-y-4">
         <div>
-          <Label className="mb-2 block">Equipment Required</Label>
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2">
+          <Label 
+            className={cn("mb-2 block", errors.equipmentRequired && "text-red-500")}
+          >
+            Equipment Required*
+          </Label>
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 border p-3 rounded-md bg-background">
             {equipmentOptions.map((option) => (
               <div key={option.value} className="flex items-center space-x-2">
                 <Checkbox 
@@ -319,6 +371,7 @@ const ClassFormFields = ({
               </div>
             ))}
           </div>
+          <ErrorMessage name="equipmentRequired" />
         </div>
       </div>
 
@@ -347,7 +400,9 @@ const ClassFormFields = ({
         {classData.classFees !== null && (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="classFees">Fee Amount</Label>
+              <Label htmlFor="classFees" className={cn(errors.classFees && "text-red-500")}>
+                Fee Amount
+              </Label>
               <div className="relative">
                 <span className="absolute left-3 top-1/2 transform -translate-y-1/2">$</span>
                 <Input 
@@ -356,21 +411,24 @@ const ClassFormFields = ({
                   type="number"
                   min="0"
                   step="0.01"
-                  className="pl-7"
+                  className={cn("pl-7", errors.classFees && "border-red-500 focus-visible:ring-red-500")}
                   value={classData.classFees || ''} 
                   onChange={handleNumberChange}
                   placeholder="0.00"
                 />
               </div>
+              <ErrorMessage name="classFees" />
             </div>
             
             <div className="space-y-2">
-              <Label htmlFor="feeType">Fee Type</Label>
+              <Label htmlFor="feeType" className={cn(errors.feeType && "text-red-500")}>
+                Fee Type
+              </Label>
               <Select 
                 value={classData.feeType || ''}
                 onValueChange={(value) => handleSelectChange('feeType', value)}
               >
-                <SelectTrigger>
+                <SelectTrigger className={cn(errors.feeType && "border-red-500")}>
                   <SelectValue placeholder="Select fee type" />
                 </SelectTrigger>
                 <SelectContent>
@@ -378,6 +436,7 @@ const ClassFormFields = ({
                   <SelectItem value="package">Package</SelectItem>
                 </SelectContent>
               </Select>
+              <ErrorMessage name="feeType" />
             </div>
           </div>
         )}
