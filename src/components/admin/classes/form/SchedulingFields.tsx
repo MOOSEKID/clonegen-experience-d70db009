@@ -17,7 +17,7 @@ import {
 import { cn } from '@/lib/utils';
 import { AlertCircle, RotateCw } from 'lucide-react';
 import { useGymLocations } from '@/hooks/classes/useGymLocations';
-import { weekDays, isEveryDay, toggleEveryDay } from '@/utils/classFormUtils';
+import { weekDays, isEveryDay, toggleEveryDay, toggleDay } from '@/utils/classFormUtils';
 import { Button } from '@/components/ui/button';
 
 interface SchedulingFieldsProps {
@@ -52,16 +52,12 @@ const SchedulingFields = ({
   );
 
   const toggleDayHandler = (day: string) => {
-    const currentDays = [...classData.recurrenceDays];
-    const newDays = currentDays.includes(day) 
-      ? currentDays.filter(d => d !== day)
-      : [...currentDays, day];
-    
+    const newDays = toggleDay(classData.recurrenceDays, day);
     handleMultiSelectChange('recurrenceDays', newDays);
   };
 
   const toggleEveryDayHandler = () => {
-    const newDays = isEveryDay(classData.recurrenceDays) ? [] : weekDays.map(day => day.value);
+    const newDays = toggleEveryDay(classData.recurrenceDays);
     handleMultiSelectChange('recurrenceDays', newDays);
   };
 

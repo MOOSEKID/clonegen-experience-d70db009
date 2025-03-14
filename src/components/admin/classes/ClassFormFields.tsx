@@ -59,6 +59,7 @@ const ClassFormFields = ({
         handleNumberChange={handleNumberChange}
         handleSelectChange={handleSelectChange}
         handleCheckboxChange={handleCheckboxChange}
+        handleMultiSelectChange={handleMultiSelectChange}
       />
       
       {/* Equipment Required */}
