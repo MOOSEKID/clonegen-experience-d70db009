@@ -1,30 +1,19 @@
 import { useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { cn } from '@/lib/utils';
-import { Menu, X, ShoppingBag, User, LayoutDashboard, LogOut, Settings } from 'lucide-react';
+import { Menu, X, ShoppingBag, User, LayoutDashboard } from 'lucide-react';
 import DesktopNav from './header/DesktopNav';
 import MobileMenu from './header/MobileMenu';
-import { useAuth } from '@/contexts/auth';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { 
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger
-} from '@/components/ui/dropdown-menu';
 
 const Header = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isCompanyDropdownOpen, setIsCompanyDropdownOpen] = useState(false);
   const [isServicesDropdownOpen, setIsServicesDropdownOpen] = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
-  
-  const { user, isAdmin, signOut } = useAuth();
-  const isLoggedIn = !!user;
 
   useEffect(() => {
     const handleScroll = () => {
@@ -38,6 +27,29 @@ const Header = () => {
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
+
+  useEffect(() => {
+    const checkAuth = () => {
+      const loggedIn = localStorage.getItem('isLoggedIn') === 'true' || document.cookie.includes('session_active=true');
+      const admin = localStorage.getItem('isAdmin') === 'true' || document.cookie.includes('user_role=admin');
+      
+      if (loggedIn && localStorage.getItem('isLoggedIn') !== 'true') {
+        localStorage.setItem('isLoggedIn', 'true');
+      }
+      
+      if (admin && localStorage.getItem('isAdmin') !== 'true') {
+        localStorage.setItem('isAdmin', 'true');
+      }
+      
+      setIsLoggedIn(loggedIn);
+      setIsAdmin(admin);
+    };
+    
+    checkAuth();
+    
+    const interval = setInterval(checkAuth, 2000);
+    return () => clearInterval(interval);
+  }, [location.pathname]);
 
   useEffect(() => {
     setIsMenuOpen(false);
@@ -66,11 +78,6 @@ const Header = () => {
       return;
     }
     navigate(isAdmin ? '/admin' : '/dashboard');
-  };
-
-  const handleSignOut = async () => {
-    await signOut();
-    navigate('/');
   };
 
   const navItems = [
@@ -105,15 +112,18 @@ const Header = () => {
   const authItems = isLoggedIn 
     ? [
         {
-          label: 'Profile',
-          path: '/profile',
-          icon: User,
-        },
-        {
           label: 'Logout',
           path: '/logout',
-          icon: LogOut,
-          action: handleSignOut
+          icon: User,
+          action: () => {
+            localStorage.removeItem('isLoggedIn');
+            localStorage.removeItem('isAdmin');
+            localStorage.removeItem('userEmail');
+            localStorage.removeItem('userName');
+            document.cookie = "session_active=; path=/; max-age=0";
+            document.cookie = "user_role=; path=/; max-age=0";
+            window.location.href = '/login';
+          }
         }
       ]
     : [
@@ -154,49 +164,6 @@ const Header = () => {
           setIsCompanyDropdownOpen={setIsCompanyDropdownOpen}
           isLoggedIn={isLoggedIn}
         />
-
-        <div className="hidden md:flex items-center space-x-4">
-          {isLoggedIn ? (
-            <DropdownMenu>
-              <DropdownMenuTrigger className="focus:outline-none">
-                <Avatar className="h-8 w-8 ring-2 ring-white/20">
-                  <AvatarImage src="" />
-                  <AvatarFallback className="bg-gym-orange text-white">
-                    {user?.email?.charAt(0).toUpperCase() || 'U'}
-                  </AvatarFallback>
-                </Avatar>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-56">
-                <DropdownMenuLabel>My Account</DropdownMenuLabel>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={() => navigate('/profile')}>
-                  <User className="mr-2 h-4 w-4" />
-                  <span>Profile</span>
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={handleDashboardClick}>
-                  <LayoutDashboard className="mr-2 h-4 w-4" />
-                  <span>Dashboard</span>
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => navigate('/settings')}>
-                  <Settings className="mr-2 h-4 w-4" />
-                  <span>Settings</span>
-                </DropdownMenuItem>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={handleSignOut}>
-                  <LogOut className="mr-2 h-4 w-4" />
-                  <span>Log out</span>
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          ) : (
-            <Link 
-              to="/login"
-              className="bg-gym-orange hover:bg-gym-orange/90 text-white px-4 py-2 rounded-full font-medium transition-colors"
-            >
-              Sign In
-            </Link>
-          )}
-        </div>
 
         <button
           className="md:hidden text-white/90 hover:text-white"

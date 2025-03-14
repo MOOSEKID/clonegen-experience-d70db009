@@ -47,57 +47,6 @@ export type Database = {
           },
         ]
       }
-      attendance_tracking: {
-        Row: {
-          check_in: string | null
-          check_out: string | null
-          created_at: string | null
-          id: string
-          member_id: string | null
-          notes: string | null
-          status: string | null
-          trainer_id: string | null
-          updated_at: string | null
-        }
-        Insert: {
-          check_in?: string | null
-          check_out?: string | null
-          created_at?: string | null
-          id?: string
-          member_id?: string | null
-          notes?: string | null
-          status?: string | null
-          trainer_id?: string | null
-          updated_at?: string | null
-        }
-        Update: {
-          check_in?: string | null
-          check_out?: string | null
-          created_at?: string | null
-          id?: string
-          member_id?: string | null
-          notes?: string | null
-          status?: string | null
-          trainer_id?: string | null
-          updated_at?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "attendance_tracking_member_id_fkey"
-            columns: ["member_id"]
-            isOneToOne: false
-            referencedRelation: "members"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "attendance_tracking_trainer_id_fkey"
-            columns: ["trainer_id"]
-            isOneToOne: false
-            referencedRelation: "trainers"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       class_enrollments: {
         Row: {
           class_id: string | null
@@ -829,48 +778,6 @@ export type Database = {
           },
         ]
       }
-      profiles: {
-        Row: {
-          avatar_url: string | null
-          contact_number: string | null
-          created_at: string | null
-          full_name: string | null
-          gym_location: string | null
-          id: string
-          is_admin: boolean | null
-          preferred_workout_time: string | null
-          role: string | null
-          updated_at: string | null
-          username: string | null
-        }
-        Insert: {
-          avatar_url?: string | null
-          contact_number?: string | null
-          created_at?: string | null
-          full_name?: string | null
-          gym_location?: string | null
-          id: string
-          is_admin?: boolean | null
-          preferred_workout_time?: string | null
-          role?: string | null
-          updated_at?: string | null
-          username?: string | null
-        }
-        Update: {
-          avatar_url?: string | null
-          contact_number?: string | null
-          created_at?: string | null
-          full_name?: string | null
-          gym_location?: string | null
-          id?: string
-          is_admin?: boolean | null
-          preferred_workout_time?: string | null
-          role?: string | null
-          updated_at?: string | null
-          username?: string | null
-        }
-        Relationships: []
-      }
       program_exercises: {
         Row: {
           created_at: string | null
@@ -1107,59 +1014,6 @@ export type Database = {
           },
           {
             foreignKeyName: "trainer_client_assignments_trainer_id_fkey"
-            columns: ["trainer_id"]
-            isOneToOne: false
-            referencedRelation: "trainers"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      trainer_performance: {
-        Row: {
-          avg_session_rating: number | null
-          class_fill_rate: number | null
-          classes_taught: number | null
-          created_at: string | null
-          date: string
-          id: string
-          monthly_goal_progress: number | null
-          new_clients: number | null
-          private_sessions: number | null
-          total_hours: number | null
-          trainer_id: string
-          updated_at: string | null
-        }
-        Insert: {
-          avg_session_rating?: number | null
-          class_fill_rate?: number | null
-          classes_taught?: number | null
-          created_at?: string | null
-          date?: string
-          id?: string
-          monthly_goal_progress?: number | null
-          new_clients?: number | null
-          private_sessions?: number | null
-          total_hours?: number | null
-          trainer_id: string
-          updated_at?: string | null
-        }
-        Update: {
-          avg_session_rating?: number | null
-          class_fill_rate?: number | null
-          classes_taught?: number | null
-          created_at?: string | null
-          date?: string
-          id?: string
-          monthly_goal_progress?: number | null
-          new_clients?: number | null
-          private_sessions?: number | null
-          total_hours?: number | null
-          trainer_id?: string
-          updated_at?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "trainer_performance_trainer_id_fkey"
             columns: ["trainer_id"]
             isOneToOne: false
             referencedRelation: "trainers"

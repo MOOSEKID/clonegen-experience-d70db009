@@ -1,204 +1,164 @@
-import { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import * as z from 'zod';
-import { toast } from 'sonner';
-import { useAuth } from '@/contexts/auth';
-import { supabase } from '@/integrations/supabase/client';
 
+import { useState, useEffect } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from '@/components/ui/form';
+import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
-import { Separator } from '@/components/ui/separator';
+import { toast } from 'sonner';
+import { Eye, EyeOff } from 'lucide-react';
 
-const formSchema = z.object({
-  email: z.string().email({
-    message: "Please enter a valid email address.",
-  }),
-  password: z.string().min(6, {
-    message: "Password must be at least 6 characters.",
-  }),
-});
+// Demo user data - in a real app, this would come from a database
+const DEMO_USERS = [
+  { email: 'admin@example.com', password: 'admin123', isAdmin: true, name: 'Admin User' },
+  { email: 'user@example.com', password: 'user123', isAdmin: false, name: 'Regular User' },
+  { email: 'john@example.com', password: 'john123', isAdmin: false, name: 'John Doe' },
+  { email: 'jane@example.com', password: 'jane123', isAdmin: false, name: 'Jane Smith' },
+  { email: 'test@example.com', password: 'test123', isAdmin: false, name: 'Test User' }
+];
 
 const Login = () => {
-  const [isLoading, setIsLoading] = useState(false);
-  const { signIn } = useAuth();
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
+  const [rememberMe, setRememberMe] = useState(false);
   const navigate = useNavigate();
-  
-  const form = useForm<z.infer<typeof formSchema>>({
-    resolver: zodResolver(formSchema),
-    defaultValues: {
-      email: "",
-      password: "",
-    },
-  });
+  const location = useLocation();
+  const from = location.state?.from || '/dashboard';
 
-  const onSubmit = async (values: z.infer<typeof formSchema>) => {
-    setIsLoading(true);
-    try {
-      const { error } = await signIn(values.email, values.password);
+  useEffect(() => {
+    // Check if user is already logged in
+    const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true' || document.cookie.includes('session_active=true');
+    if (isLoggedIn) {
+      const isAdmin = localStorage.getItem('isAdmin') === 'true' || document.cookie.includes('user_role=admin');
+      navigate(isAdmin ? '/admin' : '/dashboard');
+    }
+  }, [navigate]);
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    // Find user in demo data
+    const user = DEMO_USERS.find(user => user.email === email && user.password === password);
+    
+    if (user) {
+      // Set login status in localStorage
+      localStorage.setItem('isLoggedIn', 'true');
+      localStorage.setItem('isAdmin', user.isAdmin ? 'true' : 'false');
+      localStorage.setItem('userEmail', email);
+      localStorage.setItem('userName', user.name);
       
-      if (error) {
-        toast.error(error.message || "Login failed");
+      // Set cookies with expiry (30 days)
+      const expiryDate = new Date();
+      expiryDate.setDate(expiryDate.getDate() + 30);
+      document.cookie = `session_active=true; path=/; expires=${expiryDate.toUTCString()}`;
+      document.cookie = `user_role=${user.isAdmin ? 'admin' : 'user'}; path=/; expires=${expiryDate.toUTCString()}`;
+      
+      toast.success('Login successful! Redirecting...');
+      
+      // Navigate based on user role
+      navigate(user.isAdmin ? '/admin' : from);
+    } else {
+      // Provide more helpful error message
+      if (email === '' || password === '') {
+        toast.error('Please enter both email and password');
+      } else if (DEMO_USERS.some(user => user.email === email)) {
+        toast.error('Incorrect password. Please try again.');
       } else {
-        const { data: profile } = await supabase
-          .from('profiles')
-          .select('is_admin')
-          .eq('id', (await supabase.auth.getUser()).data.user?.id)
-          .single();
-        
-        if (profile?.is_admin) {
-          navigate('/admin');
-          toast.success("Welcome to Admin Dashboard");
-        } else {
-          navigate('/dashboard');
-          toast.success("Login successful");
-        }
+        toast.error('Invalid credentials. For demo, try: user@example.com / user123');
       }
-    } catch (error) {
-      console.error(error);
-      toast.error("An unexpected error occurred");
-    } finally {
-      setIsLoading(false);
     }
   };
 
-  const handlePasswordReset = async () => {
-    const email = form.getValues("email");
-    
-    if (!email) {
-      toast.error("Please enter your email address");
-      return;
-    }
-    
-    try {
-      setIsLoading(true);
-      const { error } = await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: `${window.location.origin}/reset-password`,
-      });
-      
-      if (error) {
-        toast.error(error.message);
-      } else {
-        toast.success("Password reset link sent to your email");
-      }
-    } catch (error: any) {
-      toast.error(error.message || "Failed to send password reset link");
-    } finally {
-      setIsLoading(false);
-    }
+  const togglePasswordVisibility = () => {
+    setShowPassword(prev => !prev);
   };
 
   return (
-    <div className="container mx-auto px-4 py-16 flex justify-center items-center min-h-[calc(100vh-200px)]">
-      <div className="w-full max-w-md p-8 space-y-8 bg-white rounded-xl shadow-lg">
-        <div className="text-center">
-          <h1 className="text-3xl font-extrabold tracking-tight">Welcome Back</h1>
-          <p className="text-sm text-gray-500 mt-2">Sign in to your account</p>
+    <div className="min-h-screen flex items-center justify-center p-6 bg-gym-dark">
+      <Card className="w-full max-w-md p-6 bg-gym-darkblue text-white border border-white/10">
+        <div className="mb-6 text-center">
+          <h1 className="text-3xl font-bold mb-2">Welcome Back</h1>
+          <p className="text-white/70">Log in to access your account</p>
         </div>
-
-        <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-            <FormField
-              control={form.control}
-              name="email"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Email</FormLabel>
-                  <FormControl>
-                    <Input placeholder="yourname@example.com" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
+        
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div className="space-y-2">
+            <label htmlFor="email" className="block text-sm font-medium text-white/90">
+              Email
+            </label>
+            <Input
+              id="email"
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="Enter your email"
+              required
+              className="bg-gym-dark border-white/20 text-white placeholder:text-white/50"
             />
+          </div>
+          
+          <div className="space-y-2">
+            <label htmlFor="password" className="block text-sm font-medium text-white/90">
+              Password
+            </label>
+            <div className="relative">
+              <Input
+                id="password"
+                type={showPassword ? "text" : "password"}
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="Enter your password"
+                required
+                className="bg-gym-dark border-white/20 text-white placeholder:text-white/50 pr-10"
+              />
+              <button
+                type="button"
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-white/70 hover:text-white focus:outline-none"
+                onClick={togglePasswordVisibility}
+                aria-label={showPassword ? "Hide password" : "Show password"}
+              >
+                {showPassword ? (
+                  <EyeOff size={18} />
+                ) : (
+                  <Eye size={18} />
+                )}
+              </button>
+            </div>
+          </div>
+          
+          <div className="flex items-center justify-between">
+            <div className="flex items-center">
+              <input
+                id="remember-me"
+                type="checkbox"
+                className="h-4 w-4 rounded border-white/20 bg-gym-dark text-gym-orange focus:ring-gym-orange"
+                checked={rememberMe}
+                onChange={(e) => setRememberMe(e.target.checked)}
+              />
+              <label htmlFor="remember-me" className="ml-2 block text-sm text-white/70">
+                Remember me
+              </label>
+            </div>
             
-            <FormField
-              control={form.control}
-              name="password"
-              render={({ field }) => (
-                <FormItem>
-                  <div className="flex items-center justify-between">
-                    <FormLabel>Password</FormLabel>
-                    <button 
-                      type="button"
-                      onClick={handlePasswordReset}
-                      className="text-xs text-blue-600 hover:text-blue-500"
-                    >
-                      Forgot Password?
-                    </button>
-                  </div>
-                  <FormControl>
-                    <Input type="password" placeholder="••••••••" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <Button 
-              type="submit" 
-              className="w-full" 
-              disabled={isLoading}
-            >
-              {isLoading ? "Logging in..." : "Log in"}
-            </Button>
-          </form>
-        </Form>
-
-        <div className="relative">
-          <div className="absolute inset-0 flex items-center">
-            <Separator className="w-full" />
+            <div className="text-sm">
+              <a href="#" className="text-gym-orange hover:underline">
+                Forgot password?
+              </a>
+            </div>
           </div>
-          <div className="relative flex justify-center text-xs uppercase">
-            <span className="bg-white px-2 text-gray-500">Or continue with</span>
-          </div>
-        </div>
-
-        <div className="grid grid-cols-1 gap-3">
-          <Button variant="outline" disabled={isLoading} className="bg-white">
-            <svg className="mr-2 h-4 w-4" viewBox="0 0 24 24">
-              <path
-                d="M12.0003 4.75C13.7703 4.75 15.3553 5.36002 16.6053 6.54998L20.0303 3.125C17.9502 1.19 15.2353 0 12.0003 0C7.31028 0 3.25527 2.69 1.28027 6.60998L5.27028 9.70498C6.21525 6.86002 8.87028 4.75 12.0003 4.75Z"
-                fill="#EA4335"
-              />
-              <path
-                d="M23.49 12.275C23.49 11.49 23.415 10.73 23.3 10H12V14.51H18.47C18.18 15.99 17.34 17.25 16.08 18.1L19.945 21.1C22.2 19.01 23.49 15.92 23.49 12.275Z"
-                fill="#4285F4"
-              />
-              <path
-                d="M5.26498 14.2949C5.02498 13.5699 4.88501 12.7999 4.88501 11.9999C4.88501 11.1999 5.01998 10.4299 5.26498 9.7049L1.275 6.60986C0.46 8.22986 0 10.0599 0 11.9999C0 13.9399 0.46 15.7699 1.28 17.3899L5.26498 14.2949Z"
-                fill="#FBBC05"
-              />
-              <path
-                d="M12.0004 24.0001C15.2404 24.0001 17.9654 22.935 19.9454 21.095L16.0804 18.095C15.0054 18.82 13.6204 19.245 12.0004 19.245C8.8704 19.245 6.21537 17.135 5.2654 14.29L1.27539 17.385C3.25539 21.31 7.3104 24.0001 12.0004 24.0001Z"
-                fill="#34A853"
-              />
-            </svg>
-            Sign in with Google
+          
+          <Button type="submit" className="w-full bg-gym-orange hover:bg-gym-orange/90 text-white">
+            Log in
           </Button>
+        </form>
+        
+        <div className="mt-6 text-center text-sm text-white/70">
+          Don't have an account?{' '}
+          <a href="/signup" className="text-gym-orange hover:underline">
+            Sign up
+          </a>
         </div>
-
-        <div className="text-center mt-6">
-          <p className="text-sm text-gray-500">
-            Don't have an account?{" "}
-            <Link 
-              to="/signup" 
-              className="font-medium text-blue-600 hover:text-blue-500"
-            >
-              Sign up
-            </Link>
-          </p>
-        </div>
-      </div>
+      </Card>
     </div>
   );
 };

@@ -1,22 +1,20 @@
 
-import React from 'react';
-import ReactDOM from 'react-dom/client';
-import { BrowserRouter } from 'react-router-dom';
-import App from './App';
-import './index.css';
-import { Toaster } from 'sonner';
-import { AuthProvider } from './contexts/auth';
-import { ErrorBoundary } from './components/ui/error-boundary';
+import React from 'react'
+import { createRoot } from 'react-dom/client'
+import App from './App.tsx'
+import './index.css'
 
-ReactDOM.createRoot(document.getElementById('root')!).render(
+// Make sure the root element exists before trying to render
+const rootElement = document.getElementById("root");
+
+if (!rootElement) {
+  console.error("Failed to find the root element");
+  document.body.innerHTML = '<div id="root"></div>';
+}
+
+// Create root and render app
+createRoot(document.getElementById("root")!).render(
   <React.StrictMode>
-    <ErrorBoundary>
-      <BrowserRouter>
-        <AuthProvider>
-          <App />
-          <Toaster position="top-right" richColors />
-        </AuthProvider>
-      </BrowserRouter>
-    </ErrorBoundary>
+    <App />
   </React.StrictMode>
 );
