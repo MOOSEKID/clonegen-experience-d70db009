@@ -2,7 +2,6 @@
 import { ClassType } from '@/types/classTypes';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
-import { Checkbox } from '@/components/ui/checkbox';
 import { 
   Select, 
   SelectContent, 
@@ -10,15 +9,13 @@ import {
   SelectTrigger, 
   SelectValue 
 } from '@/components/ui/select';
-import { 
-  ToggleGroup, 
-  ToggleGroupItem 
-} from '@/components/ui/toggle-group';
 import { cn } from '@/lib/utils';
-import { AlertCircle, RotateCw } from 'lucide-react';
+import { AlertCircle } from 'lucide-react';
 import { useGymLocations } from '@/hooks/classes/useGymLocations';
-import { weekDays, isEveryDay, toggleEveryDay, toggleDay } from '@/utils/classFormUtils';
-import { Button } from '@/components/ui/button';
+import { weekDays } from '@/utils/classFormUtils';
+import DaySelector from './DaySelector';
+import LocationSelector from './LocationSelector';
+import RecurrenceToggle from './RecurrenceToggle';
 
 interface SchedulingFieldsProps {
   classData: Omit<ClassType, 'id'>;
@@ -50,16 +47,6 @@ const SchedulingFields = ({
       </div>
     ) : null
   );
-
-  const toggleDayHandler = (day: string) => {
-    const newDays = toggleDay(classData.recurrenceDays, day);
-    handleMultiSelectChange('recurrenceDays', newDays);
-  };
-
-  const toggleEveryDayHandler = () => {
-    const newDays = toggleEveryDay(classData.recurrenceDays);
-    handleMultiSelectChange('recurrenceDays', newDays);
-  };
 
   const handleRecurrenceChange = (checked: boolean) => {
     handleCheckboxChange('recurrence', checked);
@@ -128,103 +115,26 @@ const SchedulingFields = ({
       </div>
       
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div className="space-y-2">
-          <Label htmlFor="room" className={cn(errors.room && "text-red-500")}>
-            Location*
-          </Label>
-          <Select 
-            value={classData.room} 
-            onValueChange={(value) => handleSelectChange('room', value)}
-          >
-            <SelectTrigger className={cn(errors.room && "border-red-500")}>
-              <SelectValue placeholder="Select location" />
-            </SelectTrigger>
-            <SelectContent>
-              {isLoading ? (
-                <SelectItem value="loading" disabled>Loading locations...</SelectItem>
-              ) : (
-                <>
-                  <SelectItem value="other">Other/Custom Location</SelectItem>
-                  {locations.map(location => (
-                    <SelectItem key={location.id} value={location.name}>
-                      {location.name} ({location.type})
-                    </SelectItem>
-                  ))}
-                </>
-              )}
-            </SelectContent>
-          </Select>
-          {classData.room === 'other' && (
-            <Input
-              className="mt-2"
-              placeholder="Enter custom location"
-              value={classData.room === 'other' ? '' : classData.room}
-              onChange={(e) => handleSelectChange('room', e.target.value)}
-            />
-          )}
-          <ErrorMessage name="room" />
-        </div>
+        <LocationSelector 
+          value={classData.room}
+          onChange={(value) => handleSelectChange('room', value)}
+          locations={locations}
+          isLoading={isLoading}
+          error={errors.room}
+        />
         
         <div className="space-y-2">
-          <div className="flex items-center space-x-2">
-            <Checkbox 
-              id="recurrence" 
-              checked={classData.recurrence} 
-              onCheckedChange={(checked) => 
-                handleRecurrenceChange(checked === true)
-              }
-            />
-            <Label 
-              htmlFor="recurrence" 
-              className="cursor-pointer"
-            >
-              Repeat Weekly
-            </Label>
-          </div>
+          <RecurrenceToggle 
+            checked={classData.recurrence}
+            onCheckedChange={handleRecurrenceChange}
+          />
           
           {classData.recurrence && (
-            <div className="mt-3 space-y-3">
-              <div className="flex justify-between">
-                <Label className={cn(errors.recurrenceDays && "text-red-500")}>
-                  Select Days:
-                </Label>
-                <Button 
-                  type="button" 
-                  variant="outline" 
-                  size="sm"
-                  onClick={toggleEveryDayHandler}
-                  className="flex items-center gap-1 h-7 text-xs"
-                >
-                  <RotateCw className="h-3 w-3" />
-                  {isEveryDay(classData.recurrenceDays) ? 'Clear All' : 'Every Day'}
-                </Button>
-              </div>
-              
-              <ToggleGroup 
-                type="multiple" 
-                className="flex flex-wrap gap-1"
-                value={classData.recurrenceDays}
-              >
-                {weekDays.map((day) => (
-                  <ToggleGroupItem
-                    key={day.value}
-                    value={day.value}
-                    onClick={() => toggleDayHandler(day.value)}
-                    className="flex-1 min-w-16"
-                    data-state={classData.recurrenceDays.includes(day.value) ? "on" : "off"}
-                  >
-                    {day.label.slice(0, 3)}
-                  </ToggleGroupItem>
-                ))}
-              </ToggleGroup>
-              
-              {errors.recurrenceDays && (
-                <div className="text-red-500 text-sm mt-1 flex items-center gap-1">
-                  <AlertCircle className="h-4 w-4" />
-                  <span>{errors.recurrenceDays}</span>
-                </div>
-              )}
-            </div>
+            <DaySelector 
+              selectedDays={classData.recurrenceDays}
+              onChange={(days) => handleMultiSelectChange('recurrenceDays', days)}
+              error={errors.recurrenceDays}
+            />
           )}
         </div>
       </div>
