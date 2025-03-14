@@ -13,6 +13,14 @@ export interface PerformanceMetrics {
   // Fields for PerformanceStatsGrid
   activeClients?: number;
   monthlyGrowth?: number;
+  // Legacy field names (for backwards compatibility)
+  classes_taught?: number;
+  private_sessions?: number;
+  new_clients?: number;
+  avg_session_rating?: number;
+  monthly_goal_progress?: number;
+  class_fill_rate?: number;
+  total_hours?: number;
 }
 
 export interface ClassAttendance {

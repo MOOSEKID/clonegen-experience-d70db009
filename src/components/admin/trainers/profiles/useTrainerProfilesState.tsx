@@ -1,7 +1,5 @@
-
 import { useState } from 'react';
 import { useTrainerProfiles, TrainerProfile } from '@/hooks/trainers/useTrainerProfiles';
-import { TabsContent } from '@/components/ui/tabs';
 
 export function useTrainerProfilesState() {
   const {
@@ -23,18 +21,15 @@ export function useTrainerProfilesState() {
   const [selectedTrainer, setSelectedTrainer] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState('all');
 
-  // Filter trainers based on active tab
   const filteredTrainers = trainers.filter((trainer) => {
     if (activeTab === 'all') return true;
     return trainer.status?.toLowerCase() === activeTab;
   });
 
-  // Get the selected trainer object
   const getSelectedTrainer = () => {
     return trainers.find((trainer) => trainer.id === selectedTrainer) || null;
   };
 
-  // Handle dialog openings
   const handleAddTrainer = () => {
     setIsAddDialogOpen(true);
   };
@@ -54,7 +49,6 @@ export function useTrainerProfilesState() {
     setIsAvailDialogOpen(true);
   };
 
-  // Wrapper functions to handle Promise<void> return types
   const handleAddTrainerSubmit = async (data: any) => {
     await addTrainer(data);
     setIsAddDialogOpen(false);
