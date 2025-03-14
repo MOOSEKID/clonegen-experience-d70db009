@@ -6,36 +6,13 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { X } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { commonSpecializations } from "@/utils/trainerUtils";
 
 interface TrainerAddSpecializationsFieldProps {
   selectedSpecializations: string[];
   onAddSpecialization: (spec: string) => void;
   onRemoveSpecialization: (spec: string) => void;
 }
-
-// Array of common trainer specializations
-const commonSpecializations = [
-  "Strength Training",
-  "Weight Loss",
-  "Cardio",
-  "HIIT",
-  "Yoga",
-  "Pilates",
-  "CrossFit",
-  "Bodybuilding",
-  "Nutrition",
-  "Sports Performance",
-  "Functional Training",
-  "Kettlebell",
-  "Senior Fitness",
-  "Pre/Post Natal",
-  "Rehabilitation",
-  "Boxing",
-  "Martial Arts",
-  "Dance Fitness",
-  "Group Training",
-  "Flexibility"
-];
 
 const TrainerAddSpecializationsField: React.FC<TrainerAddSpecializationsFieldProps> = ({
   selectedSpecializations,

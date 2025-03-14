@@ -18,15 +18,16 @@ const PerformanceStatsGrid: React.FC<PerformanceStatsGridProps> = ({ trainerId }
     return <div>No performance data available</div>;
   }
   
+  // Safely access performance metrics properties with fallbacks
   const stats = [
-    { label: 'Classes Taught', value: performanceMetrics.classesTaught },
-    { label: 'Private Sessions', value: performanceMetrics.privateSessions },
-    { label: 'New Clients', value: performanceMetrics.newClients },
+    { label: 'Classes Taught', value: performanceMetrics.classes_taught || 0 },
+    { label: 'Private Sessions', value: performanceMetrics.private_sessions || 0 },
+    { label: 'New Clients', value: performanceMetrics.new_clients || 0 },
     { label: 'Active Clients', value: performanceMetrics.activeClients },
-    { label: 'Avg. Session Rating', value: `${performanceMetrics.avgSessionRating}/5` },
-    { label: 'Monthly Goal Progress', value: `${performanceMetrics.monthlyGoalProgress}%` },
-    { label: 'Class Fill Rate', value: `${performanceMetrics.classFillRate}%` },
-    { label: 'Total Hours', value: performanceMetrics.totalHours },
+    { label: 'Avg. Session Rating', value: `${performanceMetrics.avg_session_rating || 0}/5` },
+    { label: 'Monthly Goal Progress', value: `${performanceMetrics.monthly_goal_progress || 0}%` },
+    { label: 'Class Fill Rate', value: `${performanceMetrics.class_fill_rate || 0}%` },
+    { label: 'Total Hours', value: performanceMetrics.total_hours || 0 },
   ];
   
   return (
