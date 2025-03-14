@@ -64,8 +64,8 @@ export const useTrainerRatings = (trainerId?: string) => {
           // Count ratings by star level
           const distribution = {1: 0, 2: 0, 3: 0, 4: 0, 5: 0};
           data.forEach(item => {
-            if (distribution[item.rating] !== undefined) {
-              distribution[item.rating]++;
+            if (distribution[item.rating as keyof typeof distribution] !== undefined) {
+              distribution[item.rating as keyof typeof distribution]++;
             }
           });
           
@@ -75,55 +75,25 @@ export const useTrainerRatings = (trainerId?: string) => {
             ratingDistribution: distribution
           });
         } else {
-          // For development, use mock data if error occurs
-          const mockRatings = Array(5).fill(0).map((_, i) => ({
-            id: `mock-${i}`,
-            trainer_id: trainerId,
-            member_id: `member-${i}`,
-            member_name: `Test Member ${i + 1}`,
-            rating: Math.floor(Math.random() * 5) + 1,
-            review: i % 2 === 0 ? `This is a test review ${i + 1}` : null,
-            trainer_response: i === 0 ? 'Thank you for your feedback!' : null,
-            is_flagged: i === 3, // One flagged review
-            created_at: new Date(Date.now() - i * 86400000).toISOString(),
-            updated_at: new Date(Date.now() - i * 86400000).toISOString()
-          }));
-          
+          // For development, use mock data if no data is returned
+          const mockRatings = generateMockRatings(trainerId);
           setRatings(mockRatings);
           
           // Mock summary
-          setSummary({
-            averageRating: 4.2,
-            totalRatings: mockRatings.length,
-            ratingDistribution: {1: 1, 2: 0, 3: 1, 4: 1, 5: 2}
-          });
+          const mockSummary = calculateMockSummary(mockRatings);
+          setSummary(mockSummary);
         }
       } catch (err) {
         console.error('Error fetching trainer ratings:', err);
         setError(err instanceof Error ? err : new Error('Failed to fetch trainer ratings'));
         
         // For development, use mock data if error occurs
-        const mockRatings = Array(5).fill(0).map((_, i) => ({
-          id: `mock-${i}`,
-          trainer_id: trainerId,
-          member_id: `member-${i}`,
-          member_name: `Test Member ${i + 1}`,
-          rating: Math.floor(Math.random() * 5) + 1,
-          review: i % 2 === 0 ? `This is a test review ${i + 1}` : null,
-          trainer_response: i === 0 ? 'Thank you for your feedback!' : null,
-          is_flagged: i === 3, // One flagged review
-          created_at: new Date(Date.now() - i * 86400000).toISOString(),
-          updated_at: new Date(Date.now() - i * 86400000).toISOString()
-        }));
-        
+        const mockRatings = generateMockRatings(trainerId);
         setRatings(mockRatings);
         
         // Mock summary
-        setSummary({
-          averageRating: 4.2,
-          totalRatings: mockRatings.length,
-          ratingDistribution: {1: 1, 2: 0, 3: 1, 4: 1, 5: 2}
-        });
+        const mockSummary = calculateMockSummary(mockRatings);
+        setSummary(mockSummary);
       } finally {
         setIsLoading(false);
       }
@@ -151,6 +121,43 @@ export const useTrainerRatings = (trainerId?: string) => {
       };
     }
   }, [trainerId]);
+  
+  // Generate mock data for development
+  const generateMockRatings = (trainerId: string): TrainerRating[] => {
+    return Array(5).fill(0).map((_, i) => ({
+      id: `mock-${i}`,
+      trainer_id: trainerId,
+      member_id: `member-${i}`,
+      member_name: `Test Member ${i + 1}`,
+      rating: Math.floor(Math.random() * 5) + 1,
+      review: i % 2 === 0 ? `This is a test review ${i + 1}` : null,
+      trainer_response: i === 0 ? 'Thank you for your feedback!' : null,
+      is_flagged: i === 3, // One flagged review
+      created_at: new Date(Date.now() - i * 86400000).toISOString(),
+      updated_at: new Date(Date.now() - i * 86400000).toISOString()
+    }));
+  };
+  
+  // Calculate summary for mock data
+  const calculateMockSummary = (mockRatings: TrainerRating[]): RatingSummary => {
+    const distribution = {1: 0, 2: 0, 3: 0, 4: 0, 5: 0};
+    
+    mockRatings.forEach(item => {
+      if (distribution[item.rating as keyof typeof distribution] !== undefined) {
+        distribution[item.rating as keyof typeof distribution]++;
+      }
+    });
+    
+    const totalRatings = mockRatings.length;
+    const ratingSum = mockRatings.reduce((sum, item) => sum + item.rating, 0);
+    const avgRating = ratingSum / totalRatings;
+    
+    return {
+      averageRating: parseFloat(avgRating.toFixed(1)),
+      totalRatings,
+      ratingDistribution: distribution
+    };
+  };
   
   // Add a rating
   const addRating = async (data: Omit<TrainerRating, 'id' | 'created_at' | 'updated_at' | 'is_flagged' | 'member_name'>) => {

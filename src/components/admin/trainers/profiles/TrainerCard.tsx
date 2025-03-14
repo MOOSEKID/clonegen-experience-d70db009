@@ -1,222 +1,235 @@
 
-import { useState } from 'react';
+import React from 'react';
+import { format } from 'date-fns';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Pencil, Trash2, Phone, Mail, Award, Calendar, Clock } from 'lucide-react';
-import { TrainerProfile } from '@/hooks/trainers/useTrainerProfiles';
-import TrainerEditForm from './TrainerEditForm';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
+import { CalendarIcon, EditIcon, PlusIcon, ShieldIcon, Trash2Icon } from 'lucide-react';
+import { TrainerProfile, TrainerCertification, TrainerAvailability } from '@/hooks/trainers/useTrainerProfiles';
+import { Separator } from '@/components/ui/separator';
 
 interface TrainerCardProps {
   trainer: TrainerProfile;
-  onDelete: (id: string) => Promise<void>;
-  onUpdate: (id: string, updates: Partial<Omit<TrainerProfile, 'id' | 'certifications' | 'availability'>>) => Promise<void>;
+  onEdit: () => void;
+  onDelete: () => void;
+  onAddCertification: () => void;
   onDeleteCertification: (id: string) => Promise<void>;
+  onAddAvailability: () => void;
   onDeleteAvailability: (id: string) => Promise<void>;
 }
 
-const TrainerCard = ({
+const TrainerCard: React.FC<TrainerCardProps> = ({
   trainer,
+  onEdit,
   onDelete,
-  onUpdate,
+  onAddCertification,
   onDeleteCertification,
+  onAddAvailability,
   onDeleteAvailability
-}: TrainerCardProps) => {
-  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
-  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+}) => {
+  const getStatusColor = (status: string) => {
+    switch (status?.toLowerCase()) {
+      case 'active':
+        return 'bg-green-100 text-green-800 border-green-200';
+      case 'inactive':
+        return 'bg-red-100 text-red-800 border-red-200';
+      case 'on leave':
+        return 'bg-amber-100 text-amber-800 border-amber-200';
+      default:
+        return 'bg-gray-100 text-gray-800 border-gray-200';
+    }
+  };
 
-  const nameInitials = trainer.name
-    .split(' ')
-    .slice(0, 2)
-    .map(n => n.charAt(0))
-    .join('');
+  const getInitials = (name: string) => {
+    const nameArray = name.split(' ');
+    return nameArray.length > 1
+      ? `${nameArray[0][0]}${nameArray[1][0]}`
+      : nameArray[0].substring(0, 2);
+  };
 
   return (
-    <>
-      <Card className="h-full flex flex-col">
-        <CardHeader className="relative pb-2">
-          <div className="flex items-start justify-between">
-            <Avatar className="h-16 w-16 mb-2">
-              {trainer.profile_picture ? (
-                <AvatarImage src={trainer.profile_picture} alt={trainer.name} />
-              ) : (
-                <AvatarFallback className="bg-gym-orange text-white text-lg">
-                  {nameInitials}
-                </AvatarFallback>
-              )}
-            </Avatar>
-            <Badge variant={trainer.status === 'Active' ? 'default' : 'destructive'}>
-              {trainer.status || 'Active'}
-            </Badge>
+    <Card className="overflow-hidden">
+      <CardHeader className="pb-2">
+        <div className="flex justify-between">
+          <Badge variant="outline" className={getStatusColor(trainer.status || '')}>
+            {trainer.status || 'Unknown'}
+          </Badge>
+          <div className="flex gap-1">
+            <Button variant="ghost" size="icon" onClick={onEdit} title="Edit trainer">
+              <EditIcon className="h-4 w-4" />
+            </Button>
+            <Button variant="ghost" size="icon" onClick={onDelete} title="Delete trainer">
+              <Trash2Icon className="h-4 w-4" />
+            </Button>
           </div>
-          <CardTitle className="text-lg font-bold">{trainer.name}</CardTitle>
-          <CardDescription className="flex flex-wrap gap-1 mt-1">
-            {trainer.specialization?.map((spec, index) => (
-              <Badge key={index} variant="outline" className="bg-gray-100">
-                {spec}
-              </Badge>
-            ))}
-          </CardDescription>
-        </CardHeader>
-
-        <CardContent className="flex-grow">
-          <div className="space-y-4">
-            <div className="space-y-2">
-              <div className="flex items-center gap-2 text-gray-600">
-                <Mail className="h-4 w-4" />
-                <span className="text-sm">{trainer.email}</span>
-              </div>
-              {trainer.phone && (
-                <div className="flex items-center gap-2 text-gray-600">
-                  <Phone className="h-4 w-4" />
-                  <span className="text-sm">{trainer.phone}</span>
-                </div>
-              )}
-              {trainer.hire_date && (
-                <div className="flex items-center gap-2 text-gray-600">
-                  <Calendar className="h-4 w-4" />
-                  <span className="text-sm">Hired: {new Date(trainer.hire_date).toLocaleDateString()}</span>
-                </div>
-              )}
-            </div>
-
-            {trainer.bio && (
-              <div className="mt-3">
-                <p className="text-sm text-gray-600">{trainer.bio}</p>
-              </div>
+        </div>
+        <div className="flex items-center gap-4 mt-2">
+          <Avatar className="h-16 w-16">
+            {trainer.profile_picture ? (
+              <AvatarImage src={trainer.profile_picture} alt={trainer.name} />
+            ) : (
+              <AvatarFallback className="text-lg bg-primary text-primary-foreground">
+                {getInitials(trainer.name)}
+              </AvatarFallback>
             )}
-
-            <Accordion type="single" collapsible className="w-full">
-              {trainer.certifications && trainer.certifications.length > 0 && (
-                <AccordionItem value="certifications">
-                  <AccordionTrigger className="text-sm font-medium py-2">
-                    Certifications ({trainer.certifications.length})
-                  </AccordionTrigger>
-                  <AccordionContent>
-                    <div className="space-y-2">
-                      {trainer.certifications.map((cert) => (
-                        <div key={cert.id} className="bg-gray-50 p-2 rounded-md relative">
-                          <div className="flex items-start">
-                            <Award className="h-4 w-4 text-gym-orange mr-2 mt-0.5" />
-                            <div className="flex-1">
-                              <p className="text-sm font-medium">{cert.certification_name}</p>
-                              <p className="text-xs text-gray-500">{cert.issuing_organization}</p>
-                              {cert.issue_date && (
-                                <p className="text-xs text-gray-500">
-                                  Issued: {new Date(cert.issue_date).toLocaleDateString()}
-                                  {cert.expiry_date && ` | Expires: ${new Date(cert.expiry_date).toLocaleDateString()}`}
-                                </p>
-                              )}
-                            </div>
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              className="h-6 w-6 absolute top-1 right-1"
-                              onClick={() => onDeleteCertification(cert.id)}
-                            >
-                              <Trash2 className="h-3 w-3" />
-                            </Button>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </AccordionContent>
-                </AccordionItem>
-              )}
-
-              {trainer.availability && trainer.availability.length > 0 && (
-                <AccordionItem value="availability">
-                  <AccordionTrigger className="text-sm font-medium py-2">
-                    Availability ({trainer.availability.length})
-                  </AccordionTrigger>
-                  <AccordionContent>
-                    <div className="space-y-2">
-                      {trainer.availability.map((avail) => (
-                        <div key={avail.id} className="bg-gray-50 p-2 rounded-md relative">
-                          <div className="flex items-start">
-                            <Clock className="h-4 w-4 text-gym-orange mr-2 mt-0.5" />
-                            <div className="flex-1">
-                              <p className="text-sm font-medium">{avail.day_of_week}</p>
-                              <p className="text-xs text-gray-500">
-                                {avail.start_time.substring(0, 5)} - {avail.end_time.substring(0, 5)}
-                              </p>
-                            </div>
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              className="h-6 w-6 absolute top-1 right-1"
-                              onClick={() => onDeleteAvailability(avail.id)}
-                            >
-                              <Trash2 className="h-3 w-3" />
-                            </Button>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </AccordionContent>
-                </AccordionItem>
-              )}
-            </Accordion>
+          </Avatar>
+          <div>
+            <CardTitle>{trainer.name}</CardTitle>
+            <CardDescription>{trainer.email}</CardDescription>
+            {trainer.phone && <CardDescription>{trainer.phone}</CardDescription>}
           </div>
-        </CardContent>
+        </div>
+      </CardHeader>
 
-        <CardFooter className="flex justify-between pt-2">
-          <Button variant="outline" size="sm" onClick={() => setIsEditModalOpen(true)}>
-            <Pencil className="h-4 w-4 mr-2" />
-            Edit
-          </Button>
-          <Button variant="destructive" size="sm" onClick={() => setIsDeleteModalOpen(true)}>
-            <Trash2 className="h-4 w-4 mr-2" />
-            Delete
-          </Button>
-        </CardFooter>
-      </Card>
+      <CardContent className="space-y-4">
+        {/* Specialization */}
+        <div>
+          <h4 className="text-sm font-semibold mb-1">Specialization</h4>
+          <div className="flex flex-wrap gap-1">
+            {trainer.specialization?.length ? (
+              trainer.specialization.map((spec, index) => (
+                <Badge key={index} variant="secondary" className="mr-1">
+                  {spec}
+                </Badge>
+              ))
+            ) : (
+              <span className="text-sm text-muted-foreground">No specializations listed</span>
+            )}
+          </div>
+        </div>
+        
+        {/* Hire Date */}
+        <div className="flex items-center text-sm">
+          <CalendarIcon className="h-4 w-4 mr-2" />
+          <span className="text-muted-foreground">Hire Date:</span>
+          <span className="ml-1 font-medium">
+            {trainer.hire_date ? format(new Date(trainer.hire_date), 'MMM d, yyyy') : 'Not specified'}
+          </span>
+        </div>
 
-      {/* Edit Trainer Modal */}
-      <Dialog open={isEditModalOpen} onOpenChange={setIsEditModalOpen}>
-        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle>Edit Trainer - {trainer.name}</DialogTitle>
-          </DialogHeader>
-          <TrainerEditForm 
-            trainer={trainer} 
-            onSave={async (updates) => {
-              await onUpdate(trainer.id, updates);
-              setIsEditModalOpen(false);
-            }}
-            onCancel={() => setIsEditModalOpen(false)}
-          />
-        </DialogContent>
-      </Dialog>
+        {/* Certifications */}
+        <div>
+          <div className="flex justify-between items-center mb-1">
+            <h4 className="text-sm font-semibold">Certifications</h4>
+            <Button variant="ghost" size="sm" onClick={onAddCertification} className="h-6 px-2">
+              <PlusIcon className="h-3 w-3 mr-1" />
+              Add
+            </Button>
+          </div>
+          
+          {trainer.certifications?.length ? (
+            <div className="space-y-2">
+              {trainer.certifications.map(cert => (
+                <CertificationItem 
+                  key={cert.id} 
+                  certification={cert} 
+                  onDelete={() => onDeleteCertification(cert.id)} 
+                />
+              ))}
+            </div>
+          ) : (
+            <div className="text-sm text-muted-foreground">No certifications added</div>
+          )}
+        </div>
 
-      {/* Delete Confirmation Modal */}
-      <AlertDialog open={isDeleteModalOpen} onOpenChange={setIsDeleteModalOpen}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
-            <AlertDialogDescription>
-              This will permanently delete {trainer.name}'s profile and all associated data. This action cannot be undone.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction
-              className="bg-red-600 hover:bg-red-700"
-              onClick={async () => {
-                await onDelete(trainer.id);
-                setIsDeleteModalOpen(false);
-              }}
-            >
-              Delete
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
-    </>
+        {/* Availability */}
+        <div>
+          <div className="flex justify-between items-center mb-1">
+            <h4 className="text-sm font-semibold">Availability</h4>
+            <Button variant="ghost" size="sm" onClick={onAddAvailability} className="h-6 px-2">
+              <PlusIcon className="h-3 w-3 mr-1" />
+              Add
+            </Button>
+          </div>
+          
+          {trainer.availability?.length ? (
+            <div className="space-y-1">
+              {trainer.availability.map(avail => (
+                <AvailabilityItem 
+                  key={avail.id} 
+                  availability={avail} 
+                  onDelete={() => onDeleteAvailability(avail.id)} 
+                />
+              ))}
+            </div>
+          ) : (
+            <div className="text-sm text-muted-foreground">No availability added</div>
+          )}
+        </div>
+      </CardContent>
+
+      {trainer.bio && (
+        <>
+          <Separator />
+          <CardFooter className="pt-4">
+            <div>
+              <h4 className="text-sm font-semibold mb-1">Bio</h4>
+              <p className="text-sm">{trainer.bio}</p>
+            </div>
+          </CardFooter>
+        </>
+      )}
+    </Card>
+  );
+};
+
+interface CertificationItemProps {
+  certification: TrainerCertification;
+  onDelete: () => void;
+}
+
+const CertificationItem: React.FC<CertificationItemProps> = ({ certification, onDelete }) => {
+  return (
+    <div className="bg-muted p-2 rounded-sm text-sm relative group">
+      <div className="font-medium">{certification.certification_name}</div>
+      <div className="text-muted-foreground">{certification.issuing_organization}</div>
+      {(certification.issue_date || certification.expiry_date) && (
+        <div className="text-xs text-muted-foreground mt-1">
+          {certification.issue_date && (
+            <span>Issued: {format(new Date(certification.issue_date), 'MMM yyyy')}</span>
+          )}
+          {certification.issue_date && certification.expiry_date && <span> • </span>}
+          {certification.expiry_date && (
+            <span>Expires: {format(new Date(certification.expiry_date), 'MMM yyyy')}</span>
+          )}
+        </div>
+      )}
+      <Button
+        variant="ghost"
+        size="icon"
+        className="h-6 w-6 absolute top-1 right-1 opacity-0 group-hover:opacity-100 transition-opacity"
+        onClick={onDelete}
+      >
+        <Trash2Icon className="h-3 w-3" />
+      </Button>
+    </div>
+  );
+};
+
+interface AvailabilityItemProps {
+  availability: TrainerAvailability;
+  onDelete: () => void;
+}
+
+const AvailabilityItem: React.FC<AvailabilityItemProps> = ({ availability, onDelete }) => {
+  return (
+    <div className="flex justify-between items-center bg-muted p-2 rounded-sm text-sm group">
+      <div>
+        <span className="font-medium">{availability.day_of_week}: </span>
+        <span>
+          {availability.start_time} - {availability.end_time}
+        </span>
+      </div>
+      <Button
+        variant="ghost"
+        size="icon"
+        className="h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity"
+        onClick={onDelete}
+      >
+        <Trash2Icon className="h-3 w-3" />
+      </Button>
+    </div>
   );
 };
 

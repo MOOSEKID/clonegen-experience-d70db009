@@ -6,7 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Skeleton } from '@/components/ui/skeleton';
 
-interface ClassSession {
+export interface ClassSession {
   id: string;
   date: string;
   class_name: string;
@@ -17,7 +17,7 @@ interface ClassSession {
   status: 'completed' | 'canceled' | 'no-show';
 }
 
-interface AttendanceTableProps {
+export interface AttendanceTableProps {
   trainerName: string;
   sessions: ClassSession[];
   isLoading: boolean;

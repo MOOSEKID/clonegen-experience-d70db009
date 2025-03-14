@@ -739,15 +739,144 @@ export type Database = {
         }
         Relationships: []
       }
+      trainer_availability: {
+        Row: {
+          created_at: string | null
+          day_of_week: string
+          end_time: string
+          id: string
+          start_time: string
+          trainer_id: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          day_of_week: string
+          end_time: string
+          id?: string
+          start_time: string
+          trainer_id?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          day_of_week?: string
+          end_time?: string
+          id?: string
+          start_time?: string
+          trainer_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "trainer_availability_trainer_id_fkey"
+            columns: ["trainer_id"]
+            isOneToOne: false
+            referencedRelation: "trainers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      trainer_certifications: {
+        Row: {
+          certification_name: string
+          created_at: string | null
+          expiry_date: string | null
+          id: string
+          issue_date: string | null
+          issuing_organization: string
+          trainer_id: string | null
+        }
+        Insert: {
+          certification_name: string
+          created_at?: string | null
+          expiry_date?: string | null
+          id?: string
+          issue_date?: string | null
+          issuing_organization: string
+          trainer_id?: string | null
+        }
+        Update: {
+          certification_name?: string
+          created_at?: string | null
+          expiry_date?: string | null
+          id?: string
+          issue_date?: string | null
+          issuing_organization?: string
+          trainer_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "trainer_certifications_trainer_id_fkey"
+            columns: ["trainer_id"]
+            isOneToOne: false
+            referencedRelation: "trainers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      trainer_ratings: {
+        Row: {
+          created_at: string | null
+          id: string
+          is_flagged: boolean | null
+          member_id: string | null
+          member_name: string | null
+          rating: number
+          review: string | null
+          trainer_id: string | null
+          trainer_response: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          is_flagged?: boolean | null
+          member_id?: string | null
+          member_name?: string | null
+          rating: number
+          review?: string | null
+          trainer_id?: string | null
+          trainer_response?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          is_flagged?: boolean | null
+          member_id?: string | null
+          member_name?: string | null
+          rating?: number
+          review?: string | null
+          trainer_id?: string | null
+          trainer_response?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "trainer_ratings_member_id_fkey"
+            columns: ["member_id"]
+            isOneToOne: false
+            referencedRelation: "members"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "trainer_ratings_trainer_id_fkey"
+            columns: ["trainer_id"]
+            isOneToOne: false
+            referencedRelation: "trainers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       trainers: {
         Row: {
           bio: string | null
           created_at: string | null
           email: string
+          hire_date: string | null
           hiredate: string | null
           id: string
           name: string
           phone: string | null
+          profile_picture: string | null
           profilepicture: string | null
           schedule: Json | null
           specialization: string[] | null
@@ -758,10 +887,12 @@ export type Database = {
           bio?: string | null
           created_at?: string | null
           email: string
+          hire_date?: string | null
           hiredate?: string | null
           id?: string
           name: string
           phone?: string | null
+          profile_picture?: string | null
           profilepicture?: string | null
           schedule?: Json | null
           specialization?: string[] | null
@@ -772,10 +903,12 @@ export type Database = {
           bio?: string | null
           created_at?: string | null
           email?: string
+          hire_date?: string | null
           hiredate?: string | null
           id?: string
           name?: string
           phone?: string | null
+          profile_picture?: string | null
           profilepicture?: string | null
           schedule?: Json | null
           specialization?: string[] | null

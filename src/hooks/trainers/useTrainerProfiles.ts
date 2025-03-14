@@ -54,36 +54,40 @@ export const useTrainerProfiles = () => {
         if (trainersError) throw trainersError;
         
         if (trainersData) {
-          // Fetch certifications for all trainers
-          const { data: certificationsData, error: certError } = await supabase
-            .from('trainer_certifications')
-            .select('*');
-            
-          if (certError) throw certError;
-          
-          // Fetch availability for all trainers
-          const { data: availabilityData, error: availError } = await supabase
-            .from('trainer_availability')
-            .select('*');
-            
-          if (availError) throw availError;
-          
-          // Combine the data
-          const processedTrainers = trainersData.map(trainer => {
-            const trainerCertifications = certificationsData
-              ? certificationsData.filter(cert => cert.trainer_id === trainer.id)
-              : [];
+          // Process all trainers to ensure consistent data structure
+          const processedTrainers = await Promise.all(
+            trainersData.map(async (trainer) => {
+              // Fetch certifications for this trainer
+              const { data: certifications, error: certError } = await supabase
+                .from('trainer_certifications')
+                .select('*')
+                .eq('trainer_id', trainer.id);
+                
+              if (certError) console.error('Error fetching certifications:', certError);
               
-            const trainerAvailability = availabilityData
-              ? availabilityData.filter(avail => avail.trainer_id === trainer.id)
-              : [];
+              // Fetch availability for this trainer
+              const { data: availability, error: availError } = await supabase
+                .from('trainer_availability')
+                .select('*')
+                .eq('trainer_id', trainer.id);
+                
+              if (availError) console.error('Error fetching availability:', availError);
               
-            return {
-              ...trainer,
-              certifications: trainerCertifications,
-              availability: trainerAvailability
-            } as TrainerProfile;
-          });
+              // Convert db column profilepicture to profile_picture if needed
+              const profile_picture = 'profilepicture' in trainer ? trainer.profilepicture : trainer.profile_picture;
+              
+              // Convert db column hiredate to hire_date if needed
+              const hire_date = 'hiredate' in trainer ? trainer.hiredate : trainer.hire_date;
+                
+              return {
+                ...trainer,
+                profile_picture,
+                hire_date,
+                certifications: certifications || [],
+                availability: availability || []
+              } as TrainerProfile;
+            })
+          );
           
           setTrainers(processedTrainers);
         } else {
@@ -347,6 +351,7 @@ const getMockTrainers = (): TrainerProfile[] => {
       specialization: ["Strength Training", "Weight Loss"],
       status: "Active",
       hire_date: "2022-01-15",
+      profile_picture: null,
       certifications: [
         {
           id: "cert1",
@@ -398,6 +403,7 @@ const getMockTrainers = (): TrainerProfile[] => {
       specialization: ["Yoga", "Pilates", "Meditation"],
       status: "Active",
       hire_date: "2022-03-10",
+      profile_picture: null,
       certifications: [
         {
           id: "cert3",
@@ -441,6 +447,7 @@ const getMockTrainers = (): TrainerProfile[] => {
       specialization: ["Sports Performance", "HIIT", "Functional Training"],
       status: "Active",
       hire_date: "2022-06-01",
+      profile_picture: null,
       certifications: [
         {
           id: "cert4",
