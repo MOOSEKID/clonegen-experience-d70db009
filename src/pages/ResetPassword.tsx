@@ -9,6 +9,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { toast } from 'sonner';
 
 const passwordSchema = z.object({
   email: z.string().email('Please enter a valid email address'),
@@ -49,14 +50,28 @@ const ResetPassword = () => {
 
   const handlePasswordReset = async (data: z.infer<typeof passwordSchema>) => {
     setIsSubmitting(true);
-    await resetPassword(data.email);
-    setIsSubmitting(false);
+    try {
+      await resetPassword(data.email);
+      toast.success('Password reset instructions sent to your email');
+    } catch (error) {
+      toast.error('Failed to send reset instructions');
+      console.error(error);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const handlePasswordUpdate = async (data: z.infer<typeof resetSchema>) => {
     setIsSubmitting(true);
-    await updatePassword(data.password);
-    setIsSubmitting(false);
+    try {
+      await updatePassword(data.password);
+      toast.success('Password updated successfully');
+    } catch (error) {
+      toast.error('Failed to update password');
+      console.error(error);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
