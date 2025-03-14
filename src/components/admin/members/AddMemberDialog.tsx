@@ -17,7 +17,10 @@ const AddMemberDialog = ({ isOpen, onClose, onAddMember, isCreating = false }: A
   
   // Handle successful submission
   const handleSubmit = async (values: any) => {
+    console.log("Dialog handling submit with values:", values);
     const success = await onSubmit(values);
+    console.log("Submit result:", success);
+    
     if (success) {
       // Close the dialog on successful submission
       onClose();
@@ -25,8 +28,13 @@ const AddMemberDialog = ({ isOpen, onClose, onAddMember, isCreating = false }: A
     return success; // Make sure we return a value
   };
 
+  React.useEffect(() => {
+    console.log("Dialog open state changed to:", isOpen);
+  }, [isOpen]);
+
   return (
     <Dialog open={isOpen} onOpenChange={(open) => {
+      console.log("Dialog onOpenChange triggered:", open, "isSubmitting:", isSubmitting);
       if (!open && !isSubmitting) {
         onClose();
       }

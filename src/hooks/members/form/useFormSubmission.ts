@@ -12,8 +12,11 @@ export const useFormSubmission = (onAddMember: AddMemberFn, isCreating: boolean)
   const { transformFormToMemberData } = useFormDataTransformer();
 
   const submitForm = async (values: MemberFormValues): Promise<boolean> => {
+    console.log("Form submission started with values:", values);
+    
     // Prevent duplicate submissions
     if (isSubmitting || isCreating) {
+      console.log("Submission prevented - already submitting or creating:", isSubmitting, isCreating);
       return false;
     }
     
@@ -21,9 +24,11 @@ export const useFormSubmission = (onAddMember: AddMemberFn, isCreating: boolean)
     try {
       // Transform the form data to member data
       const memberData = transformFormToMemberData(values);
+      console.log("Transformed member data:", memberData);
       
       // Call the onAddMember function provided by the parent
       const result = await Promise.resolve(onAddMember(memberData));
+      console.log("Member add result:", result);
       
       if (result) {
         toast.success("Member added successfully", {

@@ -18,10 +18,19 @@ export const useSupabaseMemberSelection = () => {
 
   // Select all members
   const selectAllMembers = (membersToSelect: Member[]) => {
-    if (selectedMembers.length === membersToSelect.length) {
+    if (membersToSelect.length === 0) {
+      setSelectedMembers([]);
+      return;
+    }
+    
+    // If all members are already selected, deselect all
+    const allMemberIds = membersToSelect.map(m => m.id as string);
+    const allSelected = allMemberIds.every(id => selectedMembers.includes(id));
+    
+    if (allSelected) {
       setSelectedMembers([]);
     } else {
-      setSelectedMembers(membersToSelect.map(m => m.id as string));
+      setSelectedMembers(allMemberIds);
     }
   };
 

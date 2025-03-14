@@ -15,6 +15,7 @@ export const useSupabaseMemberData = () => {
       setIsLoading(true);
       try {
         const data = await fetchMembers();
+        console.log('Members loaded successfully:', data);
         setMembers(data);
       } catch (error) {
         console.error('Error loading members:', error);
@@ -33,7 +34,8 @@ export const useSupabaseMemberData = () => {
         event: '*', 
         schema: 'public', 
         table: 'members' 
-      }, async () => {
+      }, async (payload) => {
+        console.log('Real-time update received:', payload);
         // Refresh the members list when changes occur
         const data = await fetchMembers();
         setMembers(data);
