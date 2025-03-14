@@ -7,29 +7,7 @@ import RecentActivities from '@/components/admin/dashboard/RecentActivities';
 import AdditionalInsights from '@/components/admin/dashboard/AdditionalInsights';
 import CreateAdminButton from '@/components/admin/setup/CreateAdminButton';
 import { useQuery } from '@tanstack/react-query';
-
-// Define the proper interfaces for chart data
-interface MembershipData {
-  name: string;
-  members: number;
-  month?: string;
-  newMembers?: number;
-  cancelledMembers?: number;
-}
-
-interface RevenueData {
-  name: string;
-  value: number;
-  month?: string;
-  revenue?: number;
-}
-
-interface ClassAttendanceData {
-  name: string;
-  value: number;
-  class?: string;
-  attendees?: number;
-}
+import { MembershipData, RevenueData, ClassAttendanceData } from '@/utils/exportUtils';
 
 // Mock data for dashboard
 const mockMembershipData: MembershipData[] = [
