@@ -1,3 +1,4 @@
+
 import React from "react";
 import { DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
@@ -78,7 +79,7 @@ const MemberDialogContent = ({ form, isSubmitting, onClose, onSubmit }: MemberDi
           </div>
 
           <DialogFooter>
-            <Button type="button" variant="outline" onClick={onClose}>
+            <Button type="button" variant="outline" onClick={onClose} disabled={isSubmitting}>
               Cancel
             </Button>
             <Button 

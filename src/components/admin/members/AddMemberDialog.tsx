@@ -30,6 +30,7 @@ const AddMemberDialog = ({ isOpen, onClose, onAddMember, isCreating = false }: A
 
   React.useEffect(() => {
     console.log("Dialog open state changed to:", isOpen);
+    // If dialog is closed, we don't need to do anything special
   }, [isOpen]);
 
   return (
@@ -40,12 +41,14 @@ const AddMemberDialog = ({ isOpen, onClose, onAddMember, isCreating = false }: A
       }
     }}>
       <DialogContent className="sm:max-w-[700px] max-h-[90vh] overflow-y-auto">
-        <MemberDialogContent 
-          form={form} 
-          isSubmitting={isSubmitting || isCreating} 
-          onClose={onClose} 
-          onSubmit={handleSubmit}
-        />
+        {isOpen && ( // Only render content when dialog is open
+          <MemberDialogContent 
+            form={form} 
+            isSubmitting={isSubmitting || isCreating} 
+            onClose={onClose} 
+            onSubmit={handleSubmit}
+          />
+        )}
       </DialogContent>
     </Dialog>
   );
