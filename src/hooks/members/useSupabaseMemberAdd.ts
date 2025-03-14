@@ -9,10 +9,37 @@ export const useSupabaseMemberAdd = () => {
     try {
       console.log("Starting useSupabaseMemberAdd with data:", memberData);
       
-      if (!memberData || !memberData.name || !memberData.email) {
-        console.error("Invalid member data:", memberData);
-        toast.error('Missing required member data');
+      // Validate required fields
+      if (!memberData) {
+        console.error("Member data is null or undefined");
+        toast.error('Missing member data');
         return false;
+      }
+      
+      if (memberData.membershipCategory === 'Individual') {
+        if (!memberData.name || !memberData.email) {
+          console.error("Invalid individual member data - missing required fields:", 
+            {name: memberData.name, email: memberData.email});
+          toast.error('Missing required member data: name and email are required for individual members');
+          return false;
+        }
+      } else if (memberData.membershipCategory === 'Company') {
+        if (!memberData.companyName || !memberData.companyEmail) {
+          console.error("Invalid company member data - missing required fields:", 
+            {companyName: memberData.companyName, companyEmail: memberData.companyEmail});
+          toast.error('Missing required member data: company name and email are required for company members');
+          return false;
+        }
+      } else {
+        console.error("Invalid membership category:", memberData.membershipCategory);
+        toast.error('Invalid membership category');
+        return false;
+      }
+      
+      // Ensure status is set
+      if (!memberData.status) {
+        console.log("Status field missing, setting to Active");
+        memberData.status = 'Active';
       }
       
       // Log some specific fields to help debug

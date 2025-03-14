@@ -24,6 +24,7 @@ const TrainerDropdownField = ({ control }: TrainerDropdownFieldProps) => {
           <Select 
             onValueChange={field.onChange} 
             value={field.value || ""}
+            defaultValue=""
           >
             <FormControl>
               <SelectTrigger>

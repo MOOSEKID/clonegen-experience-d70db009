@@ -59,7 +59,11 @@ const MembershipDetailsFields = ({ control }: MembershipDetailsFieldsProps) => {
           render={({ field }) => (
             <FormItem>
               <FormLabel>Membership Category</FormLabel>
-              <Select onValueChange={field.onChange} defaultValue={field.value}>
+              <Select 
+                onValueChange={field.onChange} 
+                defaultValue={field.value}
+                value={field.value || "Individual"}
+              >
                 <FormControl>
                   <SelectTrigger>
                     <SelectValue placeholder="Select membership category" />
@@ -80,7 +84,11 @@ const MembershipDetailsFields = ({ control }: MembershipDetailsFieldsProps) => {
           render={({ field }) => (
             <FormItem>
               <FormLabel>Membership Plan</FormLabel>
-              <Select onValueChange={field.onChange} defaultValue={field.value || "Monthly"}>
+              <Select 
+                onValueChange={field.onChange} 
+                defaultValue={field.value || "Monthly"}
+                value={field.value || "Monthly"}
+              >
                 <FormControl>
                   <SelectTrigger>
                     <SelectValue placeholder="Select membership plan" />
@@ -119,7 +127,11 @@ const MembershipDetailsFields = ({ control }: MembershipDetailsFieldsProps) => {
           render={({ field }) => (
             <FormItem>
               <FormLabel>Membership Status</FormLabel>
-              <Select onValueChange={field.onChange} defaultValue={field.value || "Active"}>
+              <Select 
+                onValueChange={field.onChange} 
+                defaultValue={field.value || "Active"}
+                value={field.value || "Active"}
+              >
                 <FormControl>
                   <SelectTrigger>
                     <SelectValue placeholder="Select status" />
@@ -140,7 +152,11 @@ const MembershipDetailsFields = ({ control }: MembershipDetailsFieldsProps) => {
           render={({ field }) => (
             <FormItem>
               <FormLabel>Payment Status</FormLabel>
-              <Select onValueChange={field.onChange} defaultValue={field.value || "Pending"}>
+              <Select 
+                onValueChange={field.onChange} 
+                defaultValue={field.value || "Pending"}
+                value={field.value || "Pending"}
+              >
                 <FormControl>
                   <SelectTrigger>
                     <SelectValue placeholder="Select payment status" />
@@ -164,7 +180,11 @@ const MembershipDetailsFields = ({ control }: MembershipDetailsFieldsProps) => {
         render={({ field }) => (
           <FormItem>
             <FormLabel>Discounts Used</FormLabel>
-            <Select onValueChange={field.onChange} defaultValue={field.value || "No"}>
+            <Select 
+              onValueChange={field.onChange} 
+              defaultValue={field.value || "No"}
+              value={field.value || "No"}
+            >
               <FormControl>
                 <SelectTrigger>
                   <SelectValue placeholder="Select if discounts used" />

@@ -18,7 +18,11 @@ const GenderField = ({ control }: GenderFieldProps) => {
       render={({ field }) => (
         <FormItem>
           <FormLabel>Gender</FormLabel>
-          <Select onValueChange={field.onChange} value={field.value}>
+          <Select 
+            onValueChange={field.onChange} 
+            value={field.value || ''} // Ensure a fallback empty string if value is undefined
+            defaultValue=""
+          >
             <FormControl>
               <SelectTrigger>
                 <SelectValue placeholder="Select gender" />
