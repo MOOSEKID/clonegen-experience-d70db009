@@ -6,4 +6,4 @@ export * from './classManagement';
 export * from './enrollmentManagement';
 
 // Re-export the types
-export { GymClass, ClassEnrollment, ClassStatus } from '@/types/classTypes';
+export type { GymClass, ClassEnrollment, ClassStatus, ClassType, MemberInfo, UpdateWaitlistPositionsParams } from '@/types/classTypes';

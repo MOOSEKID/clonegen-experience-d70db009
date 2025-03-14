@@ -29,6 +29,17 @@ export interface GymClass {
   enrollments?: ClassEnrollment[];
 }
 
+// Add ClassType for backward compatibility
+export type ClassType = GymClass;
+
+// Add MemberInfo for backward compatibility
+export interface MemberInfo {
+  id: string;
+  name: string;
+  email: string;
+  status?: string;
+}
+
 // Type for RPC parameters
 export interface UpdateWaitlistPositionsParams {
   class_id_param: string;
