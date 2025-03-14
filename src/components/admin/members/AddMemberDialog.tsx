@@ -4,6 +4,7 @@ import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Member, MemberFormAction } from "@/types/memberTypes";
 import { useAddMemberForm } from "@/hooks/members/useAddMemberForm";
 import MemberDialogContent from "./dialog/MemberDialogContent";
+import { toast } from "sonner";
 
 interface AddMemberDialogProps {
   isOpen: boolean;
@@ -38,6 +39,7 @@ const AddMemberDialog = ({ isOpen, onClose, onAddMember, isCreating = false }: A
     } catch (error) {
       console.error("Error in handleSubmit:", error);
       setDialogError(error instanceof Error ? error.message : "An unexpected error occurred");
+      toast.error(error instanceof Error ? error.message : "An unexpected error occurred");
       return false;
     }
   };
@@ -45,8 +47,28 @@ const AddMemberDialog = ({ isOpen, onClose, onAddMember, isCreating = false }: A
   // Reset error when dialog opens/closes
   React.useEffect(() => {
     console.log("AddMemberDialog useEffect triggered by isOpen change:", isOpen);
-    setDialogError(null);
+    if (isOpen) {
+      console.log("Dialog opened - resetting error state");
+      setDialogError(null);
+    }
   }, [isOpen]);
+
+  // Add error boundary to catch unhandled errors
+  React.useEffect(() => {
+    const originalConsoleError = console.error;
+    console.error = (...args) => {
+      // Check if this is a React error
+      const errorString = args.join(' ');
+      if (errorString.includes('React') || errorString.includes('Error')) {
+        setDialogError("An error occurred in the form. Check console for details.");
+      }
+      originalConsoleError(...args);
+    };
+    
+    return () => {
+      console.error = originalConsoleError;
+    };
+  }, []);
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => {

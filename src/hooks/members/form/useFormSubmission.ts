@@ -17,12 +17,12 @@ export const useFormSubmission = (
 
       // Transform form values to Member/MemberFormAction format
       const memberData: Omit<Member, "id" | "startDate" | "endDate" | "lastCheckin"> & MemberFormAction = {
-        name: values.name,
-        email: values.email,
+        name: values.name || "",
+        email: values.email || "",
         phone: values.phone || "",
         membershipType: values.membershipType || "Standard",
         membershipCategory: values.membershipCategory || "Individual",
-        status: values.status || "Active", // Add status field to fix type error
+        status: values.status || "Active", // Add status field
         
         // Authentication details
         generateUsername: values.generateUsername,
@@ -33,14 +33,13 @@ export const useFormSubmission = (
         
         // Additional fields based on membership category
         ...(values.membershipCategory === "Individual" ? {
-          dateOfBirth: values.dateOfBirth,
+          // Convert Date to string format for dateOfBirth
+          dateOfBirth: values.dateOfBirth ? values.dateOfBirth.toISOString().split('T')[0] : undefined,
           gender: values.gender,
           address: values.address,
           emergencyContact: values.emergencyContact,
           linkedToCompany: values.linkedToCompany,
           linkedCompanyName: values.linkedCompanyName,
-          // Fix the property name
-          linkedCompanyId: values.linkedCompanyName, // Using linkedCompanyName as a fallback
         } : {}),
         
         ...(values.membershipCategory === "Company" ? {
@@ -52,7 +51,6 @@ export const useFormSubmission = (
           companyTIN: values.companyTIN,
           subscriptionModel: values.subscriptionModel,
           billingCycle: values.billingCycle,
-          // Fix missing properties by using correct types from form values
           corporateDiscount: values.corporateDiscount,
         } : {}),
         

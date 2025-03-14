@@ -15,8 +15,17 @@ export const useSupabaseMemberAdd = () => {
         return false;
       }
       
-      // Mock successful member creation
-      console.log("Member would be created with this data:", JSON.stringify(memberData, null, 2));
+      // Log some specific fields to help debug
+      console.log("Member key fields:", {
+        name: memberData.name,
+        email: memberData.email,
+        status: memberData.status,
+        membershipCategory: memberData.membershipCategory,
+        membershipType: memberData.membershipType
+      });
+      
+      // Log stringified data for detailed inspection
+      console.log("Full member data:", JSON.stringify(memberData, null, 2));
       
       // Simulate a delay
       await new Promise(resolve => setTimeout(resolve, 500));
