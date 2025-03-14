@@ -5,6 +5,7 @@ import { Member, MemberFormAction } from "@/types/memberTypes";
 import { useAddMemberForm } from "@/hooks/members/useAddMemberForm";
 import MemberDialogContent from "./dialog/MemberDialogContent";
 import { toast } from "sonner";
+import { ErrorBoundary } from "@/components/ui/error-boundary";
 
 interface AddMemberDialogProps {
   isOpen: boolean;
@@ -70,6 +71,13 @@ const AddMemberDialog = ({ isOpen, onClose, onAddMember, isCreating = false }: A
     };
   }, []);
 
+  // Error handler for the ErrorBoundary
+  const handleError = (error: Error) => {
+    console.error("ErrorBoundary caught error:", error);
+    setDialogError(error.message || "An unexpected error occurred in the form");
+    toast.error(error.message || "An unexpected error occurred in the form");
+  };
+
   return (
     <Dialog open={isOpen} onOpenChange={(open) => {
       console.log("Dialog onOpenChange triggered:", open, "isSubmitting:", isSubmitting);
@@ -84,12 +92,33 @@ const AddMemberDialog = ({ isOpen, onClose, onAddMember, isCreating = false }: A
             {dialogError}
           </div>
         )}
-        <MemberDialogContent 
-          form={form} 
-          isSubmitting={isSubmitting || isCreating} 
-          onClose={onClose} 
-          onSubmit={handleSubmit}
-        />
+        <ErrorBoundary onError={handleError} fallback={
+          <div className="p-4 bg-red-50 border border-red-200 rounded-md">
+            <h3 className="text-lg font-medium text-red-800 mb-2">Something went wrong</h3>
+            <p className="text-red-600 mb-4">There was an error loading the member form. Please try again.</p>
+            <div className="flex justify-end space-x-2">
+              <button 
+                onClick={onClose}
+                className="px-4 py-2 border border-gray-300 rounded text-gray-700 hover:bg-gray-50"
+              >
+                Cancel
+              </button>
+              <button 
+                onClick={() => window.location.reload()}
+                className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700"
+              >
+                Reload Page
+              </button>
+            </div>
+          </div>
+        }>
+          <MemberDialogContent 
+            form={form} 
+            isSubmitting={isSubmitting || isCreating} 
+            onClose={onClose} 
+            onSubmit={handleSubmit}
+          />
+        </ErrorBoundary>
       </DialogContent>
     </Dialog>
   );
