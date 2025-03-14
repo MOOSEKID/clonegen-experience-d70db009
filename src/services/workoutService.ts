@@ -1,6 +1,8 @@
 
 import { supabase } from '@/integrations/supabase/client';
 
+export type WorkoutStatus = 'Assigned' | 'In Progress' | 'Completed' | 'Canceled';
+
 export interface WorkoutProgram {
   id: string;
   name: string;
@@ -38,9 +40,9 @@ export interface MemberWorkout {
   trainer_id: string;
   start_date: string;
   end_date: string;
-  status: 'Assigned' | 'In Progress' | 'Completed' | 'Canceled';
+  status: WorkoutStatus;
   notes?: string;
-  program?: WorkoutProgram;
+  program?: Partial<WorkoutProgram>;
   trainer_name?: string;
 }
 
@@ -55,7 +57,11 @@ export const fetchWorkoutPrograms = async (): Promise<WorkoutProgram[]> => {
       throw error;
     }
     
-    return data || [];
+    // Add an empty exercises array to each program to match the interface
+    return (data || []).map(item => ({
+      ...item,
+      exercises: []
+    }));
   } catch (error) {
     console.error('Error fetching workout programs:', error);
     return [];
@@ -154,7 +160,7 @@ export const fetchMemberWorkouts = async (memberId: string): Promise<MemberWorko
       trainer_id: item.trainer_id,
       start_date: item.start_date,
       end_date: item.end_date,
-      status: item.status,
+      status: (item.status as WorkoutStatus) || 'Assigned',
       notes: item.notes,
       program: item.workout_program,
       trainer_name: item.trainer?.name
