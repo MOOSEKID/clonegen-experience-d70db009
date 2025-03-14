@@ -1,90 +1,83 @@
-import { useState } from 'react';
-import { useTrainerProfiles, TrainerProfile } from '@/hooks/trainers/useTrainerProfiles';
+
+import { useTrainerProfiles } from '@/hooks/trainers/useTrainerProfiles';
+import { useDialogState } from './state/useDialogState';
+import { useTrainerFiltering } from './state/useTrainerFiltering';
+import { useTrainerSubmitActions } from './state/useTrainerSubmitActions';
 
 export function useTrainerProfilesState() {
+  // Get trainer data
   const {
     trainers,
     isLoading,
-    addTrainer,
-    updateTrainer,
-    deleteTrainer,
-    addCertification,
-    deleteCertification,
-    addAvailability,
-    deleteAvailability,
   } = useTrainerProfiles();
 
-  const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
-  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
-  const [isCertDialogOpen, setIsCertDialogOpen] = useState(false);
-  const [isAvailDialogOpen, setIsAvailDialogOpen] = useState(false);
-  const [selectedTrainer, setSelectedTrainer] = useState<string | null>(null);
-  const [activeTab, setActiveTab] = useState('all');
+  // Dialog state management
+  const [
+    { isAddDialogOpen, isEditDialogOpen, isCertDialogOpen, isAvailDialogOpen, selectedTrainer },
+    { 
+      setIsAddDialogOpen, 
+      setIsEditDialogOpen, 
+      setIsCertDialogOpen, 
+      setIsAvailDialogOpen,
+      setSelectedTrainer,
+      handleAddTrainer,
+      handleEditTrainer,
+      handleAddCertification,
+      handleAddAvailability 
+    }
+  ] = useDialogState();
 
-  const filteredTrainers = trainers.filter((trainer) => {
-    if (activeTab === 'all') return true;
-    return trainer.status?.toLowerCase() === activeTab;
-  });
+  // Trainer filtering
+  const [
+    { activeTab },
+    { setActiveTab },
+    filteredTrainers
+  ] = useTrainerFiltering(trainers);
 
+  // Get the selected trainer data
   const getSelectedTrainer = () => {
     return trainers.find((trainer) => trainer.id === selectedTrainer) || null;
   };
 
-  const handleAddTrainer = () => {
-    setIsAddDialogOpen(true);
-  };
+  // Form submission actions
+  const {
+    handleAddTrainerSubmit,
+    handleUpdateTrainerSubmit,
+    handleDeleteTrainerSubmit,
+    handleAddCertificationSubmit,
+    handleDeleteCertificationSubmit,
+    handleAddAvailabilitySubmit,
+    handleDeleteAvailabilitySubmit,
+  } = useTrainerSubmitActions();
 
-  const handleEditTrainer = (trainerId: string) => {
-    setSelectedTrainer(trainerId);
-    setIsEditDialogOpen(true);
-  };
-
-  const handleAddCertification = (trainerId: string) => {
-    setSelectedTrainer(trainerId);
-    setIsCertDialogOpen(true);
-  };
-
-  const handleAddAvailability = (trainerId: string) => {
-    setSelectedTrainer(trainerId);
-    setIsAvailDialogOpen(true);
-  };
-
-  const handleAddTrainerSubmit = async (data: any) => {
-    await addTrainer(data);
+  // Dialog submission handlers with dialog closing
+  const handleAddTrainerWithClose = async (data: any) => {
+    await handleAddTrainerSubmit(data);
     setIsAddDialogOpen(false);
   };
 
-  const handleUpdateTrainerSubmit = async (id: string, data: any) => {
-    await updateTrainer(id, data);
+  const handleUpdateTrainerWithClose = async (id: string, data: any) => {
+    await handleUpdateTrainerSubmit(id, data);
     setIsEditDialogOpen(false);
   };
 
-  const handleDeleteTrainerSubmit = async (id: string) => {
-    await deleteTrainer(id);
-  };
-
-  const handleAddCertificationSubmit = async (data: any) => {
-    await addCertification(data);
+  const handleAddCertificationWithClose = async (data: any) => {
+    await handleAddCertificationSubmit(data);
     setIsCertDialogOpen(false);
   };
 
-  const handleDeleteCertificationSubmit = async (id: string) => {
-    await deleteCertification(id);
-  };
-
-  const handleAddAvailabilitySubmit = async (data: any) => {
-    await addAvailability(data);
+  const handleAddAvailabilityWithClose = async (data: any) => {
+    await handleAddAvailabilitySubmit(data);
     setIsAvailDialogOpen(false);
   };
 
-  const handleDeleteAvailabilitySubmit = async (id: string) => {
-    await deleteAvailability(id);
-  };
-
   return {
+    // Data
     trainers,
     isLoading,
     filteredTrainers,
+    
+    // Dialog state
     isAddDialogOpen,
     setIsAddDialogOpen,
     isEditDialogOpen,
@@ -94,19 +87,27 @@ export function useTrainerProfilesState() {
     isAvailDialogOpen,
     setIsAvailDialogOpen,
     selectedTrainer,
+    
+    // Filtering
     activeTab,
     setActiveTab,
+    
+    // Helper methods
     getSelectedTrainer,
+    
+    // Action handlers
     handleAddTrainer,
     handleEditTrainer,
     handleAddCertification,
     handleAddAvailability,
-    handleAddTrainerSubmit,
-    handleUpdateTrainerSubmit,
+    
+    // Submission handlers with dialog closing
+    handleAddTrainerSubmit: handleAddTrainerWithClose,
+    handleUpdateTrainerSubmit: handleUpdateTrainerWithClose,
     handleDeleteTrainerSubmit,
-    handleAddCertificationSubmit,
+    handleAddCertificationSubmit: handleAddCertificationWithClose,
     handleDeleteCertificationSubmit,
-    handleAddAvailabilitySubmit,
+    handleAddAvailabilitySubmit: handleAddAvailabilityWithClose,
     handleDeleteAvailabilitySubmit,
   };
 }
