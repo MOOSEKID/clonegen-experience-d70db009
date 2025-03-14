@@ -62,7 +62,7 @@ export const useSupabaseWorkoutData = () => {
       supabase.removeChannel(workoutChannel);
       supabase.removeChannel(exercisesChannel);
     };
-  }, [loadWorkoutPrograms, loadExercises]);
+  }, []);
 
   return {
     workoutPrograms,
