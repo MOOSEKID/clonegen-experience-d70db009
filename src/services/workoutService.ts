@@ -60,7 +60,7 @@ export const fetchWorkoutPrograms = async (): Promise<WorkoutProgram[]> => {
     // Add an empty exercises array to each program to match the interface
     return (data || []).map(item => ({
       ...item,
-      exercises: []
+      exercises: [] as Exercise[]
     }));
   } catch (error) {
     console.error('Error fetching workout programs:', error);
@@ -189,7 +189,7 @@ export const assignWorkoutToMember = async (
         trainer_id: trainerId,
         start_date: startDate,
         end_date: endDate,
-        status: 'Assigned',
+        status: 'Assigned' as WorkoutStatus,
         notes
       });
       

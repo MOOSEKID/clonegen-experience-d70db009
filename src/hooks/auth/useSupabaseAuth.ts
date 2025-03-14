@@ -14,7 +14,8 @@ export const useSupabaseAuth = () => {
   // Fetch user role using the security definer function
   const fetchUserRole = async (userId: string) => {
     try {
-      const { data, error } = await supabase.rpc('get_user_role', { user_id: userId });
+      // Use type assertion to handle the unknown return type
+      const { data, error } = await supabase.rpc('get_user_role', { user_id: userId as any });
         
       if (error) {
         console.error('Error fetching user role:', error);
@@ -115,6 +116,10 @@ export const useSupabaseAuth = () => {
       }
       
       if (authData.user) {
+        // Create start and end dates
+        const startDate = new Date().toISOString().split('T')[0];
+        const endDate = new Date(new Date().setFullYear(new Date().getFullYear() + 1)).toISOString().split('T')[0];
+        
         // Create member record
         const { error: memberError } = await supabase.from('members').insert({
           id: authData.user.id,
@@ -124,8 +129,8 @@ export const useSupabaseAuth = () => {
           membershiptype: 'Basic',
           status: 'Pending',
           username: userData.email,
-          startdate: new Date().toISOString().split('T')[0],
-          enddate: new Date(new Date().setFullYear(new Date().getFullYear() + 1)).toISOString().split('T')[0]
+          startdate: startDate,
+          enddate: endDate
         });
         
         if (memberError) {

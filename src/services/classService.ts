@@ -325,7 +325,7 @@ export const removeMemberFromClass = async (
         // Update class status from full to scheduled
         await supabase
           .from('classes')
-          .update({ status: 'scheduled' })
+          .update({ status: 'scheduled' as ClassStatus })
           .eq('id', enrollment.class_id);
       }
     }
