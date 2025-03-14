@@ -20,7 +20,10 @@ const AdminLayout = () => {
         const sessionActive = document.cookie.includes('session_active=true');
         const isAdminRole = document.cookie.includes('user_role=admin');
         
+        console.log('Admin auth check:', { isAdmin, sessionActive, isAdminRole });
+        
         if ((!isAdmin || !sessionActive) && !isAdminRole) {
+          console.log('Admin authentication failed, redirecting to login');
           toast.error('You must be logged in as an administrator');
           navigate('/login');
         } else {
@@ -30,6 +33,7 @@ const AdminLayout = () => {
           }
           
           setIsAuthenticated(true);
+          console.log('Admin authenticated successfully');
           // Refresh session cookie to maintain login state
           document.cookie = "session_active=true; path=/; max-age=2592000"; // 30 days
           document.cookie = "user_role=admin; path=/; max-age=2592000"; // 30 days
