@@ -2,9 +2,10 @@
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 
-type UserRoleParams = {
+// Type definition for RPC parameters
+interface UserRoleParams {
   user_id: string;
-};
+}
 
 /**
  * Fetches the role of a user from Supabase using an RPC function
