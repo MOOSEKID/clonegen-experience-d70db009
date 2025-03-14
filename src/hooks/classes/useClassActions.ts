@@ -62,7 +62,7 @@ export const useClassActions = (initialClasses: ClassType[] = []) => {
       } else if (data) {
         // If success, use the returned ID from Supabase
         // But we still need to keep our UI data structure
-        classWithId.id = parseInt(data.id);
+        classWithId.id = typeof data.id === 'string' ? parseInt(data.id) : data.id;
       }
       
       setClasses(prevClasses => [...prevClasses, classWithId]);
@@ -110,7 +110,7 @@ export const useClassActions = (initialClasses: ClassType[] = []) => {
       const { error } = await supabase
         .from('classes')
         .update(supabaseData)
-        .eq('id', updatedClass.id);
+        .eq('id', updatedClass.id.toString());  // Convert to string for Supabase
         
       if (error) {
         console.error('Error updating class in Supabase:', error);
@@ -151,7 +151,7 @@ export const useClassActions = (initialClasses: ClassType[] = []) => {
       const { error } = await supabase
         .from('classes')
         .delete()
-        .eq('id', classId);
+        .eq('id', classId.toString());  // Convert to string for Supabase
         
       if (error) {
         console.error('Error deleting class from Supabase:', error);
