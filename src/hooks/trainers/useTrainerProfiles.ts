@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { useToast } from '@/components/ui/use-toast';
 import { supabase } from '@/integrations/supabase/client';
@@ -14,8 +13,8 @@ import {
   deleteAvailability
 } from './profiles/trainerService';
 
-// Re-export the types
-export { TrainerProfile, TrainerCertification, TrainerAvailability };
+// Re-export the types using 'export type' for TypeScript's isolatedModules
+export type { TrainerProfile, TrainerCertification, TrainerAvailability };
 
 export const useTrainerProfiles = () => {
   const [trainers, setTrainers] = useState<TrainerProfile[]>([]);
