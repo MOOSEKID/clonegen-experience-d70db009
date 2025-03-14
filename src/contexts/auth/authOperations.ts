@@ -85,18 +85,31 @@ export async function signUpWithEmail(email: string, password: string, userData:
 
 export async function signOutUser() {
   try {
-    await supabase.auth.signOut();
-    toast.success('Logged out successfully');
-    
+    // First clear local storage and cookies to prevent any state issues
     localStorage.removeItem('isLoggedIn');
     localStorage.removeItem('isAdmin');
     localStorage.removeItem('userEmail');
     localStorage.removeItem('userName');
     document.cookie = "session_active=; path=/; max-age=0";
     document.cookie = "user_role=; path=/; max-age=0";
+    
+    // Then sign out from Supabase
+    const { error } = await supabase.auth.signOut();
+    
+    if (error) {
+      console.error('Error signing out:', error);
+      toast.error('Error signing out');
+      return;
+    }
+    
+    // Force a reload after successful logout
+    toast.success('Logged out successfully');
+    setTimeout(() => {
+      window.location.href = '/';
+    }, 1000);
   } catch (error) {
-    toast.error('Error signing out');
     console.error('Error signing out:', error);
+    toast.error('Error signing out');
   }
 }
 
