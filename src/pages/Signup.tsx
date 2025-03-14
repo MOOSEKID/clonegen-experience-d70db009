@@ -1,7 +1,7 @@
 
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Button } from '@/components/Button';
+import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
 import { Eye, EyeOff } from 'lucide-react';
 import {
@@ -12,6 +12,8 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { Input } from '@/components/ui/input';
+import { useSupabaseAuth } from '@/hooks/auth/useSupabaseAuth';
 
 const Signup = () => {
   const [name, setName] = useState('');
@@ -20,44 +22,44 @@ const Signup = () => {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
+  const { signUp, isLoading } = useSupabaseAuth();
   const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsLoading(true);
     
     // Simple validation
     if (!name || !email || !password || !confirmPassword) {
       toast.error('Please fill in all fields');
-      setIsLoading(false);
       return;
     }
 
     if (password !== confirmPassword) {
       toast.error('Passwords do not match');
-      setIsLoading(false);
       return;
     }
     
-    try {
-      // In a real app, this would be an API call to create the user
-      // For now, we'll simulate a successful signup
-      localStorage.setItem('isLoggedIn', 'true');
-      localStorage.setItem('userEmail', email);
-      localStorage.setItem('userName', name);
+    if (password.length < 8) {
+      toast.error('Password must be at least 8 characters');
+      return;
+    }
+    
+    const userData = {
+      name,
+      email,
+      phone: '',
+    };
+    
+    const success = await signUp(email, password, userData);
+    
+    if (success) {
+      // Show a message about email verification if applicable
+      toast.success('Account created! Please check your email for verification.');
       
-      toast.success('Account created successfully!');
-      
-      // Use a small timeout to ensure the toast appears before redirect
+      // Redirect to login page
       setTimeout(() => {
-        setIsLoading(false);
-        navigate('/dashboard');
-      }, 500);
-    } catch (error) {
-      console.error('Signup error:', error);
-      toast.error('Signup failed. Please try again.');
-      setIsLoading(false);
+        navigate('/login');
+      }, 2000);
     }
   };
 
@@ -83,13 +85,14 @@ const Signup = () => {
               <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">
                 Full Name
               </label>
-              <input
+              <Input
                 id="name"
                 type="text"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gym-orange focus:border-transparent"
+                className="w-full"
                 placeholder="Your name"
+                disabled={isLoading}
               />
             </div>
             
@@ -97,13 +100,14 @@ const Signup = () => {
               <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
                 Email Address
               </label>
-              <input
+              <Input
                 id="email"
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gym-orange focus:border-transparent"
+                className="w-full"
                 placeholder="Your email"
+                disabled={isLoading}
               />
             </div>
             
@@ -112,13 +116,14 @@ const Signup = () => {
                 Password
               </label>
               <div className="relative">
-                <input
+                <Input
                   id="password"
                   type={showPassword ? "text" : "password"}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gym-orange focus:border-transparent pr-10"
+                  className="w-full pr-10"
                   placeholder="Your password"
+                  disabled={isLoading}
                 />
                 <button
                   type="button"
@@ -140,13 +145,14 @@ const Signup = () => {
                 Confirm Password
               </label>
               <div className="relative">
-                <input
+                <Input
                   id="confirmPassword"
                   type={showConfirmPassword ? "text" : "password"}
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gym-orange focus:border-transparent pr-10"
+                  className="w-full pr-10"
                   placeholder="Confirm your password"
+                  disabled={isLoading}
                 />
                 <button
                   type="button"
