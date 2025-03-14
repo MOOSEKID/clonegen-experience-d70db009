@@ -28,7 +28,17 @@ interface MemberDialogContentProps {
 }
 
 const MemberDialogContent = ({ form, isSubmitting, onClose, onSubmit }: MemberDialogContentProps) => {
+  console.log("Rendering MemberDialogContent, isSubmitting:", isSubmitting);
   const membershipCategory = form.watch("membershipCategory");
+
+  const handleFormSubmit = (values: z.infer<typeof memberFormSchema>) => {
+    try {
+      console.log("Form submit handler called with values:", values);
+      onSubmit(values);
+    } catch (error) {
+      console.error("Error in form submit handler:", error);
+    }
+  };
 
   return (
     <>
@@ -40,7 +50,7 @@ const MemberDialogContent = ({ form, isSubmitting, onClose, onSubmit }: MemberDi
       </DialogHeader>
       
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+        <form onSubmit={form.handleSubmit(handleFormSubmit)} className="space-y-6">
           {/* Membership Type Selection */}
           <MembershipTypeSection control={form.control} />
           
