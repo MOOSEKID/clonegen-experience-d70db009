@@ -1,68 +1,84 @@
 
-import { useTrainerPerformance } from '@/hooks/trainers/useTrainerPerformance';
-import { Skeleton } from '@/components/ui/skeleton';
-import { Users, Calendar, Award, Clock } from 'lucide-react';
+import React from 'react';
+import { Card, CardContent } from '@/components/ui/card';
+import { Users, Award, TrendingUp, BarChart } from 'lucide-react';
+import { PerformanceMetrics } from '@/hooks/trainers/performance/types';
 
-export interface PerformanceStatsGridProps {
-  trainerId: string;
+interface PerformanceStatsGridProps {
+  metrics: PerformanceMetrics;
+  isLoading?: boolean;
 }
 
-const PerformanceStatsGrid = ({ trainerId }: PerformanceStatsGridProps) => {
-  const { performanceMetrics: metrics, isLoading } = useTrainerPerformance(trainerId);
-
+const PerformanceStatsGrid: React.FC<PerformanceStatsGridProps> = ({ metrics, isLoading = false }) => {
   if (isLoading) {
-    return (
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        {[1, 2, 3, 4].map((i) => (
-          <div key={i} className="bg-white rounded-lg shadow p-4">
-            <Skeleton className="h-4 w-20 mb-2" />
-            <Skeleton className="h-8 w-24 mb-1" />
-            <Skeleton className="h-3 w-32" />
-          </div>
-        ))}
-      </div>
-    );
+    return <div>Loading performance metrics...</div>;
   }
 
-  const stats = [
-    {
-      title: 'Active Clients',
-      value: metrics.activeClients,
-      change: '+5% from last month',
-      icon: <Users className="h-5 w-5 text-blue-500" />,
-    },
-    {
-      title: 'Sessions This Month',
-      value: metrics.monthlySessions,
-      change: `${metrics.monthlyGrowth}% from last month`,
-      icon: <Calendar className="h-5 w-5 text-green-500" />,
-    },
-    {
-      title: 'Rating',
-      value: metrics.averageRating.toFixed(1),
-      change: 'Based on 24 reviews',
-      icon: <Award className="h-5 w-5 text-amber-500" />,
-    },
-    {
-      title: 'Attendance Rate',
-      value: `${metrics.completionRate}%`,
-      change: 'Over the last 30 days',
-      icon: <Clock className="h-5 w-5 text-purple-500" />,
-    },
-  ];
+  // Function to render the stats card
+  const renderStatsCard = (
+    icon: React.ReactNode,
+    label: string,
+    value: string | number,
+    bgColor: string,
+    textColor: string
+  ) => {
+    // Handle rendering for different value types
+    const renderValue = () => {
+      // If value is an array (like monthlySessions), we don't render it
+      if (Array.isArray(value)) {
+        return "See Chart";
+      }
+      return value;
+    };
+
+    return (
+      <Card className="border-0 shadow-sm">
+        <CardContent className="p-4 flex items-center space-x-4">
+          <div className={`p-3 rounded-full ${bgColor}`}>
+            {icon}
+          </div>
+          <div>
+            <p className="text-sm font-medium text-gray-500">{label}</p>
+            <p className={`text-2xl font-bold ${textColor}`}>{renderValue()}</p>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  };
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-      {stats.map((stat, index) => (
-        <div key={index} className="bg-white rounded-lg shadow p-4">
-          <div className="flex items-center justify-between">
-            <h3 className="text-sm font-medium text-gray-500">{stat.title}</h3>
-            {stat.icon}
-          </div>
-          <p className="text-2xl font-bold my-1">{stat.value}</p>
-          <p className="text-xs text-gray-500">{stat.change}</p>
-        </div>
-      ))}
+      {renderStatsCard(
+        <Users className="h-5 w-5 text-blue-600" />,
+        'Active Clients',
+        metrics.activeClients || 0,
+        'bg-blue-100',
+        'text-blue-600'
+      )}
+      
+      {renderStatsCard(
+        <Award className="h-5 w-5 text-green-600" />,
+        'Satisfaction',
+        `${metrics.satisfactionScore || 0}%`,
+        'bg-green-100',
+        'text-green-600'
+      )}
+      
+      {renderStatsCard(
+        <TrendingUp className="h-5 w-5 text-amber-600" />,
+        'Monthly Growth',
+        `${metrics.monthlyGrowth || 0}%`,
+        'bg-amber-100',
+        'text-amber-600'
+      )}
+      
+      {renderStatsCard(
+        <BarChart className="h-5 w-5 text-purple-600" />,
+        'Retention Rate',
+        `${metrics.retentionRate || 0}%`,
+        'bg-purple-100',
+        'text-purple-600'
+      )}
     </div>
   );
 };

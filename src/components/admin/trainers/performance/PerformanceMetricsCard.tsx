@@ -1,107 +1,87 @@
 
 import React from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { useTrainerPerformance } from '@/hooks/trainers/useTrainerPerformance';
-import { Skeleton } from '@/components/ui/skeleton';
-import {
-  Users,
-  CalendarDays,
-  TrendingUp,
-  Star,
-  Clock,
-  Heart,
-} from 'lucide-react';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { PerformanceMetrics } from '@/hooks/trainers/performance/types';
 
-export interface PerformanceMetricsCardProps {
-  trainerId: string;
-  trainerName: string;
-  fullView?: boolean;
+interface PerformanceMetricsCardProps {
+  metric: keyof PerformanceMetrics;
+  title: string;
+  description?: string;
+  value: number | string;
+  suffix?: string;
+  className?: string;
+  formatter?: (value: number | string) => string;
 }
 
 const PerformanceMetricsCard: React.FC<PerformanceMetricsCardProps> = ({
-  trainerId,
-  trainerName,
-  fullView = false,
+  metric,
+  title,
+  description,
+  value,
+  suffix = '',
+  className = '',
+  formatter,
 }) => {
-  const { performanceMetrics: metrics, isLoading } = useTrainerPerformance(trainerId);
+  // Default formatter that handles percentages and numbers
+  const defaultFormatter = (val: number | string) => {
+    if (typeof val === 'number') {
+      // If we're dealing with a percentage-like value
+      if (metric === 'averageAttendance' || 
+          metric === 'clientRetentionRate' || 
+          metric === 'completionRate' ||
+          metric === 'retentionRate') {
+        return `${val.toFixed(0)}%`;
+      }
+      // For other numeric values
+      return val.toString();
+    }
+    return val;
+  };
 
-  if (isLoading) {
-    return (
-      <Card>
-        <CardHeader>
-          <CardTitle>
-            <Skeleton className="h-6 w-48" />
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <Skeleton className="h-4 w-full" />
-          <Skeleton className="h-4 w-full" />
-          <Skeleton className="h-4 w-3/4" />
-        </CardContent>
-      </Card>
-    );
-  }
+  // Use provided formatter or fall back to default
+  const formattedValue = formatter ? formatter(value) : defaultFormatter(value);
+  
+  // Get appropriate color based on metric type
+  const getCardColor = () => {
+    switch (metric) {
+      case 'averageRating':
+      case 'satisfactionScore':
+        return 'bg-blue-50 border-blue-200';
+      case 'averageAttendance':
+      case 'clientRetentionRate':
+      case 'completionRate':
+      case 'retentionRate':
+        return 'bg-green-50 border-green-200';
+      case 'totalClasses':
+      case 'assignedClients':
+      case 'activeClients':
+        return 'bg-purple-50 border-purple-200';
+      case 'monthlyGrowth':
+        return 'bg-amber-50 border-amber-200';
+      default:
+        return 'bg-gray-50 border-gray-200';
+    }
+  };
 
-  const metricsList = [
-    {
-      icon: <Users className="h-4 w-4 mr-2 text-blue-500" />,
-      name: 'Active Clients',
-      value: metrics.assignedClients,
-    },
-    {
-      icon: <CalendarDays className="h-4 w-4 mr-2 text-green-500" />,
-      name: 'Sessions This Month',
-      value: metrics.monthlySessions,
-    },
-    {
-      icon: <TrendingUp className="h-4 w-4 mr-2 text-purple-500" />,
-      name: 'Client Retention',
-      value: `${metrics.retentionRate}%`,
-    },
-    {
-      icon: <Clock className="h-4 w-4 mr-2 text-orange-500" />,
-      name: 'Attendance Rate',
-      value: `${metrics.completionRate}%`,
-    },
-    {
-      icon: <Star className="h-4 w-4 mr-2 text-yellow-500" />,
-      name: 'Average Rating',
-      value: metrics.averageRating.toFixed(1),
-    },
-  ];
-
-  // Only show these metrics in full view
-  const extendedMetrics = [
-    {
-      icon: <Heart className="h-4 w-4 mr-2 text-red-500" />,
-      name: 'Client Satisfaction',
-      value: `${metrics.satisfactionScore}%`,
-    },
-  ];
-
-  const displayMetrics = fullView
-    ? [...metricsList, ...extendedMetrics]
-    : metricsList;
+  // Handle rendering for different value types
+  const renderValue = () => {
+    // If value is an array (like monthlySessions), we don't render it
+    if (Array.isArray(value)) {
+      return "See Chart";
+    }
+    return formattedValue + suffix;
+  };
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="text-lg font-medium">
-          {trainerName}'s Performance
-        </CardTitle>
+    <Card className={`border ${getCardColor()} ${className}`}>
+      <CardHeader className="pb-2">
+        <CardTitle className="text-lg font-medium">{title}</CardTitle>
+        {description && <CardDescription>{description}</CardDescription>}
       </CardHeader>
       <CardContent>
-        <ul className="space-y-2">
-          {displayMetrics.map((metric, index) => (
-            <li key={index} className="flex items-center justify-between text-sm">
-              <div className="flex items-center">
-                {metric.icon}
-                <span className="text-gray-600">{metric.name}</span>
-              </div>
-              <span className="font-medium">{metric.value}</span>
-            </li>
-          ))}
-        </ul>
+        <div className="text-2xl font-bold">
+          {renderValue()}
+        </div>
       </CardContent>
     </Card>
   );
