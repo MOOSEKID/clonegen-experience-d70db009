@@ -74,47 +74,46 @@ export const fetchMembers = async (): Promise<Member[]> => {
     console.log('Raw member data from Supabase:', data);
     
     // Convert database field names to camelCase for frontend
-    const members = data.map(memberData => {
-      // Ensure memberData is not null before accessing properties
-      if (!memberData) return null;
-      
-      // Type assertion to avoid TS errors
-      return {
-        id: memberData.id || '',
-        name: memberData.name || '',
-        email: memberData.email || '',
-        phone: memberData.phone || '',
-        membershipType: memberData.membershiptype || '',
-        startDate: memberData.startdate || '',
-        endDate: memberData.enddate || '',
-        status: memberData.status || 'Active',
-        lastCheckin: memberData.lastcheckin || '',
-        dateOfBirth: memberData.dateofbirth || '',
-        gender: memberData.gender || '',
-        address: memberData.address || '',
-        emergencyContact: memberData.emergencycontact || '',
-        membershipPlan: memberData.membershipplan || '',
-        membershipCategory: memberData.membershipcategory || '',
-        trainerAssigned: memberData.trainerassigned || '',
-        workoutGoals: memberData.workoutgoals || '',
-        medicalConditions: memberData.medicalconditions || '',
-        preferredWorkoutTime: memberData.preferredworkouttime || [],
-        paymentStatus: memberData.paymentstatus || '',
-        discountsUsed: memberData.discountsused || '',
-        notes: memberData.notes || '',
-        profilePicture: memberData.profilepicture || '',
-        nfcCardId: memberData.nfccardid || '',
-        fingerprintId: memberData.fingerprintid || '',
-        username: memberData.username || '',
-        passwordResetRequired: memberData.passwordresetrequired ?? true,
-        accountEnabled: memberData.accountenabled ?? true,
-        lastLogin: memberData.lastlogin || '',
-        linkedToCompany: memberData.linkedtocompany ?? false,
-        linkedCompanyId: memberData.linkedcompanyid || '',
-        created_at: memberData.created_at || '',
-        updated_at: memberData.updated_at || ''
-      } as Member;
-    }).filter(Boolean) as Member[]; // Filter out any null values
+    const members = data
+      .filter(memberData => memberData !== null)
+      .map(memberData => {
+        // Type assertion to safely access properties
+        const memberRecord = memberData as Record<string, any>;
+        
+        return {
+          id: memberRecord.id || '',
+          name: memberRecord.name || '',
+          email: memberRecord.email || '',
+          phone: memberRecord.phone || '',
+          membershipType: memberRecord.membershiptype || '',
+          startDate: memberRecord.startdate || '',
+          endDate: memberRecord.enddate || '',
+          status: memberRecord.status || 'Active',
+          lastCheckin: memberRecord.lastcheckin || '',
+          dateOfBirth: memberRecord.dateofbirth || '',
+          gender: memberRecord.gender || '',
+          address: memberRecord.address || '',
+          emergencyContact: memberRecord.emergencycontact || '',
+          membershipPlan: memberRecord.membershipplan || '',
+          membershipCategory: memberRecord.membershipcategory || '',
+          trainerAssigned: memberRecord.trainerassigned || '',
+          workoutGoals: memberRecord.workoutgoals || '',
+          medicalConditions: memberRecord.medicalconditions || '',
+          preferredWorkoutTime: memberRecord.preferredworkouttime || [],
+          paymentStatus: memberRecord.paymentstatus || '',
+          discountsUsed: memberRecord.discountsused || '',
+          notes: memberRecord.notes || '',
+          profilePicture: memberRecord.profilepicture || '',
+          nfcCardId: memberRecord.nfccardid || '',
+          fingerprintId: memberRecord.fingerprintid || '',
+          username: memberRecord.username || '',
+          passwordResetRequired: memberRecord.passwordresetrequired ?? true,
+          accountEnabled: memberRecord.accountenabled ?? true,
+          lastLogin: memberRecord.lastlogin || '',
+          linkedToCompany: memberRecord.linkedtocompany ?? false,
+          linkedCompanyId: memberRecord.linkedcompanyid || ''
+        } as Member;
+      });
     
     console.log(`Processed ${members.length} members with types applied`);
     
@@ -180,7 +179,7 @@ export const addMember = async (memberData: Partial<Member>): Promise<Member | n
       return null;
     }
 
-    const memberResult = data[0];
+    const memberResult = data[0] as Record<string, any>;
     if (!memberResult) {
       console.log('Member result is null after adding');
       return null;
@@ -259,7 +258,7 @@ export const updateMember = async (id: string, memberData: Partial<Member>): Pro
       return null;
     }
 
-    const memberResult = data[0];
+    const memberResult = data[0] as Record<string, any>;
     if (!memberResult) {
       console.log('Member result is null after updating');
       return null;
@@ -327,7 +326,7 @@ export const updateMemberStatus = async (id: string, newStatus: string): Promise
       return null;
     }
     
-    const memberResult = data[0];
+    const memberResult = data[0] as Record<string, any>;
     if (!memberResult) {
       console.log('Member result is null after updating status');
       return null;
