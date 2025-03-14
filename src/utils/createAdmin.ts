@@ -80,7 +80,7 @@ export const createAdminUser = async (email: string, password: string, name = "A
 
 // Utility function to create the specified admin account
 export const createSpecificAdmin = async (): Promise<void> => {
-  const email = "uptowngyms@gmail.com";
+  const email = "uptowngym250@gmail.com";
   const password = "UptownGym@123";
   const name = "Uptown Gyms Admin";
   

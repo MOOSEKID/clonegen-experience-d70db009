@@ -11,7 +11,7 @@ export default function CreateAdminButton() {
   const { createAdminAccount } = useAuth();
   
   // Admin credentials
-  const email = "uptowngyms@gmail.com";
+  const email = "uptowngym250@gmail.com";
   const password = "UptownGym@123";
   const name = "Uptown Gyms Admin";
   
