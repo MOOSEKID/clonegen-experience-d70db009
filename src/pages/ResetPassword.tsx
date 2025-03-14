@@ -84,7 +84,7 @@ const ResetPassword = () => {
           <CardDescription className="text-center">
             {isResetMode 
               ? 'Enter your new password below' 
-              : 'Enter your email and we'll send you instructions to reset your password'}
+              : 'Enter your email and we\'ll send you instructions to reset your password'}
           </CardDescription>
         </CardHeader>
         <CardContent>
