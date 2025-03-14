@@ -2,10 +2,19 @@
 import { useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { cn } from '@/lib/utils';
-import { Menu, X, ShoppingBag, User, LayoutDashboard } from 'lucide-react';
+import { Menu, X, ShoppingBag, User, LayoutDashboard, LogOut, Settings } from 'lucide-react';
 import DesktopNav from './header/DesktopNav';
 import MobileMenu from './header/MobileMenu';
 import { useAuth } from '@/contexts/AuthContext';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { 
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger
+} from '@/components/ui/dropdown-menu';
 
 const Header = () => {
   const [isScrolled, setIsScrolled] = useState(false);
@@ -60,6 +69,11 @@ const Header = () => {
     navigate(isAdmin ? '/admin' : '/dashboard');
   };
 
+  const handleSignOut = async () => {
+    await signOut();
+    navigate('/');
+  };
+
   const navItems = [
     { label: 'Home', path: '/' },
     { label: 'Membership', path: '/membership' },
@@ -92,13 +106,15 @@ const Header = () => {
   const authItems = isLoggedIn 
     ? [
         {
+          label: 'Profile',
+          path: '/profile',
+          icon: User,
+        },
+        {
           label: 'Logout',
           path: '/logout',
-          icon: User,
-          action: () => {
-            signOut();
-            navigate('/login');
-          }
+          icon: LogOut,
+          action: handleSignOut
         }
       ]
     : [
@@ -139,6 +155,49 @@ const Header = () => {
           setIsCompanyDropdownOpen={setIsCompanyDropdownOpen}
           isLoggedIn={isLoggedIn}
         />
+
+        <div className="hidden md:flex items-center space-x-4">
+          {isLoggedIn ? (
+            <DropdownMenu>
+              <DropdownMenuTrigger className="focus:outline-none">
+                <Avatar className="h-8 w-8 ring-2 ring-white/20">
+                  <AvatarImage src="" />
+                  <AvatarFallback className="bg-gym-orange text-white">
+                    {user?.email?.charAt(0).toUpperCase() || 'U'}
+                  </AvatarFallback>
+                </Avatar>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-56">
+                <DropdownMenuLabel>My Account</DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={() => navigate('/profile')}>
+                  <User className="mr-2 h-4 w-4" />
+                  <span>Profile</span>
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={handleDashboardClick}>
+                  <LayoutDashboard className="mr-2 h-4 w-4" />
+                  <span>Dashboard</span>
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => navigate('/settings')}>
+                  <Settings className="mr-2 h-4 w-4" />
+                  <span>Settings</span>
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={handleSignOut}>
+                  <LogOut className="mr-2 h-4 w-4" />
+                  <span>Log out</span>
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          ) : (
+            <Link 
+              to="/login"
+              className="bg-gym-orange hover:bg-gym-orange/90 text-white px-4 py-2 rounded-full font-medium transition-colors"
+            >
+              Sign In
+            </Link>
+          )}
+        </div>
 
         <button
           className="md:hidden text-white/90 hover:text-white"

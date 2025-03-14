@@ -1,9 +1,11 @@
 
-import { useState } from 'react';
-import { Search, Bell, Menu, ChevronDown, User } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { Search, Bell, Menu, ChevronDown, User, LogOut, Settings, UserCircle } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
+import { supabase } from '@/integrations/supabase/client';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 
 interface CustomerHeaderProps {
   toggleSidebar: () => void;
@@ -11,12 +13,35 @@ interface CustomerHeaderProps {
 
 const CustomerHeader = ({ toggleSidebar }: CustomerHeaderProps) => {
   const [userMenuOpen, setUserMenuOpen] = useState(false);
+  const [profile, setProfile] = useState<any>(null);
   const navigate = useNavigate();
   const { user, signOut } = useAuth();
   
+  // Fetch user profile
+  useEffect(() => {
+    const fetchProfile = async () => {
+      if (!user) return;
+      
+      try {
+        const { data, error } = await supabase
+          .from('profiles')
+          .select('*')
+          .eq('id', user.id)
+          .single();
+          
+        if (error) throw error;
+        if (data) setProfile(data);
+      } catch (error) {
+        console.error('Error fetching profile:', error);
+      }
+    };
+    
+    fetchProfile();
+  }, [user]);
+  
   // Get user details from supabase user or fallback to localStorage
   const userEmail = user?.email || localStorage.getItem('userEmail') || '';
-  const userName = user?.user_metadata?.name || localStorage.getItem('userName') || 'User';
+  const userName = profile?.full_name || user?.user_metadata?.name || localStorage.getItem('userName') || 'User';
 
   const handleSignOut = async () => {
     await signOut();
@@ -57,30 +82,46 @@ const CustomerHeader = ({ toggleSidebar }: CustomerHeaderProps) => {
             onClick={() => setUserMenuOpen(!userMenuOpen)}
             className="flex items-center gap-2 text-white hover:text-gym-orange transition-colors"
           >
-            <div className="h-8 w-8 rounded-full bg-gym-orange/20 text-gym-orange flex items-center justify-center">
-              <User size={16} />
-            </div>
+            <Avatar className="h-8 w-8 border border-gym-orange/50">
+              <AvatarImage src={profile?.avatar_url} alt={userName} />
+              <AvatarFallback className="bg-gym-orange/20 text-gym-orange">
+                {userName.charAt(0)}
+              </AvatarFallback>
+            </Avatar>
             <span className="hidden md:block font-medium">{userName}</span>
             <ChevronDown size={16} className={cn("transition-transform", userMenuOpen && "rotate-180")} />
           </button>
           
           {userMenuOpen && (
-            <div className="absolute right-0 top-full mt-2 w-48 bg-gym-darkblue border border-gray-700 rounded-md shadow-lg py-1 z-10">
-              <div className="px-4 py-2 border-b border-gray-700">
-                <p className="text-sm font-medium text-white">{userName}</p>
-                <p className="text-xs text-gray-400">{userEmail}</p>
+            <div className="absolute right-0 top-full mt-2 w-64 bg-gym-darkblue border border-gray-700 rounded-md shadow-lg py-1 z-10">
+              <div className="px-4 py-3 border-b border-gray-700">
+                <div className="flex items-center gap-3">
+                  <Avatar className="h-10 w-10">
+                    <AvatarImage src={profile?.avatar_url} alt={userName} />
+                    <AvatarFallback className="bg-gym-orange/20 text-gym-orange">
+                      {userName.charAt(0)}
+                    </AvatarFallback>
+                  </Avatar>
+                  <div>
+                    <p className="text-sm font-medium text-white">{userName}</p>
+                    <p className="text-xs text-gray-400">{userEmail}</p>
+                  </div>
+                </div>
               </div>
-              <a href="/dashboard/profile" className="block px-4 py-2 text-sm text-gray-300 hover:bg-gym-dark hover:text-white transition-colors">
-                Your Profile
+              <a href="/profile" className="flex items-center gap-2 px-4 py-2 text-sm text-gray-300 hover:bg-gym-dark hover:text-white transition-colors">
+                <UserCircle size={16} />
+                <span>Your Profile</span>
               </a>
-              <a href="/dashboard/settings" className="block px-4 py-2 text-sm text-gray-300 hover:bg-gym-dark hover:text-white transition-colors">
-                Settings
+              <a href="/dashboard/settings" className="flex items-center gap-2 px-4 py-2 text-sm text-gray-300 hover:bg-gym-dark hover:text-white transition-colors">
+                <Settings size={16} />
+                <span>Settings</span>
               </a>
               <button 
                 onClick={handleSignOut}
-                className="w-full text-left block px-4 py-2 text-sm text-gray-300 hover:bg-gym-dark hover:text-white transition-colors"
+                className="w-full text-left flex items-center gap-2 px-4 py-2 text-sm text-gray-300 hover:bg-gym-dark hover:text-white transition-colors"
               >
-                Sign Out
+                <LogOut size={16} />
+                <span>Sign Out</span>
               </button>
             </div>
           )}
