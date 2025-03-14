@@ -1,21 +1,11 @@
 
 import { ClassType } from '@/types/classTypes';
-import { Label } from '@/components/ui/label';
-import { Input } from '@/components/ui/input';
-import { 
-  Select, 
-  SelectContent, 
-  SelectItem, 
-  SelectTrigger, 
-  SelectValue 
-} from '@/components/ui/select';
-import { cn } from '@/lib/utils';
-import { AlertCircle } from 'lucide-react';
-import { useGymLocations } from '@/hooks/classes/useGymLocations';
-import { weekDays } from '@/utils/classFormUtils';
-import DaySelector from './DaySelector';
+import DaySelectorField from './DaySelectorField';
+import TimeAndDurationFields from './TimeAndDurationFields';
 import LocationSelector from './LocationSelector';
 import RecurrenceToggle from './RecurrenceToggle';
+import DaySelector from './DaySelector';
+import { useGymLocations } from '@/hooks/classes/useGymLocations';
 
 interface SchedulingFieldsProps {
   classData: Omit<ClassType, 'id'>;
@@ -38,16 +28,6 @@ const SchedulingFields = ({
 }: SchedulingFieldsProps) => {
   const { locations, isLoading } = useGymLocations();
   
-  // Helper function to render error message
-  const ErrorMessage = ({ name }: { name: string }) => (
-    errors[name] ? (
-      <div className="text-red-500 text-sm mt-1 flex items-center gap-1">
-        <AlertCircle className="h-4 w-4" />
-        <span>{errors[name]}</span>
-      </div>
-    ) : null
-  );
-
   const handleRecurrenceChange = (checked: boolean) => {
     handleCheckboxChange('recurrence', checked);
     if (checked && classData.recurrenceDays.length === 0) {
@@ -59,59 +39,19 @@ const SchedulingFields = ({
   return (
     <div className="space-y-4">
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div className="space-y-2">
-          <Label htmlFor="day" className={cn(errors.day && "text-red-500")}>
-            Day*
-          </Label>
-          <Select 
-            value={classData.day} 
-            onValueChange={(value) => handleSelectChange('day', value)}
-          >
-            <SelectTrigger className={cn(errors.day && "border-red-500")}>
-              <SelectValue placeholder="Select day" />
-            </SelectTrigger>
-            <SelectContent>
-              {weekDays.map(day => (
-                <SelectItem key={day.value} value={day.value}>{day.label}</SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-          <ErrorMessage name="day" />
-        </div>
+        <DaySelectorField
+          value={classData.day}
+          onChange={(value) => handleSelectChange('day', value)}
+          error={errors.day}
+        />
         
-        <div className="space-y-2">
-          <Label htmlFor="time" className={cn(errors.time && "text-red-500")}>
-            Start Time*
-          </Label>
-          <Input 
-            id="time" 
-            name="time" 
-            type="time"
-            value={classData.time} 
-            onChange={handleChange}
-            className={cn(errors.time && "border-red-500 focus-visible:ring-red-500")}
-            required
-          />
-          <ErrorMessage name="time" />
-        </div>
-        
-        <div className="space-y-2">
-          <Label htmlFor="duration" className={cn(errors.duration && "text-red-500")}>
-            Duration (mins)*
-          </Label>
-          <Input 
-            id="duration" 
-            name="duration" 
-            type="number"
-            min="15"
-            step="5"
-            value={classData.duration} 
-            onChange={handleNumberChange}
-            className={cn(errors.duration && "border-red-500 focus-visible:ring-red-500")}
-            required
-          />
-          <ErrorMessage name="duration" />
-        </div>
+        <TimeAndDurationFields
+          time={classData.time}
+          duration={classData.duration}
+          errors={errors}
+          handleChange={handleChange}
+          handleNumberChange={handleNumberChange}
+        />
       </div>
       
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
