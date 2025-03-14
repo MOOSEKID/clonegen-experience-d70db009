@@ -7,6 +7,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import Home from './pages/Home';
 import Login from './pages/Login';
 import Signup from './pages/Signup';
+import ResetPassword from './pages/ResetPassword';
 import Dashboard from './pages/Dashboard';
 import Classes from './pages/Classes';
 import Schedule from './pages/Schedule';
@@ -22,6 +23,8 @@ import AdminTrainers from './pages/admin/Trainers';
 import AdminContent from './pages/admin/Content';
 import AdminReports from './pages/admin/Reports';
 import AdminSettings from './pages/admin/Settings';
+import AdminWorkouts from './pages/admin/Workouts';
+import AdminPayments from './pages/admin/Payments';
 import NotFound from './pages/NotFound';
 
 // Auth components
@@ -48,6 +51,7 @@ function App() {
             <Route path="/" element={<Home />} />
             <Route path="/login" element={<Login />} />
             <Route path="/signup" element={<Signup />} />
+            <Route path="/reset-password" element={<ResetPassword />} />
             <Route path="/classes" element={<Classes />} />
             <Route path="/schedule" element={<Schedule />} />
             <Route path="/pricing" element={<Pricing />} />
@@ -82,6 +86,16 @@ function App() {
             <Route path="/admin/trainers" element={
               <ProtectedRoute requireAdmin>
                 <AdminTrainers />
+              </ProtectedRoute>
+            } />
+            <Route path="/admin/workouts" element={
+              <ProtectedRoute requireAdmin>
+                <AdminWorkouts />
+              </ProtectedRoute>
+            } />
+            <Route path="/admin/payments" element={
+              <ProtectedRoute requireAdmin>
+                <AdminPayments />
               </ProtectedRoute>
             } />
             <Route path="/admin/content" element={

@@ -41,10 +41,12 @@ const ProtectedRoute = ({
   
   // Check for admin or trainer permission if required
   if (requireAdmin && !isAdmin) {
+    toast.error("You don't have permission to access this page");
     return <Navigate to="/dashboard" replace />;
   }
   
   if (requireTrainer && !(isTrainer || isAdmin)) {
+    toast.error("You don't have permission to access this page");
     return <Navigate to="/dashboard" replace />;
   }
   

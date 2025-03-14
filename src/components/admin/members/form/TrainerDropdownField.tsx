@@ -45,6 +45,22 @@ const TrainerDropdownField = ({ control }: TrainerDropdownFieldProps) => {
     };
     
     fetchTrainers();
+    
+    // Set up real-time subscription
+    const channel = supabase
+      .channel('trainers-changes')
+      .on('postgres_changes', 
+        { event: '*', schema: 'public', table: 'trainers' }, 
+        () => {
+          console.log('Trainers table change detected');
+          fetchTrainers();
+        }
+      )
+      .subscribe();
+    
+    return () => {
+      supabase.removeChannel(channel);
+    };
   }, []);
   
   return (
@@ -67,7 +83,7 @@ const TrainerDropdownField = ({ control }: TrainerDropdownFieldProps) => {
             </FormControl>
             <SelectContent>
               {trainers.map((trainer) => (
-                <SelectItem key={trainer.id} value={trainer.name}>
+                <SelectItem key={trainer.id} value={trainer.id}>
                   {trainer.name} - {trainer.specialization ? trainer.specialization.join(', ') : 'General'}
                 </SelectItem>
               ))}

@@ -1,5 +1,5 @@
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
@@ -10,6 +10,22 @@ export const useSupabaseAuth = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [userRole, setUserRole] = useState<string | null>(null);
   const navigate = useNavigate();
+
+  // Fetch user role using the security definer function
+  const fetchUserRole = async (userId: string) => {
+    try {
+      const { data, error } = await supabase.rpc('get_user_role', { user_id: userId });
+        
+      if (error) {
+        console.error('Error fetching user role:', error);
+        return;
+      }
+      
+      setUserRole(data || 'member');
+    } catch (error) {
+      console.error('Failed to fetch user role:', error);
+    }
+  };
 
   useEffect(() => {
     const setupAuthListener = async () => {
@@ -26,6 +42,7 @@ export const useSupabaseAuth = () => {
         // Set up auth state change listener
         const { data: { subscription } } = await supabase.auth.onAuthStateChange(
           async (event, newSession) => {
+            console.log('Auth state change:', event);
             setSession(newSession);
             setUser(newSession?.user || null);
             
@@ -37,6 +54,11 @@ export const useSupabaseAuth = () => {
             
             if (event === 'SIGNED_OUT') {
               navigate('/login');
+              toast.info('You have been signed out');
+            } else if (event === 'SIGNED_IN') {
+              toast.success('Signed in successfully');
+            } else if (event === 'PASSWORD_RECOVERY') {
+              navigate('/reset-password');
             }
           }
         );
@@ -53,25 +75,6 @@ export const useSupabaseAuth = () => {
     
     setupAuthListener();
   }, [navigate]);
-  
-  const fetchUserRole = async (userId: string) => {
-    try {
-      const { data, error } = await supabase
-        .from('user_roles')
-        .select('roles(name)')
-        .eq('user_id', userId)
-        .single();
-        
-      if (error) {
-        console.error('Error fetching user role:', error);
-        return;
-      }
-      
-      setUserRole(data?.roles?.name || 'member');
-    } catch (error) {
-      console.error('Failed to fetch user role:', error);
-    }
-  };
 
   const signIn = async (email: string, password: string) => {
     try {
@@ -82,7 +85,6 @@ export const useSupabaseAuth = () => {
         throw error;
       }
       
-      toast.success('Login successful!');
       return true;
     } catch (error) {
       console.error('Login error:', error);
@@ -115,6 +117,7 @@ export const useSupabaseAuth = () => {
       if (authData.user) {
         // Create member record
         const { error: memberError } = await supabase.from('members').insert({
+          id: authData.user.id,
           name: userData.name,
           email: userData.email,
           phone: userData.phone || '',
@@ -168,6 +171,49 @@ export const useSupabaseAuth = () => {
     }
   };
 
+  const resetPassword = async (email: string) => {
+    try {
+      setIsLoading(true);
+      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: `${window.location.origin}/reset-password`,
+      });
+      
+      if (error) {
+        throw error;
+      }
+      
+      toast.success('Password reset instructions sent to your email');
+      return true;
+    } catch (error) {
+      console.error('Password reset error:', error);
+      toast.error(error.message || 'Failed to send password reset email');
+      return false;
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const updatePassword = async (newPassword: string) => {
+    try {
+      setIsLoading(true);
+      const { error } = await supabase.auth.updateUser({ password: newPassword });
+      
+      if (error) {
+        throw error;
+      }
+      
+      toast.success('Password updated successfully');
+      navigate('/login');
+      return true;
+    } catch (error) {
+      console.error('Update password error:', error);
+      toast.error(error.message || 'Failed to update password');
+      return false;
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const isAdmin = userRole === 'admin';
   const isTrainer = userRole === 'trainer';
   const isMember = userRole === 'member';
@@ -182,6 +228,8 @@ export const useSupabaseAuth = () => {
     isMember,
     signIn,
     signUp,
-    signOut
+    signOut,
+    resetPassword,
+    updatePassword
   };
 };

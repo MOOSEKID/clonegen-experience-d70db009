@@ -5,9 +5,10 @@ import { Button } from '../ui/button';
 import { Popover, PopoverContent, PopoverTrigger } from '../ui/popover';
 import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar';
 import { useAuth } from '@/contexts/AuthContext';
+import { toast } from 'sonner';
 
 const HeaderDropdown = () => {
-  const { user, isLoading, isAdmin, signOut } = useAuth();
+  const { user, isLoading, isAdmin, isTrainer, signOut } = useAuth();
 
   if (isLoading) {
     return (
@@ -35,6 +36,13 @@ const HeaderDropdown = () => {
   }
 
   const userInitial = user?.email?.charAt(0).toUpperCase() || 'U';
+  const handleSignOut = async () => {
+    try {
+      await signOut();
+    } catch (error) {
+      toast.error('Failed to sign out');
+    }
+  };
 
   return (
     <Popover>
@@ -66,14 +74,22 @@ const HeaderDropdown = () => {
                 Admin Panel
               </Link>
             )}
+            {isTrainer && (
+              <Link to="/trainer" className="px-3 py-2 text-sm hover:bg-gray-50 flex items-center">
+                Trainer Portal
+              </Link>
+            )}
             <Link to="/profile" className="px-3 py-2 text-sm hover:bg-gray-50 flex items-center">
               Profile Settings
             </Link>
             <Link to="/membership" className="px-3 py-2 text-sm hover:bg-gray-50 flex items-center">
               Membership
             </Link>
+            <Link to="/reset-password" className="px-3 py-2 text-sm hover:bg-gray-50 flex items-center">
+              Reset Password
+            </Link>
             <button
-              onClick={signOut}
+              onClick={handleSignOut}
               className="px-3 py-2 text-sm text-red-600 hover:bg-red-50 w-full text-left"
             >
               Sign out
