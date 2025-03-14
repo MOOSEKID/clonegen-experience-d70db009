@@ -832,30 +832,39 @@ export type Database = {
       profiles: {
         Row: {
           avatar_url: string | null
+          contact_number: string | null
           created_at: string | null
           full_name: string | null
+          gym_location: string | null
           id: string
           is_admin: boolean | null
+          preferred_workout_time: string | null
           role: string | null
           updated_at: string | null
           username: string | null
         }
         Insert: {
           avatar_url?: string | null
+          contact_number?: string | null
           created_at?: string | null
           full_name?: string | null
+          gym_location?: string | null
           id: string
           is_admin?: boolean | null
+          preferred_workout_time?: string | null
           role?: string | null
           updated_at?: string | null
           username?: string | null
         }
         Update: {
           avatar_url?: string | null
+          contact_number?: string | null
           created_at?: string | null
           full_name?: string | null
+          gym_location?: string | null
           id?: string
           is_admin?: boolean | null
+          preferred_workout_time?: string | null
           role?: string | null
           updated_at?: string | null
           username?: string | null

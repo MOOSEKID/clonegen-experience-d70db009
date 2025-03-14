@@ -8,31 +8,54 @@ import AdditionalInsights from '@/components/admin/dashboard/AdditionalInsights'
 import CreateAdminButton from '@/components/admin/setup/CreateAdminButton';
 import { useQuery } from '@tanstack/react-query';
 
+// Define the proper interfaces for chart data
+interface MembershipData {
+  name: string;
+  members: number;
+  month?: string;
+  newMembers?: number;
+  cancelledMembers?: number;
+}
+
+interface RevenueData {
+  name: string;
+  value: number;
+  month?: string;
+  revenue?: number;
+}
+
+interface ClassAttendanceData {
+  name: string;
+  value: number;
+  class?: string;
+  attendees?: number;
+}
+
 // Mock data for dashboard
-const mockMembershipData = [
-  { month: 'Jan', newMembers: 45, cancelledMembers: 12 },
-  { month: 'Feb', newMembers: 55, cancelledMembers: 15 },
-  { month: 'Mar', newMembers: 75, cancelledMembers: 10 },
-  { month: 'Apr', newMembers: 85, cancelledMembers: 20 },
-  { month: 'May', newMembers: 65, cancelledMembers: 15 },
-  { month: 'Jun', newMembers: 80, cancelledMembers: 17 },
+const mockMembershipData: MembershipData[] = [
+  { name: 'Jan', members: 45, month: 'Jan', newMembers: 45, cancelledMembers: 12 },
+  { name: 'Feb', members: 55, month: 'Feb', newMembers: 55, cancelledMembers: 15 },
+  { name: 'Mar', members: 75, month: 'Mar', newMembers: 75, cancelledMembers: 10 },
+  { name: 'Apr', members: 85, month: 'Apr', newMembers: 85, cancelledMembers: 20 },
+  { name: 'May', members: 65, month: 'May', newMembers: 65, cancelledMembers: 15 },
+  { name: 'Jun', members: 80, month: 'Jun', newMembers: 80, cancelledMembers: 17 },
 ];
 
-const mockRevenueData = [
-  { month: 'Jan', revenue: 12500 },
-  { month: 'Feb', revenue: 15000 },
-  { month: 'Mar', revenue: 18500 },
-  { month: 'Apr', revenue: 22000 },
-  { month: 'May', revenue: 19500 },
-  { month: 'Jun', revenue: 23500 },
+const mockRevenueData: RevenueData[] = [
+  { name: 'Jan', value: 12500, month: 'Jan', revenue: 12500 },
+  { name: 'Feb', value: 15000, month: 'Feb', revenue: 15000 },
+  { name: 'Mar', value: 18500, month: 'Mar', revenue: 18500 },
+  { name: 'Apr', value: 22000, month: 'Apr', revenue: 22000 },
+  { name: 'May', value: 19500, month: 'May', revenue: 19500 },
+  { name: 'Jun', value: 23500, month: 'Jun', revenue: 23500 },
 ];
 
-const mockClassAttendanceData = [
-  { class: 'Yoga', attendees: 120 },
-  { class: 'Spinning', attendees: 85 },
-  { class: 'HIIT', attendees: 95 },
-  { class: 'Pilates', attendees: 75 },
-  { class: 'Zumba', attendees: 110 },
+const mockClassAttendanceData: ClassAttendanceData[] = [
+  { name: 'Yoga', value: 120, class: 'Yoga', attendees: 120 },
+  { name: 'Spinning', value: 85, class: 'Spinning', attendees: 85 },
+  { name: 'HIIT', value: 95, class: 'HIIT', attendees: 95 },
+  { name: 'Pilates', value: 75, class: 'Pilates', attendees: 75 },
+  { name: 'Zumba', value: 110, class: 'Zumba', attendees: 110 },
 ];
 
 const AdminDashboard = () => {
