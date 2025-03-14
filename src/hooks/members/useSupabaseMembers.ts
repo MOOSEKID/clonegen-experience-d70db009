@@ -1,5 +1,5 @@
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Member, MemberFormAction } from '@/types/memberTypes';
 import { useMemberFilters } from './useMemberFilters';
 import { useMemberCreation } from './useMemberCreation';
@@ -11,7 +11,7 @@ import { useSupabaseMemberAdd } from './useSupabaseMemberAdd';
 
 export const useSupabaseMembers = () => {
   // Get member data with Supabase realtime subscription
-  const { members, isLoading, setMembers } = useSupabaseMemberData();
+  const { members, isLoading, error, setMembers } = useSupabaseMemberData();
   
   // Member selection state and actions
   const { 
@@ -38,11 +38,12 @@ export const useSupabaseMembers = () => {
   } = useMemberFilters([]);
 
   // Update filtered members when members list changes
-  useState(() => {
-    if (members.length > 0) {
+  useEffect(() => {
+    if (members && members.length > 0) {
+      console.log('Updating filtered members with:', members.length, 'members');
       setAllMembers(members);
     }
-  });
+  }, [members, setAllMembers]);
 
   // Member status and deletion actions
   const { 
@@ -77,6 +78,7 @@ export const useSupabaseMembers = () => {
     filterType,
     isCreating,
     isLoading,
+    error,
     handleSearch,
     handleStatusChange,
     handleDelete,

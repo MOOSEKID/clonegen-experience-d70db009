@@ -8,17 +8,20 @@ import { fetchMembers } from '@/services/memberService';
 export const useSupabaseMemberData = () => {
   const [members, setMembers] = useState<Member[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<Error | null>(null);
 
   // Load members from Supabase on component mount
   useEffect(() => {
     const loadMembers = async () => {
       setIsLoading(true);
+      setError(null);
       try {
         const data = await fetchMembers();
         console.log('Members loaded successfully:', data);
         setMembers(data);
       } catch (error) {
         console.error('Error loading members:', error);
+        setError(error instanceof Error ? error : new Error('Failed to load members'));
         toast.error('Failed to load members');
       } finally {
         setIsLoading(false);
@@ -36,13 +39,22 @@ export const useSupabaseMemberData = () => {
         table: 'members' 
       }, async (payload) => {
         console.log('Real-time update received:', payload);
-        // Refresh the members list when changes occur
-        const data = await fetchMembers();
-        setMembers(data);
+        try {
+          // Refresh the members list when changes occur
+          const data = await fetchMembers();
+          console.log('Members refreshed after real-time update:', data);
+          setMembers(data);
+        } catch (refreshError) {
+          console.error('Error refreshing members after real-time update:', refreshError);
+          // Don't show toast here to avoid spamming user with errors
+        }
       })
-      .subscribe();
+      .subscribe((status) => {
+        console.log('Supabase channel status:', status);
+      });
 
     return () => {
+      console.log('Cleaning up Supabase channel subscription');
       supabase.removeChannel(channel);
     };
   }, []);
@@ -50,6 +62,7 @@ export const useSupabaseMemberData = () => {
   return {
     members,
     isLoading,
+    error,
     setMembers
   };
 };

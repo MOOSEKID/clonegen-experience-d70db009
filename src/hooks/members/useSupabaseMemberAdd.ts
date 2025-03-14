@@ -34,7 +34,11 @@ export const useSupabaseMemberAdd = () => {
         passwordresetrequired: memberData.passwordResetRequired !== undefined ? memberData.passwordResetRequired : true,
         accountenabled: memberData.accountEnabled !== undefined ? memberData.accountEnabled : true,
         linkedtocompany: memberData.linkedToCompany || false,
-        linkedcompanyid: memberData.linkedCompanyId
+        linkedcompanyid: memberData.linkedCompanyId,
+        dateofbirth: memberData.dateOfBirth,
+        profilepicture: memberData.profilePicture,
+        nfccardid: memberData.nfcCardId,
+        fingerprintid: memberData.fingerprintId
       };
       
       console.log("Prepared member data for Supabase:", dbMemberData);

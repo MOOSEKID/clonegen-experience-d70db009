@@ -15,7 +15,7 @@ interface AddMemberDialogProps {
 const AddMemberDialog = ({ isOpen, onClose, onAddMember, isCreating = false }: AddMemberDialogProps) => {
   const { form, isSubmitting, onSubmit } = useAddMemberForm(onAddMember, isCreating, isOpen);
   
-  // Handle successful submission
+  // Handle form submission
   const handleSubmit = async (values: any) => {
     console.log("Dialog handling submit with values:", values);
     try {
@@ -26,7 +26,7 @@ const AddMemberDialog = ({ isOpen, onClose, onAddMember, isCreating = false }: A
         // Close the dialog on successful submission
         onClose();
       }
-      return success; // Make sure we return a value
+      return success;
     } catch (error) {
       console.error("Error in handleSubmit:", error);
       return false;
