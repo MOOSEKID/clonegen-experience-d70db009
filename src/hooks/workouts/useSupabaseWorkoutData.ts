@@ -4,9 +4,9 @@ import { supabase } from '@/integrations/supabase/client';
 import { useWorkoutData } from './useWorkoutData';
 import { useProgramManagement } from './useProgramManagement';
 import { useExerciseManagement } from './useExerciseManagement';
-import { WorkoutProgram, Exercise, ProgramExercise } from './types';
 
-export { WorkoutProgram, Exercise, ProgramExercise };
+// Use export type for re-exporting types
+export type { WorkoutProgram, Exercise, ProgramExercise } from './types';
 
 export const useSupabaseWorkoutData = () => {
   const { 
