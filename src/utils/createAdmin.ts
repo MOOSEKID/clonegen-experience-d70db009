@@ -93,9 +93,9 @@ export const createSpecificAdmin = async (): Promise<void> => {
   }
   
   // Only create if the admin doesn't exist
-  const exists = existingUsers?.users.some(user => user.email === email);
+  const adminExists = existingUsers?.users?.some(user => user.email === email) ?? false;
   
-  if (exists) {
+  if (adminExists) {
     console.log('Admin account already exists');
     return;
   }
