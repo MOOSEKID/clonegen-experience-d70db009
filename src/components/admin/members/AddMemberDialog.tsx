@@ -14,10 +14,13 @@ interface AddMemberDialogProps {
 
 const AddMemberDialog = ({ isOpen, onClose, onAddMember, isCreating = false }: AddMemberDialogProps) => {
   const { form, isSubmitting, onSubmit } = useAddMemberForm(onAddMember, isCreating, isOpen);
+  const [dialogError, setDialogError] = React.useState<string | null>(null);
   
-  // Handle form submission
+  // Handle form submission with improved error handling
   const handleSubmit = async (values: any) => {
     console.log("Dialog handling submit with values:", values);
+    setDialogError(null);
+    
     try {
       const success = await onSubmit(values);
       console.log("Submit result:", success);
@@ -25,18 +28,29 @@ const AddMemberDialog = ({ isOpen, onClose, onAddMember, isCreating = false }: A
       if (success) {
         // Close the dialog on successful submission
         onClose();
+      } else {
+        setDialogError("Failed to add member. Please try again.");
       }
       return success;
     } catch (error) {
       console.error("Error in handleSubmit:", error);
+      setDialogError(error instanceof Error ? error.message : "An unexpected error occurred");
       return false;
     }
   };
+
+  // Reset error when dialog opens/closes
+  React.useEffect(() => {
+    setDialogError(null);
+  }, [isOpen]);
 
   // Log when dialog open state changes
   React.useEffect(() => {
     console.log("Dialog open state changed to:", isOpen);
   }, [isOpen]);
+
+  // Use open state to ensure dialog is rendered properly
+  if (!isOpen) return null;
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => {
@@ -47,6 +61,11 @@ const AddMemberDialog = ({ isOpen, onClose, onAddMember, isCreating = false }: A
       }
     }}>
       <DialogContent className="sm:max-w-[700px] max-h-[90vh] overflow-y-auto">
+        {dialogError && (
+          <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+            {dialogError}
+          </div>
+        )}
         <MemberDialogContent 
           form={form} 
           isSubmitting={isSubmitting || isCreating} 

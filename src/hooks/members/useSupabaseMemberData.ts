@@ -9,6 +9,7 @@ export const useSupabaseMemberData = () => {
   const [members, setMembers] = useState<Member[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
+  const [isSubscribed, setIsSubscribed] = useState(false);
 
   // Load members from Supabase on component mount
   useEffect(() => {
@@ -51,6 +52,7 @@ export const useSupabaseMemberData = () => {
       })
       .subscribe((status) => {
         console.log('Supabase channel status:', status);
+        setIsSubscribed(status === 'SUBSCRIBED');
       });
 
     return () => {
@@ -63,6 +65,7 @@ export const useSupabaseMemberData = () => {
     members,
     isLoading,
     error,
+    isSubscribed,
     setMembers
   };
 };

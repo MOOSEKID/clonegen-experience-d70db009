@@ -37,8 +37,8 @@ export const getAvailableMembers = async (
       .filter(member => member && member.id) // Ensure member and member.id exist
       .map(member => ({
         id: member.id,
-        name: member.name,
-        email: member.email
+        name: member.name || 'Unknown',
+        email: member.email || ''
       }))
       .filter(member => 
         !enrolledIds.has(member.id) && 
@@ -62,7 +62,7 @@ export const fetchMembers = async (): Promise<Member[]> => {
       
     if (error) {
       console.error('Error fetching members:', error);
-      return [];
+      throw error;
     }
     
     // Ensure data is not null before mapping
@@ -80,39 +80,54 @@ export const fetchMembers = async (): Promise<Member[]> => {
         // Type assertion to safely access properties
         const memberRecord = memberData as Record<string, any>;
         
-        return {
-          id: memberRecord.id || '',
-          name: memberRecord.name || '',
-          email: memberRecord.email || '',
-          phone: memberRecord.phone || '',
-          membershipType: memberRecord.membershiptype || '',
-          startDate: memberRecord.startdate || '',
-          endDate: memberRecord.enddate || '',
-          status: memberRecord.status || 'Active',
-          lastCheckin: memberRecord.lastcheckin || '',
-          dateOfBirth: memberRecord.dateofbirth || '',
-          gender: memberRecord.gender || '',
-          address: memberRecord.address || '',
-          emergencyContact: memberRecord.emergencycontact || '',
-          membershipPlan: memberRecord.membershipplan || '',
-          membershipCategory: memberRecord.membershipcategory || '',
-          trainerAssigned: memberRecord.trainerassigned || '',
-          workoutGoals: memberRecord.workoutgoals || '',
-          medicalConditions: memberRecord.medicalconditions || '',
-          preferredWorkoutTime: memberRecord.preferredworkouttime || [],
-          paymentStatus: memberRecord.paymentstatus || '',
-          discountsUsed: memberRecord.discountsused || '',
-          notes: memberRecord.notes || '',
-          profilePicture: memberRecord.profilepicture || '',
-          nfcCardId: memberRecord.nfccardid || '',
-          fingerprintId: memberRecord.fingerprintid || '',
-          username: memberRecord.username || '',
-          passwordResetRequired: memberRecord.passwordresetrequired ?? true,
-          accountEnabled: memberRecord.accountenabled ?? true,
-          lastLogin: memberRecord.lastlogin || '',
-          linkedToCompany: memberRecord.linkedtocompany ?? false,
-          linkedCompanyId: memberRecord.linkedcompanyid || ''
-        } as Member;
+        try {
+          return {
+            id: memberRecord.id || '',
+            name: memberRecord.name || '',
+            email: memberRecord.email || '',
+            phone: memberRecord.phone || '',
+            membershipType: memberRecord.membershiptype || '',
+            startDate: memberRecord.startdate || '',
+            endDate: memberRecord.enddate || '',
+            status: memberRecord.status || 'Active',
+            lastCheckin: memberRecord.lastcheckin || '',
+            dateOfBirth: memberRecord.dateofbirth || '',
+            gender: memberRecord.gender || '',
+            address: memberRecord.address || '',
+            emergencyContact: memberRecord.emergencycontact || '',
+            membershipPlan: memberRecord.membershipplan || '',
+            membershipCategory: memberRecord.membershipcategory || '',
+            trainerAssigned: memberRecord.trainerassigned || '',
+            workoutGoals: memberRecord.workoutgoals || '',
+            medicalConditions: memberRecord.medicalconditions || '',
+            preferredWorkoutTime: memberRecord.preferredworkouttime || [],
+            paymentStatus: memberRecord.paymentstatus || '',
+            discountsUsed: memberRecord.discountsused || '',
+            notes: memberRecord.notes || '',
+            profilePicture: memberRecord.profilepicture || '',
+            nfcCardId: memberRecord.nfccardid || '',
+            fingerprintId: memberRecord.fingerprintid || '',
+            username: memberRecord.username || '',
+            passwordResetRequired: memberRecord.passwordresetrequired ?? true,
+            accountEnabled: memberRecord.accountenabled ?? true,
+            lastLogin: memberRecord.lastlogin || '',
+            linkedToCompany: memberRecord.linkedtocompany ?? false,
+            linkedCompanyId: memberRecord.linkedcompanyid || ''
+          } as Member;
+        } catch (mappingError) {
+          console.error('Error mapping member data:', mappingError, memberRecord);
+          // Return a minimal valid member object to prevent crashes
+          return {
+            id: memberRecord.id || '',
+            name: memberRecord.name || 'Unknown Member',
+            email: memberRecord.email || '',
+            status: 'Active',
+            membershipType: 'Standard',
+            startDate: '',
+            endDate: '',
+            lastCheckin: ''
+          } as Member;
+        }
       });
     
     console.log(`Processed ${members.length} members with types applied`);
