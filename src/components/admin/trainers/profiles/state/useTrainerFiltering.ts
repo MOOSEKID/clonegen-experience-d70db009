@@ -1,6 +1,6 @@
 
 import { useState } from 'react';
-import { TrainerProfile } from '@/hooks/trainers/useTrainerProfiles';
+import { TrainerProfile } from '@/hooks/trainers/profiles/types';
 import { TrainerProfilesState, TrainerProfilesActions } from './types';
 
 export const useTrainerFiltering = (trainers: TrainerProfile[]): [
