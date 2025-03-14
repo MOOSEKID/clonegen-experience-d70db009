@@ -1,4 +1,5 @@
 
+import React, { useState } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
@@ -9,7 +10,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { X } from "lucide-react";
-import { useState } from "react";
+import FileUpload from "@/components/admin/trainers/common/FileUpload";
+import { useTrainerFileUpload } from "@/hooks/trainers/useTrainerFileUpload";
 import { TrainerProfile } from "@/hooks/trainers/useTrainerProfiles";
 
 const trainerFormSchema = z.object({
@@ -20,18 +22,47 @@ const trainerFormSchema = z.object({
   status: z.string(),
   specialization: z.array(z.string()).optional(),
   hire_date: z.string().optional(),
-  profile_picture: z.string().optional(),
+  experience_years: z.number().optional(),
+  experience_level: z.string().optional(),
 });
 
 type TrainerFormValues = z.infer<typeof trainerFormSchema>;
 
 interface TrainerAddFormProps {
-  onSubmit: (data: Omit<TrainerProfile, 'id' | 'certifications' | 'availability'>) => Promise<void>;
+  onSubmit: (data: Omit<TrainerProfile, "id" | "certifications" | "availability">) => Promise<void>;
   onCancel: () => void;
 }
 
+// Array of common trainer specializations
+const commonSpecializations = [
+  "Strength Training",
+  "Weight Loss",
+  "Cardio",
+  "HIIT",
+  "Yoga",
+  "Pilates",
+  "CrossFit",
+  "Bodybuilding",
+  "Nutrition",
+  "Sports Performance",
+  "Functional Training",
+  "Kettlebell",
+  "Senior Fitness",
+  "Pre/Post Natal",
+  "Rehabilitation",
+  "Boxing",
+  "Martial Arts",
+  "Dance Fitness",
+  "Group Training",
+  "Flexibility"
+];
+
 const TrainerAddForm = ({ onSubmit, onCancel }: TrainerAddFormProps) => {
   const [newSpecialization, setNewSpecialization] = useState("");
+  const [selectedSpecializations, setSelectedSpecializations] = useState<string[]>([]);
+  const [profilePictureUrl, setProfilePictureUrl] = useState<string | null>(null);
+  
+  const { uploadFile, isUploading, uploadProgress } = useTrainerFileUpload();
   
   const form = useForm<TrainerFormValues>({
     resolver: zodResolver(trainerFormSchema),
@@ -43,48 +74,66 @@ const TrainerAddForm = ({ onSubmit, onCancel }: TrainerAddFormProps) => {
       status: "Active",
       specialization: [],
       hire_date: new Date().toISOString().split('T')[0],
-      profile_picture: "",
+      experience_years: undefined,
+      experience_level: "Beginner",
     },
   });
 
-  const handleSubmit = async (data: TrainerFormValues) => {
-    // Ensure required fields are present
-    const trainerData: Omit<TrainerProfile, 'id' | 'certifications' | 'availability'> = {
-      name: data.name,
-      email: data.email,
-      phone: data.phone,
-      bio: data.bio,
-      status: data.status,
-      specialization: data.specialization || [],
-      hire_date: data.hire_date,
-      profile_picture: data.profile_picture
+  const handleFormSubmit = async (data: TrainerFormValues) => {
+    // Combine form data with uploaded profile picture
+    const formData = {
+      ...data,
+      specialization: selectedSpecializations,
+      profile_picture: profilePictureUrl,
     };
-    await onSubmit(trainerData);
+    
+    await onSubmit(formData as Omit<TrainerProfile, "id" | "certifications" | "availability">);
     form.reset();
+    setSelectedSpecializations([]);
+    setProfilePictureUrl(null);
   };
 
-  const addSpecialization = () => {
-    if (newSpecialization.trim() === "") return;
+  const addSpecialization = (spec: string) => {
+    if (spec.trim() === "") return;
     
-    const currentSpecs = form.getValues("specialization") || [];
-    if (!currentSpecs.includes(newSpecialization)) {
-      form.setValue("specialization", [...currentSpecs, newSpecialization]);
-      setNewSpecialization("");
+    if (!selectedSpecializations.includes(spec)) {
+      setSelectedSpecializations([...selectedSpecializations, spec]);
     }
+    
+    setNewSpecialization("");
   };
 
   const removeSpecialization = (spec: string) => {
-    const currentSpecs = form.getValues("specialization") || [];
-    form.setValue(
-      "specialization",
-      currentSpecs.filter((s) => s !== spec)
-    );
+    setSelectedSpecializations(selectedSpecializations.filter(s => s !== spec));
+  };
+
+  const handleProfilePictureUpload = async (file: File) => {
+    // Use a temporary ID for the upload, it will be replaced when the trainer is created
+    const tempId = "temp-" + Date.now();
+    const url = await uploadFile(file, tempId, 'profile_picture');
+    if (url) {
+      setProfilePictureUrl(url);
+    }
   };
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
+      <form onSubmit={form.handleSubmit(handleFormSubmit)} className="space-y-6">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="md:col-span-2">
+            <div className="mb-4">
+              <FormLabel>Profile Picture</FormLabel>
+              <FileUpload
+                type="profile_picture"
+                onFileSelected={handleProfilePictureUpload}
+                isUploading={isUploading}
+                progress={uploadProgress}
+                buttonText="Upload Profile Picture"
+                previewUrl={profilePictureUrl || undefined}
+              />
+            </div>
+          </div>
+
           <FormField
             control={form.control}
             name="name"
@@ -166,61 +215,105 @@ const TrainerAddForm = ({ onSubmit, onCancel }: TrainerAddFormProps) => {
 
           <FormField
             control={form.control}
-            name="profile_picture"
+            name="experience_years"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Profile Picture URL</FormLabel>
+                <FormLabel>Years of Experience</FormLabel>
                 <FormControl>
-                  <Input placeholder="http://example.com/image.jpg" {...field} />
+                  <Input 
+                    type="number" 
+                    min="0" 
+                    step="1" 
+                    placeholder="Years of experience" 
+                    {...field}
+                    onChange={(e) => field.onChange(e.target.value ? parseInt(e.target.value) : undefined)}
+                  />
                 </FormControl>
-                <FormDescription>Enter a URL for the trainer's profile picture</FormDescription>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="experience_level"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Experience Level</FormLabel>
+                <Select onValueChange={field.onChange} defaultValue={field.value}>
+                  <FormControl>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select experience level" />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    <SelectItem value="Beginner">Beginner</SelectItem>
+                    <SelectItem value="Intermediate">Intermediate</SelectItem>
+                    <SelectItem value="Advanced">Advanced</SelectItem>
+                    <SelectItem value="Expert">Expert</SelectItem>
+                  </SelectContent>
+                </Select>
                 <FormMessage />
               </FormItem>
             )}
           />
         </div>
 
-        <FormField
-          control={form.control}
-          name="specialization"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Specializations</FormLabel>
-              <div className="flex flex-wrap gap-2 mb-2">
-                {field.value?.map((spec, index) => (
-                  <Badge key={index} variant="secondary" className="flex items-center gap-1">
-                    {spec}
-                    <button
-                      type="button"
-                      onClick={() => removeSpecialization(spec)}
-                      className="rounded-full h-4 w-4 flex items-center justify-center bg-gray-200 hover:bg-gray-300"
-                    >
-                      <X className="h-3 w-3" />
-                    </button>
-                  </Badge>
-                ))}
-              </div>
-              <div className="flex gap-2">
-                <Input
-                  value={newSpecialization}
-                  onChange={(e) => setNewSpecialization(e.target.value)}
-                  placeholder="Add specialization (e.g., Yoga, Strength Training)"
-                  className="flex-grow"
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter') {
-                      e.preventDefault();
-                      addSpecialization();
-                    }
-                  }}
-                />
-                <Button type="button" onClick={addSpecialization} variant="outline">
-                  Add
-                </Button>
-              </div>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+        <FormItem>
+          <FormLabel>Specializations</FormLabel>
+          <div className="flex flex-wrap gap-2 mb-2">
+            {selectedSpecializations.map((spec, index) => (
+              <Badge key={index} variant="secondary" className="flex items-center gap-1">
+                {spec}
+                <button
+                  type="button"
+                  onClick={() => removeSpecialization(spec)}
+                  className="rounded-full h-4 w-4 flex items-center justify-center bg-gray-200 hover:bg-gray-300"
+                >
+                  <X className="h-3 w-3" />
+                </button>
+              </Badge>
+            ))}
+          </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+            <div className="flex gap-2">
+              <Input
+                value={newSpecialization}
+                onChange={(e) => setNewSpecialization(e.target.value)}
+                placeholder="Add custom specialization"
+                className="flex-grow"
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    e.preventDefault();
+                    addSpecialization(newSpecialization);
+                  }
+                }}
+              />
+              <Button type="button" onClick={() => addSpecialization(newSpecialization)} variant="outline">
+                Add
+              </Button>
+            </div>
+            
+            <Select onValueChange={(value) => addSpecialization(value)}>
+              <SelectTrigger>
+                <SelectValue placeholder="Select from common specializations" />
+              </SelectTrigger>
+              <SelectContent>
+                {commonSpecializations
+                  .filter(spec => !selectedSpecializations.includes(spec))
+                  .map(spec => (
+                    <SelectItem key={spec} value={spec}>{spec}</SelectItem>
+                  ))
+                }
+              </SelectContent>
+            </Select>
+          </div>
+          
+          <FormDescription>
+            Add specializations from the list or create custom ones.
+          </FormDescription>
+        </FormItem>
 
         <FormField
           control={form.control}
@@ -230,8 +323,8 @@ const TrainerAddForm = ({ onSubmit, onCancel }: TrainerAddFormProps) => {
               <FormLabel>Bio</FormLabel>
               <FormControl>
                 <Textarea
-                  placeholder="Trainer biography and background information..."
-                  className="min-h-[120px]"
+                  placeholder="Trainer biography and background information"
+                  className="min-h-[100px]"
                   {...field}
                 />
               </FormControl>

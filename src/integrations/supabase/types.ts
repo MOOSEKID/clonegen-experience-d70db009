@@ -163,6 +163,129 @@ export type Database = {
           },
         ]
       }
+      client_progress: {
+        Row: {
+          arm_measurement: number | null
+          body_fat_percentage: number | null
+          chest_measurement: number | null
+          client_id: string | null
+          created_at: string | null
+          date: string
+          hip_measurement: number | null
+          id: string
+          notes: string | null
+          thigh_measurement: number | null
+          trainer_id: string | null
+          updated_at: string | null
+          waist_measurement: number | null
+          weight: number | null
+        }
+        Insert: {
+          arm_measurement?: number | null
+          body_fat_percentage?: number | null
+          chest_measurement?: number | null
+          client_id?: string | null
+          created_at?: string | null
+          date?: string
+          hip_measurement?: number | null
+          id?: string
+          notes?: string | null
+          thigh_measurement?: number | null
+          trainer_id?: string | null
+          updated_at?: string | null
+          waist_measurement?: number | null
+          weight?: number | null
+        }
+        Update: {
+          arm_measurement?: number | null
+          body_fat_percentage?: number | null
+          chest_measurement?: number | null
+          client_id?: string | null
+          created_at?: string | null
+          date?: string
+          hip_measurement?: number | null
+          id?: string
+          notes?: string | null
+          thigh_measurement?: number | null
+          trainer_id?: string | null
+          updated_at?: string | null
+          waist_measurement?: number | null
+          weight?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "client_progress_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "members"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "client_progress_trainer_id_fkey"
+            columns: ["trainer_id"]
+            isOneToOne: false
+            referencedRelation: "trainers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      client_sessions: {
+        Row: {
+          achievements: string | null
+          client_id: string | null
+          created_at: string | null
+          duration: number
+          focus_areas: string[] | null
+          id: string
+          notes: string | null
+          session_date: string
+          status: string | null
+          trainer_id: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          achievements?: string | null
+          client_id?: string | null
+          created_at?: string | null
+          duration: number
+          focus_areas?: string[] | null
+          id?: string
+          notes?: string | null
+          session_date: string
+          status?: string | null
+          trainer_id?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          achievements?: string | null
+          client_id?: string | null
+          created_at?: string | null
+          duration?: number
+          focus_areas?: string[] | null
+          id?: string
+          notes?: string | null
+          session_date?: string
+          status?: string | null
+          trainer_id?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "client_sessions_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "members"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "client_sessions_trainer_id_fkey"
+            columns: ["trainer_id"]
+            isOneToOne: false
+            referencedRelation: "trainers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       companies: {
         Row: {
           adminsetuprequired: boolean | null
@@ -739,6 +862,47 @@ export type Database = {
         }
         Relationships: []
       }
+      trainer_attendance: {
+        Row: {
+          check_in_time: string | null
+          check_out_time: string | null
+          created_at: string | null
+          date: string
+          id: string
+          notes: string | null
+          trainer_id: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          check_in_time?: string | null
+          check_out_time?: string | null
+          created_at?: string | null
+          date?: string
+          id?: string
+          notes?: string | null
+          trainer_id?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          check_in_time?: string | null
+          check_out_time?: string | null
+          created_at?: string | null
+          date?: string
+          id?: string
+          notes?: string | null
+          trainer_id?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "trainer_attendance_trainer_id_fkey"
+            columns: ["trainer_id"]
+            isOneToOne: false
+            referencedRelation: "trainers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       trainer_availability: {
         Row: {
           created_at: string | null
@@ -812,6 +976,51 @@ export type Database = {
           },
         ]
       }
+      trainer_client_assignments: {
+        Row: {
+          assignment_date: string
+          client_id: string | null
+          created_at: string | null
+          id: string
+          status: string | null
+          trainer_id: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          assignment_date?: string
+          client_id?: string | null
+          created_at?: string | null
+          id?: string
+          status?: string | null
+          trainer_id?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          assignment_date?: string
+          client_id?: string | null
+          created_at?: string | null
+          id?: string
+          status?: string | null
+          trainer_id?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "trainer_client_assignments_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "members"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "trainer_client_assignments_trainer_id_fkey"
+            columns: ["trainer_id"]
+            isOneToOne: false
+            referencedRelation: "trainers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       trainer_ratings: {
         Row: {
           created_at: string | null
@@ -871,6 +1080,8 @@ export type Database = {
           bio: string | null
           created_at: string | null
           email: string
+          experience_level: string | null
+          experience_years: number | null
           hire_date: string | null
           hiredate: string | null
           id: string
@@ -881,12 +1092,15 @@ export type Database = {
           schedule: Json | null
           specialization: string[] | null
           status: string | null
+          stripe_account_id: string | null
           updated_at: string | null
         }
         Insert: {
           bio?: string | null
           created_at?: string | null
           email: string
+          experience_level?: string | null
+          experience_years?: number | null
           hire_date?: string | null
           hiredate?: string | null
           id?: string
@@ -897,12 +1111,15 @@ export type Database = {
           schedule?: Json | null
           specialization?: string[] | null
           status?: string | null
+          stripe_account_id?: string | null
           updated_at?: string | null
         }
         Update: {
           bio?: string | null
           created_at?: string | null
           email?: string
+          experience_level?: string | null
+          experience_years?: number | null
           hire_date?: string | null
           hiredate?: string | null
           id?: string
@@ -913,6 +1130,7 @@ export type Database = {
           schedule?: Json | null
           specialization?: string[] | null
           status?: string | null
+          stripe_account_id?: string | null
           updated_at?: string | null
         }
         Relationships: []

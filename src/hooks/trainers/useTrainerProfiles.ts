@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/components/ui/use-toast';
@@ -13,6 +12,9 @@ export interface TrainerProfile {
   specialization: string[];
   status?: string;
   hire_date?: string;
+  experience_years?: number;
+  experience_level?: string;
+  stripe_account_id?: string;
   certifications: TrainerCertification[];
   availability: TrainerAvailability[];
 }
@@ -45,7 +47,6 @@ export const useTrainerProfiles = () => {
       setIsLoading(true);
       
       try {
-        // Fetch trainers
         const { data: trainersData, error: trainersError } = await supabase
           .from('trainers')
           .select('*')
@@ -54,10 +55,8 @@ export const useTrainerProfiles = () => {
         if (trainersError) throw trainersError;
         
         if (trainersData) {
-          // Process all trainers to ensure consistent data structure
           const processedTrainers = await Promise.all(
             trainersData.map(async (trainer) => {
-              // Fetch certifications for this trainer
               const { data: certifications, error: certError } = await supabase
                 .from('trainer_certifications')
                 .select('*')
@@ -65,7 +64,6 @@ export const useTrainerProfiles = () => {
                 
               if (certError) console.error('Error fetching certifications:', certError);
               
-              // Fetch availability for this trainer
               const { data: availability, error: availError } = await supabase
                 .from('trainer_availability')
                 .select('*')
@@ -73,32 +71,29 @@ export const useTrainerProfiles = () => {
                 
               if (availError) console.error('Error fetching availability:', availError);
               
-              // Convert db column profilepicture to profile_picture if needed
-              const profile_picture = 'profilepicture' in trainer ? trainer.profilepicture : trainer.profile_picture;
-              
-              // Convert db column hiredate to hire_date if needed
-              const hire_date = 'hiredate' in trainer ? trainer.hiredate : trainer.hire_date;
+              const profile_picture = trainer.profile_picture || trainer.profilepicture || null;
+              const hire_date = trainer.hire_date || trainer.hiredate || new Date().toISOString().split('T')[0];
                 
               return {
                 ...trainer,
                 profile_picture,
                 hire_date,
                 certifications: certifications || [],
-                availability: availability || []
+                availability: availability || [],
+                experience_years: trainer.experience_years || null,
+                experience_level: trainer.experience_level || null
               } as TrainerProfile;
             })
           );
           
           setTrainers(processedTrainers);
         } else {
-          // Fallback to mock data
           setTrainers(getMockTrainers());
         }
       } catch (err) {
         console.error('Error fetching trainers:', err);
         setError(err instanceof Error ? err : new Error('Failed to fetch trainers'));
         
-        // Fallback to mock data
         setTrainers(getMockTrainers());
       } finally {
         setIsLoading(false);
@@ -107,7 +102,6 @@ export const useTrainerProfiles = () => {
     
     fetchTrainers();
     
-    // Set up real-time subscription
     const subscription = supabase
       .channel('public:trainers')
       .on('postgres_changes', { 
@@ -124,7 +118,6 @@ export const useTrainerProfiles = () => {
     };
   }, []);
   
-  // Add a new trainer
   const addTrainer = async (trainer: Omit<TrainerProfile, 'id' | 'certifications' | 'availability'>) => {
     try {
       const { data, error } = await supabase
@@ -137,7 +130,9 @@ export const useTrainerProfiles = () => {
           profile_picture: trainer.profile_picture || null,
           specialization: trainer.specialization || [],
           status: trainer.status || 'Active',
-          hire_date: trainer.hire_date || new Date().toISOString()
+          hire_date: trainer.hire_date || new Date().toISOString().split('T')[0],
+          experience_years: trainer.experience_years || null,
+          experience_level: trainer.experience_level || null
         })
         .select()
         .single();
@@ -161,7 +156,6 @@ export const useTrainerProfiles = () => {
     }
   };
   
-  // Update a trainer
   const updateTrainer = async (id: string, updates: Partial<Omit<TrainerProfile, 'id' | 'certifications' | 'availability'>>) => {
     try {
       const { error } = await supabase
@@ -188,7 +182,6 @@ export const useTrainerProfiles = () => {
     }
   };
   
-  // Delete a trainer
   const deleteTrainer = async (id: string) => {
     try {
       const { error } = await supabase
@@ -215,7 +208,6 @@ export const useTrainerProfiles = () => {
     }
   };
   
-  // Add a certification
   const addCertification = async (certification: Omit<TrainerCertification, 'id'>) => {
     try {
       const { data, error } = await supabase
@@ -243,7 +235,6 @@ export const useTrainerProfiles = () => {
     }
   };
   
-  // Delete a certification
   const deleteCertification = async (id: string) => {
     try {
       const { error } = await supabase
@@ -270,7 +261,6 @@ export const useTrainerProfiles = () => {
     }
   };
   
-  // Add availability
   const addAvailability = async (availability: Omit<TrainerAvailability, 'id'>) => {
     try {
       const { data, error } = await supabase
@@ -298,7 +288,6 @@ export const useTrainerProfiles = () => {
     }
   };
   
-  // Delete availability
   const deleteAvailability = async (id: string) => {
     try {
       const { error } = await supabase
@@ -339,7 +328,6 @@ export const useTrainerProfiles = () => {
   };
 };
 
-// Mock data generator
 const getMockTrainers = (): TrainerProfile[] => {
   const mockTrainers = [
     {
@@ -352,6 +340,8 @@ const getMockTrainers = (): TrainerProfile[] => {
       status: "Active",
       hire_date: "2022-01-15",
       profile_picture: null,
+      experience_years: 5,
+      experience_level: "Intermediate",
       certifications: [
         {
           id: "cert1",
@@ -404,6 +394,8 @@ const getMockTrainers = (): TrainerProfile[] => {
       status: "Active",
       hire_date: "2022-03-10",
       profile_picture: null,
+      experience_years: 8,
+      experience_level: "Advanced",
       certifications: [
         {
           id: "cert3",
@@ -448,6 +440,8 @@ const getMockTrainers = (): TrainerProfile[] => {
       status: "Active",
       hire_date: "2022-06-01",
       profile_picture: null,
+      experience_years: 3,
+      experience_level: "Beginner",
       certifications: [
         {
           id: "cert4",
