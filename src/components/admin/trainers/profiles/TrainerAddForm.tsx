@@ -19,8 +19,8 @@ const trainerFormSchema = z.object({
   bio: z.string().optional(),
   status: z.string(),
   specialization: z.array(z.string()).optional(),
-  hiredate: z.string().optional(),
-  profilepicture: z.string().optional(),
+  hire_date: z.string().optional(),
+  profile_picture: z.string().optional(),
 });
 
 type TrainerFormValues = z.infer<typeof trainerFormSchema>;
@@ -42,13 +42,24 @@ const TrainerAddForm = ({ onSubmit, onCancel }: TrainerAddFormProps) => {
       bio: "",
       status: "Active",
       specialization: [],
-      hiredate: new Date().toISOString().split('T')[0],
-      profilepicture: "",
+      hire_date: new Date().toISOString().split('T')[0],
+      profile_picture: "",
     },
   });
 
   const handleSubmit = async (data: TrainerFormValues) => {
-    await onSubmit(data);
+    // Ensure required fields are present
+    const trainerData: Omit<TrainerProfile, 'id' | 'certifications' | 'availability'> = {
+      name: data.name,
+      email: data.email,
+      phone: data.phone,
+      bio: data.bio,
+      status: data.status,
+      specialization: data.specialization || [],
+      hire_date: data.hire_date,
+      profile_picture: data.profile_picture
+    };
+    await onSubmit(trainerData);
     form.reset();
   };
 
@@ -141,7 +152,7 @@ const TrainerAddForm = ({ onSubmit, onCancel }: TrainerAddFormProps) => {
 
           <FormField
             control={form.control}
-            name="hiredate"
+            name="hire_date"
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Hire Date</FormLabel>
@@ -155,7 +166,7 @@ const TrainerAddForm = ({ onSubmit, onCancel }: TrainerAddFormProps) => {
 
           <FormField
             control={form.control}
-            name="profilepicture"
+            name="profile_picture"
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Profile Picture URL</FormLabel>

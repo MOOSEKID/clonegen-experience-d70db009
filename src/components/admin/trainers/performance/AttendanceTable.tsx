@@ -1,60 +1,108 @@
 
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { ClassAttendance } from "@/hooks/trainers/useTrainerPerformance";
-import { Skeleton } from "@/components/ui/skeleton";
+import React from 'react';
+import { format } from 'date-fns';
+import { Badge } from '@/components/ui/badge';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Skeleton } from '@/components/ui/skeleton';
+
+interface ClassSession {
+  id: string;
+  date: string;
+  class_name: string;
+  time: string;
+  duration: number;
+  attendees: number;
+  capacity: number;
+  status: 'completed' | 'canceled' | 'no-show';
+}
 
 interface AttendanceTableProps {
-  data: ClassAttendance[];
+  trainerName: string;
+  sessions: ClassSession[];
   isLoading: boolean;
 }
 
-const AttendanceTable = ({ data, isLoading }: AttendanceTableProps) => {
+const AttendanceTable: React.FC<AttendanceTableProps> = ({ 
+  trainerName, 
+  sessions, 
+  isLoading 
+}) => {
+  const getStatusBadge = (status: string) => {
+    switch (status) {
+      case 'completed':
+        return (
+          <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">
+            Completed
+          </Badge>
+        );
+      case 'canceled':
+        return (
+          <Badge variant="destructive">
+            Canceled
+          </Badge>
+        );
+      case 'no-show':
+        return (
+          <Badge variant="outline" className="bg-amber-50 text-amber-700 border-amber-200">
+            No-show
+          </Badge>
+        );
+      default:
+        return (
+          <Badge variant="outline">
+            {status}
+          </Badge>
+        );
+    }
+  };
+  
   return (
-    <Card className="w-full h-full">
+    <Card>
       <CardHeader>
-        <CardTitle>Class Attendance</CardTitle>
-        <CardDescription>Recent class attendance records</CardDescription>
+        <CardTitle>Recent Class Sessions</CardTitle>
       </CardHeader>
       <CardContent>
         {isLoading ? (
-          <div className="space-y-3">
-            <Skeleton className="h-8 w-full" />
-            <Skeleton className="h-8 w-full" />
-            <Skeleton className="h-8 w-full" />
-            <Skeleton className="h-8 w-full" />
+          <div className="space-y-2">
+            <Skeleton className="h-6 w-full" />
+            <Skeleton className="h-14 w-full" />
+            <Skeleton className="h-14 w-full" />
+            <Skeleton className="h-14 w-full" />
           </div>
-        ) : data.length === 0 ? (
-          <div className="flex items-center justify-center text-gray-500 text-center p-8 border border-dashed rounded-md">
-            <div>
-              <p>No attendance records found.</p>
-              <p className="text-sm mt-1">Records will appear once classes are conducted.</p>
-            </div>
+        ) : sessions.length === 0 ? (
+          <div className="text-center py-6 text-gray-500">
+            No recent sessions found for {trainerName}.
           </div>
         ) : (
           <div className="overflow-x-auto">
-            <Table className="w-full">
+            <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Class Name</TableHead>
-                  <TableHead>Schedule</TableHead>
-                  <TableHead className="text-center">Enrolled</TableHead>
-                  <TableHead className="text-center">Attended</TableHead>
-                  <TableHead className="text-center">Rate</TableHead>
+                  <TableHead>Date</TableHead>
+                  <TableHead>Class</TableHead>
+                  <TableHead>Time</TableHead>
+                  <TableHead>Attendees</TableHead>
+                  <TableHead>Status</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {data.map((item, index) => (
-                  <TableRow key={index}>
-                    <TableCell className="font-medium">{item.class_name}</TableCell>
-                    <TableCell>{item.class_date}</TableCell>
-                    <TableCell className="text-center">{item.enrolled_count}</TableCell>
-                    <TableCell className="text-center">{item.attended_count}</TableCell>
-                    <TableCell className="text-center">
-                      <Badge variant={getRateVariant(item.attendance_rate)}>
-                        {item.attendance_rate.toFixed(0)}%
-                      </Badge>
+                {sessions.map(session => (
+                  <TableRow key={session.id}>
+                    <TableCell>
+                      {format(new Date(session.date), 'MMM d, yyyy')}
+                    </TableCell>
+                    <TableCell className="font-medium">
+                      {session.class_name}
+                    </TableCell>
+                    <TableCell>
+                      {session.time} ({session.duration} min)
+                    </TableCell>
+                    <TableCell>
+                      {session.attendees}/{session.capacity}
+                    </TableCell>
+                    <TableCell>
+                      {getStatusBadge(session.status)}
                     </TableCell>
                   </TableRow>
                 ))}
@@ -66,12 +114,5 @@ const AttendanceTable = ({ data, isLoading }: AttendanceTableProps) => {
     </Card>
   );
 };
-
-function getRateVariant(rate: number) {
-  if (rate >= 80) return "success";
-  if (rate >= 60) return "default";
-  if (rate >= 40) return "warning";
-  return "destructive";
-}
 
 export default AttendanceTable;

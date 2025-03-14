@@ -9,7 +9,7 @@ export interface TrainerProfile {
   email: string;
   phone?: string;
   bio?: string;
-  profile_image?: string;
+  profile_picture?: string;
   specialization: string[];
   status?: string;
   hire_date?: string;
@@ -45,7 +45,7 @@ export const useTrainerProfiles = () => {
       setIsLoading(true);
       
       try {
-        // Fetch trainers with certifications and availability
+        // Fetch trainers
         const { data: trainersData, error: trainersError } = await supabase
           .from('trainers')
           .select('*')
@@ -82,7 +82,7 @@ export const useTrainerProfiles = () => {
               ...trainer,
               certifications: trainerCertifications,
               availability: trainerAvailability
-            };
+            } as TrainerProfile;
           });
           
           setTrainers(processedTrainers);
@@ -130,7 +130,7 @@ export const useTrainerProfiles = () => {
           email: trainer.email,
           phone: trainer.phone || null,
           bio: trainer.bio || null,
-          profile_image: trainer.profile_image || null,
+          profile_picture: trainer.profile_picture || null,
           specialization: trainer.specialization || [],
           status: trainer.status || 'Active',
           hire_date: trainer.hire_date || new Date().toISOString()
@@ -158,7 +158,7 @@ export const useTrainerProfiles = () => {
   };
   
   // Update a trainer
-  const updateTrainer = async (id: string, updates: Partial<Omit<TrainerProfile, 'certifications' | 'availability'>>) => {
+  const updateTrainer = async (id: string, updates: Partial<Omit<TrainerProfile, 'id' | 'certifications' | 'availability'>>) => {
     try {
       const { error } = await supabase
         .from('trainers')

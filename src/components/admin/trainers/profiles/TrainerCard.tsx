@@ -41,8 +41,8 @@ const TrainerCard = ({
         <CardHeader className="relative pb-2">
           <div className="flex items-start justify-between">
             <Avatar className="h-16 w-16 mb-2">
-              {trainer.profilepicture ? (
-                <AvatarImage src={trainer.profilepicture} alt={trainer.name} />
+              {trainer.profile_picture ? (
+                <AvatarImage src={trainer.profile_picture} alt={trainer.name} />
               ) : (
                 <AvatarFallback className="bg-gym-orange text-white text-lg">
                   {nameInitials}
@@ -76,10 +76,10 @@ const TrainerCard = ({
                   <span className="text-sm">{trainer.phone}</span>
                 </div>
               )}
-              {trainer.hiredate && (
+              {trainer.hire_date && (
                 <div className="flex items-center gap-2 text-gray-600">
                   <Calendar className="h-4 w-4" />
-                  <span className="text-sm">Hired: {new Date(trainer.hiredate).toLocaleDateString()}</span>
+                  <span className="text-sm">Hired: {new Date(trainer.hire_date).toLocaleDateString()}</span>
                 </div>
               )}
             </div>
@@ -184,8 +184,8 @@ const TrainerCard = ({
           </DialogHeader>
           <TrainerEditForm 
             trainer={trainer} 
-            onSave={(updates) => {
-              onUpdate(trainer.id, updates);
+            onSave={async (updates) => {
+              await onUpdate(trainer.id, updates);
               setIsEditModalOpen(false);
             }}
             onCancel={() => setIsEditModalOpen(false)}

@@ -37,10 +37,14 @@ const TrainerCertificationForm = ({ trainerId, onSubmit, onCancel }: TrainerCert
   });
 
   const handleSubmit = async (data: CertificationFormValues) => {
-    await onSubmit({
+    const certData: Omit<TrainerCertification, 'id'> = {
       trainer_id: trainerId,
-      ...data,
-    });
+      certification_name: data.certification_name,
+      issuing_organization: data.issuing_organization,
+      issue_date: data.issue_date || undefined,
+      expiry_date: data.expiry_date || undefined
+    };
+    await onSubmit(certData);
     form.reset();
   };
 

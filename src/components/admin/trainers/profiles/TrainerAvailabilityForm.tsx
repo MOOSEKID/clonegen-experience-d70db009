@@ -37,10 +37,13 @@ const TrainerAvailabilityForm = ({ trainerId, onSubmit, onCancel }: TrainerAvail
   });
 
   const handleSubmit = async (data: AvailabilityFormValues) => {
-    await onSubmit({
+    const availabilityData: Omit<TrainerAvailability, 'id'> = {
       trainer_id: trainerId,
-      ...data,
-    });
+      day_of_week: data.day_of_week,
+      start_time: data.start_time,
+      end_time: data.end_time
+    };
+    await onSubmit(availabilityData);
     form.reset();
   };
 

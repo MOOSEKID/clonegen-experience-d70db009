@@ -50,6 +50,23 @@ const TrainerProfiles = () => {
     setModalTab('certification');
   };
 
+  // Wrapper functions to convert Promise<boolean> to Promise<void>
+  const handleDeleteTrainer = async (id: string): Promise<void> => {
+    await deleteTrainer(id);
+  };
+
+  const handleUpdateTrainer = async (id: string, updates: Partial<Omit<TrainerProfile, 'id' | 'certifications' | 'availability'>>): Promise<void> => {
+    await updateTrainer(id, updates);
+  };
+
+  const handleDeleteCertification = async (id: string): Promise<void> => {
+    await deleteCertification(id);
+  };
+
+  const handleDeleteAvailability = async (id: string): Promise<void> => {
+    await deleteAvailability(id);
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
@@ -143,10 +160,10 @@ const TrainerProfiles = () => {
             <TrainerCard 
               key={trainer.id} 
               trainer={trainer}
-              onDelete={deleteTrainer}
-              onUpdate={updateTrainer}
-              onDeleteCertification={deleteCertification}
-              onDeleteAvailability={deleteAvailability}
+              onDelete={handleDeleteTrainer}
+              onUpdate={handleUpdateTrainer}
+              onDeleteCertification={handleDeleteCertification}
+              onDeleteAvailability={handleDeleteAvailability}
             />
           ))}
         </div>

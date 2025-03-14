@@ -19,15 +19,15 @@ const trainerFormSchema = z.object({
   bio: z.string().optional(),
   status: z.string(),
   specialization: z.array(z.string()).optional(),
-  hiredate: z.string().optional(),
-  profilepicture: z.string().optional(),
+  hire_date: z.string().optional(),
+  profile_picture: z.string().optional(),
 });
 
 type TrainerFormValues = z.infer<typeof trainerFormSchema>;
 
 interface TrainerEditFormProps {
   trainer: TrainerProfile;
-  onSave: (data: Partial<TrainerProfile>) => void;
+  onSave: (data: Partial<TrainerProfile>) => Promise<void>;
   onCancel: () => void;
 }
 
@@ -43,8 +43,8 @@ const TrainerEditForm = ({ trainer, onSave, onCancel }: TrainerEditFormProps) =>
       bio: trainer.bio || "",
       status: trainer.status || "Active",
       specialization: trainer.specialization || [],
-      hiredate: trainer.hiredate || new Date().toISOString().split('T')[0],
-      profilepicture: trainer.profilepicture || "",
+      hire_date: trainer.hire_date || new Date().toISOString().split('T')[0],
+      profile_picture: trainer.profile_picture || "",
     },
   });
 
@@ -141,7 +141,7 @@ const TrainerEditForm = ({ trainer, onSave, onCancel }: TrainerEditFormProps) =>
 
           <FormField
             control={form.control}
-            name="hiredate"
+            name="hire_date"
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Hire Date</FormLabel>
@@ -155,7 +155,7 @@ const TrainerEditForm = ({ trainer, onSave, onCancel }: TrainerEditFormProps) =>
 
           <FormField
             control={form.control}
-            name="profilepicture"
+            name="profile_picture"
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Profile Picture URL</FormLabel>
