@@ -8,7 +8,7 @@ interface PerformanceStatsGridProps {
 }
 
 const PerformanceStatsGrid = ({ trainerId }: PerformanceStatsGridProps) => {
-  const { metrics, isLoading } = useTrainerPerformance(trainerId);
+  const { performanceMetrics: metrics, isLoading } = useTrainerPerformance(trainerId);
 
   if (isLoading) {
     return (

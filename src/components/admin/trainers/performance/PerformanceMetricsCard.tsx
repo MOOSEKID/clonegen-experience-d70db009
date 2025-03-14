@@ -11,7 +11,7 @@ interface PerformanceMetricsCardProps {
 }
 
 const PerformanceMetricsCard = ({ trainerId, trainerName, fullView = false }: PerformanceMetricsCardProps) => {
-  const { metrics, isLoading } = useTrainerPerformance(trainerId);
+  const { performanceMetrics: metrics, isLoading } = useTrainerPerformance(trainerId);
 
   return (
     <Card className="w-full h-full">
