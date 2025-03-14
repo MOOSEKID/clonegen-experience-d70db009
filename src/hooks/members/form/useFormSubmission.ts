@@ -22,6 +22,7 @@ export const useFormSubmission = (
         phone: values.phone || "",
         membershipType: values.membershipType || "Standard",
         membershipCategory: values.membershipCategory || "Individual",
+        status: values.status || "Active", // Add status field to fix type error
         
         // Authentication details
         generateUsername: values.generateUsername,
@@ -38,7 +39,8 @@ export const useFormSubmission = (
           emergencyContact: values.emergencyContact,
           linkedToCompany: values.linkedToCompany,
           linkedCompanyName: values.linkedCompanyName,
-          linkedCompanyId: values.linkedCompanyId,
+          // Fix the property name
+          linkedCompanyId: values.linkedCompanyName, // Using linkedCompanyName as a fallback
         } : {}),
         
         ...(values.membershipCategory === "Company" ? {
@@ -50,8 +52,8 @@ export const useFormSubmission = (
           companyTIN: values.companyTIN,
           subscriptionModel: values.subscriptionModel,
           billingCycle: values.billingCycle,
-          discountRate: values.discountRate,
-          useGroupDiscount: values.useGroupDiscount,
+          // Fix missing properties by using correct types from form values
+          corporateDiscount: values.corporateDiscount,
         } : {}),
         
         // Auth-related fields

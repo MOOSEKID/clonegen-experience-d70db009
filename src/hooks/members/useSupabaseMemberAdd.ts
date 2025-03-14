@@ -7,7 +7,7 @@ export const useSupabaseMemberAdd = () => {
   // Mock addMember function that uses local data instead of Supabase
   const addMember = async (memberData: Omit<Member, "id" | "startDate" | "endDate" | "lastCheckin"> & MemberFormAction): Promise<boolean> => {
     try {
-      console.log("Starting addMember with data:", memberData);
+      console.log("Starting useSupabaseMemberAdd with data:", memberData);
       
       if (!memberData || !memberData.name || !memberData.email) {
         console.error("Invalid member data:", memberData);
@@ -16,7 +16,7 @@ export const useSupabaseMemberAdd = () => {
       }
       
       // Mock successful member creation
-      console.log("Member would be created with this data:", memberData);
+      console.log("Member would be created with this data:", JSON.stringify(memberData, null, 2));
       
       // Simulate a delay
       await new Promise(resolve => setTimeout(resolve, 500));

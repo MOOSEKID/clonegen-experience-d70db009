@@ -7,9 +7,11 @@ import { useMemberFilters } from './useMemberFilters';
 import { v4 as uuidv4 } from 'uuid';
 
 export const useSupabaseMembers = () => {
+  console.log("Initializing useSupabaseMembers hook");
   const { members, setMembers, isLoading } = useSupabaseMemberData();
   const [selectedMembers, setSelectedMembers] = useState<string[]>([]);
   const [isCreating, setIsCreating] = useState(false);
+  const [error, setError] = useState<Error | null>(null);
 
   // Use the member filters hook to handle filtering, pagination, etc.
   const {
@@ -29,6 +31,7 @@ export const useSupabaseMembers = () => {
 
   // Update the member filters when members change
   useEffect(() => {
+    console.log("useSupabaseMembers effect: members changed", members.length);
     if (members.length > 0) {
       setAllMembers(members);
     }
@@ -116,8 +119,10 @@ export const useSupabaseMembers = () => {
 
   // Add member
   const addMember = useCallback(async (memberData: Omit<Member, "id" | "startDate" | "endDate" | "lastCheckin"> & MemberFormAction): Promise<boolean> => {
+    console.log("useSupabaseMembers.addMember called with data:", memberData);
     try {
       setIsCreating(true);
+      setError(null);
       
       // Create a simulated delay to mimic API call
       await new Promise(resolve => setTimeout(resolve, 500));
@@ -143,13 +148,20 @@ export const useSupabaseMembers = () => {
         companyName: memberData.companyName,
       };
       
-      // Update state with new member
-      setMembers(prevMembers => [...prevMembers, newMember]);
-      console.log('Added new member:', newMember);
+      console.log("Created new member:", newMember);
       
+      // Update state with new member
+      setMembers(prevMembers => {
+        console.log("Updating members state, current count:", prevMembers.length);
+        return [...prevMembers, newMember];
+      });
+      
+      toast.success(`Member ${newMember.name} added successfully`);
       return true;
     } catch (error) {
       console.error('Error adding member:', error);
+      setError(error instanceof Error ? error : new Error('Unknown error occurred'));
+      toast.error(`Failed to add member: ${error instanceof Error ? error.message : 'Unknown error'}`);
       return false;
     } finally {
       setIsCreating(false);
@@ -178,6 +190,7 @@ export const useSupabaseMembers = () => {
     filterType,
     isCreating,
     isLoading,
+    error,
     handleSearch,
     handleStatusChange,
     handleDelete,

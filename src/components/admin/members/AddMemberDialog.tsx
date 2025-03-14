@@ -13,6 +13,8 @@ interface AddMemberDialogProps {
 }
 
 const AddMemberDialog = ({ isOpen, onClose, onAddMember, isCreating = false }: AddMemberDialogProps) => {
+  console.log("AddMemberDialog rendering. Props:", { isOpen, isCreating });
+  
   const { form, isSubmitting, onSubmit } = useAddMemberForm(onAddMember, isCreating, isOpen);
   const [dialogError, setDialogError] = React.useState<string | null>(null);
   
@@ -42,6 +44,7 @@ const AddMemberDialog = ({ isOpen, onClose, onAddMember, isCreating = false }: A
 
   // Reset error when dialog opens/closes
   React.useEffect(() => {
+    console.log("AddMemberDialog useEffect triggered by isOpen change:", isOpen);
     setDialogError(null);
   }, [isOpen]);
 
