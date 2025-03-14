@@ -3,7 +3,7 @@ import { useTrainerPerformance } from '@/hooks/trainers/useTrainerPerformance';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Users, Calendar, Award, Clock } from 'lucide-react';
 
-interface PerformanceStatsGridProps {
+export interface PerformanceStatsGridProps {
   trainerId: string;
 }
 
@@ -27,14 +27,14 @@ const PerformanceStatsGrid = ({ trainerId }: PerformanceStatsGridProps) => {
   const stats = [
     {
       title: 'Active Clients',
-      value: metrics.activeClients,
+      value: metrics.assignedClients,
       change: '+5% from last month',
       icon: <Users className="h-5 w-5 text-blue-500" />,
     },
     {
       title: 'Sessions This Month',
-      value: metrics.thisMonthSessions,
-      change: `${metrics.sessionChangePercent}% from last month`,
+      value: metrics.monthlySessions,
+      change: `${metrics.sessionGrowth}% from last month`,
       icon: <Calendar className="h-5 w-5 text-green-500" />,
     },
     {
@@ -45,7 +45,7 @@ const PerformanceStatsGrid = ({ trainerId }: PerformanceStatsGridProps) => {
     },
     {
       title: 'Attendance Rate',
-      value: `${metrics.attendanceRate}%`,
+      value: `${metrics.completionRate}%`,
       change: 'Over the last 30 days',
       icon: <Clock className="h-5 w-5 text-purple-500" />,
     },

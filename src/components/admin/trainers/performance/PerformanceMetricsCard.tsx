@@ -1,66 +1,107 @@
 
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
-import { useTrainerPerformance } from "@/hooks/trainers/useTrainerPerformance";
-import { Skeleton } from "@/components/ui/skeleton";
+import React from 'react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { useTrainerPerformance } from '@/hooks/trainers/useTrainerPerformance';
+import { Skeleton } from '@/components/ui/skeleton';
+import {
+  Users,
+  CalendarDays,
+  TrendingUp,
+  Star,
+  Clock,
+  Heart,
+} from 'lucide-react';
 
-interface PerformanceMetricsCardProps {
+export interface PerformanceMetricsCardProps {
   trainerId: string;
   trainerName: string;
   fullView?: boolean;
 }
 
-const PerformanceMetricsCard = ({ trainerId, trainerName, fullView = false }: PerformanceMetricsCardProps) => {
+const PerformanceMetricsCard: React.FC<PerformanceMetricsCardProps> = ({
+  trainerId,
+  trainerName,
+  fullView = false,
+}) => {
   const { performanceMetrics: metrics, isLoading } = useTrainerPerformance(trainerId);
 
+  if (isLoading) {
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle>
+            <Skeleton className="h-6 w-48" />
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <Skeleton className="h-4 w-full" />
+          <Skeleton className="h-4 w-full" />
+          <Skeleton className="h-4 w-3/4" />
+        </CardContent>
+      </Card>
+    );
+  }
+
+  const metricsList = [
+    {
+      icon: <Users className="h-4 w-4 mr-2 text-blue-500" />,
+      name: 'Active Clients',
+      value: metrics.assignedClients,
+    },
+    {
+      icon: <CalendarDays className="h-4 w-4 mr-2 text-green-500" />,
+      name: 'Sessions This Month',
+      value: metrics.monthlySessions,
+    },
+    {
+      icon: <TrendingUp className="h-4 w-4 mr-2 text-purple-500" />,
+      name: 'Client Retention',
+      value: `${metrics.retentionRate}%`,
+    },
+    {
+      icon: <Clock className="h-4 w-4 mr-2 text-orange-500" />,
+      name: 'Attendance Rate',
+      value: `${metrics.completionRate}%`,
+    },
+    {
+      icon: <Star className="h-4 w-4 mr-2 text-yellow-500" />,
+      name: 'Average Rating',
+      value: metrics.averageRating.toFixed(1),
+    },
+  ];
+
+  // Only show these metrics in full view
+  const extendedMetrics = [
+    {
+      icon: <Heart className="h-4 w-4 mr-2 text-red-500" />,
+      name: 'Client Satisfaction',
+      value: `${metrics.satisfactionScore}%`,
+    },
+  ];
+
+  const displayMetrics = fullView
+    ? [...metricsList, ...extendedMetrics]
+    : metricsList;
+
   return (
-    <Card className="w-full h-full">
+    <Card>
       <CardHeader>
-        <CardTitle>Monthly Sessions</CardTitle>
+        <CardTitle className="text-lg font-medium">
+          {trainerName}'s Performance
+        </CardTitle>
       </CardHeader>
       <CardContent>
-        {isLoading ? (
-          <Skeleton className="h-[200px] w-full" />
-        ) : (
-          <div className="h-[200px] mt-4">
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={metrics.monthlySessions}>
-                <CartesianGrid strokeDasharray="3 3" vertical={false} />
-                <XAxis dataKey="month" />
-                <YAxis allowDecimals={false} />
-                <Tooltip 
-                  formatter={(value) => [`${value} classes`, 'Classes Conducted']}
-                  labelFormatter={(label) => `Month: ${label}`}
-                />
-                <Bar dataKey="count" fill="#f97316" radius={[4, 4, 0, 0]} />
-              </BarChart>
-            </ResponsiveContainer>
-          </div>
-        )}
-        
-        {fullView && (
-          <div className="mt-6 space-y-4">
-            <h3 className="text-md font-medium">Additional Performance Stats</h3>
-            <div className="grid grid-cols-2 gap-4">
-              <div className="border rounded-md p-3">
-                <p className="text-sm text-muted-foreground">Client Retention</p>
-                <p className="text-xl font-bold">{metrics.clientRetentionRate}%</p>
+        <ul className="space-y-2">
+          {displayMetrics.map((metric, index) => (
+            <li key={index} className="flex items-center justify-between text-sm">
+              <div className="flex items-center">
+                {metric.icon}
+                <span className="text-gray-600">{metric.name}</span>
               </div>
-              <div className="border rounded-md p-3">
-                <p className="text-sm text-muted-foreground">Rating</p>
-                <p className="text-xl font-bold">{metrics.averageRating.toFixed(1)}</p>
-              </div>
-              <div className="border rounded-md p-3">
-                <p className="text-sm text-muted-foreground">Sessions This Month</p>
-                <p className="text-xl font-bold">{metrics.thisMonthSessions}</p>
-              </div>
-              <div className="border rounded-md p-3">
-                <p className="text-sm text-muted-foreground">Attendance Rate</p>
-                <p className="text-xl font-bold">{metrics.attendanceRate}%</p>
-              </div>
-            </div>
-          </div>
-        )}
+              <span className="font-medium">{metric.value}</span>
+            </li>
+          ))}
+        </ul>
       </CardContent>
     </Card>
   );
