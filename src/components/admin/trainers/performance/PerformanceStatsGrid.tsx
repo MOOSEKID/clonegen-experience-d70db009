@@ -8,25 +8,25 @@ export interface PerformanceStatsGridProps {
 }
 
 const PerformanceStatsGrid: React.FC<PerformanceStatsGridProps> = ({ trainerId }) => {
-  const { metrics, statistics, isLoading } = useTrainerPerformance(trainerId);
+  const { performanceMetrics, isLoading } = useTrainerPerformance(trainerId);
   
   if (isLoading) {
     return <div>Loading performance statistics...</div>;
   }
   
-  if (!metrics || !statistics) {
+  if (!performanceMetrics) {
     return <div>No performance data available</div>;
   }
   
   const stats = [
-    { label: 'Classes Taught', value: statistics.classesTaught },
-    { label: 'Private Sessions', value: statistics.privateSessions },
-    { label: 'New Clients', value: statistics.newClients },
-    { label: 'Active Clients', value: statistics.activeClients },
-    { label: 'Avg. Session Rating', value: `${statistics.avgSessionRating}/5` },
-    { label: 'Monthly Goal Progress', value: `${statistics.monthlyGoalProgress}%` },
-    { label: 'Class Fill Rate', value: `${statistics.classFillRate}%` },
-    { label: 'Total Hours', value: statistics.totalHours },
+    { label: 'Classes Taught', value: performanceMetrics.classesTaught },
+    { label: 'Private Sessions', value: performanceMetrics.privateSessions },
+    { label: 'New Clients', value: performanceMetrics.newClients },
+    { label: 'Active Clients', value: performanceMetrics.activeClients },
+    { label: 'Avg. Session Rating', value: `${performanceMetrics.avgSessionRating}/5` },
+    { label: 'Monthly Goal Progress', value: `${performanceMetrics.monthlyGoalProgress}%` },
+    { label: 'Class Fill Rate', value: `${performanceMetrics.classFillRate}%` },
+    { label: 'Total Hours', value: performanceMetrics.totalHours },
   ];
   
   return (
