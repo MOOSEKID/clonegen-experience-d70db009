@@ -27,14 +27,14 @@ const PerformanceStatsGrid = ({ trainerId }: PerformanceStatsGridProps) => {
   const stats = [
     {
       title: 'Active Clients',
-      value: metrics.assignedClients,
+      value: metrics.activeClients,
       change: '+5% from last month',
       icon: <Users className="h-5 w-5 text-blue-500" />,
     },
     {
       title: 'Sessions This Month',
       value: metrics.monthlySessions,
-      change: `${metrics.sessionGrowth}% from last month`,
+      change: `${metrics.monthlyGrowth}% from last month`,
       icon: <Calendar className="h-5 w-5 text-green-500" />,
     },
     {
