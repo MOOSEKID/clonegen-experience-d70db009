@@ -1,4 +1,3 @@
-
 import { supabase } from '@/integrations/supabase/client';
 
 export type ClassStatus = 'scheduled' | 'full' | 'canceled';
@@ -225,13 +224,15 @@ export const enrollMemberInClass = async (
       waitlistPosition = waitlistCount + 1;
     }
     
-    // Add the enrollment
+    // Add the enrollment - use proper type for status
+    const enrollmentStatus: 'enrolled' | 'waitlisted' = isClassFull ? 'waitlisted' : 'enrolled';
+    
     const { error } = await supabase
       .from('class_enrollments')
       .insert({
         class_id: classId,
         member_id: memberId,
-        status: isClassFull ? 'waitlisted' : 'enrolled',
+        status: enrollmentStatus,
         waitlist_position: waitlistPosition
       });
       
@@ -310,10 +311,12 @@ export const removeMemberFromClass = async (
           .single();
           
         if (waitlisted) {
-          // Move the waitlisted member to enrolled
+          // Move the waitlisted member to enrolled with properly typed status
+          const newStatus: 'enrolled' = 'enrolled';
+          
           await supabase
             .from('class_enrollments')
-            .update({ status: 'enrolled', waitlist_position: null })
+            .update({ status: newStatus, waitlist_position: null })
             .eq('id', waitlisted.id);
             
           // Update the remaining waitlist positions
@@ -322,10 +325,12 @@ export const removeMemberFromClass = async (
           });
         }
         
-        // Update class status from full to scheduled
+        // Update class status from full to scheduled with properly typed status
+        const newClassStatus: ClassStatus = 'scheduled';
+        
         await supabase
           .from('classes')
-          .update({ status: 'scheduled' as ClassStatus })
+          .update({ status: newClassStatus })
           .eq('id', enrollment.class_id);
       }
     }

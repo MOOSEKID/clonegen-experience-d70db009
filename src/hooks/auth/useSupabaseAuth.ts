@@ -14,8 +14,15 @@ export const useSupabaseAuth = () => {
   // Fetch user role using the security definer function
   const fetchUserRole = async (userId: string) => {
     try {
-      // Use type assertion to handle the unknown return type
-      const { data, error } = await supabase.rpc('get_user_role', { user_id: userId as any });
+      // Properly type the RPC parameters
+      type UserRoleParams = {
+        user_id: string;
+      };
+      
+      const { data, error } = await supabase.rpc<string, UserRoleParams>(
+        'get_user_role', 
+        { user_id: userId }
+      );
         
       if (error) {
         console.error('Error fetching user role:', error);
