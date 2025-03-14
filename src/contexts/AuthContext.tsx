@@ -52,7 +52,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     getSession();
 
     // Listen for auth changes
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
       setSession(session);
       setUser(session?.user ?? null);
       
@@ -66,6 +66,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         const expiryDate = new Date();
         expiryDate.setDate(expiryDate.getDate() + 30);
         document.cookie = `session_active=true; path=/; expires=${expiryDate.toUTCString()}`;
+        
+        // Check if user is admin
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('is_admin')
+          .eq('id', session.user.id)
+          .single();
+        
+        setIsAdmin(profile?.is_admin || false);
       } else {
         localStorage.removeItem('isLoggedIn');
         localStorage.removeItem('userEmail');
@@ -105,6 +114,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   // Sign up with email and password
   const signUp = async (email: string, password: string, userData: any) => {
     try {
+      console.log('Signing up user with data:', { email, ...userData });
+      
       const { data, error } = await supabase.auth.signUp({
         email,
         password,
@@ -113,12 +124,47 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             name: userData.name,
             username: userData.username || email.split('@')[0],
           },
+          emailRedirectTo: `${window.location.origin}/auth/callback`,
         }
       });
       
       if (error) {
         toast.error(error.message);
         return { error, data: null };
+      }
+      
+      // Log signup success
+      console.log('Signup successful:', data);
+      
+      // Verify if user is in the database by checking profiles
+      if (data.user) {
+        setTimeout(async () => {
+          const { data: profile, error: profileError } = await supabase
+            .from('profiles')
+            .select('*')
+            .eq('id', data.user?.id)
+            .single();
+          
+          if (profileError || !profile) {
+            console.warn('Profile not created automatically, attempting manual creation');
+            // Attempt to manually create profile if trigger didn't work
+            const { error: insertError } = await supabase
+              .from('profiles')
+              .insert([{
+                id: data.user?.id,
+                full_name: userData.name,
+                username: userData.username || email.split('@')[0],
+              }]);
+              
+            if (insertError) {
+              console.error('Error creating profile manually:', insertError);
+            } else {
+              console.log('Profile created manually');
+            }
+          } else {
+            console.log('Profile created automatically:', profile);
+          }
+        }, 1000); // Give the trigger a moment to run
       }
       
       toast.success('Account created successfully!');
