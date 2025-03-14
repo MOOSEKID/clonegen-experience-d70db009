@@ -25,7 +25,7 @@ export const useTrainerFiltering = (trainers: TrainerProfile[]): [
     { activeTab },
     { 
       setActiveTab,
-      getSelectedTrainer: () => getSelectedTrainer(null) // This will be properly connected in the main hook
+      getSelectedTrainer: (selectedTrainerId: string | null = null) => getSelectedTrainer(selectedTrainerId)
     },
     filteredTrainers
   ];

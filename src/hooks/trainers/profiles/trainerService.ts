@@ -1,181 +1,163 @@
 
-import { supabase } from '@/integrations/supabase/client';
 import { TrainerProfile, TrainerCertification, TrainerAvailability } from './types';
+import { supabase } from '@/integrations/supabase/client';
 import { getMockTrainers } from './mockData';
 
 export const fetchTrainers = async (): Promise<TrainerProfile[]> => {
   try {
+    // First attempt to get trainers from the database
     const { data: trainersData, error: trainersError } = await supabase
       .from('trainers')
-      .select('*')
-      .order('name');
-      
+      .select('*');
+
     if (trainersError) throw trainersError;
-    
-    if (trainersData) {
-      const processedTrainers = await Promise.all(
-        trainersData.map(async (trainer) => {
-          const { data: certifications, error: certError } = await supabase
-            .from('trainer_certifications')
-            .select('*')
-            .eq('trainer_id', trainer.id);
-            
-          if (certError) console.error('Error fetching certifications:', certError);
-          
-          const { data: availability, error: availError } = await supabase
-            .from('trainer_availability')
-            .select('*')
-            .eq('trainer_id', trainer.id);
-            
-          if (availError) console.error('Error fetching availability:', availError);
-          
-          const profile_picture = trainer.profile_picture || trainer.profilepicture || null;
-          const hire_date = trainer.hire_date || trainer.hiredate || new Date().toISOString().split('T')[0];
-            
-          return {
-            ...trainer,
-            profile_picture,
-            hire_date,
-            certifications: certifications || [],
-            availability: availability || [],
-            experience_years: trainer.experience_years || null,
-            experience_level: trainer.experience_level || null
-          } as TrainerProfile;
-        })
-      );
-      
-      return processedTrainers;
-    } else {
+
+    // If no trainers found in the database, return mock data
+    if (!trainersData || trainersData.length === 0) {
+      console.log('No trainers found in database, returning mock data');
       return getMockTrainers();
     }
-  } catch (err) {
-    console.error('Error fetching trainers:', err);
+
+    // For each trainer, fetch their certifications
+    const trainersWithCerts = await Promise.all(
+      trainersData.map(async (trainer) => {
+        const { data: certifications, error: certError } = await supabase
+          .from('trainer_certifications')
+          .select('*')
+          .eq('trainer_id', trainer.id);
+
+        if (certError) {
+          console.error('Error fetching certifications:', certError);
+          return { ...trainer, certifications: [] };
+        }
+
+        // Fetch availability
+        const { data: availability, error: availError } = await supabase
+          .from('trainer_availability')
+          .select('*')
+          .eq('trainer_id', trainer.id);
+
+        if (availError) {
+          console.error('Error fetching availability:', availError);
+          return { ...trainer, certifications: certifications || [], availability: [] };
+        }
+
+        return {
+          ...trainer,
+          certifications: certifications || [],
+          availability: availability || []
+        };
+      })
+    );
+
+    return trainersWithCerts;
+  } catch (error) {
+    console.error('Error in fetchTrainers:', error);
+    // Return mock data if there's an error
     return getMockTrainers();
   }
 };
 
-export const addTrainer = async (trainer: Omit<TrainerProfile, 'id' | 'certifications' | 'availability'>) => {
+export const addTrainer = async (trainer: Omit<TrainerProfile, 'id' | 'certifications' | 'availability'>): Promise<TrainerProfile> => {
   try {
     const { data, error } = await supabase
       .from('trainers')
-      .insert({
-        name: trainer.name,
-        email: trainer.email,
-        phone: trainer.phone || null,
-        bio: trainer.bio || null,
-        profile_picture: trainer.profile_picture || null,
-        specialization: trainer.specialization || [],
-        status: trainer.status || 'Active',
-        hire_date: trainer.hire_date || new Date().toISOString().split('T')[0],
-        experience_years: trainer.experience_years || null,
-        experience_level: trainer.experience_level || null
-      })
+      .insert([trainer])
       .select()
       .single();
-      
+
     if (error) throw error;
     
-    return data;
-  } catch (err) {
-    console.error('Error adding trainer:', err);
-    throw err;
+    return { ...data, certifications: [], availability: [] };
+  } catch (error) {
+    console.error('Error adding trainer:', error);
+    throw error;
   }
 };
 
-export const updateTrainer = async (id: string, updates: Partial<Omit<TrainerProfile, 'id' | 'certifications' | 'availability'>>) => {
+export const updateTrainer = async (id: string, updates: Partial<Omit<TrainerProfile, 'id' | 'certifications' | 'availability'>>): Promise<void> => {
   try {
     const { error } = await supabase
       .from('trainers')
       .update(updates)
       .eq('id', id);
-      
+
     if (error) throw error;
-    
-    return true;
-  } catch (err) {
-    console.error('Error updating trainer:', err);
-    throw err;
+  } catch (error) {
+    console.error('Error updating trainer:', error);
+    throw error;
   }
 };
 
-export const deleteTrainer = async (id: string) => {
+export const deleteTrainer = async (id: string): Promise<void> => {
   try {
+    // First delete related certifications and availability
+    await supabase.from('trainer_certifications').delete().eq('trainer_id', id);
+    await supabase.from('trainer_availability').delete().eq('trainer_id', id);
+    
+    // Then delete the trainer
     const { error } = await supabase
       .from('trainers')
       .delete()
       .eq('id', id);
-      
+
     if (error) throw error;
-    
-    return true;
-  } catch (err) {
-    console.error('Error deleting trainer:', err);
-    throw err;
+  } catch (error) {
+    console.error('Error deleting trainer:', error);
+    throw error;
   }
 };
 
-export const addCertification = async (certification: Omit<TrainerCertification, 'id'>) => {
+export const addCertification = async (certification: Omit<TrainerCertification, 'id'>): Promise<void> => {
   try {
-    const { data, error } = await supabase
+    const { error } = await supabase
       .from('trainer_certifications')
-      .insert(certification)
-      .select()
-      .single();
-      
+      .insert([certification]);
+
     if (error) throw error;
-    
-    return data;
-  } catch (err) {
-    console.error('Error adding certification:', err);
-    throw err;
+  } catch (error) {
+    console.error('Error adding certification:', error);
+    throw error;
   }
 };
 
-export const deleteCertification = async (id: string) => {
+export const deleteCertification = async (id: string): Promise<void> => {
   try {
     const { error } = await supabase
       .from('trainer_certifications')
       .delete()
       .eq('id', id);
-      
+
     if (error) throw error;
-    
-    return true;
-  } catch (err) {
-    console.error('Error deleting certification:', err);
-    throw err;
+  } catch (error) {
+    console.error('Error deleting certification:', error);
+    throw error;
   }
 };
 
-export const addAvailability = async (availability: Omit<TrainerAvailability, 'id'>) => {
+export const addAvailability = async (availability: Omit<TrainerAvailability, 'id'>): Promise<void> => {
   try {
-    const { data, error } = await supabase
+    const { error } = await supabase
       .from('trainer_availability')
-      .insert(availability)
-      .select()
-      .single();
-      
+      .insert([availability]);
+
     if (error) throw error;
-    
-    return data;
-  } catch (err) {
-    console.error('Error adding availability:', err);
-    throw err;
+  } catch (error) {
+    console.error('Error adding availability:', error);
+    throw error;
   }
 };
 
-export const deleteAvailability = async (id: string) => {
+export const deleteAvailability = async (id: string): Promise<void> => {
   try {
     const { error } = await supabase
       .from('trainer_availability')
       .delete()
       .eq('id', id);
-      
+
     if (error) throw error;
-    
-    return true;
-  } catch (err) {
-    console.error('Error deleting availability:', err);
-    throw err;
+  } catch (error) {
+    console.error('Error deleting availability:', error);
+    throw error;
   }
 };

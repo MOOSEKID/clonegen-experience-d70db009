@@ -30,45 +30,45 @@ export function useTrainerProfilesState() {
   // Trainer filtering
   const [
     { activeTab },
-    { setActiveTab },
+    { setActiveTab, getSelectedTrainer },
     filteredTrainers
   ] = useTrainerFiltering(trainers);
 
-  // Get the selected trainer data
-  const getSelectedTrainer = () => {
-    return trainers.find((trainer) => trainer.id === selectedTrainer) || null;
-  };
-
   // Form submission actions
   const {
-    handleAddTrainerSubmit,
-    handleUpdateTrainerSubmit,
+    handleAddTrainerSubmit: baseAddTrainerSubmit,
+    handleUpdateTrainerSubmit: baseUpdateTrainerSubmit,
     handleDeleteTrainerSubmit,
-    handleAddCertificationSubmit,
+    handleAddCertificationSubmit: baseAddCertificationSubmit,
     handleDeleteCertificationSubmit,
-    handleAddAvailabilitySubmit,
+    handleAddAvailabilitySubmit: baseAddAvailabilitySubmit,
     handleDeleteAvailabilitySubmit,
   } = useTrainerSubmitActions();
 
   // Dialog submission handlers with dialog closing
-  const handleAddTrainerWithClose = async (data: any) => {
-    await handleAddTrainerSubmit(data);
+  const handleAddTrainerSubmit = async (data: any): Promise<void> => {
+    await baseAddTrainerSubmit(data);
     setIsAddDialogOpen(false);
   };
 
-  const handleUpdateTrainerWithClose = async (id: string, data: any) => {
-    await handleUpdateTrainerSubmit(id, data);
+  const handleUpdateTrainerSubmit = async (id: string, data: any): Promise<void> => {
+    await baseUpdateTrainerSubmit(id, data);
     setIsEditDialogOpen(false);
   };
 
-  const handleAddCertificationWithClose = async (data: any) => {
-    await handleAddCertificationSubmit(data);
+  const handleAddCertificationSubmit = async (data: any): Promise<void> => {
+    await baseAddCertificationSubmit(data);
     setIsCertDialogOpen(false);
   };
 
-  const handleAddAvailabilityWithClose = async (data: any) => {
-    await handleAddAvailabilitySubmit(data);
+  const handleAddAvailabilitySubmit = async (data: any): Promise<void> => {
+    await baseAddAvailabilitySubmit(data);
     setIsAvailDialogOpen(false);
+  };
+
+  // Custom getSelectedTrainer implementation that uses the selectedTrainer state
+  const getSelectedTrainerData = () => {
+    return trainers.find((trainer) => trainer.id === selectedTrainer) || null;
   };
 
   return {
@@ -93,7 +93,7 @@ export function useTrainerProfilesState() {
     setActiveTab,
     
     // Helper methods
-    getSelectedTrainer,
+    getSelectedTrainer: getSelectedTrainerData,
     
     // Action handlers
     handleAddTrainer,
@@ -102,12 +102,12 @@ export function useTrainerProfilesState() {
     handleAddAvailability,
     
     // Submission handlers with dialog closing
-    handleAddTrainerSubmit: handleAddTrainerWithClose,
-    handleUpdateTrainerSubmit: handleUpdateTrainerWithClose,
+    handleAddTrainerSubmit,
+    handleUpdateTrainerSubmit,
     handleDeleteTrainerSubmit,
-    handleAddCertificationSubmit: handleAddCertificationWithClose,
+    handleAddCertificationSubmit,
     handleDeleteCertificationSubmit,
-    handleAddAvailabilitySubmit: handleAddAvailabilityWithClose,
+    handleAddAvailabilitySubmit,
     handleDeleteAvailabilitySubmit,
   };
 }

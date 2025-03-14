@@ -1,7 +1,8 @@
 
 import { useTrainerProfiles } from '@/hooks/trainers/useTrainerProfiles';
+import { TrainerSubmitActions } from './types';
 
-export const useTrainerSubmitActions = () => {
+export const useTrainerSubmitActions = (): TrainerSubmitActions => {
   const {
     addTrainer,
     updateTrainer,
@@ -12,39 +13,32 @@ export const useTrainerSubmitActions = () => {
     deleteAvailability,
   } = useTrainerProfiles();
 
-  const handleAddTrainerSubmit = async (data: any) => {
+  const handleAddTrainerSubmit = async (data: any): Promise<void> => {
     await addTrainer(data);
-    return true;
   };
 
-  const handleUpdateTrainerSubmit = async (id: string, data: any) => {
+  const handleUpdateTrainerSubmit = async (id: string, data: any): Promise<void> => {
     await updateTrainer(id, data);
-    return true;
   };
 
-  const handleDeleteTrainerSubmit = async (id: string) => {
+  const handleDeleteTrainerSubmit = async (id: string): Promise<void> => {
     await deleteTrainer(id);
-    return true;
   };
 
-  const handleAddCertificationSubmit = async (data: any) => {
+  const handleAddCertificationSubmit = async (data: any): Promise<void> => {
     await addCertification(data);
-    return true;
   };
 
-  const handleDeleteCertificationSubmit = async (id: string) => {
+  const handleDeleteCertificationSubmit = async (id: string): Promise<void> => {
     await deleteCertification(id);
-    return true;
   };
 
-  const handleAddAvailabilitySubmit = async (data: any) => {
+  const handleAddAvailabilitySubmit = async (data: any): Promise<void> => {
     await addAvailability(data);
-    return true;
   };
 
-  const handleDeleteAvailabilitySubmit = async (id: string) => {
+  const handleDeleteAvailabilitySubmit = async (id: string): Promise<void> => {
     await deleteAvailability(id);
-    return true;
   };
 
   return {

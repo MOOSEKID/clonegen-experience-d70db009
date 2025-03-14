@@ -23,3 +23,14 @@ export interface TrainerProfilesActions {
   handleAddAvailability: (trainerId: string) => void;
   getSelectedTrainer: () => TrainerProfile | null;
 }
+
+// Adding consistent return types for submission handlers
+export interface TrainerSubmitActions {
+  handleAddTrainerSubmit: (data: any) => Promise<void>;
+  handleUpdateTrainerSubmit: (id: string, data: any) => Promise<void>;
+  handleDeleteTrainerSubmit: (id: string) => Promise<void>;
+  handleAddCertificationSubmit: (data: any) => Promise<void>;
+  handleDeleteCertificationSubmit: (id: string) => Promise<void>;
+  handleAddAvailabilitySubmit: (data: any) => Promise<void>;
+  handleDeleteAvailabilitySubmit: (id: string) => Promise<void>;
+}
