@@ -1,18 +1,14 @@
 
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { toast } from 'sonner';
 
-export interface TrainerPerformanceMetrics {
-  id: string;
-  trainer_id: string;
-  month: string;
-  classes_conducted: number;
-  attendance_rate: number;
-  client_retention_rate: number;
-  average_rating: number;
-  created_at: string;
-  updated_at: string;
+export interface PerformanceMetrics {
+  averageRating: number;
+  totalClasses: number;
+  averageAttendance: number;
+  clientRetentionRate: number;
+  monthlySessions: { month: string; count: number }[];
+  completionRate: number;
 }
 
 export interface ClassAttendance {
@@ -24,72 +20,101 @@ export interface ClassAttendance {
 }
 
 export const useTrainerPerformance = (trainerId?: string) => {
-  const [performanceMetrics, setPerformanceMetrics] = useState<TrainerPerformanceMetrics[]>([]);
+  const [performanceMetrics, setPerformanceMetrics] = useState<PerformanceMetrics>({
+    averageRating: 0,
+    totalClasses: 0,
+    averageAttendance: 0,
+    clientRetentionRate: 0,
+    monthlySessions: [],
+    completionRate: 0
+  });
+  
   const [classAttendance, setClassAttendance] = useState<ClassAttendance[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
-
+  
   useEffect(() => {
     const fetchPerformanceData = async () => {
-      if (!trainerId) return;
+      if (!trainerId) {
+        setIsLoading(false);
+        return;
+      }
       
       setIsLoading(true);
+      
       try {
-        // Fetch performance metrics
-        const { data: metricsData, error: metricsError } = await supabase
-          .from('trainer_performance_metrics')
-          .select('*')
-          .eq('trainer_id', trainerId)
-          .order('month', { ascending: false });
+        // In a real app, we would fetch this data from Supabase
+        // Here we'll create mock data
         
-        if (metricsError) throw metricsError;
-        setPerformanceMetrics(metricsData || []);
+        // Mock performance metrics
+        const mockMetrics: PerformanceMetrics = {
+          averageRating: 4.3,
+          totalClasses: 156,
+          averageAttendance: 85,
+          clientRetentionRate: 78,
+          monthlySessions: [
+            { month: 'Jan', count: 18 },
+            { month: 'Feb', count: 20 },
+            { month: 'Mar', count: 22 },
+            { month: 'Apr', count: 19 },
+            { month: 'May', count: 24 },
+            { month: 'Jun', count: 28 }
+          ],
+          completionRate: 95
+        };
         
-        // Fetch class attendance data
-        // This is a simplified query - in a real app you would calculate attendance from enrollment records
-        const { data: classesData, error: classesError } = await supabase
-          .from('classes')
-          .select(`
-            id,
-            name,
-            day,
-            time,
-            capacity,
-            class_enrollments(*)
-          `)
-          .eq('trainer_id', trainerId)
-          .limit(10);
+        // Mock attendance records
+        const mockAttendance: ClassAttendance[] = [
+          {
+            class_name: 'Morning HIIT',
+            class_date: 'Mon, June 10',
+            enrolled_count: 12,
+            attended_count: 10,
+            attendance_rate: 83
+          },
+          {
+            class_name: 'Power Yoga',
+            class_date: 'Wed, June 12',
+            enrolled_count: 15,
+            attended_count: 14,
+            attendance_rate: 93
+          },
+          {
+            class_name: 'Kickboxing',
+            class_date: 'Fri, June 14',
+            enrolled_count: 10,
+            attended_count: 7,
+            attendance_rate: 70
+          },
+          {
+            class_name: 'Core Strength',
+            class_date: 'Mon, June 17',
+            enrolled_count: 8,
+            attended_count: 8,
+            attendance_rate: 100
+          },
+          {
+            class_name: 'Spin Class',
+            class_date: 'Wed, June 19',
+            enrolled_count: 18,
+            attended_count: 12,
+            attendance_rate: 67
+          }
+        ];
         
-        if (classesError) throw classesError;
-        
-        // Transform class data into attendance metrics
-        const attendanceData = (classesData || []).map(classItem => {
-          const enrolledCount = classItem.class_enrollments?.length || 0;
-          const attendedCount = Math.floor(Math.random() * (enrolledCount + 1)); // Mock data for demo
-          const attendanceRate = enrolledCount > 0 ? (attendedCount / enrolledCount) * 100 : 0;
-          
-          return {
-            class_name: classItem.name,
-            class_date: `${classItem.day} ${classItem.time}`,
-            enrolled_count: enrolledCount,
-            attended_count: attendedCount,
-            attendance_rate: attendanceRate
-          };
-        });
-        
-        setClassAttendance(attendanceData);
+        setPerformanceMetrics(mockMetrics);
+        setClassAttendance(mockAttendance);
       } catch (err) {
-        console.error('Error fetching performance data:', err);
-        setError(err instanceof Error ? err : new Error('Failed to fetch performance data'));
-        toast.error('Failed to load performance data');
+        console.error('Error fetching trainer performance:', err);
+        setError(err instanceof Error ? err : new Error('Failed to fetch trainer performance data'));
       } finally {
         setIsLoading(false);
       }
     };
-
+    
     fetchPerformanceData();
   }, [trainerId]);
-
+  
   return {
     performanceMetrics,
     classAttendance,

@@ -1,91 +1,66 @@
 
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { StarRating } from "./StarRating";
-import { Progress } from "@/components/ui/progress";
-import { TrainerRating } from "@/hooks/trainers/useTrainerRatings";
-import { Skeleton } from "@/components/ui/skeleton";
+import { StarRating } from './StarRating';
+import { Progress } from '@/components/ui/progress';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { RatingSummary } from '@/hooks/trainers/useTrainerRatings';
 
 interface RatingsSummaryProps {
-  ratings: TrainerRating[];
-  averageRating: number;
-  isLoading: boolean;
+  trainerName: string;
+  summary: RatingSummary;
 }
 
-const RatingsSummary = ({ ratings, averageRating, isLoading }: RatingsSummaryProps) => {
-  const calculateRatingDistribution = () => {
-    if (ratings.length === 0) {
-      return Array(5).fill(0);
-    }
-
-    const distribution = [0, 0, 0, 0, 0];
-    
-    ratings.forEach(rating => {
-      // Ratings are 1-5, array is 0-4
-      distribution[rating.rating - 1]++;
-    });
-    
-    return distribution.map(count => {
-      const percentage = ratings.length > 0 
-        ? (count / ratings.length) * 100 
-        : 0;
-      return percentage;
-    }).reverse(); // Reverse to show 5-star first
+const RatingsSummary = ({ trainerName, summary }: RatingsSummaryProps) => {
+  const { averageRating, totalRatings, ratingDistribution } = summary;
+  
+  // Calculate percentages for each star rating
+  const getPercentage = (count: number) => {
+    if (totalRatings === 0) return 0;
+    return (count / totalRatings) * 100;
   };
-
-  const distribution = calculateRatingDistribution();
-
+  
+  // Format the distribution
+  const formattedDistribution = Object.entries(ratingDistribution)
+    .map(([rating, count]) => ({
+      rating: Number(rating),
+      count,
+      percentage: getPercentage(count)
+    }))
+    .sort((a, b) => b.rating - a.rating); // Sort in descending order (5 stars first)
+  
   return (
     <Card>
-      <CardHeader>
-        <CardTitle>Ratings Overview</CardTitle>
+      <CardHeader className="pb-2">
+        <CardTitle className="text-lg">{trainerName}'s Ratings Summary</CardTitle>
       </CardHeader>
       <CardContent>
-        {isLoading ? (
-          <div className="space-y-4">
-            <div className="flex flex-col items-center">
-              <Skeleton className="h-8 w-20" />
-              <Skeleton className="h-6 w-32 mt-2" />
+        <div className="flex flex-col md:flex-row justify-between gap-6">
+          {/* Average rating and count */}
+          <div className="text-center md:text-left flex-shrink-0">
+            <div className="text-4xl font-bold mb-1">
+              {averageRating > 0 ? averageRating.toFixed(1) : '—'}
             </div>
-            <div className="space-y-2 mt-4">
-              {[...Array(5)].map((_, i) => (
-                <div key={i} className="flex items-center gap-2">
-                  <Skeleton className="h-4 w-16" />
-                  <Skeleton className="h-4 w-full" />
-                  <Skeleton className="h-4 w-8" />
-                </div>
-              ))}
+            <div className="mb-2">
+              <StarRating rating={averageRating} size={24} />
+            </div>
+            <div className="text-sm text-gray-500">
+              Based on {totalRatings} {totalRatings === 1 ? 'rating' : 'ratings'}
             </div>
           </div>
-        ) : (
-          <>
-            <div className="flex flex-col items-center">
-              <div className="text-4xl font-bold">
-                {averageRating.toFixed(1)}
+          
+          {/* Rating distribution */}
+          <div className="flex-grow space-y-3">
+            {formattedDistribution.map(({ rating, count, percentage }) => (
+              <div key={rating} className="flex items-center gap-3">
+                <div className="flex items-center w-14 gap-1 text-sm">
+                  <span>{rating}</span>
+                  <span className="text-yellow-400">★</span>
+                </div>
+                <Progress value={percentage} className="h-2 flex-grow" />
+                <div className="text-sm text-gray-500 w-12 text-right">{count}</div>
               </div>
-              <div className="flex items-center mt-1">
-                <StarRating rating={averageRating} size={20} />
-                <span className="text-sm text-gray-500 ml-2">
-                  ({ratings.length} {ratings.length === 1 ? 'review' : 'reviews'})
-                </span>
-              </div>
-            </div>
-            
-            <div className="space-y-2 mt-6">
-              {distribution.map((percentage, i) => {
-                // Convert index to rating (5-star to 1-star)
-                const currentRating = 5 - i;
-                
-                return (
-                  <div key={i} className="flex items-center gap-2">
-                    <div className="w-12 text-right">{currentRating} stars</div>
-                    <Progress value={percentage} className="h-2 flex-1" />
-                    <div className="w-8 text-xs text-gray-500">{Math.round(percentage)}%</div>
-                  </div>
-                );
-              })}
-            </div>
-          </>
-        )}
+            ))}
+          </div>
+        </div>
       </CardContent>
     </Card>
   );

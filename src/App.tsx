@@ -37,6 +37,11 @@ import AdminReports from "./pages/admin/Reports";
 import AdminSettings from "./pages/admin/Settings";
 import AdminSupport from "./pages/admin/Support";
 
+// Import trainer subpages
+import TrainerProfiles from "./pages/admin/trainers/TrainerProfiles";
+import PerformanceTracking from "./pages/admin/trainers/PerformanceTracking";
+import TrainerRatings from "./pages/admin/trainers/TrainerRatings";
+
 // Customer Dashboard imports
 import DashboardLayout from "./pages/dashboard/DashboardLayout";
 import Dashboard from "./pages/dashboard/Dashboard";
@@ -97,6 +102,9 @@ const App = () => {
               <Route path="members" element={<AdminMembers />} />
               <Route path="classes" element={<AdminClasses />} />
               <Route path="trainers" element={<AdminTrainers />} />
+              <Route path="trainers/profiles" element={<TrainerProfiles />} />
+              <Route path="trainers/performance" element={<PerformanceTracking />} />
+              <Route path="trainers/ratings" element={<TrainerRatings />} />
               <Route path="payments" element={<AdminPayments />} />
               <Route path="workouts" element={<AdminWorkouts />} />
               <Route path="shop" element={<AdminShop />} />

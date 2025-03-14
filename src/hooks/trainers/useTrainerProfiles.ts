@@ -1,20 +1,20 @@
 
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { toast } from 'sonner';
+import { useToast } from '@/components/ui/use-toast';
 
 export interface TrainerProfile {
   id: string;
   name: string;
   email: string;
-  phone?: string | null;
-  specialization?: string[] | null;
-  bio?: string | null;
-  profilepicture?: string | null;
-  status?: string | null;
-  hiredate?: string | null;
-  certifications?: TrainerCertification[];
-  availability?: TrainerAvailability[];
+  phone?: string;
+  bio?: string;
+  profile_image?: string;
+  specialization: string[];
+  status?: string;
+  hire_date?: string;
+  certifications: TrainerCertification[];
+  availability: TrainerAvailability[];
 }
 
 export interface TrainerCertification {
@@ -22,8 +22,8 @@ export interface TrainerCertification {
   trainer_id: string;
   certification_name: string;
   issuing_organization: string;
-  issue_date?: string | null;
-  expiry_date?: string | null;
+  issue_date?: string;
+  expiry_date?: string;
 }
 
 export interface TrainerAvailability {
@@ -38,193 +38,289 @@ export const useTrainerProfiles = () => {
   const [trainers, setTrainers] = useState<TrainerProfile[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
-
+  const { toast } = useToast();
+  
   useEffect(() => {
     const fetchTrainers = async () => {
       setIsLoading(true);
+      
       try {
-        const { data, error } = await supabase
+        // Fetch trainers with certifications and availability
+        const { data: trainersData, error: trainersError } = await supabase
           .from('trainers')
           .select('*')
           .order('name');
+          
+        if (trainersError) throw trainersError;
         
-        if (error) throw error;
-        
-        // Fetch certifications for each trainer
-        const trainersWithCertifications = await Promise.all(
-          (data || []).map(async (trainer) => {
-            const { data: certifications } = await supabase
-              .from('trainer_certifications')
-              .select('*')
-              .eq('trainer_id', trainer.id)
-              .order('certification_name');
+        if (trainersData) {
+          // Fetch certifications for all trainers
+          const { data: certificationsData, error: certError } = await supabase
+            .from('trainer_certifications')
+            .select('*');
             
-            const { data: availability } = await supabase
-              .from('trainer_availability')
-              .select('*')
-              .eq('trainer_id', trainer.id)
-              .order('day_of_week');
+          if (certError) throw certError;
+          
+          // Fetch availability for all trainers
+          const { data: availabilityData, error: availError } = await supabase
+            .from('trainer_availability')
+            .select('*');
             
+          if (availError) throw availError;
+          
+          // Combine the data
+          const processedTrainers = trainersData.map(trainer => {
+            const trainerCertifications = certificationsData
+              ? certificationsData.filter(cert => cert.trainer_id === trainer.id)
+              : [];
+              
+            const trainerAvailability = availabilityData
+              ? availabilityData.filter(avail => avail.trainer_id === trainer.id)
+              : [];
+              
             return {
               ...trainer,
-              certifications: certifications || [],
-              availability: availability || []
+              certifications: trainerCertifications,
+              availability: trainerAvailability
             };
-          })
-        );
-        
-        setTrainers(trainersWithCertifications);
+          });
+          
+          setTrainers(processedTrainers);
+        } else {
+          // Fallback to mock data
+          setTrainers(getMockTrainers());
+        }
       } catch (err) {
         console.error('Error fetching trainers:', err);
         setError(err instanceof Error ? err : new Error('Failed to fetch trainers'));
-        toast.error('Failed to load trainers');
+        
+        // Fallback to mock data
+        setTrainers(getMockTrainers());
       } finally {
         setIsLoading(false);
       }
     };
-
+    
     fetchTrainers();
-
-    // Set up real-time listener for trainer changes
-    const channel = supabase
-      .channel('schema-db-changes')
-      .on(
-        'postgres_changes',
-        {
-          event: '*',
-          schema: 'public',
+    
+    // Set up real-time subscription
+    const subscription = supabase
+      .channel('public:trainers')
+      .on('postgres_changes', { 
+          event: '*', 
+          schema: 'public', 
           table: 'trainers'
-        },
-        () => {
-          fetchTrainers();
-        }
-      )
+      }, () => {
+        fetchTrainers();
+      })
       .subscribe();
-
+      
     return () => {
-      supabase.removeChannel(channel);
+      subscription.unsubscribe();
     };
   }, []);
-
+  
+  // Add a new trainer
   const addTrainer = async (trainer: Omit<TrainerProfile, 'id' | 'certifications' | 'availability'>) => {
     try {
       const { data, error } = await supabase
         .from('trainers')
-        .insert(trainer)
+        .insert({
+          name: trainer.name,
+          email: trainer.email,
+          phone: trainer.phone || null,
+          bio: trainer.bio || null,
+          profile_image: trainer.profile_image || null,
+          specialization: trainer.specialization || [],
+          status: trainer.status || 'Active',
+          hire_date: trainer.hire_date || new Date().toISOString()
+        })
         .select()
         .single();
-      
+        
       if (error) throw error;
       
-      toast.success('Trainer added successfully');
+      toast({
+        title: "Trainer added",
+        description: `${trainer.name} has been added successfully.`
+      });
+      
       return data;
     } catch (err) {
       console.error('Error adding trainer:', err);
-      toast.error('Failed to add trainer');
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Failed to add trainer. Please try again."
+      });
       throw err;
     }
   };
-
-  const updateTrainer = async (id: string, updates: Partial<Omit<TrainerProfile, 'id' | 'certifications' | 'availability'>>) => {
+  
+  // Update a trainer
+  const updateTrainer = async (id: string, updates: Partial<Omit<TrainerProfile, 'certifications' | 'availability'>>) => {
     try {
       const { error } = await supabase
         .from('trainers')
         .update(updates)
         .eq('id', id);
-      
+        
       if (error) throw error;
       
-      toast.success('Trainer updated successfully');
+      toast({
+        title: "Trainer updated",
+        description: "Trainer profile has been updated successfully."
+      });
+      
+      return true;
     } catch (err) {
       console.error('Error updating trainer:', err);
-      toast.error('Failed to update trainer');
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Failed to update trainer. Please try again."
+      });
       throw err;
     }
   };
-
+  
+  // Delete a trainer
   const deleteTrainer = async (id: string) => {
     try {
       const { error } = await supabase
         .from('trainers')
         .delete()
         .eq('id', id);
-      
+        
       if (error) throw error;
       
-      toast.success('Trainer deleted successfully');
+      toast({
+        title: "Trainer deleted",
+        description: "Trainer has been removed successfully."
+      });
+      
+      return true;
     } catch (err) {
       console.error('Error deleting trainer:', err);
-      toast.error('Failed to delete trainer');
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Failed to delete trainer. Please try again."
+      });
       throw err;
     }
   };
-
+  
+  // Add a certification
   const addCertification = async (certification: Omit<TrainerCertification, 'id'>) => {
     try {
-      const { error } = await supabase
+      const { data, error } = await supabase
         .from('trainer_certifications')
-        .insert(certification);
-      
+        .insert(certification)
+        .select()
+        .single();
+        
       if (error) throw error;
       
-      toast.success('Certification added successfully');
+      toast({
+        title: "Certification added",
+        description: "Certification has been added successfully."
+      });
+      
+      return data;
     } catch (err) {
       console.error('Error adding certification:', err);
-      toast.error('Failed to add certification');
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Failed to add certification. Please try again."
+      });
       throw err;
     }
   };
-
+  
+  // Delete a certification
   const deleteCertification = async (id: string) => {
     try {
       const { error } = await supabase
         .from('trainer_certifications')
         .delete()
         .eq('id', id);
-      
+        
       if (error) throw error;
       
-      toast.success('Certification removed successfully');
+      toast({
+        title: "Certification deleted",
+        description: "Certification has been removed successfully."
+      });
+      
+      return true;
     } catch (err) {
       console.error('Error deleting certification:', err);
-      toast.error('Failed to remove certification');
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Failed to delete certification. Please try again."
+      });
       throw err;
     }
   };
-
+  
+  // Add availability
   const addAvailability = async (availability: Omit<TrainerAvailability, 'id'>) => {
     try {
-      const { error } = await supabase
+      const { data, error } = await supabase
         .from('trainer_availability')
-        .insert(availability);
-      
+        .insert(availability)
+        .select()
+        .single();
+        
       if (error) throw error;
       
-      toast.success('Availability added successfully');
+      toast({
+        title: "Availability added",
+        description: "Availability has been added successfully."
+      });
+      
+      return data;
     } catch (err) {
       console.error('Error adding availability:', err);
-      toast.error('Failed to add availability');
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Failed to add availability. Please try again."
+      });
       throw err;
     }
   };
-
+  
+  // Delete availability
   const deleteAvailability = async (id: string) => {
     try {
       const { error } = await supabase
         .from('trainer_availability')
         .delete()
         .eq('id', id);
-      
+        
       if (error) throw error;
       
-      toast.success('Availability removed successfully');
+      toast({
+        title: "Availability deleted",
+        description: "Availability has been removed successfully."
+      });
+      
+      return true;
     } catch (err) {
       console.error('Error deleting availability:', err);
-      toast.error('Failed to remove availability');
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Failed to delete availability. Please try again."
+      });
       throw err;
     }
   };
-
+  
   return {
     trainers,
     isLoading,
@@ -237,4 +333,156 @@ export const useTrainerProfiles = () => {
     addAvailability,
     deleteAvailability
   };
+};
+
+// Mock data generator
+const getMockTrainers = (): TrainerProfile[] => {
+  const mockTrainers = [
+    {
+      id: "1",
+      name: "John Doe",
+      email: "john.doe@uptowngym.com",
+      phone: "+1234567890",
+      bio: "Certified personal trainer with 5+ years of experience in strength training and weight loss.",
+      specialization: ["Strength Training", "Weight Loss"],
+      status: "Active",
+      hire_date: "2022-01-15",
+      certifications: [
+        {
+          id: "cert1",
+          trainer_id: "1",
+          certification_name: "NASM Certified Personal Trainer",
+          issuing_organization: "National Academy of Sports Medicine",
+          issue_date: "2020-05-20",
+          expiry_date: "2024-05-20"
+        },
+        {
+          id: "cert2",
+          trainer_id: "1",
+          certification_name: "First Aid & CPR",
+          issuing_organization: "Red Cross",
+          issue_date: "2023-01-10",
+          expiry_date: "2025-01-10"
+        }
+      ],
+      availability: [
+        {
+          id: "avail1",
+          trainer_id: "1",
+          day_of_week: "Monday",
+          start_time: "09:00",
+          end_time: "17:00"
+        },
+        {
+          id: "avail2",
+          trainer_id: "1",
+          day_of_week: "Wednesday",
+          start_time: "09:00",
+          end_time: "17:00"
+        },
+        {
+          id: "avail3",
+          trainer_id: "1",
+          day_of_week: "Friday",
+          start_time: "09:00",
+          end_time: "17:00"
+        }
+      ]
+    },
+    {
+      id: "2",
+      name: "Jane Smith",
+      email: "jane.smith@uptowngym.com",
+      phone: "+1987654321",
+      bio: "Yoga instructor and mindfulness coach with expertise in Hatha and Vinyasa styles.",
+      specialization: ["Yoga", "Pilates", "Meditation"],
+      status: "Active",
+      hire_date: "2022-03-10",
+      certifications: [
+        {
+          id: "cert3",
+          trainer_id: "2",
+          certification_name: "RYT 200-Hour Yoga Teacher",
+          issuing_organization: "Yoga Alliance",
+          issue_date: "2019-11-15",
+          expiry_date: null
+        }
+      ],
+      availability: [
+        {
+          id: "avail4",
+          trainer_id: "2",
+          day_of_week: "Tuesday",
+          start_time: "08:00",
+          end_time: "14:00"
+        },
+        {
+          id: "avail5",
+          trainer_id: "2",
+          day_of_week: "Thursday",
+          start_time: "08:00",
+          end_time: "14:00"
+        },
+        {
+          id: "avail6",
+          trainer_id: "2",
+          day_of_week: "Saturday",
+          start_time: "10:00",
+          end_time: "15:00"
+        }
+      ]
+    },
+    {
+      id: "3",
+      name: "Mike Johnson",
+      email: "mike.johnson@uptowngym.com",
+      phone: "+1122334455",
+      bio: "Former athlete specializing in sports-specific training and athletic performance.",
+      specialization: ["Sports Performance", "HIIT", "Functional Training"],
+      status: "Active",
+      hire_date: "2022-06-01",
+      certifications: [
+        {
+          id: "cert4",
+          trainer_id: "3",
+          certification_name: "CSCS",
+          issuing_organization: "NSCA",
+          issue_date: "2021-02-28",
+          expiry_date: "2025-02-28"
+        }
+      ],
+      availability: [
+        {
+          id: "avail7",
+          trainer_id: "3",
+          day_of_week: "Monday",
+          start_time: "14:00",
+          end_time: "21:00"
+        },
+        {
+          id: "avail8",
+          trainer_id: "3",
+          day_of_week: "Wednesday",
+          start_time: "14:00",
+          end_time: "21:00"
+        },
+        {
+          id: "avail9",
+          trainer_id: "3",
+          day_of_week: "Friday",
+          start_time: "14:00",
+          end_time: "21:00"
+        },
+        {
+          id: "avail10",
+          trainer_id: "3",
+          day_of_week: "Sunday",
+          start_time: "10:00",
+          end_time: "16:00"
+        }
+      ]
+    }
+  ];
+  
+  return mockTrainers;
 };
