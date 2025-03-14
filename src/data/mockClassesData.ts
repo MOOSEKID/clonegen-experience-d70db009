@@ -23,6 +23,7 @@ export const mockClasses: ClassType[] = [
     classLevel: 'Beginner',
     equipmentRequired: ['yoga_mat'],
     recurrence: true,
+    recurrenceDays: ['Monday', 'Wednesday', 'Friday'],
     classFees: 15,
     feeType: 'per_session'
   },
@@ -46,6 +47,7 @@ export const mockClasses: ClassType[] = [
     classLevel: 'Advanced',
     equipmentRequired: ['dumbbells', 'kettlebells', 'jump_rope'],
     recurrence: true,
+    recurrenceDays: ['Tuesday', 'Thursday'],
     classFees: 20,
     feeType: 'per_session'
   },
@@ -69,6 +71,7 @@ export const mockClasses: ClassType[] = [
     classLevel: 'Intermediate',
     equipmentRequired: ['dumbbells', 'kettlebells'],
     recurrence: true,
+    recurrenceDays: ['Monday', 'Wednesday', 'Friday'],
     classFees: 25,
     feeType: 'per_session'
   },
@@ -92,6 +95,7 @@ export const mockClasses: ClassType[] = [
     classLevel: 'Beginner',
     equipmentRequired: ['none'],
     recurrence: true,
+    recurrenceDays: ['Tuesday', 'Thursday'],
     classFees: 15,
     feeType: 'per_session'
   },
@@ -115,6 +119,7 @@ export const mockClasses: ClassType[] = [
     classLevel: 'Intermediate',
     equipmentRequired: ['yoga_mat', 'resistance_bands'],
     recurrence: false,
+    recurrenceDays: [],
     classFees: 18,
     feeType: 'per_session'
   },
@@ -138,6 +143,7 @@ export const mockClasses: ClassType[] = [
     classLevel: 'Beginner',
     equipmentRequired: ['yoga_mat'],
     recurrence: false,
+    recurrenceDays: [],
     classFees: 15,
     feeType: 'per_session'
   },
@@ -161,6 +167,7 @@ export const mockClasses: ClassType[] = [
     classLevel: 'Advanced',
     equipmentRequired: ['dumbbells', 'kettlebells', 'jump_rope', 'boxing_gloves'],
     recurrence: true,
+    recurrenceDays: ['Monday', 'Wednesday'],
     classFees: 25,
     feeType: 'per_session'
   },
