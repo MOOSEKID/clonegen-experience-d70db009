@@ -11,6 +11,7 @@ export interface ClassType {
   description: string;
   type: 'yoga' | 'hiit' | 'strength' | 'cardio' | 'pilates' | 'other';
   trainer: string;
+  trainerId?: string; // New field to store the trainer ID
   capacity: number;
   enrolled: number;
   enrolledMembers: MemberInfo[];
@@ -20,5 +21,11 @@ export interface ClassType {
   time: string;
   duration: number;
   room: string;
-  status: 'scheduled' | 'canceled' | 'full';
+  status: 'scheduled' | 'canceled' | 'full' | 'open';
+  // New fields
+  classLevel: 'Beginner' | 'Intermediate' | 'Advanced';
+  equipmentRequired: string[];
+  recurrence: boolean;
+  classFees: number | null;
+  feeType: 'per_session' | 'package' | null;
 }

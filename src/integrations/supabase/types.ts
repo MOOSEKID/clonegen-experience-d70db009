@@ -92,12 +92,17 @@ export type Database = {
       classes: {
         Row: {
           capacity: number
+          class_fees: number | null
+          class_level: string | null
           created_at: string | null
           day: string
           description: string | null
           duration: number
+          equipment_required: string[] | null
+          fee_type: string | null
           id: string
           name: string
+          recurrence: boolean | null
           room: string | null
           status: string | null
           time: string
@@ -107,12 +112,17 @@ export type Database = {
         }
         Insert: {
           capacity: number
+          class_fees?: number | null
+          class_level?: string | null
           created_at?: string | null
           day: string
           description?: string | null
           duration: number
+          equipment_required?: string[] | null
+          fee_type?: string | null
           id?: string
           name: string
+          recurrence?: boolean | null
           room?: string | null
           status?: string | null
           time: string
@@ -122,12 +132,17 @@ export type Database = {
         }
         Update: {
           capacity?: number
+          class_fees?: number | null
+          class_level?: string | null
           created_at?: string | null
           day?: string
           description?: string | null
           duration?: number
+          equipment_required?: string[] | null
+          fee_type?: string | null
           id?: string
           name?: string
+          recurrence?: boolean | null
           room?: string | null
           status?: string | null
           time?: string

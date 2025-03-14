@@ -2,250 +2,211 @@
 import { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { Label } from '@/components/ui/label';
-import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { ClassType } from '@/hooks/useClassesData';
+import ClassFormFields from './ClassFormFields';
+import { toast } from 'sonner';
 
 interface EditClassDialogProps {
   open: boolean;
-  classData: ClassType;
   onOpenChange: (open: boolean) => void;
+  classData: ClassType | null;
   onUpdateClass: (updatedClass: ClassType) => void;
 }
 
-const EditClassDialog = ({ open, classData, onOpenChange, onUpdateClass }: EditClassDialogProps) => {
-  const [formData, setFormData] = useState<ClassType>(classData);
+const EditClassDialog = ({ 
+  open, 
+  onOpenChange, 
+  classData, 
+  onUpdateClass 
+}: EditClassDialogProps) => {
+  const [formData, setFormData] = useState<ClassType | null>(null);
+  const [errors, setErrors] = useState<Record<string, string>>({});
 
   useEffect(() => {
-    setFormData(classData);
+    if (classData) {
+      setFormData(classData);
+    }
   }, [classData]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: value
-    }));
+    setFormData(prev => {
+      if (!prev) return prev;
+      return {
+        ...prev,
+        [name]: value
+      };
+    });
+    
+    // Clear error when field is changed
+    if (errors[name]) {
+      setErrors(prev => {
+        const newErrors = { ...prev };
+        delete newErrors[name];
+        return newErrors;
+      });
+    }
   };
 
   const handleNumberChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    const numValue = parseInt(value);
+    
+    if (value === '') {
+      // Allow empty string for optional numeric fields
+      setFormData(prev => {
+        if (!prev) return prev;
+        return {
+          ...prev,
+          [name]: name === 'classFees' ? null : 0
+        };
+      });
+      return;
+    }
+    
+    const numValue = parseFloat(value);
     if (!isNaN(numValue)) {
-      setFormData(prev => ({
-        ...prev,
-        [name]: numValue
-      }));
+      setFormData(prev => {
+        if (!prev) return prev;
+        return {
+          ...prev,
+          [name]: numValue
+        };
+      });
+      
+      // Clear error when field is changed
+      if (errors[name]) {
+        setErrors(prev => {
+          const newErrors = { ...prev };
+          delete newErrors[name];
+          return newErrors;
+        });
+      }
     }
   };
 
-  const handleSelectChange = (name: string, value: string) => {
-    setFormData(prev => ({
-      ...prev,
-      [name]: value
-    }));
+  const handleSelectChange = (name: string, value: string | null) => {
+    setFormData(prev => {
+      if (!prev) return prev;
+      return {
+        ...prev,
+        [name]: value
+      };
+    });
+    
+    // Clear error when field is changed
+    if (errors[name]) {
+      setErrors(prev => {
+        const newErrors = { ...prev };
+        delete newErrors[name];
+        return newErrors;
+      });
+    }
+  };
+  
+  const handleCheckboxChange = (name: string, checked: boolean) => {
+    setFormData(prev => {
+      if (!prev) return prev;
+      return {
+        ...prev,
+        [name]: checked
+      };
+    });
+  };
+  
+  const handleMultiSelectChange = (name: string, values: string[]) => {
+    setFormData(prev => {
+      if (!prev) return prev;
+      return {
+        ...prev,
+        [name]: values
+      };
+    });
+  };
+
+  const validateForm = (): boolean => {
+    if (!formData) return false;
+    
+    const newErrors: Record<string, string> = {};
+    
+    // Required fields
+    if (!formData.name.trim()) {
+      newErrors.name = 'Class name is required';
+    }
+    
+    if (!formData.trainer && !formData.trainerId) {
+      newErrors.trainer = 'Trainer is required';
+    }
+    
+    if (!formData.day) {
+      newErrors.day = 'Day is required';
+    }
+    
+    if (!formData.time) {
+      newErrors.time = 'Start time is required';
+    }
+    
+    if (!formData.room) {
+      newErrors.room = 'Room is required';
+    }
+    
+    // Numeric validations
+    if (formData.capacity <= 0) {
+      newErrors.capacity = 'Capacity must be at least 1';
+    }
+    
+    if (formData.duration <= 0) {
+      newErrors.duration = 'Duration must be at least 1 minute';
+    }
+    
+    // Fee validations
+    if (formData.classFees !== null) {
+      if (formData.classFees < 0) {
+        newErrors.classFees = 'Fee cannot be negative';
+      }
+      
+      if (!formData.feeType) {
+        newErrors.feeType = 'Fee type is required when fee is specified';
+      }
+    }
+    
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
   };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
-    // Auto-update status based on enrollment and capacity
-    let updatedStatus = formData.status;
-    if (formData.enrolled >= formData.capacity) {
-      updatedStatus = 'full';
-    } else if (formData.enrolled < formData.capacity) {
-      updatedStatus = 'scheduled';
+    if (!formData) {
+      toast.error('No class data to update');
+      return;
     }
     
-    onUpdateClass({
-      ...formData,
-      status: updatedStatus
-    });
+    if (!validateForm()) {
+      toast.error('Please fix the errors in the form');
+      return;
+    }
+    
+    onUpdateClass(formData);
+    onOpenChange(false);
   };
+
+  if (!formData) return null;
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[500px]">
+      <DialogContent className="sm:max-w-[650px]">
         <DialogHeader>
           <DialogTitle>Edit Class</DialogTitle>
         </DialogHeader>
-        <form onSubmit={handleSubmit} className="space-y-4 py-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="name">Class Name</Label>
-              <Input 
-                id="name" 
-                name="name" 
-                value={formData.name} 
-                onChange={handleChange} 
-                required 
-              />
-            </div>
-            
-            <div className="space-y-2">
-              <Label htmlFor="type">Class Type</Label>
-              <Select 
-                value={formData.type} 
-                onValueChange={(value) => handleSelectChange('type', value as any)}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Select class type" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="yoga">Yoga</SelectItem>
-                  <SelectItem value="hiit">HIIT</SelectItem>
-                  <SelectItem value="strength">Strength Training</SelectItem>
-                  <SelectItem value="cardio">Cardio</SelectItem>
-                  <SelectItem value="pilates">Pilates</SelectItem>
-                  <SelectItem value="other">Other</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
-          
-          <div className="space-y-2">
-            <Label htmlFor="description">Description</Label>
-            <Textarea 
-              id="description" 
-              name="description" 
-              value={formData.description} 
-              onChange={handleChange} 
-              rows={3} 
-            />
-          </div>
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="trainer">Trainer</Label>
-              <Input 
-                id="trainer" 
-                name="trainer" 
-                value={formData.trainer} 
-                onChange={handleChange}
-                required
-              />
-            </div>
-            
-            <div className="space-y-2">
-              <Label htmlFor="capacity">Maximum Capacity</Label>
-              <Input 
-                id="capacity" 
-                name="capacity" 
-                type="number"
-                min="1"
-                value={formData.capacity} 
-                onChange={handleNumberChange}
-                required
-              />
-            </div>
-          </div>
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="enrolled">Current Enrollment</Label>
-              <Input 
-                id="enrolled" 
-                name="enrolled" 
-                type="number"
-                min="0"
-                value={formData.enrolled} 
-                onChange={handleNumberChange}
-                required
-              />
-            </div>
-            
-            <div className="space-y-2">
-              <Label htmlFor="waitlist">Waitlist</Label>
-              <Input 
-                id="waitlist" 
-                name="waitlist" 
-                type="number"
-                min="0"
-                value={formData.waitlist} 
-                onChange={handleNumberChange}
-                required
-              />
-            </div>
-          </div>
-          
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="day">Day</Label>
-              <Select 
-                value={formData.day} 
-                onValueChange={(value) => handleSelectChange('day', value)}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Select day" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="Monday">Monday</SelectItem>
-                  <SelectItem value="Tuesday">Tuesday</SelectItem>
-                  <SelectItem value="Wednesday">Wednesday</SelectItem>
-                  <SelectItem value="Thursday">Thursday</SelectItem>
-                  <SelectItem value="Friday">Friday</SelectItem>
-                  <SelectItem value="Saturday">Saturday</SelectItem>
-                  <SelectItem value="Sunday">Sunday</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            
-            <div className="space-y-2">
-              <Label htmlFor="time">Start Time</Label>
-              <Input 
-                id="time" 
-                name="time" 
-                type="time"
-                value={formData.time} 
-                onChange={handleChange}
-                required
-              />
-            </div>
-            
-            <div className="space-y-2">
-              <Label htmlFor="duration">Duration (mins)</Label>
-              <Input 
-                id="duration" 
-                name="duration" 
-                type="number"
-                min="15"
-                step="5"
-                value={formData.duration} 
-                onChange={handleNumberChange}
-                required
-              />
-            </div>
-          </div>
-          
-          <div className="space-y-2">
-            <Label htmlFor="room">Room</Label>
-            <Input 
-              id="room" 
-              name="room" 
-              value={formData.room} 
-              onChange={handleChange}
-              required
-            />
-          </div>
-          
-          <div className="space-y-2">
-            <Label htmlFor="status">Class Status</Label>
-            <Select 
-              value={formData.status} 
-              onValueChange={(value) => handleSelectChange('status', value as any)}
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="Select status" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="scheduled">Scheduled</SelectItem>
-                <SelectItem value="canceled">Canceled</SelectItem>
-                <SelectItem value="full">Full</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
+        <form onSubmit={handleSubmit}>
+          <ClassFormFields 
+            classData={formData}
+            handleChange={handleChange}
+            handleNumberChange={handleNumberChange}
+            handleSelectChange={handleSelectChange}
+            handleCheckboxChange={handleCheckboxChange}
+            handleMultiSelectChange={handleMultiSelectChange}
+          />
           
           <DialogFooter>
             <Button 
