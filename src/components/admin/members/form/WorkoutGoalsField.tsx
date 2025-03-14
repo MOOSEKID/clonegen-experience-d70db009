@@ -20,8 +20,8 @@ const WorkoutGoalsField = ({ control }: WorkoutGoalsFieldProps) => {
           <FormLabel>Workout Goals</FormLabel>
           <Select 
             onValueChange={field.onChange} 
-            value={field.value || ''} // Ensure a fallback empty string if value is undefined
-            defaultValue=""
+            value={field.value || undefined} 
+            defaultValue={undefined}
           >
             <FormControl>
               <SelectTrigger>

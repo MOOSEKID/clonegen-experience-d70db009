@@ -30,6 +30,16 @@ export const useAddMemberForm = (
   const onSubmit = async (values: MemberFormValues): Promise<boolean> => {
     console.log("useAddMemberForm.onSubmit called with values:", values);
     try {
+      // Validate select fields don't have empty string values
+      const selectFields = [
+        { name: 'gender', category: 'Individual' },
+        { name: 'workoutGoals', category: 'Individual' },
+        { name: 'companyMembershipPlan', category: 'Company' },
+        { name: 'billingCycle', category: 'Company' },
+        { name: 'paymentMode', category: 'Company' },
+        { name: 'subscriptionModel', category: 'Company' }
+      ];
+      
       // Ensure required values are present before submission
       if (values.membershipCategory === 'Individual' && (!values.name || !values.email)) {
         const missingFields = [];
@@ -50,6 +60,13 @@ export const useAddMemberForm = (
         toast.error(errorMessage);
         return false;
       }
+      
+      // Replace empty strings with undefined for select fields
+      selectFields.forEach(field => {
+        if (values.membershipCategory === field.category && values[field.name as keyof MemberFormValues] === '') {
+          (values as any)[field.name] = undefined;
+        }
+      });
       
       // Process form submission
       const result = await submitForm(values);

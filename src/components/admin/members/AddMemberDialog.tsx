@@ -78,6 +78,18 @@ const AddMemberDialog = ({ isOpen, onClose, onAddMember, isCreating = false }: A
     toast.error(error.message || "An unexpected error occurred in the form");
   };
 
+  // Memoize dialog content to prevent unnecessary re-renders
+  const dialogContent = React.useMemo(() => {
+    return (
+      <MemberDialogContent 
+        form={form} 
+        isSubmitting={isSubmitting || isCreating} 
+        onClose={onClose} 
+        onSubmit={handleSubmit}
+      />
+    );
+  }, [form, isSubmitting, isCreating, onClose, handleSubmit]);
+
   return (
     <Dialog open={isOpen} onOpenChange={(open) => {
       console.log("Dialog onOpenChange triggered:", open, "isSubmitting:", isSubmitting);
@@ -112,12 +124,7 @@ const AddMemberDialog = ({ isOpen, onClose, onAddMember, isCreating = false }: A
             </div>
           </div>
         }>
-          <MemberDialogContent 
-            form={form} 
-            isSubmitting={isSubmitting || isCreating} 
-            onClose={onClose} 
-            onSubmit={handleSubmit}
-          />
+          {dialogContent}
         </ErrorBoundary>
       </DialogContent>
     </Dialog>

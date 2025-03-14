@@ -23,8 +23,8 @@ const CompanyBillingFields = ({ control }: CompanyBillingFieldsProps) => {
               <FormLabel>Billing Cycle</FormLabel>
               <Select 
                 onValueChange={field.onChange} 
-                value={field.value || ""}
-                defaultValue=""
+                value={field.value || undefined}
+                defaultValue={undefined}
               >
                 <FormControl>
                   <SelectTrigger>
@@ -51,8 +51,8 @@ const CompanyBillingFields = ({ control }: CompanyBillingFieldsProps) => {
               </FormLabel>
               <Select 
                 onValueChange={field.onChange} 
-                value={field.value || ""}
-                defaultValue=""
+                value={field.value || undefined}
+                defaultValue={undefined}
               >
                 <FormControl>
                   <SelectTrigger>
@@ -80,8 +80,8 @@ const CompanyBillingFields = ({ control }: CompanyBillingFieldsProps) => {
             </FormLabel>
             <Select 
               onValueChange={field.onChange} 
-              value={field.value || ""}
-              defaultValue=""
+              value={field.value || undefined}
+              defaultValue={undefined}
             >
               <FormControl>
                 <SelectTrigger>

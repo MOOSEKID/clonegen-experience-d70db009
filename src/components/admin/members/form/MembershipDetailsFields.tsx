@@ -61,7 +61,7 @@ const MembershipDetailsFields = ({ control }: MembershipDetailsFieldsProps) => {
               <FormLabel>Membership Category</FormLabel>
               <Select 
                 onValueChange={field.onChange} 
-                defaultValue={field.value}
+                defaultValue={field.value || "Individual"}
                 value={field.value || "Individual"}
               >
                 <FormControl>
