@@ -28,10 +28,11 @@ const AddMemberDialog = ({ isOpen, onClose, onAddMember, isCreating = false }: A
       if (success) {
         // Close the dialog on successful submission
         onClose();
+        return true;
       } else {
         setDialogError("Failed to add member. Please try again.");
+        return false;
       }
-      return success;
     } catch (error) {
       console.error("Error in handleSubmit:", error);
       setDialogError(error instanceof Error ? error.message : "An unexpected error occurred");
@@ -43,14 +44,6 @@ const AddMemberDialog = ({ isOpen, onClose, onAddMember, isCreating = false }: A
   React.useEffect(() => {
     setDialogError(null);
   }, [isOpen]);
-
-  // Log when dialog open state changes
-  React.useEffect(() => {
-    console.log("Dialog open state changed to:", isOpen);
-  }, [isOpen]);
-
-  // Use open state to ensure dialog is rendered properly
-  if (!isOpen) return null;
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => {

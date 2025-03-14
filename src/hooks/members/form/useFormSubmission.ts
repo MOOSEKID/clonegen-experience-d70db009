@@ -15,8 +15,8 @@ export const useFormSubmission = (onAddMember: AddMemberFn, isCreating: boolean)
     console.log("Form submission started with values:", values);
     
     // Prevent duplicate submissions
-    if (isSubmitting || isCreating) {
-      console.log("Submission prevented - already submitting or creating:", isSubmitting, isCreating);
+    if (isSubmitting) {
+      console.log("Submission prevented - already submitting:", isSubmitting);
       return false;
     }
     
