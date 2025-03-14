@@ -1,5 +1,5 @@
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { toast } from 'sonner';
 import { Member, MemberFormAction } from '@/types/memberTypes';
 import { useSupabaseMemberData } from './useSupabaseMemberData';
@@ -28,11 +28,11 @@ export const useSupabaseMembers = () => {
   } = useMemberFilters(members);
 
   // Update the member filters when members change
-  useState(() => {
+  useEffect(() => {
     if (members.length > 0) {
       setAllMembers(members);
     }
-  });
+  }, [members, setAllMembers]);
 
   // Toggle member selection
   const toggleMemberSelection = useCallback((memberId: string) => {
