@@ -47,5 +47,10 @@ export const validateClassForm = (formData: ClassType | null): Record<string, st
     }
   }
   
+  // Recurrence validations
+  if (formData.recurrence && formData.recurrenceDays.length === 0) {
+    errors.recurrenceDays = 'Please select at least one day for recurring classes';
+  }
+  
   return errors;
 };

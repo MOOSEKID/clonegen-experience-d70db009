@@ -20,6 +20,7 @@ export const getDefaultClassData = (): Omit<ClassType, 'id'> => ({
   classLevel: 'Beginner',
   equipmentRequired: ['yoga_mat'],
   recurrence: false,
+  recurrenceDays: [],
   classFees: null,
   feeType: null
 });
@@ -37,3 +38,33 @@ export const equipmentOptions = [
   { value: 'rowing_machine', label: 'Rowing Machine' },
   { value: 'none', label: 'No Equipment Required' }
 ];
+
+export const weekDays = [
+  { value: 'Monday', label: 'Monday' },
+  { value: 'Tuesday', label: 'Tuesday' },
+  { value: 'Wednesday', label: 'Wednesday' },
+  { value: 'Thursday', label: 'Thursday' },
+  { value: 'Friday', label: 'Friday' },
+  { value: 'Saturday', label: 'Saturday' },
+  { value: 'Sunday', label: 'Sunday' },
+];
+
+export const isEveryDay = (days: string[]): boolean => {
+  return days.length === 7;
+};
+
+export const toggleDay = (days: string[], day: string): string[] => {
+  if (days.includes(day)) {
+    return days.filter(d => d !== day);
+  } else {
+    return [...days, day];
+  }
+};
+
+export const toggleEveryDay = (days: string[]): string[] => {
+  if (isEveryDay(days)) {
+    return [];
+  } else {
+    return weekDays.map(day => day.value);
+  }
+};

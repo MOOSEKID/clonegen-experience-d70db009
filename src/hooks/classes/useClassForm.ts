@@ -101,6 +101,15 @@ export const useClassForm = (
         [name]: checked
       };
     });
+    
+    // Clear error related to the checkbox field
+    if (errors[name]) {
+      setErrors(prev => {
+        const newErrors = { ...prev };
+        delete newErrors[name];
+        return newErrors;
+      });
+    }
   };
   
   const handleMultiSelectChange = (name: string, values: string[]) => {
@@ -111,6 +120,15 @@ export const useClassForm = (
         [name]: values
       };
     });
+    
+    // Clear error when field is changed
+    if (errors[name]) {
+      setErrors(prev => {
+        const newErrors = { ...prev };
+        delete newErrors[name];
+        return newErrors;
+      });
+    }
   };
 
   const validateForm = (): boolean => {

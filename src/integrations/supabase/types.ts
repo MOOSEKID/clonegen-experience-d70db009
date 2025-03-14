@@ -103,6 +103,7 @@ export type Database = {
           id: string
           name: string
           recurrence: boolean | null
+          recurrence_days: string[] | null
           room: string | null
           status: string | null
           time: string
@@ -123,6 +124,7 @@ export type Database = {
           id?: string
           name: string
           recurrence?: boolean | null
+          recurrence_days?: string[] | null
           room?: string | null
           status?: string | null
           time: string
@@ -143,6 +145,7 @@ export type Database = {
           id?: string
           name?: string
           recurrence?: boolean | null
+          recurrence_days?: string[] | null
           room?: string | null
           status?: string | null
           time?: string
@@ -375,6 +378,36 @@ export type Database = {
           name?: string
           updated_at?: string | null
           video_url?: string | null
+        }
+        Relationships: []
+      }
+      gym_locations: {
+        Row: {
+          capacity: number | null
+          created_at: string
+          equipment: string[] | null
+          id: string
+          name: string
+          type: string
+          updated_at: string
+        }
+        Insert: {
+          capacity?: number | null
+          created_at?: string
+          equipment?: string[] | null
+          id?: string
+          name: string
+          type: string
+          updated_at?: string
+        }
+        Update: {
+          capacity?: number | null
+          created_at?: string
+          equipment?: string[] | null
+          id?: string
+          name?: string
+          type?: string
+          updated_at?: string
         }
         Relationships: []
       }

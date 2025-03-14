@@ -10,8 +10,15 @@ import {
   SelectTrigger, 
   SelectValue 
 } from '@/components/ui/select';
+import { 
+  ToggleGroup, 
+  ToggleGroupItem 
+} from '@/components/ui/toggle-group';
 import { cn } from '@/lib/utils';
-import { AlertCircle } from 'lucide-react';
+import { AlertCircle, RotateCw } from 'lucide-react';
+import { useGymLocations } from '@/hooks/classes/useGymLocations';
+import { weekDays, isEveryDay, toggleEveryDay } from '@/utils/classFormUtils';
+import { Button } from '@/components/ui/button';
 
 interface SchedulingFieldsProps {
   classData: Omit<ClassType, 'id'>;
@@ -20,6 +27,7 @@ interface SchedulingFieldsProps {
   handleNumberChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   handleSelectChange: (name: string, value: string) => void;
   handleCheckboxChange: (name: string, checked: boolean) => void;
+  handleMultiSelectChange?: (name: string, values: string[]) => void;
 }
 
 const SchedulingFields = ({
@@ -28,8 +36,11 @@ const SchedulingFields = ({
   handleChange,
   handleNumberChange,
   handleSelectChange,
-  handleCheckboxChange
+  handleCheckboxChange,
+  handleMultiSelectChange = () => {}
 }: SchedulingFieldsProps) => {
+  const { locations, isLoading } = useGymLocations();
+  
   // Helper function to render error message
   const ErrorMessage = ({ name }: { name: string }) => (
     errors[name] ? (
@@ -39,6 +50,28 @@ const SchedulingFields = ({
       </div>
     ) : null
   );
+
+  const toggleDayHandler = (day: string) => {
+    const currentDays = [...classData.recurrenceDays];
+    const newDays = currentDays.includes(day) 
+      ? currentDays.filter(d => d !== day)
+      : [...currentDays, day];
+    
+    handleMultiSelectChange('recurrenceDays', newDays);
+  };
+
+  const toggleEveryDayHandler = () => {
+    const newDays = isEveryDay(classData.recurrenceDays) ? [] : weekDays.map(day => day.value);
+    handleMultiSelectChange('recurrenceDays', newDays);
+  };
+
+  const handleRecurrenceChange = (checked: boolean) => {
+    handleCheckboxChange('recurrence', checked);
+    if (checked && classData.recurrenceDays.length === 0) {
+      // Initialize with the current day when enabling recurrence
+      handleMultiSelectChange('recurrenceDays', [classData.day]);
+    }
+  };
 
   return (
     <div className="space-y-4">
@@ -55,13 +88,9 @@ const SchedulingFields = ({
               <SelectValue placeholder="Select day" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="Monday">Monday</SelectItem>
-              <SelectItem value="Tuesday">Tuesday</SelectItem>
-              <SelectItem value="Wednesday">Wednesday</SelectItem>
-              <SelectItem value="Thursday">Thursday</SelectItem>
-              <SelectItem value="Friday">Friday</SelectItem>
-              <SelectItem value="Saturday">Saturday</SelectItem>
-              <SelectItem value="Sunday">Sunday</SelectItem>
+              {weekDays.map(day => (
+                <SelectItem key={day.value} value={day.value}>{day.label}</SelectItem>
+              ))}
             </SelectContent>
           </Select>
           <ErrorMessage name="day" />
@@ -105,27 +134,48 @@ const SchedulingFields = ({
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div className="space-y-2">
           <Label htmlFor="room" className={cn(errors.room && "text-red-500")}>
-            Room*
+            Location*
           </Label>
-          <Input 
-            id="room" 
-            name="room" 
+          <Select 
             value={classData.room} 
-            onChange={handleChange}
-            placeholder="Enter room or location"
-            className={cn(errors.room && "border-red-500 focus-visible:ring-red-500")}
-            required
-          />
+            onValueChange={(value) => handleSelectChange('room', value)}
+          >
+            <SelectTrigger className={cn(errors.room && "border-red-500")}>
+              <SelectValue placeholder="Select location" />
+            </SelectTrigger>
+            <SelectContent>
+              {isLoading ? (
+                <SelectItem value="loading" disabled>Loading locations...</SelectItem>
+              ) : (
+                <>
+                  <SelectItem value="other">Other/Custom Location</SelectItem>
+                  {locations.map(location => (
+                    <SelectItem key={location.id} value={location.name}>
+                      {location.name} ({location.type})
+                    </SelectItem>
+                  ))}
+                </>
+              )}
+            </SelectContent>
+          </Select>
+          {classData.room === 'other' && (
+            <Input
+              className="mt-2"
+              placeholder="Enter custom location"
+              value={classData.room === 'other' ? '' : classData.room}
+              onChange={(e) => handleSelectChange('room', e.target.value)}
+            />
+          )}
           <ErrorMessage name="room" />
         </div>
         
-        <div className="space-y-2 flex items-center">
+        <div className="space-y-2">
           <div className="flex items-center space-x-2">
             <Checkbox 
               id="recurrence" 
               checked={classData.recurrence} 
               onCheckedChange={(checked) => 
-                handleCheckboxChange('recurrence', checked === true)
+                handleRecurrenceChange(checked === true)
               }
             />
             <Label 
@@ -135,6 +185,51 @@ const SchedulingFields = ({
               Repeat Weekly
             </Label>
           </div>
+          
+          {classData.recurrence && (
+            <div className="mt-3 space-y-3">
+              <div className="flex justify-between">
+                <Label className={cn(errors.recurrenceDays && "text-red-500")}>
+                  Select Days:
+                </Label>
+                <Button 
+                  type="button" 
+                  variant="outline" 
+                  size="sm"
+                  onClick={toggleEveryDayHandler}
+                  className="flex items-center gap-1 h-7 text-xs"
+                >
+                  <RotateCw className="h-3 w-3" />
+                  {isEveryDay(classData.recurrenceDays) ? 'Clear All' : 'Every Day'}
+                </Button>
+              </div>
+              
+              <ToggleGroup 
+                type="multiple" 
+                className="flex flex-wrap gap-1"
+                value={classData.recurrenceDays}
+              >
+                {weekDays.map((day) => (
+                  <ToggleGroupItem
+                    key={day.value}
+                    value={day.value}
+                    onClick={() => toggleDayHandler(day.value)}
+                    className="flex-1 min-w-16"
+                    data-state={classData.recurrenceDays.includes(day.value) ? "on" : "off"}
+                  >
+                    {day.label.slice(0, 3)}
+                  </ToggleGroupItem>
+                ))}
+              </ToggleGroup>
+              
+              {errors.recurrenceDays && (
+                <div className="text-red-500 text-sm mt-1 flex items-center gap-1">
+                  <AlertCircle className="h-4 w-4" />
+                  <span>{errors.recurrenceDays}</span>
+                </div>
+              )}
+            </div>
+          )}
         </div>
       </div>
     </div>

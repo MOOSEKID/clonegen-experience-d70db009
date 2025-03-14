@@ -26,6 +26,15 @@ export interface ClassType {
   classLevel: 'Beginner' | 'Intermediate' | 'Advanced';
   equipmentRequired: string[];
   recurrence: boolean;
+  recurrenceDays: string[]; // New field for storing multiple recurrence days
   classFees: number | null;
   feeType: 'per_session' | 'package' | null;
+}
+
+export interface GymLocation {
+  id: string;
+  name: string;
+  type: 'room' | 'area';
+  capacity: number;
+  equipment: string[];
 }

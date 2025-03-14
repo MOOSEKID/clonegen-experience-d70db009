@@ -57,6 +57,7 @@ export const useClassCrud = (
         class_level: newClass.classLevel,
         equipment_required: newClass.equipmentRequired || [],
         recurrence: newClass.recurrence || false,
+        recurrence_days: newClass.recurrenceDays || [],
         class_fees: newClass.classFees,
         fee_type: newClass.feeType
       };
@@ -121,6 +122,7 @@ export const useClassCrud = (
         class_level: updatedClass.classLevel,
         equipment_required: updatedClass.equipmentRequired,
         recurrence: updatedClass.recurrence,
+        recurrence_days: updatedClass.recurrenceDays || [],
         class_fees: updatedClass.classFees,
         fee_type: updatedClass.feeType
       };
