@@ -5,14 +5,6 @@ import StatsSection from '@/components/admin/dashboard/StatsSection';
 import ChartsSection, { membershipData, revenueData } from '@/components/admin/dashboard/ChartsSection';
 import AdditionalInsights, { classAttendanceData } from '@/components/admin/dashboard/AdditionalInsights';
 
-interface DashboardHeaderProps {
-  timeFilter: string;
-  setTimeFilter: (filter: string) => void;
-  membershipData: any;
-  revenueData: any;
-  classAttendanceData: any;
-}
-
 const AdminDashboard = () => {
   const [timeFilter, setTimeFilter] = useState('weekly');
 
