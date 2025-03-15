@@ -1,7 +1,7 @@
 
 import { createContext } from 'react';
 
-interface AuthUser {
+export interface AuthUser {
   id: string;
   email: string;
   role?: string;
@@ -18,13 +18,6 @@ export interface AuthContextType {
   signOut: () => Promise<void>;
   requestPasswordReset: (email: string) => Promise<boolean>;
   resetPassword: (password: string) => Promise<boolean>;
-}
-
-export interface AuthUser {
-  id: string;
-  email: string;
-  role?: string;
-  isAdmin?: boolean;
 }
 
 // Default context values

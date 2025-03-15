@@ -1,3 +1,4 @@
+
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 
@@ -46,7 +47,10 @@ export type RevenueData = {
 export interface ClassAttendanceData {
   name: string;
   value: number;
-  total: number; // Adding the missing total property
+  total: number;
+  className?: string;
+  attendance?: number;
+  capacity?: number;
 }
 
 // Define columns for CSV export
