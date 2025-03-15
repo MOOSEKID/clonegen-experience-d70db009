@@ -20,30 +20,43 @@ const AdminLayout = () => {
         const sessionActive = document.cookie.includes('session_active=true');
         const isAdminRole = document.cookie.includes('user_role=admin');
         
+        console.log('Admin auth check:', { isAdmin, sessionActive, isAdminRole });
+        
         if ((!isAdmin || !sessionActive) && !isAdminRole) {
+          console.log('Admin authentication failed, redirecting to login');
           toast.error('You must be logged in as an administrator');
-          navigate('/login');
+          navigate('/login', { state: { from: '/admin' } });
         } else {
           // Ensure both storage mechanisms are synchronized
           if (!isAdmin && isAdminRole) {
             localStorage.setItem('isAdmin', 'true');
           }
           
+          if (!sessionActive) {
+            document.cookie = "session_active=true; path=/; max-age=2592000"; // 30 days
+          }
+          
+          if (!isAdminRole) {
+            document.cookie = "user_role=admin; path=/; max-age=2592000"; // 30 days
+          }
+          
           setIsAuthenticated(true);
-          // Refresh session cookie to maintain login state
-          document.cookie = "session_active=true; path=/; max-age=2592000"; // 30 days
-          document.cookie = "user_role=admin; path=/; max-age=2592000"; // 30 days
+          console.log('Admin authenticated successfully');
         }
       } catch (error) {
         console.error('Authentication check error:', error);
         toast.error('Authentication error. Please log in again.');
-        navigate('/login');
+        navigate('/login', { state: { from: '/admin' } });
       } finally {
         setIsLoading(false);
       }
     };
 
     checkAuth();
+    
+    // Recheck authentication every 5 minutes
+    const interval = setInterval(checkAuth, 300000);
+    return () => clearInterval(interval);
   }, [navigate]);
 
   const toggleSidebar = () => {

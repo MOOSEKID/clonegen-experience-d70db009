@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 import { Menu, X, ShoppingBag, User, LayoutDashboard } from 'lucide-react';
+import { toast } from 'sonner';
 import DesktopNav from './header/DesktopNav';
 import MobileMenu from './header/MobileMenu';
 
@@ -32,6 +33,8 @@ const Header = () => {
     const checkAuth = () => {
       const loggedIn = localStorage.getItem('isLoggedIn') === 'true' || document.cookie.includes('session_active=true');
       const admin = localStorage.getItem('isAdmin') === 'true' || document.cookie.includes('user_role=admin');
+      
+      console.log('Header auth check:', { loggedIn, admin });
       
       if (loggedIn && localStorage.getItem('isLoggedIn') !== 'true') {
         localStorage.setItem('isLoggedIn', 'true');
@@ -122,6 +125,8 @@ const Header = () => {
             localStorage.removeItem('userName');
             document.cookie = "session_active=; path=/; max-age=0";
             document.cookie = "user_role=; path=/; max-age=0";
+            console.log('Logged out successfully');
+            toast.success('Logged out successfully');
             window.location.href = '/login';
           }
         }

@@ -7,6 +7,19 @@ export type { PerformanceMetrics, ClassAttendance };
 
 export const useTrainerPerformance = (trainerId?: string) => {
   const [performanceMetrics, setPerformanceMetrics] = useState<PerformanceMetrics>({
+    id: '',
+    trainerId: '',
+    period: '',
+    classes_taught: 0,
+    private_sessions: 0,
+    new_clients: 0,
+    client_retention_rate: 0,
+    avg_session_rating: 0,
+    monthly_goal_progress: 0,
+    class_fill_rate: 0,
+    total_hours: 0,
+    
+    // Legacy field support
     averageRating: 0,
     totalClasses: 0,
     averageAttendance: 0,

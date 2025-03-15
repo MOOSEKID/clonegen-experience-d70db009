@@ -7,7 +7,7 @@ import { Input } from '@/components/ui/input';
 import { toast } from 'sonner';
 import { Eye, EyeOff } from 'lucide-react';
 
-// Demo user data - in a real app, this would come from a database
+// Updated demo user data with clear admin credentials - in a real app, this would come from a database
 const DEMO_USERS = [
   { email: 'admin@example.com', password: 'admin123', isAdmin: true, name: 'Admin User' },
   { email: 'user@example.com', password: 'user123', isAdmin: false, name: 'Regular User' },
@@ -30,6 +30,7 @@ const Login = () => {
     const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true' || document.cookie.includes('session_active=true');
     if (isLoggedIn) {
       const isAdmin = localStorage.getItem('isAdmin') === 'true' || document.cookie.includes('user_role=admin');
+      // Redirect based on user role
       navigate(isAdmin ? '/admin' : '/dashboard');
     }
   }, [navigate]);
@@ -53,6 +54,17 @@ const Login = () => {
       document.cookie = `session_active=true; path=/; expires=${expiryDate.toUTCString()}`;
       document.cookie = `user_role=${user.isAdmin ? 'admin' : 'user'}; path=/; expires=${expiryDate.toUTCString()}`;
       
+      console.log('Login successful!', { 
+        isAdmin: user.isAdmin, 
+        cookies: document.cookie,
+        localStorage: {
+          isLoggedIn: localStorage.getItem('isLoggedIn'),
+          isAdmin: localStorage.getItem('isAdmin'),
+          userEmail: localStorage.getItem('userEmail'),
+          userName: localStorage.getItem('userName')
+        }
+      });
+      
       toast.success('Login successful! Redirecting...');
       
       // Navigate based on user role
@@ -64,7 +76,7 @@ const Login = () => {
       } else if (DEMO_USERS.some(user => user.email === email)) {
         toast.error('Incorrect password. Please try again.');
       } else {
-        toast.error('Invalid credentials. For demo, try: user@example.com / user123');
+        toast.error('Invalid credentials. For demo, try: admin@example.com / admin123');
       }
     }
   };
@@ -79,6 +91,10 @@ const Login = () => {
         <div className="mb-6 text-center">
           <h1 className="text-3xl font-bold mb-2">Welcome Back</h1>
           <p className="text-white/70">Log in to access your account</p>
+          <div className="mt-4 p-3 bg-gym-orange/10 rounded-md border border-gym-orange/20">
+            <p className="text-sm font-medium text-gym-orange">Admin Login: admin@example.com / admin123</p>
+            <p className="text-sm text-white/70 mt-1">User Login: user@example.com / user123</p>
+          </div>
         </div>
         
         <form onSubmit={handleSubmit} className="space-y-4">
