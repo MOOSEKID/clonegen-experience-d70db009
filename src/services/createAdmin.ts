@@ -12,7 +12,9 @@ export const createAdminUser = async (email: string, password: string, fullName:
     });
     
     // Find the user with the matching email
-    const existingAuthUser = authUsers?.users.find(user => user.email === email);
+    const existingAuthUser = authUsers?.users.find(user => {
+      return (user as User).email === email;
+    });
     let userId = existingAuthUser?.id;
     
     // If user doesn't exist in auth, create them
