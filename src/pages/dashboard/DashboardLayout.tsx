@@ -4,12 +4,12 @@ import { Outlet, useNavigate } from 'react-router-dom';
 import CustomerSidebar from '@/components/dashboard/CustomerSidebar';
 import CustomerHeader from '@/components/dashboard/CustomerHeader';
 import { toast } from 'sonner';
-import { useAuth } from '@/contexts/AuthContext';
+import { useAuth } from '@/hooks/useAuth';
 
 const DashboardLayout = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [isLoading, setIsLoading] = useState(true);
-  const { isAuthenticated, refreshSession } = useAuth();
+  const { isAuthenticated, user } = useAuth();
   const navigate = useNavigate();
 
   // Check user authentication
@@ -17,9 +17,6 @@ const DashboardLayout = () => {
     const checkAuth = async () => {
       try {
         setIsLoading(true);
-        
-        // Refresh session to ensure we have the latest auth state
-        await refreshSession();
         
         if (!isAuthenticated) {
           toast.error('You must be logged in to access this page');
@@ -36,11 +33,10 @@ const DashboardLayout = () => {
 
     checkAuth();
     
-    // No need for frequent polling anymore since we're using onAuthStateChange
-    // Just check once every 10 minutes as a fallback
+    // Check authentication status periodically
     const interval = setInterval(checkAuth, 600000); // 10 minutes
     return () => clearInterval(interval);
-  }, [navigate, isAuthenticated, refreshSession]);
+  }, [navigate, isAuthenticated]);
 
   const toggleSidebar = () => {
     setIsSidebarOpen(!isSidebarOpen);

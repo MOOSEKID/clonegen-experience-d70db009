@@ -2,7 +2,7 @@
 import { Link, useLocation } from 'react-router-dom';
 import { Home, BarChart2, Calendar, Dumbbell, Heart, Award, MapPin, Settings, LogOut } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { useAuth } from '@/contexts/AuthContext';
+import { useAuth } from '@/hooks/useAuth';
 
 interface CustomerSidebarProps {
   isOpen: boolean;

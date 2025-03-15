@@ -4,12 +4,12 @@ import { Outlet, useNavigate } from 'react-router-dom';
 import AdminSidebar from '@/components/admin/AdminSidebar';
 import AdminHeader from '@/components/admin/AdminHeader';
 import { toast } from 'sonner';
-import { useAuth } from '@/contexts/AuthContext';
+import { useAuth } from '@/hooks/useAuth';
 
 const AdminLayout = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [isLoading, setIsLoading] = useState(true);
-  const { isAuthenticated, isAdmin, refreshSession } = useAuth();
+  const { isAuthenticated, isAdmin } = useAuth();
   const navigate = useNavigate();
 
   // Check admin authentication
@@ -17,9 +17,6 @@ const AdminLayout = () => {
     const checkAuth = async () => {
       try {
         setIsLoading(true);
-        
-        // Refresh session to ensure we have the latest auth state
-        await refreshSession();
         
         if (!isAuthenticated || !isAdmin) {
           console.log('Admin authentication failed, redirecting to login');
@@ -39,11 +36,10 @@ const AdminLayout = () => {
 
     checkAuth();
     
-    // No need for frequent polling anymore since we're using onAuthStateChange
-    // Just check once every 10 minutes as a fallback
+    // Check authentication status periodically
     const interval = setInterval(checkAuth, 600000); // 10 minutes
     return () => clearInterval(interval);
-  }, [navigate, isAuthenticated, isAdmin, refreshSession]);
+  }, [navigate, isAuthenticated, isAdmin]);
 
   const toggleSidebar = () => {
     setIsSidebarOpen(!isSidebarOpen);

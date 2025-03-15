@@ -4,7 +4,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/Button';
 import { toast } from 'sonner';
 import { Eye, EyeOff } from 'lucide-react';
-import { useAuth } from '@/contexts/AuthContext';
+import { useAuth } from '@/hooks/useAuth';
 import {
   Card,
   CardContent,
@@ -46,6 +46,7 @@ const Signup = () => {
       const success = await signUp(email, password, name);
       
       if (success) {
+        toast.success('Account created successfully! Please check your email to confirm your account.');
         // Use a small timeout to ensure the toast appears before redirect
         setTimeout(() => {
           navigate('/login');

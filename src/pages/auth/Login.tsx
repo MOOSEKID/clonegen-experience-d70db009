@@ -1,5 +1,5 @@
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { Mail, Lock, AlertCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -8,19 +8,28 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { useAuth } from '@/hooks/useAuth';
+import { toast } from 'sonner';
 
 const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const { login } = useAuth();
+  const { login, isAuthenticated, isAdmin } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   
   // Get referrer from state or query parameter
   const from = location.state?.from || new URLSearchParams(location.search).get('redirect') || '/dashboard';
   
+  // Check if user is already authenticated
+  useEffect(() => {
+    if (isAuthenticated) {
+      // Redirect based on user role
+      navigate(isAdmin ? '/admin' : '/dashboard');
+    }
+  }, [isAuthenticated, isAdmin, navigate]);
+
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     
@@ -36,8 +45,9 @@ const Login = () => {
       const success = await login(email, password);
       
       if (success) {
-        // Redirect handled in login function
-        console.log('Login successful, redirecting to', from);
+        toast.success('Login successful');
+        // Navigation will be handled by the useEffect
+        console.log('Login successful, redirection will happen through useEffect');
       }
     } catch (error) {
       console.error('Login error:', error);
@@ -55,7 +65,8 @@ const Login = () => {
       const success = await login('admin@example.com', 'admin123');
       
       if (success) {
-        // Navigate is handled in login function
+        toast.success('Admin login successful');
+        // Navigation is handled in login function
         console.log('Admin login successful');
       }
     } catch (error) {
