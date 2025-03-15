@@ -1,96 +1,66 @@
 
-// This is a new file to define interfaces for export utilities
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 
-export interface MembershipData {
+// Function to export data as PDF
+export const exportToPDF = (
+  title: string,
+  data: Array<Record<string, any>>,
+  columns: Array<{ label: string; key: string }>
+) => {
+  const doc = new jsPDF();
+  const tableColumn = columns.map(col => col.label);
+  const tableRows = data.map(item => 
+    columns.map(col => item[col.key] !== undefined ? item[col.key].toString() : '')
+  );
+
+  // Add title to PDF
+  doc.setFontSize(18);
+  doc.text(title, 14, 22);
+  doc.setFontSize(12);
+  doc.text(`Generated on: ${new Date().toLocaleDateString()}`, 14, 30);
+
+  // Add table to PDF
+  autoTable(doc, {
+    head: [tableColumn],
+    body: tableRows,
+    startY: 35,
+    styles: { fontSize: 10, cellPadding: 3 },
+    headStyles: { fillColor: [52, 73, 94] }
+  });
+
+  // Save PDF
+  doc.save(`${title.toLowerCase().replace(/\s+/g, '-')}-${new Date().toISOString().split('T')[0]}.pdf`);
+};
+
+// Define types for dashboard data
+export type MembershipData = {
   name: string;
   members: number;
-  month: string;
-  active: number;
-  canceled: number;
-  total: number;
-  value: number;
-  capacity: number;
-}
+};
 
-export interface RevenueData {
+export type RevenueData = {
   name: string;
   revenue: number;
-  month: string;
-  memberships: number;
-  classes: number;
-  other: number;
-  total: number;
-  value: number;
-  capacity: number;
-}
+};
 
-export interface ClassAttendanceData {
+export type ClassAttendanceData = {
   name: string;
   value: number;
-  className: string;
-  attendance: number;
-  capacity: number;
-  total: number;
-}
+};
 
+// Define columns for CSV export
 export const membershipColumns = [
-  { header: 'Month', dataKey: 'month' },
-  { header: 'Active', dataKey: 'active' },
-  { header: 'Canceled', dataKey: 'canceled' },
-  { header: 'Total', dataKey: 'total' }
+  { label: 'Month', key: 'name' },
+  { label: 'Members', key: 'members' }
 ];
 
 export const revenueColumns = [
-  { header: 'Month', dataKey: 'month' },
-  { header: 'Memberships', dataKey: 'memberships' },
-  { header: 'Classes', dataKey: 'classes' },
-  { header: 'Other', dataKey: 'other' },
-  { header: 'Total', dataKey: 'total' }
+  { label: 'Month', key: 'name' },
+  { label: 'Revenue ($)', key: 'revenue' }
 ];
 
 export const classAttendanceColumns = [
-  { header: 'Class Name', dataKey: 'className' },
-  { header: 'Attendance', dataKey: 'attendance' },
-  { header: 'Capacity', dataKey: 'capacity' },
-  { header: 'Percentage', dataKey: 'percentage' }
+  { label: 'Class Type', key: 'name' },
+  { label: 'Attendance', key: 'value' }
 ];
-
-export const exportToPDF = (
-  data: any[],
-  columns: any[],
-  title: string,
-  filename: string
-) => {
-  const doc = new jsPDF();
-  
-  // Add title
-  doc.setFontSize(18);
-  doc.text(title, 14, 22);
-  doc.setFontSize(11);
-  doc.setTextColor(100);
-  
-  // Format data for autoTable if needed
-  const formattedData = data.map(item => {
-    const row: any = {};
-    columns.forEach(col => {
-      if (col.dataKey === 'percentage' && item.attendance && item.capacity) {
-        row[col.dataKey] = `${Math.round((item.attendance / item.capacity) * 100)}%`;
-      } else {
-        row[col.dataKey] = item[col.dataKey];
-      }
-    });
-    return row;
-  });
-  
-  // Create the table
-  autoTable(doc, {
-    startY: 30,
-    head: [columns.map(col => col.header)],
-    body: formattedData.map(item => columns.map(col => item[col.dataKey])),
-  });
-  
-  // Save the PDF
-  doc.save(`${filename}.pdf`);
-};
