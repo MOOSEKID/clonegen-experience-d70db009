@@ -8,7 +8,7 @@ import { passwordManager, storageManager } from '@/utils/auth.utils';
 import { createAdminUser } from '@/services/createAdmin';
 
 // Create the auth context with default values
-export const AuthContext = createContext<AuthContextType | null>(null);
+export const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 interface AuthProviderProps {
   children: ReactNode;
@@ -34,7 +34,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         const { data: adminExists, error: checkAdminError } = await supabase
           .from('profiles')
           .select('id')
-          .eq('email', 'admin@example.com')
+          .eq('role', 'admin')
           .maybeSingle();
           
         if (checkAdminError) {
@@ -56,7 +56,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         const { data: userExists, error: checkUserError } = await supabase
           .from('profiles')
           .select('id')
-          .eq('email', 'user@example.com')
+          .eq('role', 'member')
           .maybeSingle();
           
         if (checkUserError) {
@@ -85,7 +85,6 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
               .upsert([
                 { 
                   id: data.user.id,
-                  email: 'user@example.com',
                   full_name: 'Regular User',
                   role: 'member',
                   is_admin: false
@@ -127,12 +126,30 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         // Get user role from profiles table
         const { data: profile, error: profileError } = await supabase
           .from('profiles')
-          .select('role, is_admin, full_name, email')
+          .select('role, is_admin, full_name')
           .eq('id', data.user.id)
           .single();
           
         if (profileError) {
           console.error('Error fetching user profile:', profileError);
+          // Handle the case where profile doesn't exist yet
+          if (profileError.code === 'PGRST116') {
+            // Create a default profile
+            const { error: insertError } = await supabase
+              .from('profiles')
+              .insert([
+                { 
+                  id: data.user.id,
+                  full_name: data.user.user_metadata?.full_name || '',
+                  role: 'member',
+                  is_admin: false
+                }
+              ]);
+              
+            if (insertError) {
+              console.error('Error creating profile:', insertError);
+            }
+          }
         }
         
         const userRole = profile?.role || 'member';
@@ -142,7 +159,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         // Update auth state
         setUser({
           ...data.user,
-          email: data.user.email || profile?.email || '', // Ensure email is always provided
+          email: data.user.email || '', // Ensure email is always provided
           role: userRole
         });
         setIsAdmin(userIsAdmin);

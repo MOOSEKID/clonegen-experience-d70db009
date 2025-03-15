@@ -4,15 +4,15 @@ import { supabase } from '@/integrations/supabase/client';
 export const createAdminUser = async (email: string, password: string, fullName: string) => {
   try {
     // Check if admin already exists in auth
-    const { data: existingAuthUser, error: checkAuthError } = await supabase.auth.admin.listUsers({
+    // Note: We no longer use filters as it's not supported in the PageParams type
+    const { data: authUsers, error: checkAuthError } = await supabase.auth.admin.listUsers({
       page: 1,
-      perPage: 1,
-      filters: {
-        email: email
-      }
+      perPage: 100 // Get more users and filter in code
     });
     
-    let userId = existingAuthUser?.users?.[0]?.id;
+    // Find the user with the matching email
+    const existingAuthUser = authUsers?.users.find(user => user.email === email);
+    let userId = existingAuthUser?.id;
     
     // If user doesn't exist in auth, create them
     if (!userId) {
@@ -51,7 +51,6 @@ export const createAdminUser = async (email: string, password: string, fullName:
       .upsert([
         {
           id: userId,
-          email: email,
           full_name: fullName,
           role: 'admin',
           is_admin: true
