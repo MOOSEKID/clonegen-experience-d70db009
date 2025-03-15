@@ -11,6 +11,18 @@ interface AuthUser {
   user_metadata?: {
     full_name?: string;
   };
+  // Add any other properties from Supabase User that we need
+  app_metadata?: any;
+  confirmation_sent_at?: string;
+  confirmed_at?: string;
+  created_at?: string;
+  factors?: any[];
+  identities?: any[];
+  last_sign_in_at?: string;
+  phone?: string;
+  recovery_sent_at?: string;
+  updated_at?: string;
+  aud?: string;
 }
 
 export const useAuth = () => {
@@ -48,6 +60,7 @@ export const useAuth = () => {
           
           setUser({
             ...currentUser,
+            email: currentUser.email || '',
             role: userRole
           });
           
@@ -119,6 +132,7 @@ export const useAuth = () => {
             
             setUser({
               ...session.user,
+              email: session.user.email || '',
               role: userRole
             });
             

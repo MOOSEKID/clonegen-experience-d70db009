@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import DashboardHeader from '@/components/admin/dashboard/DashboardHeader';
 import StatsSection from '@/components/admin/dashboard/StatsSection';
@@ -7,25 +6,31 @@ import AdditionalInsights from '@/components/admin/dashboard/AdditionalInsights'
 import { supabase } from '@/integrations/supabase/client';
 
 // Types for our dashboard data
-interface MembershipData {
+export interface MembershipData {
   month: string;
   active: number;
   canceled: number;
   total: number;
+  name?: string;
+  members?: number;
 }
 
-interface RevenueData {
+export interface RevenueData {
   month: string;
   memberships: number;
   classes: number;
   other: number;
   total: number;
+  name?: string;
+  revenue?: number;
 }
 
-interface ClassAttendanceData {
+export interface ClassAttendanceData {
   className: string;
   attendance: number;
   capacity: number;
+  name?: string;
+  value?: number;
 }
 
 const AdminDashboard = () => {
@@ -47,9 +52,28 @@ const AdminDashboard = () => {
         const mockRevenueData = generateMockRevenueData();
         const mockClassAttendanceData = generateMockClassAttendanceData();
         
-        setMembershipData(mockMembershipData);
-        setRevenueData(mockRevenueData);
-        setClassAttendanceData(mockClassAttendanceData);
+        // Add required properties for exportUtils
+        const enhancedMembershipData = mockMembershipData.map(item => ({
+          ...item,
+          name: item.month,
+          members: item.total
+        }));
+        
+        const enhancedRevenueData = mockRevenueData.map(item => ({
+          ...item,
+          name: item.month,
+          revenue: item.total
+        }));
+        
+        const enhancedClassAttendanceData = mockClassAttendanceData.map(item => ({
+          ...item,
+          name: item.className,
+          value: item.attendance
+        }));
+        
+        setMembershipData(enhancedMembershipData);
+        setRevenueData(enhancedRevenueData);
+        setClassAttendanceData(enhancedClassAttendanceData);
       } catch (error) {
         console.error('Error fetching dashboard data:', error);
         // Fall back to mock data if fetching fails
@@ -114,9 +138,7 @@ const AdminDashboard = () => {
         membershipData={membershipData}
         revenueData={revenueData}
       />
-      <AdditionalInsights 
-        classAttendanceData={classAttendanceData}
-      />
+      <AdditionalInsights />
     </div>
   );
 };

@@ -1,5 +1,4 @@
-
-import { Child, Award, Clock, Calendar, ChevronDown, ChevronUp } from 'lucide-react';
+import { User, Award, Clock, Calendar, ChevronDown, ChevronUp } from 'lucide-react';
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { useNavigate } from 'react-router-dom';
@@ -83,7 +82,7 @@ const ProgramCard = ({ program }) => {
         
         <div className="grid grid-cols-2 gap-4 mb-4">
           <div className="flex items-center gap-2">
-            <Child className="text-gym-orange" size={18} />
+            <User className="text-gym-orange" size={18} />
             <div>
               <p className="text-sm font-medium">Age Range</p>
               <p className="text-sm text-gray-600">{program.ageRange}</p>

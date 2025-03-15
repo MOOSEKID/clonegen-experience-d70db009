@@ -1,5 +1,4 @@
-
-import { Spa, Heart, Flame, CupSoda, ChevronDown, ChevronUp } from 'lucide-react';
+import { Leaf, Heart, Flame, CupSoda, ChevronDown, ChevronUp } from 'lucide-react';
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { useNavigate } from 'react-router-dom';
@@ -185,7 +184,7 @@ const SpaWellness = () => {
                 </div>
               </li>
               <li className="flex items-start gap-2">
-                <Spa className="text-gym-orange min-w-[20px] mt-1" size={20} />
+                <Leaf className="text-gym-orange min-w-[20px] mt-1" size={20} />
                 <div>
                   <p className="font-medium">Improved Flexibility</p>
                   <p className="text-sm text-gray-600">Regular massage increases range of motion and helps prevent injuries.</p>

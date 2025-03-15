@@ -12,6 +12,27 @@ export interface PerformanceMetrics {
   class_fill_rate: number;
   total_hours: number;
   trainerName?: string;
+  
+  // Additional properties needed by the components
+  averageRating?: number;
+  totalClasses?: number;
+  averageAttendance?: number;
+  clientRetentionRate?: number;
+  monthlySessions?: Array<{ month: string; count: number }>;
+  completionRate?: number;
+  assignedClients?: number;
+  retentionRate?: number;
+  satisfactionScore?: number;
+  activeClients?: number;
+  monthlyGrowth?: number;
+}
+
+export interface ClassAttendance {
+  class_name: string;
+  class_date: string;
+  enrolled_count: number;
+  attended_count: number;
+  attendance_rate: number;
 }
 
 export interface TrainerPerformanceSummary {
