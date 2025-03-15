@@ -260,6 +260,7 @@ export const useAuth = () => {
       
       setUser({
         ...data.user,
+        email: data.user.email || '',
         role: userRole
       });
       

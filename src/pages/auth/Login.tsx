@@ -150,7 +150,7 @@ const Login = () => {
           <div className="text-center text-sm">
             Don't have an account?{' '}
             <Link 
-              to="/signup" 
+              to="/register" 
               className="text-gym-orange hover:underline font-medium"
             >
               Sign up

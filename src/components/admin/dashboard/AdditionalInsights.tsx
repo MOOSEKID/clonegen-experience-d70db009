@@ -20,7 +20,7 @@ const AdditionalInsights: React.FC<AdditionalInsightsProps> = ({ classAttendance
               {classAttendanceData.map((item, index) => (
                 <li key={index} className="flex justify-between items-center">
                   <span>{item.name}</span>
-                  <span>{item.value}/{item.capacity} ({Math.round((item.value / item.capacity) * 100)}%)</span>
+                  <span>{item.value} ({Math.round((item.value / item.attendance) * 100)}%)</span>
                 </li>
               ))}
             </ul>
