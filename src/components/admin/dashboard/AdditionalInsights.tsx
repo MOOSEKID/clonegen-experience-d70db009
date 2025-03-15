@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { ClassAttendanceData } from '@/pages/admin/Dashboard';
+import { ClassAttendanceData } from '@/utils/exportUtils';
 
 interface AdditionalInsightsProps {
   classAttendanceData?: ClassAttendanceData[];
