@@ -1,20 +1,22 @@
+
 import { useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 import { Menu, X, ShoppingBag, User, LayoutDashboard } from 'lucide-react';
-import { toast } from 'sonner';
 import DesktopNav from './header/DesktopNav';
 import MobileMenu from './header/MobileMenu';
+import { useAuth } from '@/contexts/AuthContext';
 
 const Header = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isCompanyDropdownOpen, setIsCompanyDropdownOpen] = useState(false);
   const [isServicesDropdownOpen, setIsServicesDropdownOpen] = useState(false);
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [isAdmin, setIsAdmin] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
+  
+  const { user, isAdmin, signOut } = useAuth();
+  const isLoggedIn = !!user;
 
   useEffect(() => {
     const handleScroll = () => {
@@ -28,31 +30,6 @@ const Header = () => {
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
-
-  useEffect(() => {
-    const checkAuth = () => {
-      const loggedIn = localStorage.getItem('isLoggedIn') === 'true' || document.cookie.includes('session_active=true');
-      const admin = localStorage.getItem('isAdmin') === 'true' || document.cookie.includes('user_role=admin');
-      
-      console.log('Header auth check:', { loggedIn, admin });
-      
-      if (loggedIn && localStorage.getItem('isLoggedIn') !== 'true') {
-        localStorage.setItem('isLoggedIn', 'true');
-      }
-      
-      if (admin && localStorage.getItem('isAdmin') !== 'true') {
-        localStorage.setItem('isAdmin', 'true');
-      }
-      
-      setIsLoggedIn(loggedIn);
-      setIsAdmin(admin);
-    };
-    
-    checkAuth();
-    
-    const interval = setInterval(checkAuth, 2000);
-    return () => clearInterval(interval);
-  }, [location.pathname]);
 
   useEffect(() => {
     setIsMenuOpen(false);
@@ -119,15 +96,8 @@ const Header = () => {
           path: '/logout',
           icon: User,
           action: () => {
-            localStorage.removeItem('isLoggedIn');
-            localStorage.removeItem('isAdmin');
-            localStorage.removeItem('userEmail');
-            localStorage.removeItem('userName');
-            document.cookie = "session_active=; path=/; max-age=0";
-            document.cookie = "user_role=; path=/; max-age=0";
-            console.log('Logged out successfully');
-            toast.success('Logged out successfully');
-            window.location.href = '/login';
+            signOut();
+            navigate('/login');
           }
         }
       ]

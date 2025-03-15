@@ -7,6 +7,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import PerformanceStatsGrid from '@/components/admin/trainers/performance/PerformanceStatsGrid';
 import PerformanceMetricsCard from '@/components/admin/trainers/performance/PerformanceMetricsCard';
 import AttendanceTable, { ClassSession } from '@/components/admin/trainers/performance/AttendanceTable';
+import AttendanceHistoryCard from '@/components/admin/trainers/performance/AttendanceHistoryCard';
+import AttendanceCheckInOut from '@/components/admin/trainers/attendance/AttendanceCheckInOut';
 
 const PerformanceTracking = () => {
   const { trainers, isLoading } = useTrainersData();
@@ -100,14 +102,20 @@ const PerformanceTracking = () => {
                 </CardContent>
               </Card>
               
-              <PerformanceMetricsCard 
-                trainerId={selectedTrainer} 
-                trainerName={getTrainerName()} 
-              />
+              <AttendanceHistoryCard trainerId={selectedTrainer} />
             </div>
           </TabsContent>
           
           <TabsContent value="attendance" className="space-y-4">
+            <div className="grid md:grid-cols-2 gap-4">
+              <AttendanceCheckInOut 
+                trainerId={selectedTrainer} 
+                trainerName={getTrainerName()} 
+              />
+              
+              <AttendanceHistoryCard trainerId={selectedTrainer} limit={10} />
+            </div>
+            
             <Card>
               <CardHeader>
                 <CardTitle>Class Attendance History</CardTitle>
@@ -124,11 +132,26 @@ const PerformanceTracking = () => {
           </TabsContent>
           
           <TabsContent value="metrics" className="space-y-4">
-            <PerformanceMetricsCard 
-              trainerId={selectedTrainer} 
-              trainerName={getTrainerName()} 
-              fullView={true} 
-            />
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <PerformanceMetricsCard 
+                trainerId={selectedTrainer} 
+                metricName="Assigned Clients"
+                metricValue="15"
+                description="Total clients currently assigned to this trainer"
+              />
+              <PerformanceMetricsCard 
+                trainerId={selectedTrainer} 
+                metricName="Retention Rate"
+                metricValue="85%"
+                description="Percentage of clients who continue training"
+              />
+              <PerformanceMetricsCard 
+                trainerId={selectedTrainer} 
+                metricName="Satisfaction Score"
+                metricValue="4.8/5"
+                description="Average client rating"
+              />
+            </div>
           </TabsContent>
         </Tabs>
       ) : (
