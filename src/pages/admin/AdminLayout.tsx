@@ -4,43 +4,28 @@ import { Outlet, useNavigate } from 'react-router-dom';
 import AdminSidebar from '@/components/admin/AdminSidebar';
 import AdminHeader from '@/components/admin/AdminHeader';
 import { toast } from 'sonner';
+import { useAuth } from '@/contexts/AuthContext';
 
 const AdminLayout = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const { isAuthenticated, isAdmin, refreshSession } = useAuth();
   const navigate = useNavigate();
 
   // Check admin authentication
   useEffect(() => {
-    const checkAuth = () => {
+    const checkAuth = async () => {
       try {
-        // Get admin authentication status from localStorage and cookies
-        const isAdmin = localStorage.getItem('isAdmin') === 'true';
-        const sessionActive = document.cookie.includes('session_active=true');
-        const isAdminRole = document.cookie.includes('user_role=admin');
+        setIsLoading(true);
         
-        console.log('Admin auth check:', { isAdmin, sessionActive, isAdminRole });
+        // Refresh session to ensure we have the latest auth state
+        await refreshSession();
         
-        if ((!isAdmin || !sessionActive) && !isAdminRole) {
+        if (!isAuthenticated || !isAdmin) {
           console.log('Admin authentication failed, redirecting to login');
           toast.error('You must be logged in as an administrator');
           navigate('/login', { state: { from: '/admin' } });
         } else {
-          // Ensure both storage mechanisms are synchronized
-          if (!isAdmin && isAdminRole) {
-            localStorage.setItem('isAdmin', 'true');
-          }
-          
-          if (!sessionActive) {
-            document.cookie = "session_active=true; path=/; max-age=2592000"; // 30 days
-          }
-          
-          if (!isAdminRole) {
-            document.cookie = "user_role=admin; path=/; max-age=2592000"; // 30 days
-          }
-          
-          setIsAuthenticated(true);
           console.log('Admin authenticated successfully');
         }
       } catch (error) {
@@ -54,10 +39,11 @@ const AdminLayout = () => {
 
     checkAuth();
     
-    // Recheck authentication every 5 minutes
-    const interval = setInterval(checkAuth, 300000);
+    // No need for frequent polling anymore since we're using onAuthStateChange
+    // Just check once every 10 minutes as a fallback
+    const interval = setInterval(checkAuth, 600000); // 10 minutes
     return () => clearInterval(interval);
-  }, [navigate]);
+  }, [navigate, isAuthenticated, isAdmin, refreshSession]);
 
   const toggleSidebar = () => {
     setIsSidebarOpen(!isSidebarOpen);
@@ -71,8 +57,8 @@ const AdminLayout = () => {
     );
   }
 
-  if (!isAuthenticated) {
-    return null; // Or a loading spinner
+  if (!isAuthenticated || !isAdmin) {
+    return null; // Redirect will happen in the useEffect
   }
 
   return (
