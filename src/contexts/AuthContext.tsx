@@ -1,10 +1,11 @@
 
-import { createContext, ReactNode } from 'react';
+import { createContext, ReactNode, useEffect } from 'react';
 import { useAuthState } from '@/hooks/useAuthState';
 import { supabase } from '@/integrations/supabase/client';
 import { AuthContextType } from '@/types/auth.types';
 import { toast } from 'sonner';
 import { passwordManager, storageManager } from '@/utils/auth.utils';
+import { createAdminUser } from '@/services/createAdmin';
 
 // Create the auth context with default values
 export const AuthContext = createContext<AuthContextType | null>(null);
@@ -24,6 +25,87 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     setIsAdmin, 
     setIsAuthenticated 
   } = useAuthState();
+
+  // Initialize test users on mount
+  useEffect(() => {
+    const createTestUsers = async () => {
+      try {
+        // Check if admin exists first
+        const { data: adminExists, error: checkAdminError } = await supabase
+          .from('profiles')
+          .select('id')
+          .eq('email', 'admin@example.com')
+          .maybeSingle();
+          
+        if (checkAdminError) {
+          console.error('Error checking for admin user:', checkAdminError);
+        }
+        
+        // If admin doesn't exist, create one
+        if (!adminExists) {
+          console.log('Creating admin test user...');
+          const result = await createAdminUser(
+            'admin@example.com', 
+            'admin123', 
+            'Admin User'
+          );
+          console.log('Admin creation result:', result);
+        }
+        
+        // Check if regular user exists
+        const { data: userExists, error: checkUserError } = await supabase
+          .from('profiles')
+          .select('id')
+          .eq('email', 'user@example.com')
+          .maybeSingle();
+          
+        if (checkUserError) {
+          console.error('Error checking for regular user:', checkUserError);
+        }
+        
+        // If regular user doesn't exist, create one
+        if (!userExists) {
+          console.log('Creating regular test user...');
+          const { data, error } = await supabase.auth.signUp({
+            email: 'user@example.com',
+            password: 'user123',
+            options: {
+              data: {
+                full_name: 'Regular User'
+              }
+            }
+          });
+          
+          if (error) {
+            console.error('Error creating regular user:', error);
+          } else if (data.user) {
+            // Create a profile entry for the new user
+            const { error: profileError } = await supabase
+              .from('profiles')
+              .upsert([
+                { 
+                  id: data.user.id,
+                  email: 'user@example.com',
+                  full_name: 'Regular User',
+                  role: 'member',
+                  is_admin: false
+                }
+              ]);
+              
+            if (profileError) {
+              console.error('Error creating user profile:', profileError);
+            } else {
+              console.log('Regular user created successfully');
+            }
+          }
+        }
+      } catch (err) {
+        console.error('Error creating test users:', err);
+      }
+    };
+    
+    createTestUsers();
+  }, []);
 
   /**
    * Login with email and password
@@ -45,7 +127,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         // Get user role from profiles table
         const { data: profile, error: profileError } = await supabase
           .from('profiles')
-          .select('role, is_admin')
+          .select('role, is_admin, full_name, email')
           .eq('id', data.user.id)
           .single();
           
@@ -55,11 +137,12 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         
         const userRole = profile?.role || 'member';
         const userIsAdmin = profile?.is_admin || false;
+        const fullName = profile?.full_name || data.user.user_metadata?.full_name || '';
         
         // Update auth state
         setUser({
           ...data.user,
-          email: data.user.email || '', // Ensure email is always provided
+          email: data.user.email || profile?.email || '', // Ensure email is always provided
           role: userRole
         });
         setIsAdmin(userIsAdmin);
@@ -70,7 +153,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
           true, 
           userIsAdmin, 
           data.user.email || '', 
-          data.user.user_metadata?.full_name || data.user.email || ''
+          fullName
         );
         
         toast.success('Login successful');
