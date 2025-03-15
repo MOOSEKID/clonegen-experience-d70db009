@@ -1,5 +1,6 @@
 
 import { supabase } from '@/integrations/supabase/client';
+import { User } from '@supabase/supabase-js';
 
 export const createAdminUser = async (email: string, password: string, fullName: string) => {
   try {
