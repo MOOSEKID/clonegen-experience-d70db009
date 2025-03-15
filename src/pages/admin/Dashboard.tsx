@@ -7,7 +7,7 @@ import AdditionalInsights from '@/components/admin/dashboard/AdditionalInsights'
 import { supabase } from '@/integrations/supabase/client';
 import { MembershipData, RevenueData, ClassAttendanceData } from '@/utils/exportUtils';
 
-// Types for our dashboard data
+// Types that match the ChartsSection component requirements
 interface LocalMembershipData {
   month: string;
   active: number;
@@ -31,9 +31,12 @@ interface LocalClassAttendanceData {
 
 const AdminDashboard = () => {
   const [timeFilter, setTimeFilter] = useState('weekly');
-  const [membershipData, setMembershipData] = useState<MembershipData[]>([]);
-  const [revenueData, setRevenueData] = useState<RevenueData[]>([]);
-  const [classAttendanceData, setClassAttendanceData] = useState<ClassAttendanceData[]>([]);
+  const [membershipData, setMembershipData] = useState<LocalMembershipData[]>([]);
+  const [revenueData, setRevenueData] = useState<LocalRevenueData[]>([]);
+  const [classAttendanceData, setClassAttendanceData] = useState<LocalClassAttendanceData[]>([]);
+  const [exportMembershipData, setExportMembershipData] = useState<MembershipData[]>([]);
+  const [exportRevenueData, setExportRevenueData] = useState<RevenueData[]>([]);
+  const [exportClassAttendanceData, setExportClassAttendanceData] = useState<ClassAttendanceData[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
@@ -48,27 +51,36 @@ const AdminDashboard = () => {
         const mockRevenueData = generateMockRevenueData();
         const mockClassAttendanceData = generateMockClassAttendanceData();
         
+        // Set the local state for ChartsSection component
+        setMembershipData(mockMembershipData);
+        setRevenueData(mockRevenueData);
+        setClassAttendanceData(mockClassAttendanceData);
+        
         // Transform the data to match the expected format for exportUtils
-        const exportMembershipData: MembershipData[] = mockMembershipData.map(item => ({
+        const transformedMembershipData: MembershipData[] = mockMembershipData.map(item => ({
           name: item.month,
           members: item.total,
           month: item.month,
           active: item.active,
           canceled: item.canceled,
-          total: item.total
+          total: item.total,
+          value: item.total, // Required for the chart
+          capacity: 0 // Not used for membership data
         }));
         
-        const exportRevenueData: RevenueData[] = mockRevenueData.map(item => ({
+        const transformedRevenueData: RevenueData[] = mockRevenueData.map(item => ({
           name: item.month,
           revenue: item.total,
           month: item.month,
           memberships: item.memberships,
           classes: item.classes,
           other: item.other,
-          total: item.total
+          total: item.total,
+          value: item.total, // Required for the chart
+          capacity: 0 // Not used for revenue data
         }));
         
-        const exportClassAttendanceData: ClassAttendanceData[] = mockClassAttendanceData.map(item => ({
+        const transformedClassAttendanceData: ClassAttendanceData[] = mockClassAttendanceData.map(item => ({
           name: item.className,
           value: item.attendance,
           className: item.className,
@@ -76,32 +88,45 @@ const AdminDashboard = () => {
           capacity: item.capacity
         }));
         
-        setMembershipData(exportMembershipData);
-        setRevenueData(exportRevenueData);
-        setClassAttendanceData(exportClassAttendanceData);
+        setExportMembershipData(transformedMembershipData);
+        setExportRevenueData(transformedRevenueData);
+        setExportClassAttendanceData(transformedClassAttendanceData);
       } catch (error) {
         console.error('Error fetching dashboard data:', error);
-        // Fall back to mock data if fetching fails
-        const fallbackMembershipData = generateMockMembershipData().map(item => ({
+        // Handle error case
+        const mockMembershipData = generateMockMembershipData();
+        const mockRevenueData = generateMockRevenueData();
+        const mockClassAttendanceData = generateMockClassAttendanceData();
+        
+        setMembershipData(mockMembershipData);
+        setRevenueData(mockRevenueData);
+        setClassAttendanceData(mockClassAttendanceData);
+        
+        // Transform for export
+        const fallbackMembershipData: MembershipData[] = mockMembershipData.map(item => ({
           name: item.month,
           members: item.total,
           month: item.month,
           active: item.active,
           canceled: item.canceled,
-          total: item.total
+          total: item.total,
+          value: item.total,
+          capacity: 0
         }));
         
-        const fallbackRevenueData = generateMockRevenueData().map(item => ({
+        const fallbackRevenueData: RevenueData[] = mockRevenueData.map(item => ({
           name: item.month,
           revenue: item.total,
           month: item.month,
           memberships: item.memberships,
           classes: item.classes,
           other: item.other,
-          total: item.total
+          total: item.total,
+          value: item.total,
+          capacity: 0
         }));
         
-        const fallbackClassAttendanceData = generateMockClassAttendanceData().map(item => ({
+        const fallbackClassAttendanceData: ClassAttendanceData[] = mockClassAttendanceData.map(item => ({
           name: item.className,
           value: item.attendance,
           className: item.className,
@@ -109,9 +134,9 @@ const AdminDashboard = () => {
           capacity: item.capacity
         }));
         
-        setMembershipData(fallbackMembershipData);
-        setRevenueData(fallbackRevenueData);
-        setClassAttendanceData(fallbackClassAttendanceData);
+        setExportMembershipData(fallbackMembershipData);
+        setExportRevenueData(fallbackRevenueData);
+        setExportClassAttendanceData(fallbackClassAttendanceData);
       } finally {
         setIsLoading(false);
       }
@@ -161,16 +186,16 @@ const AdminDashboard = () => {
       <DashboardHeader 
         timeFilter={timeFilter} 
         setTimeFilter={setTimeFilter} 
-        membershipData={membershipData}
-        revenueData={revenueData}
-        classAttendanceData={classAttendanceData}
+        membershipData={exportMembershipData}
+        revenueData={exportRevenueData}
+        classAttendanceData={exportClassAttendanceData}
       />
       <StatsSection />
       <ChartsSection 
         membershipData={membershipData}
         revenueData={revenueData}
       />
-      <AdditionalInsights classAttendanceData={classAttendanceData} />
+      <AdditionalInsights classAttendanceData={exportClassAttendanceData} />
     </div>
   );
 };
