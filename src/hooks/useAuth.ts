@@ -60,7 +60,7 @@ export const useAuth = () => {
           
           setUser({
             ...currentUser,
-            email: currentUser.email || '',
+            email: currentUser.email || '', // Ensure email is always provided
             role: userRole
           });
           
@@ -132,7 +132,7 @@ export const useAuth = () => {
             
             setUser({
               ...session.user,
-              email: session.user.email || '',
+              email: session.user.email || '', // Ensure email is always provided
               role: userRole
             });
             
@@ -260,6 +260,7 @@ export const useAuth = () => {
       
       setUser({
         ...data.user,
+        email: data.user.email || '', // Ensure email is always provided
         role: userRole
       });
       
