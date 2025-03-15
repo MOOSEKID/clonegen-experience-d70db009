@@ -28,7 +28,7 @@ export const fetchTrainers = async (): Promise<TrainerProfile[]> => {
 
         if (certError) {
           console.error('Error fetching certifications:', certError);
-          return { ...trainer, certifications: [], availability: [] };
+          return { ...trainer, certifications: [] };
         }
 
         // Fetch availability
@@ -39,11 +39,7 @@ export const fetchTrainers = async (): Promise<TrainerProfile[]> => {
 
         if (availError) {
           console.error('Error fetching availability:', availError);
-          return { 
-            ...trainer, 
-            certifications: certifications || [], 
-            availability: [] 
-          };
+          return { ...trainer, certifications: certifications || [], availability: [] };
         }
 
         return {
@@ -54,23 +50,7 @@ export const fetchTrainers = async (): Promise<TrainerProfile[]> => {
       })
     );
 
-    // Ensure all trainer objects conform to the TrainerProfile interface
-    return trainersWithCerts.map(trainer => ({
-      id: trainer.id,
-      name: trainer.name,
-      email: trainer.email,
-      phone: trainer.phone || undefined,
-      bio: trainer.bio || undefined,
-      profile_picture: trainer.profile_picture || undefined,
-      specialization: Array.isArray(trainer.specialization) ? trainer.specialization : [],
-      status: trainer.status || undefined,
-      hire_date: trainer.hire_date || undefined,
-      experience_years: trainer.experience_years || undefined,
-      experience_level: trainer.experience_level || undefined,
-      stripe_account_id: trainer.stripe_account_id || undefined,
-      certifications: trainer.certifications || [],
-      availability: trainer.availability || []
-    }));
+    return trainersWithCerts;
   } catch (error) {
     console.error('Error in fetchTrainers:', error);
     // Return mock data if there's an error

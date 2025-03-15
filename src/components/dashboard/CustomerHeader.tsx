@@ -2,8 +2,6 @@
 import { useState } from 'react';
 import { Search, Bell, Menu, ChevronDown, User } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { useAuth } from '@/contexts/AuthContext';
-import { useNavigate } from 'react-router-dom';
 
 interface CustomerHeaderProps {
   toggleSidebar: () => void;
@@ -11,17 +9,8 @@ interface CustomerHeaderProps {
 
 const CustomerHeader = ({ toggleSidebar }: CustomerHeaderProps) => {
   const [userMenuOpen, setUserMenuOpen] = useState(false);
-  const navigate = useNavigate();
-  const { user, signOut } = useAuth();
-  
-  // Get user details from supabase user or fallback to localStorage
-  const userEmail = user?.email || localStorage.getItem('userEmail') || '';
-  const userName = user?.user_metadata?.name || localStorage.getItem('userName') || 'User';
-
-  const handleSignOut = async () => {
-    await signOut();
-    navigate('/login');
-  };
+  const userEmail = localStorage.getItem('userEmail') || '';
+  const userName = localStorage.getItem('userName') || 'User';
 
   return (
     <header className="bg-gym-darkblue py-3 px-6 flex items-center justify-between border-b border-gray-700">
@@ -76,12 +65,16 @@ const CustomerHeader = ({ toggleSidebar }: CustomerHeaderProps) => {
               <a href="/dashboard/settings" className="block px-4 py-2 text-sm text-gray-300 hover:bg-gym-dark hover:text-white transition-colors">
                 Settings
               </a>
-              <button 
-                onClick={handleSignOut}
-                className="w-full text-left block px-4 py-2 text-sm text-gray-300 hover:bg-gym-dark hover:text-white transition-colors"
+              <a 
+                href="/login" 
+                className="block px-4 py-2 text-sm text-gray-300 hover:bg-gym-dark hover:text-white transition-colors"
+                onClick={() => {
+                  localStorage.removeItem('isLoggedIn');
+                  localStorage.removeItem('userEmail');
+                }}
               >
                 Sign Out
-              </button>
+              </a>
             </div>
           )}
         </div>

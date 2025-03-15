@@ -6,74 +6,71 @@ import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { toast } from 'sonner';
 import { Eye, EyeOff } from 'lucide-react';
-import { useAuth } from '@/contexts/AuthContext';
+
+// Demo user data - in a real app, this would come from a database
+const DEMO_USERS = [
+  { email: 'admin@example.com', password: 'admin123', isAdmin: true, name: 'Admin User' },
+  { email: 'user@example.com', password: 'user123', isAdmin: false, name: 'Regular User' },
+  { email: 'john@example.com', password: 'john123', isAdmin: false, name: 'John Doe' },
+  { email: 'jane@example.com', password: 'jane123', isAdmin: false, name: 'Jane Smith' },
+  { email: 'test@example.com', password: 'test123', isAdmin: false, name: 'Test User' }
+];
 
 const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
   const from = location.state?.from || '/dashboard';
-  
-  const { signIn, user, isAdmin } = useAuth();
 
   useEffect(() => {
-    // If user is already logged in, redirect to appropriate page
-    if (user) {
+    // Check if user is already logged in
+    const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true' || document.cookie.includes('session_active=true');
+    if (isLoggedIn) {
+      const isAdmin = localStorage.getItem('isAdmin') === 'true' || document.cookie.includes('user_role=admin');
       navigate(isAdmin ? '/admin' : '/dashboard');
     }
-  }, [user, isAdmin, navigate]);
+  }, [navigate]);
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    setIsLoading(true);
     
-    // Validate input
-    if (!email || !password) {
-      toast.error('Please enter both email and password');
-      setIsLoading(false);
-      return;
-    }
+    // Find user in demo data
+    const user = DEMO_USERS.find(user => user.email === email && user.password === password);
     
-    try {
-      const { error } = await signIn(email, password);
+    if (user) {
+      // Set login status in localStorage
+      localStorage.setItem('isLoggedIn', 'true');
+      localStorage.setItem('isAdmin', user.isAdmin ? 'true' : 'false');
+      localStorage.setItem('userEmail', email);
+      localStorage.setItem('userName', user.name);
       
-      if (!error) {
-        // The redirection will happen automatically in the useEffect when user state updates
+      // Set cookies with expiry (30 days)
+      const expiryDate = new Date();
+      expiryDate.setDate(expiryDate.getDate() + 30);
+      document.cookie = `session_active=true; path=/; expires=${expiryDate.toUTCString()}`;
+      document.cookie = `user_role=${user.isAdmin ? 'admin' : 'user'}; path=/; expires=${expiryDate.toUTCString()}`;
+      
+      toast.success('Login successful! Redirecting...');
+      
+      // Navigate based on user role
+      navigate(user.isAdmin ? '/admin' : from);
+    } else {
+      // Provide more helpful error message
+      if (email === '' || password === '') {
+        toast.error('Please enter both email and password');
+      } else if (DEMO_USERS.some(user => user.email === email)) {
+        toast.error('Incorrect password. Please try again.');
+      } else {
+        toast.error('Invalid credentials. For demo, try: user@example.com / user123');
       }
-    } catch (error) {
-      console.error('Login error:', error);
-    } finally {
-      setIsLoading(false);
     }
   };
 
   const togglePasswordVisibility = () => {
     setShowPassword(prev => !prev);
-  };
-
-  // For demo purposes - quick login buttons
-  const loginAsDemo = async (userType: 'admin' | 'user') => {
-    setIsLoading(true);
-    const demoCredentials = {
-      admin: { email: 'admin@example.com', password: 'admin123' },
-      user: { email: 'user@example.com', password: 'user123' }
-    };
-    
-    const credentials = demoCredentials[userType];
-    setEmail(credentials.email);
-    setPassword(credentials.password);
-    
-    try {
-      await signIn(credentials.email, credentials.password);
-    } catch (error) {
-      console.error('Demo login error:', error);
-    } finally {
-      setIsLoading(false);
-    }
   };
 
   return (
@@ -150,39 +147,10 @@ const Login = () => {
             </div>
           </div>
           
-          <Button 
-            type="submit" 
-            className="w-full bg-gym-orange hover:bg-gym-orange/90 text-white"
-            disabled={isLoading}
-          >
-            {isLoading ? 'Logging in...' : 'Log in'}
+          <Button type="submit" className="w-full bg-gym-orange hover:bg-gym-orange/90 text-white">
+            Log in
           </Button>
         </form>
-        
-        {/* Demo login options */}
-        <div className="mt-4 border-t border-white/10 pt-4">
-          <p className="text-sm text-white/70 mb-2 text-center">Demo Quick Access:</p>
-          <div className="grid grid-cols-2 gap-2">
-            <Button
-              type="button"
-              variant="outline"
-              className="text-xs"
-              onClick={() => loginAsDemo('admin')}
-              disabled={isLoading}
-            >
-              Login as Admin
-            </Button>
-            <Button
-              type="button"
-              variant="outline"
-              className="text-xs"
-              onClick={() => loginAsDemo('user')}
-              disabled={isLoading}
-            >
-              Login as User
-            </Button>
-          </div>
-        </div>
         
         <div className="mt-6 text-center text-sm text-white/70">
           Don't have an account?{' '}
