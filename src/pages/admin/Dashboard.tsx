@@ -85,7 +85,8 @@ const AdminDashboard = () => {
           value: item.attendance,
           className: item.className,
           attendance: item.attendance,
-          capacity: item.capacity
+          capacity: item.capacity,
+          total: item.capacity // Using capacity as total for percentage calculations
         }));
         
         setExportMembershipData(transformedMembershipData);
@@ -131,7 +132,8 @@ const AdminDashboard = () => {
           value: item.attendance,
           className: item.className,
           attendance: item.attendance,
-          capacity: item.capacity
+          capacity: item.capacity,
+          total: item.capacity // Using capacity as total for percentage calculations
         }));
         
         setExportMembershipData(fallbackMembershipData);
