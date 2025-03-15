@@ -1,27 +1,27 @@
 
 import { useState } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
-import { Mail, Lock, AlertCircle } from 'lucide-react';
+import { Mail, Lock, Eye, EyeOff } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { Alert, AlertDescription } from '@/components/ui/alert';
 import { useAuth } from '@/hooks/useAuth';
 
 const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const { login } = useAuth();
+  const { signIn } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   
-  // Get referrer from state or query parameter
-  const from = location.state?.from || new URLSearchParams(location.search).get('redirect') || '/dashboard';
-  
-  const handleLogin = async (e: React.FormEvent) => {
+  // Get the origin path the user was redirected from
+  const from = (location.state as { from?: string })?.from || '/dashboard';
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
     if (!email || !password) {
@@ -33,34 +33,17 @@ const Login = () => {
       setIsLoading(true);
       setErrorMessage('');
       
-      const success = await login(email, password);
+      const { success, error } = await signIn(email, password);
       
       if (success) {
-        // Redirect handled in login function
-        console.log('Login successful, redirecting to', from);
+        // Redirect to the previous page or dashboard
+        navigate(from, { replace: true });
+      } else {
+        setErrorMessage(error || 'Invalid email or password');
       }
     } catch (error) {
       console.error('Login error:', error);
-      setErrorMessage(error instanceof Error ? error.message : 'Login failed');
-    } finally {
-      setIsLoading(false);
-    }
-  };
-  
-  const handleAdminLogin = async () => {
-    try {
-      setIsLoading(true);
-      setErrorMessage('');
-      
-      const success = await login('admin@example.com', 'admin123');
-      
-      if (success) {
-        // Navigate is handled in login function
-        console.log('Admin login successful');
-      }
-    } catch (error) {
-      console.error('Admin login error:', error);
-      setErrorMessage(error instanceof Error ? error.message : 'Admin login failed');
+      setErrorMessage('An unexpected error occurred');
     } finally {
       setIsLoading(false);
     }
@@ -70,20 +53,19 @@ const Login = () => {
     <div className="min-h-screen flex items-center justify-center bg-gray-100 p-4">
       <Card className="w-full max-w-md">
         <CardHeader className="space-y-1">
-          <CardTitle className="text-2xl font-bold text-center">Sign In</CardTitle>
+          <CardTitle className="text-2xl font-bold text-center">Welcome back</CardTitle>
           <CardDescription className="text-center">
-            Enter your email and password to access your account
+            Login to your account to access your dashboard
           </CardDescription>
         </CardHeader>
         <CardContent>
           {errorMessage && (
-            <Alert variant="destructive" className="mb-4">
-              <AlertCircle className="h-4 w-4" />
-              <AlertDescription>{errorMessage}</AlertDescription>
-            </Alert>
+            <div className="bg-red-50 text-red-600 p-3 rounded-md mb-4">
+              {errorMessage}
+            </div>
           )}
           
-          <form onSubmit={handleLogin} className="space-y-4">
+          <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="email">Email</Label>
               <div className="relative">
@@ -100,12 +82,9 @@ const Login = () => {
               </div>
             </div>
             <div className="space-y-2">
-              <div className="flex items-center justify-between">
+              <div className="flex justify-between">
                 <Label htmlFor="password">Password</Label>
-                <Link 
-                  to="/forgot-password" 
-                  className="text-sm text-gym-orange hover:underline"
-                >
+                <Link to="/forgot-password" className="text-sm text-gym-orange hover:underline">
                   Forgot password?
                 </Link>
               </div>
@@ -113,13 +92,19 @@ const Login = () => {
                 <Lock className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
                 <Input
                   id="password"
-                  type="password"
-                  placeholder="••••••••"
-                  className="pl-10"
+                  type={showPassword ? 'text' : 'password'}
+                  className="pl-10 pr-10"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   disabled={isLoading}
                 />
+                <button 
+                  type="button"
+                  className="absolute right-3 top-3 text-gray-400"
+                  onClick={() => setShowPassword(!showPassword)}
+                >
+                  {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                </button>
               </div>
             </div>
             <Button 
@@ -127,41 +112,17 @@ const Login = () => {
               className="w-full bg-gym-orange hover:bg-gym-orange/90" 
               disabled={isLoading}
             >
-              {isLoading ? 'Signing in...' : 'Sign In'}
+              {isLoading ? 'Signing in...' : 'Sign in'}
             </Button>
           </form>
-          
-          <div className="my-4 flex items-center">
-            <div className="flex-grow h-0.5 bg-gray-200"></div>
-            <span className="px-4 text-sm text-gray-400">OR</span>
-            <div className="flex-grow h-0.5 bg-gray-200"></div>
-          </div>
-          
-          <Button 
-            variant="outline" 
-            className="w-full" 
-            onClick={handleAdminLogin}
-            disabled={isLoading}
-          >
-            Admin Login (admin@example.com)
-          </Button>
         </CardContent>
-        <CardFooter className="flex flex-col space-y-4">
-          <div className="text-center text-sm">
+        <CardFooter className="flex justify-center">
+          <p className="text-sm text-gray-600">
             Don't have an account?{' '}
-            <Link 
-              to="/register" 
-              className="text-gym-orange hover:underline font-medium"
-            >
+            <Link to="/register" className="text-gym-orange hover:underline font-medium">
               Sign up
             </Link>
-          </div>
-          <div className="text-center text-xs text-gray-500">
-            By signing in, you agree to our{' '}
-            <Link to="/terms" className="underline">Terms of Service</Link>{' '}
-            and{' '}
-            <Link to="/privacy" className="underline">Privacy Policy</Link>
-          </div>
+          </p>
         </CardFooter>
       </Card>
     </div>

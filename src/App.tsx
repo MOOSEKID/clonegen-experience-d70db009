@@ -1,8 +1,9 @@
+
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import './App.css';
 import Home from './pages/Home';
-import Dashboard from './pages/Dashboard';
+import Dashboard from './pages/dashboard/Dashboard';
 import AdminLayout from './pages/admin/AdminLayout';
 import NotFound from './components/NotFound';
 import Login from './pages/auth/Login';
