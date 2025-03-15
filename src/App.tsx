@@ -4,27 +4,40 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
+
+// Layout components
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import AdminLayout from "./pages/admin/AdminLayout";
+import DashboardLayout from "./pages/dashboard/DashboardLayout";
+
+// Main pages
 import Index from "./pages/Index";
 import AboutUs from "./pages/AboutUs";
 import Services from "./pages/Services";
+import Blogs from "./pages/Blogs";
+import ContactUs from "./pages/ContactUs";
+import NotFound from "./pages/NotFound";
+
+// Service pages
 import FitnessFacilities from "./pages/FitnessFacilities";
 import YouthPrograms from "./pages/YouthPrograms";
 import SpaWellness from "./pages/SpaWellness";
 import Membership from "./pages/Membership";
 import Classes from "./pages/Classes";
-import Blogs from "./pages/Blogs";
-import Login from "./pages/Login";
-import Signup from "./pages/Signup";
-import NotFound from "./pages/NotFound";
-import ContactUs from "./pages/ContactUs";
 import Timetable from "./pages/Timetable";
 import OpeningTimes from "./pages/OpeningTimes";
+
+// Shop pages
 import ShopPage from "./pages/Shop";
 import CategoryPage from "./pages/shop/CategoryPage";
 import ProductPage from "./pages/shop/ProductPage";
-import AdminLayout from "./pages/admin/AdminLayout";
+
+// Auth pages
+import Login from "./pages/Login";
+import Signup from "./pages/Signup";
+
+// Admin pages
 import AdminDashboard from "./pages/admin/Dashboard";
 import AdminMembers from "./pages/admin/Members";
 import AdminClasses from "./pages/admin/Classes";
@@ -37,13 +50,12 @@ import AdminReports from "./pages/admin/Reports";
 import AdminSettings from "./pages/admin/Settings";
 import AdminSupport from "./pages/admin/Support";
 
-// Import trainer subpages
+// Trainer subpages
 import TrainerProfiles from "./pages/admin/trainers/TrainerProfiles";
 import PerformanceTracking from "./pages/admin/trainers/PerformanceTracking";
 import TrainerRatings from "./pages/admin/trainers/TrainerRatings";
 
-// Customer Dashboard imports
-import DashboardLayout from "./pages/dashboard/DashboardLayout";
+// Customer Dashboard pages
 import Dashboard from "./pages/dashboard/Dashboard";
 
 // Create a new query client instance
