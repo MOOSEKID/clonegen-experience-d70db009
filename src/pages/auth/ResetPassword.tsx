@@ -15,7 +15,7 @@ const ResetPassword = () => {
   const [errorMessage, setErrorMessage] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
-  const { updatePassword } = useAuth();
+  const { resetPassword } = useAuth();
   const navigate = useNavigate();
 
   // Automatically redirect after successful password reset
@@ -57,7 +57,7 @@ const ResetPassword = () => {
       setIsLoading(true);
       setErrorMessage('');
       
-      const success = await updatePassword(password);
+      const success = await resetPassword(password);
       
       if (success) {
         setIsSuccess(true);
