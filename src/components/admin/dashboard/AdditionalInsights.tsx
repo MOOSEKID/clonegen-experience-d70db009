@@ -1,35 +1,22 @@
 
-import React from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { ClassAttendanceData } from '@/utils/exportUtils';
+import ClassAttendanceChart from './ClassAttendanceChart';
+import RecentActivities from './RecentActivities';
 
-interface AdditionalInsightsProps {
-  classAttendanceData?: ClassAttendanceData[];
-}
+// Export the data for use in export functionality
+export const classAttendanceData = [
+  { name: 'Yoga', value: 30 },
+  { name: 'HIIT', value: 25 },
+  { name: 'Cardio', value: 20 },
+  { name: 'Weight', value: 15 },
+  { name: 'Zumba', value: 10 },
+];
 
-const AdditionalInsights: React.FC<AdditionalInsightsProps> = ({ classAttendanceData = [] }) => {
+const AdditionalInsights = () => {
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Additional Insights</CardTitle>
-      </CardHeader>
-      <CardContent>
-        <div className="grid gap-4">
-          {classAttendanceData.length > 0 ? (
-            <ul className="space-y-2">
-              {classAttendanceData.map((item, index) => (
-                <li key={index} className="flex justify-between items-center">
-                  <span>{item.name}</span>
-                  <span>{item.value} ({Math.round((item.value / item.total) * 100)}%)</span>
-                </li>
-              ))}
-            </ul>
-          ) : (
-            <p className="text-muted-foreground">No class attendance data available</p>
-          )}
-        </div>
-      </CardContent>
-    </Card>
+    <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <ClassAttendanceChart data={classAttendanceData} />
+      <RecentActivities />
+    </div>
   );
 };
 

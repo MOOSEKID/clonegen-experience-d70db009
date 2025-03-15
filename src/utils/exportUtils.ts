@@ -44,14 +44,10 @@ export type RevenueData = {
   revenue: number;
 };
 
-export interface ClassAttendanceData {
+export type ClassAttendanceData = {
   name: string;
   value: number;
-  total: number;
-  className?: string;
-  attendance?: number;
-  capacity?: number;
-}
+};
 
 // Define columns for CSV export
 export const membershipColumns = [
