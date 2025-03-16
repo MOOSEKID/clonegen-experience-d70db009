@@ -59,8 +59,9 @@ const CertificateUploadForm = ({ trainerId, onSubmit, onCancel, isOpen }: Certif
     setSelectedFile(null);
   };
 
-  const handleFileSelected = (file: File) => {
+  const handleFileSelected = async (file: File): Promise<void> => {
     setSelectedFile(file);
+    return Promise.resolve();
   };
 
   const handleClose = () => {
@@ -139,12 +140,11 @@ const CertificateUploadForm = ({ trainerId, onSubmit, onCancel, isOpen }: Certif
             <div>
               <FormLabel>Certificate Document</FormLabel>
               <FileUpload
-                type="certificate"
+                type="certification"
                 onFileSelected={handleFileSelected}
                 isUploading={isUploading}
                 progress={uploadProgress}
                 buttonText="Upload Certificate"
-                acceptedFileTypes="application/pdf,image/png,image/jpeg"
               />
             </div>
 

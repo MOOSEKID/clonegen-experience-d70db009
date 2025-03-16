@@ -30,25 +30,30 @@ export const useTrainerFileUpload = () => {
       }
       
       // Upload the file
+      // Set initial progress
+      setUploadProgress(10);
+      
       const { data, error } = await supabase.storage
         .from('trainers')
         .upload(filePath, file, {
           cacheControl: '3600',
-          upsert: true,
-          onUploadProgress: (progress) => {
-            const percent = (progress.loaded / progress.total) * 100;
-            setUploadProgress(Math.round(percent));
-          },
+          upsert: true
         });
         
       if (error) {
         throw error;
       }
       
+      // Simulate progress after successful upload
+      setUploadProgress(50);
+      
       // Get the public URL
       const { data: { publicUrl } } = supabase.storage
         .from('trainers')
         .getPublicUrl(filePath);
+      
+      // Complete the progress
+      setUploadProgress(100);
         
       // Success message
       toast({
@@ -66,7 +71,10 @@ export const useTrainerFileUpload = () => {
       });
       return null;
     } finally {
-      setIsUploading(false);
+      // After a short delay, reset the uploading state
+      setTimeout(() => {
+        setIsUploading(false);
+      }, 500);
     }
   };
 

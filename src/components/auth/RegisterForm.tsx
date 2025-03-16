@@ -9,6 +9,7 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Checkbox } from '@/components/ui/checkbox';
 import { useAuth } from '@/hooks/useAuth';
 import { useRegisterValidation } from '@/hooks/auth/useRegisterValidation';
+import TermsAgreement from '@/components/auth/TermsAgreement';
 
 interface RegisterFormProps {
   onSuccess?: () => void;
