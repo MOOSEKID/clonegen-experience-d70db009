@@ -17,40 +17,34 @@ const Login = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { login, isAuthenticated, isAdmin } = useAuth();
-  
-  // Get redirect path from location state or default to dashboard
   const from = location.state?.from || '/dashboard';
-  
-  // Check if user is already logged in
+
   useEffect(() => {
+    // Check if user is already logged in
     if (isAuthenticated) {
-      const redirectPath = isAdmin ? '/admin' : '/dashboard';
-      console.log('Already authenticated, redirecting to', redirectPath);
-      navigate(redirectPath, { replace: true });
+      // Redirect based on user role
+      navigate(isAdmin ? '/admin' : '/dashboard');
     }
-  }, [isAuthenticated, isAdmin, navigate]);
+  }, [navigate, isAuthenticated, isAdmin]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setIsLoading(true);
     
     try {
-      setIsLoading(true);
-      
       // Email validation
       if (!email || !password) {
         toast.error('Please enter both email and password');
+        setIsLoading(false);
         return;
       }
       
-      console.log('Attempting login with:', email);
       const success = await login(email, password);
       
       if (success) {
-        console.log('Login successful, user is admin:', isAdmin);
-        toast.success('Login successful');
-        // Redirect will happen in useEffect when isAuthenticated changes
-      } else {
-        console.log('Login failed');
+        // Navigate after successful login
+        // The destination will be determined by isAdmin in the useEffect
+        console.log('Login successful! Redirecting...');
       }
     } catch (error) {
       console.error('Login error:', error);
@@ -65,13 +59,13 @@ const Login = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-6 pt-24">
+    <div className="min-h-screen flex items-center justify-center p-6 bg-gym-dark">
       <Card className="w-full max-w-md p-6 bg-gym-darkblue text-white border border-white/10">
         <div className="mb-6 text-center">
           <h1 className="text-3xl font-bold mb-2">Welcome Back</h1>
           <p className="text-white/70">Log in to access your account</p>
           <div className="mt-4 p-3 bg-gym-orange/10 rounded-md border border-gym-orange/20">
-            <p className="text-sm font-medium text-gym-orange">Admin Login: admin@uptowngym.rw / admin123</p>
+            <p className="text-sm font-medium text-gym-orange">Admin Login: admin@example.com / admin123</p>
             <p className="text-sm text-white/70 mt-1">User Login: user@example.com / user123</p>
           </div>
         </div>

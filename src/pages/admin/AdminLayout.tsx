@@ -17,33 +17,28 @@ const AdminLayout = () => {
     const checkAuth = async () => {
       try {
         setIsLoading(true);
-        console.log('AdminLayout - checking auth', { isAuthenticated, isAdmin });
         
-        if (!isAuthenticated) {
-          console.log('Not authenticated, redirecting to login');
-          toast.error('You must be logged in to access the admin area');
-          navigate('/login', { replace: true });
-          return;
+        if (!isAuthenticated || !isAdmin) {
+          console.log('Admin authentication failed, redirecting to login');
+          toast.error('You must be logged in as an administrator');
+          navigate('/login', { state: { from: '/admin' } });
+        } else {
+          console.log('Admin authenticated successfully');
         }
-        
-        if (!isAdmin) {
-          console.log('Not an admin, redirecting to dashboard');
-          toast.error('You do not have permission to access the admin area');
-          navigate('/dashboard', { replace: true });
-          return;
-        }
-
-        console.log('Admin authenticated successfully');
       } catch (error) {
         console.error('Authentication check error:', error);
         toast.error('Authentication error. Please log in again.');
-        navigate('/login', { replace: true });
+        navigate('/login', { state: { from: '/admin' } });
       } finally {
         setIsLoading(false);
       }
     };
 
     checkAuth();
+    
+    // Check authentication status periodically
+    const interval = setInterval(checkAuth, 600000); // 10 minutes
+    return () => clearInterval(interval);
   }, [navigate, isAuthenticated, isAdmin]);
 
   const toggleSidebar = () => {

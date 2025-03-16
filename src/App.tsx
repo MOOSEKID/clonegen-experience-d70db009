@@ -1,4 +1,3 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -81,7 +80,7 @@ const App = () => {
           <BrowserRouter>
             <Routes>
               {/* Main Routes with Header and Footer */}
-              <Route path="/" element={
+              <Route path="*" element={
                 <div className="flex flex-col min-h-screen">
                   <Header />
                   <div className="flex-grow">
@@ -98,11 +97,11 @@ const App = () => {
                       <Route path="/shop" element={<ShopPage />} />
                       <Route path="/shop/category/:categoryId" element={<CategoryPage />} />
                       <Route path="/shop/product/:productId" element={<ProductPage />} />
+                      <Route path="/login" element={<Login />} />
+                      <Route path="/signup" element={<Signup />} />
                       <Route path="/contact-us" element={<ContactUs />} />
                       <Route path="/timetable" element={<Timetable />} />
                       <Route path="/opening-times" element={<OpeningTimes />} />
-                      <Route path="/login" element={<Login />} />
-                      <Route path="/signup" element={<Signup />} />
                       <Route path="*" element={<NotFound />} />
                     </Routes>
                   </div>
