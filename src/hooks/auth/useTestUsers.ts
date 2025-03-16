@@ -60,7 +60,7 @@ export const useTestUsers = () => {
           
           let existingUser = null;
           if (authData && authData.users) {
-            // Use type assertion to tell TypeScript that users have email property
+            // Use explicit type assertion
             existingUser = authData.users.find((user: any) => user.email === 'user@example.com');
           }
           

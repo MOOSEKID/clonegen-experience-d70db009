@@ -6,9 +6,10 @@ import { Link } from 'react-router-dom';
 interface TermsAgreementProps {
   accepted: boolean;
   onChange: (checked: boolean) => void;
+  disabled?: boolean;
 }
 
-const TermsAgreement: React.FC<TermsAgreementProps> = ({ accepted, onChange }) => {
+const TermsAgreement: React.FC<TermsAgreementProps> = ({ accepted, onChange, disabled = false }) => {
   return (
     <div className="flex items-start space-x-2 mt-4">
       <Checkbox 
@@ -16,6 +17,7 @@ const TermsAgreement: React.FC<TermsAgreementProps> = ({ accepted, onChange }) =
         checked={accepted}
         onCheckedChange={onChange}
         className="mt-1"
+        disabled={disabled}
       />
       <label htmlFor="terms" className="text-sm text-gray-600">
         I agree to the{' '}

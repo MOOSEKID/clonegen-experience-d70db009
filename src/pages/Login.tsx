@@ -39,12 +39,14 @@ const Login = () => {
           // Check if user is admin by querying the profiles table
           const { data: profileData, error: profileError } = await supabase
             .from('profiles')
-            .select('is_admin, email')
+            .select('is_admin, role')
             .eq('id', session.user.id)
             .single();
             
           if (profileError) {
             console.error("Error fetching profile:", profileError);
+            // Don't try to access properties on error
+            return;
           }
           
           // Check if it's one of our admin users
@@ -59,7 +61,7 @@ const Login = () => {
             if (!userIsAdmin) {
               const { error: updateError } = await supabase
                 .from('profiles')
-                .update({ is_admin: true })
+                .update({ is_admin: true, role: 'admin' })
                 .eq('id', session.user.id);
                 
               if (updateError) {
