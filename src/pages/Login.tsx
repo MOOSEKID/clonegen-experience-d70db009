@@ -39,7 +39,7 @@ const Login = () => {
           // Check if user is admin by querying the profiles table
           const { data: profileData, error: profileError } = await supabase
             .from('profiles')
-            .select('is_admin')
+            .select('is_admin, email')
             .eq('id', session.user.id)
             .single();
             
@@ -47,7 +47,27 @@ const Login = () => {
             console.error("Error fetching profile:", profileError);
           }
           
-          const userIsAdmin = profileData?.is_admin || false;
+          // Check if it's one of our admin users
+          const userEmail = session.user.email;
+          let userIsAdmin = profileData?.is_admin || false;
+          
+          // Explicitly check for the admin email addresses
+          if (userEmail === 'admin@example.com' || userEmail === 'admin@uptowngym.rw') {
+            userIsAdmin = true;
+            
+            // Update profile if needed
+            if (!userIsAdmin) {
+              const { error: updateError } = await supabase
+                .from('profiles')
+                .update({ is_admin: true })
+                .eq('id', session.user.id);
+                
+              if (updateError) {
+                console.error("Error updating admin status:", updateError);
+              }
+            }
+          }
+          
           const redirectPath = userIsAdmin ? '/admin' : '/dashboard';
           
           // Force navigation with replace to prevent back button from returning to login
@@ -80,8 +100,11 @@ const Login = () => {
         console.log('Login successful!');
         toast.success('Login successful!');
         
+        // Check if this is one of our admin emails
+        const isAdminUser = email === 'admin@example.com' || email === 'admin@uptowngym.rw';
+        
         // Force navigation to dashboard
-        const targetPath = isAdmin ? '/admin' : '/dashboard';
+        const targetPath = isAdminUser ? '/admin' : '/dashboard';
         console.log('Forcing navigation to:', targetPath);
         
         // Small timeout to ensure state is updated before redirect
