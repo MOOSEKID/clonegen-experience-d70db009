@@ -101,16 +101,14 @@ const App = () => {
                       <Route path="/contact-us" element={<ContactUs />} />
                       <Route path="/timetable" element={<Timetable />} />
                       <Route path="/opening-times" element={<OpeningTimes />} />
+                      <Route path="/login" element={<Login />} />
+                      <Route path="/signup" element={<Signup />} />
                       <Route path="*" element={<NotFound />} />
                     </Routes>
                   </div>
                   <Footer />
                 </div>
               } />
-              
-              {/* Auth Routes (without header/footer) */}
-              <Route path="/login" element={<Login />} />
-              <Route path="/signup" element={<Signup />} />
               
               {/* Admin Routes */}
               <Route path="/admin/*" element={<AdminLayout />}>

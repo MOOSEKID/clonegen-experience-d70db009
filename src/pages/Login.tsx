@@ -18,6 +18,9 @@ const Login = () => {
   const location = useLocation();
   const { login, isAuthenticated, isAdmin } = useAuth();
   
+  // Get redirect path from location state or default to dashboard
+  const from = location.state?.from || '/dashboard';
+  
   // Check if user is already logged in
   useEffect(() => {
     if (isAuthenticated) {
@@ -44,7 +47,8 @@ const Login = () => {
       
       if (success) {
         console.log('Login successful, user is admin:', isAdmin);
-        // No need to navigate here, the useEffect will handle it
+        toast.success('Login successful');
+        // Redirect will happen in useEffect when isAuthenticated changes
       } else {
         console.log('Login failed');
       }
@@ -61,7 +65,7 @@ const Login = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-6 bg-gym-dark">
+    <div className="min-h-screen flex items-center justify-center p-6 pt-24">
       <Card className="w-full max-w-md p-6 bg-gym-darkblue text-white border border-white/10">
         <div className="mb-6 text-center">
           <h1 className="text-3xl font-bold mb-2">Welcome Back</h1>

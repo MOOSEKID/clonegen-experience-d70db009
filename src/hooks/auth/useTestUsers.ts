@@ -14,18 +14,27 @@ export const useTestUsers = () => {
           // Check for existing users first by checking profiles instead of auth users
           const { data: existingProfiles, error: profileError } = await supabase
             .from('profiles')
-            .select('email');
+            .select('id, full_name');
           
           if (profileError) {
             console.error('Error checking existing profiles:', profileError);
             return;
           }
           
-          const userEmails = existingProfiles?.map(profile => profile.email) || [];
-          console.log('Existing user emails:', userEmails);
+          const existingProfileIds = existingProfiles?.map(profile => profile.id) || [];
+          console.log('Existing profile IDs:', existingProfileIds);
+          
+          // Get auth users to check emails (since profiles might not have emails)
+          const { data: authUsers, error: authError } = await supabase.auth.admin.listUsers();
+          if (authError) {
+            console.error('Error listing auth users:', authError);
+          }
+          
+          const existingEmails = authUsers?.users?.map(user => user.email) || [];
+          console.log('Existing user emails:', existingEmails);
           
           // Create test admin user if it doesn't exist
-          if (!userEmails.includes('admin@example.com')) {
+          if (!existingEmails.includes('admin@example.com')) {
             console.log('Creating test admin user...');
             await createAdminUser(
               'admin@example.com',
@@ -35,7 +44,7 @@ export const useTestUsers = () => {
           }
           
           // Create another admin for Uptown Gym
-          if (!userEmails.includes('admin@uptowngym.rw')) {
+          if (!existingEmails.includes('admin@uptowngym.rw')) {
             console.log('Creating Uptown Gym admin user...');
             await createAdminUser(
               'admin@uptowngym.rw',
@@ -45,7 +54,7 @@ export const useTestUsers = () => {
           }
           
           // Create test regular user if it doesn't exist
-          if (!userEmails.includes('user@example.com')) {
+          if (!existingEmails.includes('user@example.com')) {
             console.log('Creating test regular user...');
             const { data: regularUser, error: regularUserError } = await supabase.auth.signUp({
               email: 'user@example.com',
