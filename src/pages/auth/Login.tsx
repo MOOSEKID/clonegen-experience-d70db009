@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { Mail, Lock, AlertCircle } from 'lucide-react';
@@ -25,10 +24,11 @@ const Login = () => {
   // Check if user is already authenticated
   useEffect(() => {
     if (isAuthenticated) {
-      // Redirect based on user role
-      navigate(isAdmin ? '/admin' : '/dashboard');
+      console.log('User authenticated, redirecting to:', from);
+      // Redirect based on saved path or user role
+      navigate(from || (isAdmin ? '/admin' : '/dashboard'), { replace: true });
     }
-  }, [isAuthenticated, isAdmin, navigate]);
+  }, [isAuthenticated, isAdmin, navigate, from]);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -46,12 +46,13 @@ const Login = () => {
       
       if (success) {
         toast.success('Login successful');
-        // Navigation will be handled by the useEffect
-        console.log('Login successful, redirection will happen through useEffect');
+        // Let the useEffect handle navigation after auth state updates
+        console.log('Login successful, waiting for auth state update');
       }
     } catch (error) {
       console.error('Login error:', error);
       setErrorMessage(error instanceof Error ? error.message : 'Login failed');
+      toast.error('Login failed. Please try again.');
     } finally {
       setIsLoading(false);
     }

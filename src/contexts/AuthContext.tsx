@@ -1,5 +1,4 @@
-
-import { createContext, ReactNode, useEffect } from 'react';
+import React, { createContext, ReactNode, useEffect } from 'react';
 import { useAuthState } from '@/hooks/useAuthState';
 import { AuthContextType } from '@/types/auth.types';
 import { useLoginService } from '@/hooks/auth/useLoginService';
@@ -97,6 +96,15 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
    * Handle session update - common logic for SIGNED_IN and initial session check
    */
   const handleSessionUpdate = async (session: any) => {
+    if (!session?.user) {
+      console.error('Invalid session object received');
+      setUser(null);
+      setIsAdmin(false);
+      setIsAuthenticated(false);
+      authStorageService.setAuthData(false, false, '', '');
+      return;
+    }
+
     // Additional setup after sign-in or session found
     console.log('Session established', session);
     
@@ -128,6 +136,16 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
             
           if (insertError) {
             console.error('Error creating profile after session update:', insertError);
+            // Set default values if profile creation fails
+            setUser({
+              ...session.user,
+              email: session.user.email || '',
+              role: 'member'
+            });
+            setIsAdmin(false);
+            setIsAuthenticated(true);
+            authStorageService.setAuthData(true, false, session.user.email || '', session.user.user_metadata?.full_name || session.user.email || '');
+            toast.error('Error setting up user profile. Some features may be limited.');
           } else {
             console.log('Profile created after session update');
             
@@ -138,16 +156,29 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
               role: 'member'
             });
             
-            setIsAdmin(session.user.email === 'admin@example.com');
+            const isAdminUser = session.user.email === 'admin@example.com';
+            setIsAdmin(isAdminUser);
             setIsAuthenticated(true);
             
             authStorageService.setAuthData(
               true, 
-              session.user.email === 'admin@example.com', 
+              isAdminUser, 
               session.user.email || '', 
               session.user.user_metadata?.full_name || session.user.email || ''
             );
           }
+        } else {
+          // Handle other profile fetch errors
+          console.error('Unexpected error fetching profile:', error);
+          setUser({
+            ...session.user,
+            email: session.user.email || '',
+            role: 'member'
+          });
+          setIsAdmin(false);
+          setIsAuthenticated(true);
+          authStorageService.setAuthData(true, false, session.user.email || '', session.user.user_metadata?.full_name || session.user.email || '');
+          toast.error('Error loading user profile. Some features may be limited.');
         }
       } else {
         // Profile exists, update auth state
@@ -174,6 +205,16 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       }
     } catch (error) {
       console.error('Error in profile check after session update:', error);
+      // Set safe defaults in case of error
+      setUser({
+        ...session.user,
+        email: session.user.email || '',
+        role: 'member'
+      });
+      setIsAdmin(false);
+      setIsAuthenticated(true);
+      authStorageService.setAuthData(true, false, session.user.email || '', session.user.user_metadata?.full_name || session.user.email || '');
+      toast.error('Error loading user profile. Some features may be limited.');
     }
   };
 
