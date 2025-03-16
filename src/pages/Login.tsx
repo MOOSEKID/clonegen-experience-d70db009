@@ -17,15 +17,17 @@ const Login = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { login, isAuthenticated, isAdmin } = useAuth();
+  
+  // Default redirect path (can be overridden by location state)
   const from = location.state?.from || '/dashboard';
 
   useEffect(() => {
-    // Check if user is already logged in
+    // If user is already authenticated, redirect them
     if (isAuthenticated) {
-      // Redirect based on user role
+      console.log('User is authenticated, redirecting to:', isAdmin ? '/admin' : '/dashboard');
       navigate(isAdmin ? '/admin' : '/dashboard');
     }
-  }, [navigate, isAuthenticated, isAdmin]);
+  }, [isAuthenticated, isAdmin, navigate]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -39,12 +41,17 @@ const Login = () => {
         return;
       }
       
+      console.log('Attempting login with:', email);
       const success = await login(email, password);
       
       if (success) {
-        // Navigate after successful login
-        // The destination will be determined by isAdmin in the useEffect
-        console.log('Login successful! Redirecting...');
+        console.log('Login successful!');
+        toast.success('Login successful!');
+        
+        // Redirect will happen in useEffect when isAuthenticated changes
+      } else {
+        console.log('Login failed');
+        toast.error('Login failed. Please check your credentials.');
       }
     } catch (error) {
       console.error('Login error:', error);
