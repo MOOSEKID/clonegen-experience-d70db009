@@ -100,7 +100,7 @@ export const useTestUsers = () => {
               console.error('Error creating regular user:', error);
               
               // If user already exists, try to get their ID to create a profile
-              if (error.message.includes('already registered')) {
+              if (error.message && error.message.includes('already registered')) {
                 console.log('User already registered, attempting to create profile...');
                 
                 // Sign in to get the user ID
@@ -111,7 +111,7 @@ export const useTestUsers = () => {
                 
                 if (signInError) {
                   console.error('Error signing in as existing user:', signInError);
-                } else if (signInData.user) {
+                } else if (signInData && signInData.user) {
                   // Create a profile entry for the existing user
                   const { error: profileError } = await supabase
                     .from('profiles')
@@ -131,7 +131,7 @@ export const useTestUsers = () => {
                   }
                 }
               }
-            } else if (data.user) {
+            } else if (data && data.user) {
               // Create a profile entry for the new user
               const { error: profileError } = await supabase
                 .from('profiles')
