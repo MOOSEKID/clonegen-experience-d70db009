@@ -7,6 +7,7 @@ import { useAuth } from '@/hooks/useAuth';
 import LoginForm from '@/components/auth/LoginForm';
 import PresetButtons from '@/components/auth/PresetButtons';
 import LoginInfo from '@/components/auth/LoginInfo';
+import { supabase } from '@/integrations/supabase/client';
 
 const Login = () => {
   const [loginError, setLoginError] = useState<string | null>(null);
@@ -22,9 +23,46 @@ const Login = () => {
     // Clear any previous errors
     setLoginError(null);
     
-    // If user is already authenticated, redirect them
+    const checkAuthStatus = async () => {
+      try {
+        // Get the session directly from Supabase
+        const { data: { session }, error } = await supabase.auth.getSession();
+        
+        if (error) {
+          console.error("Error checking authentication status:", error);
+          return;
+        }
+        
+        if (session) {
+          console.log('User is authenticated via Supabase, redirecting');
+          
+          // Check if user is admin by querying the profiles table
+          const { data: profileData, error: profileError } = await supabase
+            .from('profiles')
+            .select('is_admin')
+            .eq('id', session.user.id)
+            .single();
+            
+          if (profileError) {
+            console.error("Error fetching profile:", profileError);
+          }
+          
+          const userIsAdmin = profileData?.is_admin || false;
+          const redirectPath = userIsAdmin ? '/admin' : '/dashboard';
+          
+          // Force navigation with replace to prevent back button from returning to login
+          navigate(redirectPath, { replace: true });
+        }
+      } catch (error) {
+        console.error("Error in authentication check:", error);
+      }
+    };
+    
+    checkAuthStatus();
+    
+    // If user is already authenticated through the context, also redirect
     if (isAuthenticated) {
-      console.log('User is authenticated, redirecting to:', isAdmin ? '/admin' : '/dashboard');
+      console.log('User is authenticated through context, redirecting to:', isAdmin ? '/admin' : '/dashboard');
       // Force navigation with replace to prevent back button from returning to login
       navigate(isAdmin ? '/admin' : '/dashboard', { replace: true });
     }
