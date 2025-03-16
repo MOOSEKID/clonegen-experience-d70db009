@@ -1,83 +1,70 @@
 
-/**
- * Array of weekdays for availability selection
- */
-export const weekDays = [
-  { value: "Monday", label: "Monday" },
-  { value: "Tuesday", label: "Tuesday" },
-  { value: "Wednesday", label: "Wednesday" },
-  { value: "Thursday", label: "Thursday" },
-  { value: "Friday", label: "Friday" },
-  { value: "Saturday", label: "Saturday" },
-  { value: "Sunday", label: "Sunday" }
-];
+import { ClassType } from '@/types/classTypes';
 
-/**
- * Equipment options for class requirements
- */
-export const equipmentOptions = [
-  { value: "none", label: "None Required" },
-  { value: "yoga_mat", label: "Yoga Mat" },
-  { value: "dumbbells", label: "Dumbbells" },
-  { value: "kettlebells", label: "Kettlebells" },
-  { value: "resistance_bands", label: "Resistance Bands" },
-  { value: "exercise_ball", label: "Exercise Ball" },
-  { value: "foam_roller", label: "Foam Roller" },
-  { value: "jump_rope", label: "Jump Rope" },
-  { value: "barbell", label: "Barbell" },
-  { value: "rowing_machine", label: "Rowing Machine" },
-  { value: "treadmill", label: "Treadmill" },
-  { value: "bicycle", label: "Bicycle" }
-];
-
-/**
- * Returns default class data for initializing new class forms
- */
-export const getDefaultClassData = () => ({
+export const getDefaultClassData = (): Omit<ClassType, 'id'> => ({
   name: '',
   description: '',
-  type: 'yoga' as const,
+  type: 'yoga',
   trainer: '',
   trainerId: '',
   capacity: 20,
   enrolled: 0,
-  enrolledMembers: [],
   waitlist: 0,
-  waitlistMembers: [],
-  day: '',
-  time: '',
+  day: 'Monday',
+  time: '08:00',
   duration: 60,
   room: '',
-  status: 'scheduled' as const,
-  classLevel: 'Beginner' as const,
-  equipmentRequired: ['none'],
+  status: 'scheduled',
+  enrolledMembers: [],
+  waitlistMembers: [],
+  classLevel: 'Beginner',
+  equipmentRequired: ['yoga_mat'],
   recurrence: false,
   recurrenceDays: [],
   classFees: null,
   feeType: null
 });
 
-/**
- * Check if all weekdays are selected
- */
-export const isEveryDay = (selectedDays: string[]): boolean => {
-  return selectedDays.length === weekDays.length;
+export const equipmentOptions = [
+  { value: 'yoga_mat', label: 'Yoga Mat' },
+  { value: 'dumbbells', label: 'Dumbbells' },
+  { value: 'kettlebells', label: 'Kettlebells' },
+  { value: 'resistance_bands', label: 'Resistance Bands' },
+  { value: 'boxing_gloves', label: 'Boxing Gloves' },
+  { value: 'jump_rope', label: 'Jump Rope' },
+  { value: 'foam_roller', label: 'Foam Roller' },
+  { value: 'exercise_bike', label: 'Exercise Bike' },
+  { value: 'treadmill', label: 'Treadmill' },
+  { value: 'rowing_machine', label: 'Rowing Machine' },
+  { value: 'none', label: 'No Equipment Required' }
+];
+
+export const weekDays = [
+  { value: 'Monday', label: 'Monday' },
+  { value: 'Tuesday', label: 'Tuesday' },
+  { value: 'Wednesday', label: 'Wednesday' },
+  { value: 'Thursday', label: 'Thursday' },
+  { value: 'Friday', label: 'Friday' },
+  { value: 'Saturday', label: 'Saturday' },
+  { value: 'Sunday', label: 'Sunday' },
+];
+
+export const isEveryDay = (days: string[]): boolean => {
+  return days.length === 7;
 };
 
-/**
- * Toggle a day in the selected days array
- */
-export const toggleDay = (selectedDays: string[], day: string): string[] => {
-  return selectedDays.includes(day)
-    ? selectedDays.filter(d => d !== day)
-    : [...selectedDays, day];
+export const toggleDay = (days: string[], day: string): string[] => {
+  if (days.includes(day)) {
+    return days.filter(d => d !== day);
+  } else {
+    return [...days, day];
+  }
 };
 
-/**
- * Toggle all days selection
- */
-export const toggleEveryDay = (selectedDays: string[]): string[] => {
-  return isEveryDay(selectedDays)
-    ? []
-    : weekDays.map(day => day.value);
+export const toggleEveryDay = (days: string[]): string[] => {
+  if (isEveryDay(days)) {
+    return [];
+  } else {
+    return weekDays.map(day => day.value);
+  }
 };

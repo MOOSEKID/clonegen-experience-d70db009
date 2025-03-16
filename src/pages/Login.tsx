@@ -22,7 +22,6 @@ const Login = () => {
   useEffect(() => {
     // Check if user is already logged in
     if (isAuthenticated) {
-      console.log('User is already authenticated, redirecting to dashboard or admin');
       // Redirect based on user role
       navigate(isAdmin ? '/admin' : '/dashboard');
     }
@@ -33,7 +32,6 @@ const Login = () => {
     setIsLoading(true);
     
     try {
-      console.log('Attempting login with:', { email, password });
       // Email validation
       if (!email || !password) {
         toast.error('Please enter both email and password');
@@ -45,12 +43,8 @@ const Login = () => {
       
       if (success) {
         // Navigate after successful login
-        console.log('Login successful! Redirecting...');
-        toast.success('Login successful!');
         // The destination will be determined by isAdmin in the useEffect
-      } else {
-        console.log('Login failed');
-        toast.error('Login failed. Please check your credentials.');
+        console.log('Login successful! Redirecting...');
       }
     } catch (error) {
       console.error('Login error:', error);
@@ -140,7 +134,7 @@ const Login = () => {
             </div>
             
             <div className="text-sm">
-              <a href="/forgot-password" className="text-gym-orange hover:underline">
+              <a href="#" className="text-gym-orange hover:underline">
                 Forgot password?
               </a>
             </div>

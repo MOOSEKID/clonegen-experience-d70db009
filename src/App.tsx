@@ -1,9 +1,8 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "./contexts/AuthContext";
 
 // Layout components
@@ -35,7 +34,7 @@ import CategoryPage from "./pages/shop/CategoryPage";
 import ProductPage from "./pages/shop/ProductPage";
 
 // Auth pages
-import Login from "./pages/auth/Login";
+import Login from "./pages/Login";
 import Signup from "./pages/Signup";
 
 // Admin pages
@@ -81,7 +80,7 @@ const App = () => {
           <BrowserRouter>
             <Routes>
               {/* Main Routes with Header and Footer */}
-              <Route path="/" element={
+              <Route path="*" element={
                 <div className="flex flex-col min-h-screen">
                   <Header />
                   <div className="flex-grow">
@@ -98,6 +97,8 @@ const App = () => {
                       <Route path="/shop" element={<ShopPage />} />
                       <Route path="/shop/category/:categoryId" element={<CategoryPage />} />
                       <Route path="/shop/product/:productId" element={<ProductPage />} />
+                      <Route path="/login" element={<Login />} />
+                      <Route path="/signup" element={<Signup />} />
                       <Route path="/contact-us" element={<ContactUs />} />
                       <Route path="/timetable" element={<Timetable />} />
                       <Route path="/opening-times" element={<OpeningTimes />} />
@@ -108,10 +109,6 @@ const App = () => {
                 </div>
               } />
               
-              {/* Auth Routes */}
-              <Route path="/login" element={<Login />} />
-              <Route path="/signup" element={<Signup />} />
-
               {/* Admin Routes */}
               <Route path="/admin/*" element={<AdminLayout />}>
                 <Route index element={<AdminDashboard />} />
@@ -128,7 +125,6 @@ const App = () => {
                 <Route path="reports" element={<AdminReports />} />
                 <Route path="settings" element={<AdminSettings />} />
                 <Route path="support" element={<AdminSupport />} />
-                <Route path="*" element={<Navigate to="/admin" replace />} />
               </Route>
               
               {/* Customer Dashboard Routes */}

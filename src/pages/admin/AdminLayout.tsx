@@ -9,7 +9,7 @@ import { useAuth } from '@/hooks/useAuth';
 const AdminLayout = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [isLoading, setIsLoading] = useState(true);
-  const { isAuthenticated, isAdmin, user } = useAuth();
+  const { isAuthenticated, isAdmin } = useAuth();
   const navigate = useNavigate();
 
   // Check admin authentication
@@ -17,16 +17,11 @@ const AdminLayout = () => {
     const checkAuth = async () => {
       try {
         setIsLoading(true);
-        console.log('AdminLayout - Checking auth:', { isAuthenticated, isAdmin, user });
         
-        if (!isAuthenticated) {
-          console.log('User not authenticated, redirecting to login');
-          toast.error('You must be logged in to access the admin area');
+        if (!isAuthenticated || !isAdmin) {
+          console.log('Admin authentication failed, redirecting to login');
+          toast.error('You must be logged in as an administrator');
           navigate('/login', { state: { from: '/admin' } });
-        } else if (!isAdmin) {
-          console.log('User authenticated but not admin, redirecting to dashboard');
-          toast.error('You do not have administrator privileges');
-          navigate('/dashboard');
         } else {
           console.log('Admin authenticated successfully');
         }
@@ -44,7 +39,7 @@ const AdminLayout = () => {
     // Check authentication status periodically
     const interval = setInterval(checkAuth, 600000); // 10 minutes
     return () => clearInterval(interval);
-  }, [navigate, isAuthenticated, isAdmin, user]);
+  }, [navigate, isAuthenticated, isAdmin]);
 
   const toggleSidebar = () => {
     setIsSidebarOpen(!isSidebarOpen);
