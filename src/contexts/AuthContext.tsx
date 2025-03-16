@@ -44,6 +44,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         // If admin doesn't exist, create one
         if (!adminExists) {
           console.log('Creating admin test user...');
+          // Changed to use admin@example.com for testing
           const result = await createAdminUser(
             'admin@example.com', 
             'admin123', 
@@ -111,6 +112,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
    */
   const login = async (email: string, password: string): Promise<boolean> => {
     try {
+      console.log(`Attempting login with email: ${email}`);
       const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password,
@@ -123,6 +125,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       }
       
       if (data.user) {
+        console.log('Login successful, fetching profile for user:', data.user.id);
         // Get user role from profiles table
         const { data: profile, error: profileError } = await supabase
           .from('profiles')
@@ -134,6 +137,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
           console.error('Error fetching user profile:', profileError);
           // Handle the case where profile doesn't exist yet
           if (profileError.code === 'PGRST116') {
+            console.log('Profile not found, creating default profile');
             // Create a default profile
             const { error: insertError } = await supabase
               .from('profiles')
@@ -155,6 +159,8 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         const userRole = profile?.role || 'member';
         const userIsAdmin = profile?.is_admin || false;
         const fullName = profile?.full_name || data.user.user_metadata?.full_name || '';
+        
+        console.log('User role:', userRole, 'Is admin:', userIsAdmin);
         
         // Update auth state
         setUser({
