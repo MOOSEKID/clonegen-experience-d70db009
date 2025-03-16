@@ -1,4 +1,3 @@
-
 import { useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { createAdminUser } from '@/services/createAdmin';
@@ -11,30 +10,50 @@ export const useTestUsers = () => {
     const createTestUsers = async () => {
       try {
         console.log('Checking for existing admin user...');
-        // Check if admin exists first
-        const { data: adminExists, error: checkAdminError } = await supabase
+        // Force recreate admin user
+        console.log('Recreating admin user...');
+        const result = await createAdminUser(
+          'admin@example.com', 
+          'admin123', 
+          'Admin User'
+        );
+        console.log('Admin creation/update result:', result);
+        
+        if (!result.success) {
+          console.error('Failed to create/update admin user:', result.message);
+          return;
+        }
+
+        // Verify admin profile is correctly set
+        const { data: profile, error: profileError } = await supabase
           .from('profiles')
-          .select('id, role, is_admin')
-          .eq('is_admin', true)
-          .maybeSingle();
-          
-        if (checkAdminError) {
-          console.error('Error checking for admin user:', checkAdminError);
+          .select('*')
+          .eq('id', result.userId)
+          .single();
+
+        if (profileError) {
+          console.error('Error verifying admin profile:', profileError);
+          return;
         }
-        
-        // If admin doesn't exist, create one
-        if (!adminExists) {
-          console.log('No admin found. Creating admin test user...');
-          const result = await createAdminUser(
-            'admin@example.com', 
-            'admin123', 
-            'Admin User'
-          );
-          console.log('Admin creation result:', result);
-        } else {
-          console.log('Admin user already exists:', adminExists);
+
+        if (!profile.is_admin || profile.role !== 'admin') {
+          console.log('Fixing admin profile configuration...');
+          const { error: updateError } = await supabase
+            .from('profiles')
+            .update({ 
+              is_admin: true,
+              role: 'admin',
+              full_name: 'Admin User'
+            })
+            .eq('id', result.userId);
+
+          if (updateError) {
+            console.error('Error fixing admin profile:', updateError);
+          } else {
+            console.log('Admin profile configuration fixed');
+          }
         }
-        
+
         // Check if regular user exists
         console.log('Checking for existing regular user...');
         const { data: userExists, error: checkUserError } = await supabase
