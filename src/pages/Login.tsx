@@ -17,35 +17,36 @@ const Login = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { login, isAuthenticated, isAdmin } = useAuth();
-  const from = location.state?.from || '/dashboard';
-
+  
+  // Check if user is already logged in
   useEffect(() => {
-    // Check if user is already logged in
     if (isAuthenticated) {
-      // Redirect based on user role
-      console.log('Already authenticated, redirecting to', isAdmin ? '/admin' : '/dashboard');
-      navigate(isAdmin ? '/admin' : '/dashboard');
+      const redirectPath = isAdmin ? '/admin' : '/dashboard';
+      console.log('Already authenticated, redirecting to', redirectPath);
+      navigate(redirectPath, { replace: true });
     }
-  }, [navigate, isAuthenticated, isAdmin]);
+  }, [isAuthenticated, isAdmin, navigate]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsLoading(true);
     
     try {
+      setIsLoading(true);
+      
       // Email validation
       if (!email || !password) {
         toast.error('Please enter both email and password');
-        setIsLoading(false);
         return;
       }
       
+      console.log('Attempting login with:', email);
       const success = await login(email, password);
       
       if (success) {
-        // Navigate after successful login
-        // The destination will be determined by isAdmin in the useEffect
-        console.log('Login successful! Redirecting...');
+        console.log('Login successful, user is admin:', isAdmin);
+        // No need to navigate here, the useEffect will handle it
+      } else {
+        console.log('Login failed');
       }
     } catch (error) {
       console.error('Login error:', error);

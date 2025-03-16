@@ -11,22 +11,21 @@ export const useTestUsers = () => {
     const initializeTestUsers = async () => {
       try {
         if (import.meta.env.DEV || import.meta.env.VITE_ENABLE_TEST_USERS === 'true') {
-          // Check for existing test users first
-          const { data: existingUsers, error: checkError } = await supabase.auth.admin.listUsers({
-            page: 1, 
-            perPage: 10
-          });
+          // Check for existing users first by checking profiles instead of auth users
+          const { data: existingProfiles, error: profileError } = await supabase
+            .from('profiles')
+            .select('email');
           
-          if (checkError) {
-            console.error('Error checking existing users:', checkError);
+          if (profileError) {
+            console.error('Error checking existing profiles:', profileError);
             return;
           }
           
-          const userEmails = existingUsers?.users.map(user => user.email);
+          const userEmails = existingProfiles?.map(profile => profile.email) || [];
           console.log('Existing user emails:', userEmails);
           
           // Create test admin user if it doesn't exist
-          if (!userEmails?.includes('admin@example.com')) {
+          if (!userEmails.includes('admin@example.com')) {
             console.log('Creating test admin user...');
             await createAdminUser(
               'admin@example.com',
@@ -36,7 +35,7 @@ export const useTestUsers = () => {
           }
           
           // Create another admin for Uptown Gym
-          if (!userEmails?.includes('admin@uptowngym.rw')) {
+          if (!userEmails.includes('admin@uptowngym.rw')) {
             console.log('Creating Uptown Gym admin user...');
             await createAdminUser(
               'admin@uptowngym.rw',
@@ -46,7 +45,7 @@ export const useTestUsers = () => {
           }
           
           // Create test regular user if it doesn't exist
-          if (!userEmails?.includes('user@example.com')) {
+          if (!userEmails.includes('user@example.com')) {
             console.log('Creating test regular user...');
             const { data: regularUser, error: regularUserError } = await supabase.auth.signUp({
               email: 'user@example.com',
@@ -70,6 +69,7 @@ export const useTestUsers = () => {
                   .upsert({
                     id: regularUser.user.id,
                     full_name: 'Regular User',
+                    email: 'user@example.com',
                     role: 'member',
                     is_admin: false
                   });
