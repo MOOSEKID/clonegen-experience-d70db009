@@ -1,19 +1,15 @@
 
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
-import { authStorageService } from '@/services/authStorageService';
-
-// Re-export the storage manager for backward compatibility
-export const storageManager = authStorageService;
 
 /**
- * Manages password reset functionality
+ * Hook that provides password management functionality
  */
-export const passwordManager = {
+export const usePasswordService = () => {
   /**
-   * Requests a password reset for the given email
+   * Request a password reset for the given email
    */
-  requestPasswordReset: async (email: string): Promise<boolean> => {
+  const requestPasswordReset = async (email: string): Promise<boolean> => {
     try {
       const { error } = await supabase.auth.resetPasswordForEmail(email, {
         redirectTo: `${window.location.origin}/reset-password`,
@@ -32,12 +28,12 @@ export const passwordManager = {
       toast.error(error instanceof Error ? error.message : 'Failed to send password reset link');
       return false;
     }
-  },
+  };
   
   /**
    * Updates the password for the currently logged in user
    */
-  updatePassword: async (newPassword: string): Promise<boolean> => {
+  const updatePassword = async (newPassword: string): Promise<boolean> => {
     try {
       const { error } = await supabase.auth.updateUser({
         password: newPassword
@@ -56,5 +52,7 @@ export const passwordManager = {
       toast.error(error instanceof Error ? error.message : 'Failed to update password');
       return false;
     }
-  }
+  };
+
+  return { requestPasswordReset, updatePassword };
 };
