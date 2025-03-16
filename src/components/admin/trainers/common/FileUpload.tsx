@@ -11,7 +11,6 @@ interface FileUploadProps {
   progress: number;
   buttonText?: string;
   previewUrl?: string;
-  acceptedFileTypes?: string;
 }
 
 const FileUpload: React.FC<FileUploadProps> = ({
@@ -20,8 +19,7 @@ const FileUpload: React.FC<FileUploadProps> = ({
   isUploading,
   progress,
   buttonText = 'Upload File',
-  previewUrl,
-  acceptedFileTypes
+  previewUrl
 }) => {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [previewImage, setPreviewImage] = useState<string | null>(previewUrl || null);
@@ -75,7 +73,7 @@ const FileUpload: React.FC<FileUploadProps> = ({
           ref={fileInputRef}
           onChange={handleFileChange}
           className="hidden"
-          accept={acceptedFileTypes || (type === 'profile_picture' ? 'image/*' : undefined)}
+          accept={type === 'profile_picture' ? 'image/*' : undefined}
         />
         <Button 
           type="button" 
