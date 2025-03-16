@@ -17,6 +17,7 @@ const AdminLayout = () => {
     const checkAuth = async () => {
       try {
         setIsLoading(true);
+        console.log('AdminLayout - checking auth', { isAuthenticated, isAdmin });
         
         if (!isAuthenticated || !isAdmin) {
           console.log('Admin authentication failed, redirecting to login');
