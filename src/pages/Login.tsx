@@ -14,6 +14,7 @@ const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [loginError, setLoginError] = useState<string | null>(null);
   const navigate = useNavigate();
   const location = useLocation();
   const { login, isAuthenticated, isAdmin } = useAuth();
@@ -25,17 +26,19 @@ const Login = () => {
     // If user is already authenticated, redirect them
     if (isAuthenticated) {
       console.log('User is authenticated, redirecting to:', isAdmin ? '/admin' : '/dashboard');
-      navigate(isAdmin ? '/admin' : '/dashboard');
+      navigate(isAdmin ? '/admin' : '/dashboard', { replace: true });
     }
   }, [isAuthenticated, isAdmin, navigate]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
+    setLoginError(null);
     
     try {
       // Email validation
       if (!email || !password) {
+        setLoginError('Please enter both email and password');
         toast.error('Please enter both email and password');
         setIsLoading(false);
         return;
@@ -48,13 +51,18 @@ const Login = () => {
         console.log('Login successful!');
         toast.success('Login successful!');
         
-        // Redirect will happen in useEffect when isAuthenticated changes
+        // Force navigation to dashboard
+        const targetPath = isAdmin ? '/admin' : '/dashboard';
+        console.log('Forcing navigation to:', targetPath);
+        navigate(targetPath, { replace: true });
       } else {
         console.log('Login failed');
+        setLoginError('Login failed. Please check your credentials.');
         toast.error('Login failed. Please check your credentials.');
       }
     } catch (error) {
       console.error('Login error:', error);
+      setLoginError(error instanceof Error ? error.message : 'Login failed');
       toast.error(error instanceof Error ? error.message : 'Login failed');
     } finally {
       setIsLoading(false);
@@ -65,8 +73,20 @@ const Login = () => {
     setShowPassword(prev => !prev);
   };
 
+  const handleAdminLogin = async () => {
+    setEmail('admin@example.com');
+    setPassword('admin123');
+    // Let the form submission handle the actual login
+  };
+
+  const handleUserLogin = async () => {
+    setEmail('user@example.com');
+    setPassword('user123');
+    // Let the form submission handle the actual login
+  };
+
   return (
-    <div className="min-h-screen flex items-center justify-center p-6 bg-gym-dark">
+    <div className="min-h-screen flex items-center justify-center p-6 bg-gym-dark pt-20">
       <Card className="w-full max-w-md p-6 bg-gym-darkblue text-white border border-white/10">
         <div className="mb-6 text-center">
           <h1 className="text-3xl font-bold mb-2">Welcome Back</h1>
@@ -76,6 +96,12 @@ const Login = () => {
             <p className="text-sm text-white/70 mt-1">User Login: user@example.com / user123</p>
           </div>
         </div>
+        
+        {loginError && (
+          <div className="mb-4 p-3 bg-red-500/20 border border-red-500/30 rounded text-white text-sm">
+            {loginError}
+          </div>
+        )}
         
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
@@ -154,6 +180,28 @@ const Login = () => {
           >
             {isLoading ? 'Signing in...' : 'Log in'}
           </Button>
+          
+          <div className="grid grid-cols-2 gap-3 mt-4">
+            <Button 
+              type="button" 
+              variant="outline" 
+              className="w-full border-white/20 hover:bg-gym-dark/50"
+              onClick={handleAdminLogin}
+              disabled={isLoading}
+            >
+              Admin Login
+            </Button>
+            
+            <Button 
+              type="button" 
+              variant="outline" 
+              className="w-full border-white/20 hover:bg-gym-dark/50"
+              onClick={handleUserLogin}
+              disabled={isLoading}
+            >
+              User Login
+            </Button>
+          </div>
         </form>
         
         <div className="mt-6 text-center text-sm text-white/70">

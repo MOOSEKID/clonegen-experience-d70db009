@@ -20,7 +20,12 @@ export const useInitialAuthCheck = () => {
       console.log('Performing initial auth check...');
       
       // Get current session
-      const { data: { session } } = await supabase.auth.getSession();
+      const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+      
+      if (sessionError) {
+        console.error('Error getting session:', sessionError);
+        throw sessionError;
+      }
       
       if (session) {
         const currentUser = session.user;
@@ -36,9 +41,10 @@ export const useInitialAuthCheck = () => {
         if (error) {
           console.error('Error fetching user profile:', error);
           
+          // Create a default profile if one doesn't exist
           if (error.code === 'PGRST116') {
             console.log('Profile not found, creating default profile...');
-            // Create a default profile if one doesn't exist
+            
             const { error: insertError } = await supabase
               .from('profiles')
               .insert([
@@ -46,7 +52,7 @@ export const useInitialAuthCheck = () => {
                   id: currentUser.id,
                   full_name: currentUser.user_metadata?.full_name || 'User',
                   role: 'member',
-                  is_admin: false
+                  is_admin: currentUser.email === 'admin@example.com' // Set admin based on email
                 }
               ]);
               
@@ -54,6 +60,43 @@ export const useInitialAuthCheck = () => {
               console.error('Error creating default profile:', insertError);
             } else {
               console.log('Default profile created successfully');
+            }
+            
+            // Get the newly created profile
+            const { data: newProfile } = await supabase
+              .from('profiles')
+              .select('role, is_admin, full_name')
+              .eq('id', currentUser.id)
+              .single();
+              
+            if (newProfile) {
+              const userRole = newProfile.role || 'member';
+              const userIsAdmin = newProfile.is_admin || false;
+              
+              console.log('User authenticated with new profile:', {
+                email: currentUser.email,
+                role: userRole,
+                isAdmin: userIsAdmin
+              });
+              
+              setUser({
+                ...currentUser,
+                email: currentUser.email || '',
+                role: userRole
+              });
+              
+              setIsAdmin(userIsAdmin);
+              setIsAuthenticated(true);
+              
+              authStorageService.setAuthData(
+                true, 
+                userIsAdmin, 
+                currentUser.email || '', 
+                currentUser.user_metadata?.full_name || newProfile.full_name || currentUser.email || ''
+              );
+              
+              setIsLoading(false);
+              return;
             }
           }
         }
@@ -95,6 +138,7 @@ export const useInitialAuthCheck = () => {
       setUser(null);
       setIsAdmin(false);
       setIsAuthenticated(false);
+      authStorageService.setAuthData(false, false, '', '');
     } finally {
       setIsLoading(false);
     }
