@@ -13,7 +13,7 @@ export const useTestUsers = () => {
         // Force recreate admin user
         console.log('Recreating admin user...');
         const result = await createAdminUser(
-          'admin@example.com', 
+          'admin@uptowngym.rw', 
           'admin123', 
           'Admin User'
         );

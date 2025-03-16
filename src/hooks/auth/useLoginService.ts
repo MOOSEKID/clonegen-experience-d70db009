@@ -150,7 +150,7 @@ export const useLoginService = () => {
 
 // Helper functions
 function determineInitialRole(email: string): UserRole {
-  if (email === 'admin@example.com' || email === 'admin@uptowngym.rw') {
+  if (email === 'admin@uptowngym.rw') {
     return 'admin';
   }
   if (email.endsWith('@uptowngym.rw')) {
