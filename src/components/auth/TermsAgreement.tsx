@@ -1,5 +1,5 @@
 
-import { Link } from 'react-router-dom';
+import React from 'react';
 import { Checkbox } from '@/components/ui/checkbox';
 
 interface TermsAgreementProps {
@@ -8,28 +8,38 @@ interface TermsAgreementProps {
   disabled?: boolean;
 }
 
-const TermsAgreement = ({ checked, onCheckedChange, disabled }: TermsAgreementProps) => {
+const TermsAgreement: React.FC<TermsAgreementProps> = ({ 
+  checked, 
+  onCheckedChange,
+  disabled = false
+}) => {
   return (
-    <div className="flex items-center space-x-2">
+    <div className="flex items-start space-x-2 my-4">
       <Checkbox
         id="terms"
         checked={checked}
-        onCheckedChange={(checked) => onCheckedChange(checked as boolean)}
+        onCheckedChange={onCheckedChange}
         disabled={disabled}
       />
-      <label
-        htmlFor="terms"
-        className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-      >
-        I accept the{' '}
-        <Link to="/terms" className="text-gym-orange hover:underline">
-          Terms of Service
-        </Link>{' '}
-        and{' '}
-        <Link to="/privacy" className="text-gym-orange hover:underline">
-          Privacy Policy
-        </Link>
-      </label>
+      <div className="grid gap-1.5 leading-none">
+        <label
+          htmlFor="terms"
+          className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+        >
+          I agree to the terms and conditions
+        </label>
+        <p className="text-xs text-muted-foreground">
+          By checking this box, you agree to our{" "}
+          <a href="/terms" className="text-gym-orange hover:underline">
+            Terms of Service
+          </a>{" "}
+          and{" "}
+          <a href="/privacy" className="text-gym-orange hover:underline">
+            Privacy Policy
+          </a>
+          .
+        </p>
+      </div>
     </div>
   );
 };

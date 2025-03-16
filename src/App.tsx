@@ -3,7 +3,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider } from "./contexts/AuthContext";
 
 // Layout components
@@ -81,7 +81,7 @@ const App = () => {
           <BrowserRouter>
             <Routes>
               {/* Main Routes with Header and Footer */}
-              <Route path="*" element={
+              <Route path="/" element={
                 <div className="flex flex-col min-h-screen">
                   <Header />
                   <div className="flex-grow">
@@ -126,6 +126,7 @@ const App = () => {
                 <Route path="reports" element={<AdminReports />} />
                 <Route path="settings" element={<AdminSettings />} />
                 <Route path="support" element={<AdminSupport />} />
+                <Route path="*" element={<Navigate to="/admin" replace />} />
               </Route>
               
               {/* Customer Dashboard Routes */}
