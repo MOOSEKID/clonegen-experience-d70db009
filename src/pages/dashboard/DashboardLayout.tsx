@@ -9,7 +9,7 @@ import { useAuth } from '@/hooks/useAuth';
 const DashboardLayout = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [isLoading, setIsLoading] = useState(true);
-  const { isAuthenticated, user, isAdmin } = useAuth();
+  const { isAuthenticated, user } = useAuth();
   const navigate = useNavigate();
 
   // Check user authentication
@@ -18,23 +18,10 @@ const DashboardLayout = () => {
       try {
         setIsLoading(true);
         
-        console.log('Dashboard: Checking auth state:', { isAuthenticated, isAdmin });
-        
         if (!isAuthenticated) {
-          console.log('User not authenticated, redirecting to login');
           toast.error('You must be logged in to access this page');
           navigate('/login', { state: { from: '/dashboard' } });
-          return;
         }
-        
-        // If user is admin, redirect to admin dashboard
-        if (isAdmin) {
-          console.log('Admin user detected, redirecting to admin dashboard');
-          navigate('/admin', { replace: true });
-          return;
-        }
-        
-        console.log('User authenticated and is not admin, staying on dashboard');
       } catch (error) {
         console.error('Authentication check error:', error);
         toast.error('Authentication error. Please log in again.');
@@ -45,7 +32,11 @@ const DashboardLayout = () => {
     };
 
     checkAuth();
-  }, [navigate, isAuthenticated, isAdmin]);
+    
+    // Check authentication status periodically
+    const interval = setInterval(checkAuth, 600000); // 10 minutes
+    return () => clearInterval(interval);
+  }, [navigate, isAuthenticated]);
 
   const toggleSidebar = () => {
     setIsSidebarOpen(!isSidebarOpen);

@@ -1,4 +1,5 @@
 
+import { useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import type { AuthUser } from '@/types/auth.types';
 import { authStorageService } from '@/services/authStorageService';
@@ -28,36 +29,16 @@ export const useInitialAuthCheck = () => {
         // Get user role from profiles table
         const { data: profile, error } = await supabase
           .from('profiles')
-          .select('role, is_admin, full_name')
+          .select('role, is_admin')
           .eq('id', currentUser.id)
           .single();
           
-        // Handle special case for admin@example.com
-        let userRole = profile?.role || 'member';
-        let userIsAdmin = profile?.is_admin || false;
-        
-        // Check if this is a known admin account
-        if (currentUser.email?.toLowerCase() === 'admin@example.com') {
-          userRole = 'admin';
-          userIsAdmin = true;
-          
-          // Update profile if needed
-          if (!profile?.is_admin || profile?.role !== 'admin') {
-            console.log('Updating admin status for admin@example.com during initial check');
-            await supabase
-              .from('profiles')
-              .upsert([
-                { 
-                  id: currentUser.id,
-                  full_name: profile?.full_name || 'Admin User',
-                  role: 'admin',
-                  is_admin: true
-                }
-              ]);
-          }
+        if (error) {
+          console.error('Error fetching user profile:', error);
         }
         
-        console.log('Initial auth check - user role and admin status:', { userRole, userIsAdmin });
+        const userRole = profile?.role || 'member';
+        const userIsAdmin = profile?.is_admin || false;
         
         setUser({
           ...currentUser,

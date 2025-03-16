@@ -1,5 +1,5 @@
 
-import { useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import type { AuthUser } from '@/types/auth.types';
 import { authStorageService } from '@/services/authStorageService';
@@ -26,33 +26,12 @@ export const useAuthStateChanges = (callbacks: AuthStateChangeCallbacks) => {
             // Get user role from profiles table
             const { data: profile, error } = await supabase
               .from('profiles')
-              .select('role, is_admin, full_name')
+              .select('role, is_admin')
               .eq('id', session.user.id)
               .single();
               
-            // Handle special case for admin@example.com
-            let userRole = profile?.role || 'member';
-            let userIsAdmin = profile?.is_admin || false;
-            
-            // Check if this is a known admin account
-            if (session.user.email?.toLowerCase() === 'admin@example.com') {
-              userRole = 'admin';
-              userIsAdmin = true;
-              
-              // Update profile if needed
-              if (!profile?.is_admin) {
-                await supabase
-                  .from('profiles')
-                  .upsert([
-                    { 
-                      id: session.user.id,
-                      full_name: profile?.full_name || 'Admin User',
-                      role: 'admin',
-                      is_admin: true
-                    }
-                  ]);
-              }
-            }
+            const userRole = profile?.role || 'member';
+            const userIsAdmin = profile?.is_admin || false;
             
             setUser({
               ...session.user,
