@@ -46,19 +46,6 @@ export const createAdminUser = async (email: string, password: string, fullName:
       }
       
       userId = authUser.user.id;
-    } else {
-      // User exists but we should update their password for consistency
-      // This ensures the password matches what we expect
-      console.log(`Updating existing user: ${email}`);
-      const { error: updateError } = await supabase.auth.admin.updateUserById(
-        userId,
-        { password }
-      );
-      
-      if (updateError) {
-        console.error('Error updating admin user password:', updateError);
-        // We don't return here as we still want to update the profile
-      }
     }
     
     // Update or create profile as admin
