@@ -1,5 +1,5 @@
 
-import { createContext, ReactNode } from 'react';
+import { createContext, ReactNode, useEffect } from 'react';
 import { useAuthState } from '@/hooks/useAuthState';
 import { AuthContextType } from '@/types/auth.types';
 import { useLoginService } from '@/hooks/auth/useLoginService';
@@ -37,13 +37,20 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   const { logout: logoutService } = useLogoutService();
   const { requestPasswordReset, updatePassword } = usePasswordService();
 
+  // Log auth state for debugging
+  useEffect(() => {
+    console.log('Auth context state:', { isAuthenticated, isAdmin, isLoading, user });
+  }, [isAuthenticated, isAdmin, isLoading, user]);
+
   /**
    * Login with email and password
    */
   const login = async (email: string, password: string): Promise<boolean> => {
+    console.log('Auth context: login attempt for', email);
     const result = await loginService(email, password);
     
     if (result.success && result.user) {
+      console.log('Auth context: login successful, updating state');
       // Update auth state
       setUser(result.user);
       setIsAdmin(result.isAdmin || false);
@@ -60,6 +67,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       return true;
     }
     
+    console.log('Auth context: login failed');
     return false;
   };
 

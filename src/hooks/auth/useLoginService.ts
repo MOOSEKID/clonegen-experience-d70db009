@@ -16,6 +16,7 @@ export const useLoginService = () => {
     isAdmin?: boolean;
   }> => {
     try {
+      console.log('Login service: Attempting to sign in with:', email);
       const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password,

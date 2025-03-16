@@ -19,13 +19,13 @@ const Login = () => {
   const { login, isAuthenticated, isAdmin } = useAuth();
   const from = location.state?.from || '/dashboard';
 
+  // Check if user is already logged in and redirect accordingly
   useEffect(() => {
-    // Check if user is already logged in
     if (isAuthenticated) {
-      // Redirect based on user role
-      navigate(isAdmin ? '/admin' : '/dashboard');
+      console.log('User already authenticated, redirecting to:', isAdmin ? '/admin' : '/dashboard');
+      navigate(isAdmin ? '/admin' : '/dashboard', { replace: true });
     }
-  }, [navigate, isAuthenticated, isAdmin]);
+  }, [isAuthenticated, isAdmin, navigate]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -39,12 +39,18 @@ const Login = () => {
         return;
       }
       
+      console.log('Attempting login with:', email);
       const success = await login(email, password);
       
       if (success) {
-        // Navigate after successful login
-        // The destination will be determined by isAdmin in the useEffect
-        console.log('Login successful! Redirecting...');
+        console.log('Login successful! User will be redirected by useEffect.');
+        toast.success('Login successful');
+        // Explicit redirection (in addition to the useEffect)
+        const redirectTo = isAdmin ? '/admin' : '/dashboard';
+        console.log('Explicitly redirecting to:', redirectTo);
+        navigate(redirectTo, { replace: true });
+      } else {
+        toast.error('Login failed. Please check your credentials.');
       }
     } catch (error) {
       console.error('Login error:', error);
