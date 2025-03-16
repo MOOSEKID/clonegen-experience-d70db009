@@ -60,7 +60,10 @@ export const useTestUsers = () => {
           
           let existingUser = null;
           if (authData && authData.users) {
-            existingUser = authData.users.find(user => user.email === 'user@example.com');
+            existingUser = authData.users.find(user => {
+              // Safely check if user has an email property and if it matches
+              return user && typeof user === 'object' && 'email' in user && user.email === 'user@example.com';
+            });
           }
           
           if (existingUser) {

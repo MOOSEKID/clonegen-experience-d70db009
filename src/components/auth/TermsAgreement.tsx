@@ -4,20 +4,29 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Link } from 'react-router-dom';
 
 interface TermsAgreementProps {
-  accepted: boolean;
-  onChange: (checked: boolean) => void;
+  checked: boolean;
+  onCheckedChange: (checked: boolean) => void;
+  disabled?: boolean;
 }
 
-const TermsAgreement: React.FC<TermsAgreementProps> = ({ accepted, onChange }) => {
+const TermsAgreement: React.FC<TermsAgreementProps> = ({ 
+  checked, 
+  onCheckedChange,
+  disabled = false 
+}) => {
   return (
     <div className="flex items-start space-x-2 mt-4">
       <Checkbox 
         id="terms"
-        checked={accepted}
-        onCheckedChange={onChange}
+        checked={checked}
+        onCheckedChange={onCheckedChange}
+        disabled={disabled}
         className="mt-1"
       />
-      <label htmlFor="terms" className="text-sm text-gray-600">
+      <label 
+        htmlFor="terms" 
+        className={`text-sm ${disabled ? 'text-gray-400' : 'text-gray-600'}`}
+      >
         I agree to the{' '}
         <Link to="/terms" className="text-gym-orange hover:underline">
           Terms of Service
