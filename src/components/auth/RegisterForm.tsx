@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { User, Mail, Lock, AlertCircle } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
@@ -9,6 +8,7 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Checkbox } from '@/components/ui/checkbox';
 import { useAuth } from '@/hooks/useAuth';
 import { useRegisterValidation } from '@/hooks/auth/useRegisterValidation';
+import TermsAgreement from '@/components/auth/TermsAgreement';
 
 interface RegisterFormProps {
   onSuccess?: () => void;
@@ -139,7 +139,7 @@ const RegisterForm = ({ onSuccess }: RegisterFormProps) => {
       
       <TermsAgreement 
         checked={acceptTerms}
-        onCheckedChange={(checked) => setAcceptTerms(checked as boolean)}
+        onCheckedChange={setAcceptTerms}
         disabled={isLoading}
       />
       

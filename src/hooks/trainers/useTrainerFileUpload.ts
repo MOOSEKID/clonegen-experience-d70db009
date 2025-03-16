@@ -29,18 +29,36 @@ export const useTrainerFileUpload = () => {
         });
       }
       
+      // Set up a progress tracker
+      let uploadProgressTracker = 0;
+      const uploadTask = () => {
+        const interval = setInterval(() => {
+          if (uploadProgressTracker < 95) {
+            uploadProgressTracker += 5;
+            setUploadProgress(uploadProgressTracker);
+          } else {
+            clearInterval(interval);
+          }
+        }, 100);
+        
+        return () => clearInterval(interval);
+      };
+      
+      // Start tracking progress
+      const stopTracking = uploadTask();
+      
       // Upload the file
       const { data, error } = await supabase.storage
         .from('trainers')
         .upload(filePath, file, {
           cacheControl: '3600',
-          upsert: true,
-          onUploadProgress: (progress) => {
-            const percent = (progress.loaded / progress.total) * 100;
-            setUploadProgress(Math.round(percent));
-          },
+          upsert: true
         });
         
+      // Clean up progress tracking
+      stopTracking();
+      setUploadProgress(100);
+      
       if (error) {
         throw error;
       }
