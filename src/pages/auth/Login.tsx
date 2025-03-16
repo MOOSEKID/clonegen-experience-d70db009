@@ -25,6 +25,7 @@ const Login = () => {
   // Check if user is already authenticated
   useEffect(() => {
     if (isAuthenticated) {
+      console.log('User already authenticated, redirecting to:', isAdmin ? '/admin' : '/dashboard');
       // Redirect based on user role
       navigate(isAdmin ? '/admin' : '/dashboard');
     }
@@ -41,13 +42,16 @@ const Login = () => {
     try {
       setIsLoading(true);
       setErrorMessage('');
+      console.log('Attempting login with:', email);
       
       const success = await login(email, password);
       
       if (success) {
+        console.log('Login successful, redirecting to:', isAdmin ? '/admin' : '/dashboard');
         toast.success('Login successful');
         // Navigation will be handled by the useEffect
-        console.log('Login successful, redirection will happen through useEffect');
+      } else {
+        setErrorMessage('Invalid email or password');
       }
     } catch (error) {
       console.error('Login error:', error);
@@ -65,9 +69,9 @@ const Login = () => {
       const success = await login('admin@example.com', 'admin123');
       
       if (success) {
-        toast.success('Admin login successful');
-        // Navigation is handled in login function
         console.log('Admin login successful');
+        toast.success('Admin login successful');
+        // Navigation is handled in useEffect
       }
     } catch (error) {
       console.error('Admin login error:', error);

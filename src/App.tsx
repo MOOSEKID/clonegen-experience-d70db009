@@ -35,7 +35,7 @@ import CategoryPage from "./pages/shop/CategoryPage";
 import ProductPage from "./pages/shop/ProductPage";
 
 // Auth pages
-import Login from "./pages/Login";
+import Login from "./pages/auth/Login";
 import Signup from "./pages/Signup";
 
 // Admin pages
@@ -98,8 +98,6 @@ const App = () => {
                       <Route path="/shop" element={<ShopPage />} />
                       <Route path="/shop/category/:categoryId" element={<CategoryPage />} />
                       <Route path="/shop/product/:productId" element={<ProductPage />} />
-                      <Route path="/login" element={<Login />} />
-                      <Route path="/signup" element={<Signup />} />
                       <Route path="/contact-us" element={<ContactUs />} />
                       <Route path="/timetable" element={<Timetable />} />
                       <Route path="/opening-times" element={<OpeningTimes />} />
@@ -110,6 +108,10 @@ const App = () => {
                 </div>
               } />
               
+              {/* Auth Routes */}
+              <Route path="/login" element={<Login />} />
+              <Route path="/signup" element={<Signup />} />
+
               {/* Admin Routes */}
               <Route path="/admin/*" element={<AdminLayout />}>
                 <Route index element={<AdminDashboard />} />
