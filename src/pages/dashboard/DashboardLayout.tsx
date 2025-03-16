@@ -14,16 +14,21 @@ const DashboardLayout = () => {
 
   // Check user authentication
   useEffect(() => {
+    console.log('DashboardLayout mounted, checking auth state:', { isAuthenticated });
+    
     const checkAuth = async () => {
       try {
         setIsLoading(true);
         
         if (!isAuthenticated) {
+          console.log('User not authenticated, redirecting to login from dashboard');
           toast.error('You must be logged in to access this page');
           navigate('/login', { state: { from: '/dashboard' } });
+        } else {
+          console.log('User is authenticated in dashboard:', user?.email);
         }
       } catch (error) {
-        console.error('Authentication check error:', error);
+        console.error('Authentication check error in dashboard:', error);
         toast.error('Authentication error. Please log in again.');
         navigate('/login', { state: { from: '/dashboard' } });
       } finally {
@@ -34,9 +39,17 @@ const DashboardLayout = () => {
     checkAuth();
     
     // Check authentication status periodically
-    const interval = setInterval(checkAuth, 600000); // 10 minutes
+    const interval = setInterval(() => {
+      console.log('Running periodic auth check in dashboard');
+      if (!isAuthenticated) {
+        console.log('User not authenticated in periodic check, redirecting to login');
+        clearInterval(interval);
+        navigate('/login', { state: { from: '/dashboard' } });
+      }
+    }, 300000); // 5 minutes
+    
     return () => clearInterval(interval);
-  }, [navigate, isAuthenticated]);
+  }, [navigate, isAuthenticated, user]);
 
   const toggleSidebar = () => {
     setIsSidebarOpen(!isSidebarOpen);

@@ -23,9 +23,13 @@ const Login = () => {
   const from = location.state?.from || '/dashboard';
 
   useEffect(() => {
+    // Clear any previous errors
+    setLoginError(null);
+    
     // If user is already authenticated, redirect them
     if (isAuthenticated) {
       console.log('User is authenticated, redirecting to:', isAdmin ? '/admin' : '/dashboard');
+      // Force navigation with replace to prevent back button from returning to login
       navigate(isAdmin ? '/admin' : '/dashboard', { replace: true });
     }
   }, [isAuthenticated, isAdmin, navigate]);
@@ -54,7 +58,12 @@ const Login = () => {
         // Force navigation to dashboard
         const targetPath = isAdmin ? '/admin' : '/dashboard';
         console.log('Forcing navigation to:', targetPath);
-        navigate(targetPath, { replace: true });
+        
+        // Small timeout to ensure state is updated before redirect
+        setTimeout(() => {
+          console.log('Executing redirect now');
+          navigate(targetPath, { replace: true });
+        }, 500);
       } else {
         console.log('Login failed');
         setLoginError('Login failed. Please check your credentials.');
@@ -76,13 +85,21 @@ const Login = () => {
   const handleAdminLogin = async () => {
     setEmail('admin@example.com');
     setPassword('admin123');
-    // Let the form submission handle the actual login
+    // Submit form after setting credentials
+    setTimeout(() => {
+      const form = document.querySelector('form');
+      if (form) form.dispatchEvent(new Event('submit', { cancelable: true, bubbles: true }));
+    }, 100);
   };
 
   const handleUserLogin = async () => {
     setEmail('user@example.com');
     setPassword('user123');
-    // Let the form submission handle the actual login
+    // Submit form after setting credentials
+    setTimeout(() => {
+      const form = document.querySelector('form');
+      if (form) form.dispatchEvent(new Event('submit', { cancelable: true, bubbles: true }));
+    }, 100);
   };
 
   return (

@@ -51,15 +51,17 @@ export const useTestUsers = () => {
         if (!userExists) {
           console.log('No regular user found. Creating regular test user...');
           
-          // First check if the user exists in auth but not in profiles
-          const { data: authUsers, error: authUserError } = await supabase.auth
-            .admin.listUsers();
+          // First check if the user exists in auth
+          const { data: authData, error: authError } = await supabase.auth.admin.listUsers();
           
-          if (authUserError) {
-            console.error('Error checking for existing auth users:', authUserError);
+          if (authError) {
+            console.error('Error checking for existing auth users:', authError);
           }
           
-          const existingUser = authUsers?.users.find(user => user.email === 'user@example.com');
+          let existingUser = null;
+          if (authData && authData.users) {
+            existingUser = authData.users.find(user => user.email === 'user@example.com');
+          }
           
           if (existingUser) {
             console.log('User exists in auth but not in profiles. Creating profile for existing user.');
