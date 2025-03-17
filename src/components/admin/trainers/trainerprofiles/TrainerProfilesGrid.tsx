@@ -1,6 +1,6 @@
 
-import { TrainerCard } from './TrainerCard';
 import { Skeleton } from '@/components/ui/skeleton';
+import TrainerCard from './TrainerCard';
 import { TrainerProfile } from '../profiles/TrainerProfileType';
 
 export interface TrainerProfilesGridProps {

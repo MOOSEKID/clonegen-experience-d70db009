@@ -36,9 +36,6 @@ const AdminDashboard = () => {
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
-  const userAvatar = user?.avatar_url || '/placeholder.svg';
-  const userName = user?.full_name || 'Admin User';
-
   return (
     <div className="flex flex-col md:flex-row min-h-screen bg-gray-100">
       <AdminSidebar isOpen={isSidebarOpen} />

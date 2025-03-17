@@ -1,26 +1,20 @@
+
 import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
-// Import smaller components
 import TrainerStatusBadge from './card/TrainerStatusBadge';
 import TrainerBasicInfo from './card/TrainerBasicInfo';
 import SpecializationsSection from './card/SpecializationsSection';
+import { TrainerProfile } from '../profiles/TrainerProfileType';
 
 interface TrainerCardProps {
-  trainer: {
-    id: string;
-    name: string;
-    email: string;
-    imageUrl?: string;
-    status: 'active' | 'inactive' | 'on leave';
-    specializations: string[];
-  };
+  trainer: TrainerProfile;
   onEdit: () => void;
   onDelete: () => void;
   onAddCertification: () => void;
-  onDeleteCertification: (certIndex: number) => void;
+  onDeleteCertification: (certificationId: string) => void;
   onAddAvailability: () => void;
-  onDeleteAvailability: (availIndex: number) => void;
+  onDeleteAvailability: (availabilityId: string) => void;
 }
 
 const TrainerCard: React.FC<TrainerCardProps> = ({
@@ -39,12 +33,12 @@ const TrainerCard: React.FC<TrainerCardProps> = ({
           <TrainerBasicInfo
             name={trainer.name}
             email={trainer.email}
-            imageUrl={trainer.imageUrl}
+            imageUrl={trainer.profile_picture}
           />
-          <TrainerStatusBadge status={trainer.status} />
+          <TrainerStatusBadge status={trainer.status.toLowerCase() as 'active' | 'inactive' | 'on leave'} />
         </div>
         <Separator className="my-4" />
-        <SpecializationsSection specializations={trainer.specializations} />
+        <SpecializationsSection specializations={trainer.specializations || []} />
       </CardContent>
     </Card>
   );

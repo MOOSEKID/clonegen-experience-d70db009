@@ -15,10 +15,33 @@ import PrivateRoute from '@/components/auth/PrivateRoute';
 import { ThemeProvider } from '@/components/theme/theme-provider';
 import { ErrorBoundary } from '@/components/ui/error-boundary';
 import Index from '@/pages/Index';
+import NotFound from '@/components/NotFound';
+import { ErrorMessage } from '@/components/ErrorMessage';
+import { useNavigate } from 'react-router-dom';
+
+// Custom error fallback component to show when there's an error
+const ErrorFallback = () => {
+  const navigate = useNavigate();
+  
+  return (
+    <ErrorMessage
+      title="Something went wrong"
+      description="We encountered an error while loading the application. Please try refreshing the page or contact support if the problem persists."
+      primaryAction={{
+        label: "Refresh page",
+        onClick: () => window.location.reload()
+      }}
+      secondaryAction={{
+        label: "Go to homepage",
+        onClick: () => navigate('/')
+      }}
+    />
+  );
+};
 
 function App() {
   return (
-    <ErrorBoundary>
+    <ErrorBoundary fallback={<ErrorFallback />}>
       <ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
         <AuthProvider>
           <Router>
@@ -64,7 +87,7 @@ function App() {
                 } />
                 
                 {/* Fallback route */}
-                <Route path="*" element={<Navigate to="/" replace />} />
+                <Route path="*" element={<NotFound />} />
               </Routes>
             </div>
             <Toaster />

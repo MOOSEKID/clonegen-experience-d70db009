@@ -11,16 +11,13 @@ const AdminMembers = () => {
     currentMembers,
     currentPage,
     totalPages,
-    statusFilter,
-    membershipFilter,
-    membersPerPage,
+    filterType,
     isCreating,
     isLoading,
     handleSearch,
     handleStatusChange,
     handleDelete,
-    handleStatusFilterChange,
-    handleMembershipFilterChange,
+    handleFilterChange,
     toggleMemberSelection,
     selectAllMembers,
     handleBulkAction,
@@ -29,10 +26,14 @@ const AdminMembers = () => {
     paginate,
     nextPage,
     prevPage,
-    handleItemsPerPageChange
   } = useSupabaseMembers();
 
   console.log("AdminMembers rendered, isCreating:", isCreating);
+
+  // Adapt props to match what MembersContainer expects
+  const handleSearchChange = (value: string) => {
+    handleSearch(value);
+  };
 
   return (
     <MembersContainer
@@ -42,20 +43,21 @@ const AdminMembers = () => {
       currentPage={currentPage}
       totalPages={totalPages}
       selectedMembers={selectedMembers}
-      membersPerPage={membersPerPage}
       searchTerm={searchTerm}
-      statusFilter={statusFilter}
-      membershipFilter={membershipFilter}
-      handleSearchChange={handleSearch}
+      statusFilter={filterType}
+      membershipFilter={filterType}
+      handleSearchChange={handleSearchChange}
       handleStatusChange={handleStatusChange}
       handleDelete={handleDelete}
-      handleStatusFilterChange={handleStatusFilterChange}
-      handleMembershipFilterChange={handleMembershipFilterChange}
+      onStatusFilterChange={handleFilterChange}
+      onMembershipFilterChange={handleFilterChange}
       toggleMemberSelection={toggleMemberSelection}
-      selectAllMembers={selectAllMembers}
+      selectAllMembers={() => selectAllMembers(filteredMembers)}
       handlePageChange={paginate}
-      handleItemsPerPageChange={handleItemsPerPageChange}
+      onItemsPerPageChange={(itemsPerPage: number) => console.log("Items per page changed:", itemsPerPage)}
       onViewProfile={(memberId) => console.log("View profile", memberId)}
+      itemsPerPage={10}
+      totalItems={members.length}
     />
   );
 };

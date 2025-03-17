@@ -45,97 +45,102 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
 
   useEffect(() => {
     const setupAuthListener = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      
-      if (session) {
-        console.log('Initial session found:', session.user.email);
-        const profile = await fetchUserProfile(session.user.id);
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
         
-        if (profile) {
-          setUser({
-            ...session.user,
-            ...profile,
-            email: session.user.email || '',
-          });
-          setIsAdmin(profile.is_admin || false);
-          setIsStaff(profile.is_staff || false);
-          setIsAuthenticated(true);
-        } else {
-          const defaultProfile = {
-            id: session.user.id,
-            email: session.user.email || '',
-            full_name: session.user.user_metadata?.full_name || session.user.email || '',
-            role: 'client' as UserRole,
-            is_admin: session.user.email === 'admin@example.com',
-            is_staff: false,
-            status: 'Active' as const,
-            access_level: 'Basic' as AccessLevel,
-            created_at: new Date().toISOString(),
-            updated_at: new Date().toISOString()
-          };
+        if (session) {
+          console.log('Initial session found:', session.user.email);
+          const profile = await fetchUserProfile(session.user.id);
           
-          setUser({
-            ...session.user,
-            ...defaultProfile
-          });
-          setIsAdmin(defaultProfile.is_admin);
-          setIsStaff(defaultProfile.is_staff);
-          setIsAuthenticated(true);
-        }
-      }
-      
-      setIsLoading(false);
-      
-      const { data: { subscription } } = supabase.auth.onAuthStateChange(
-        async (event, session) => {
-          console.log('Auth state changed:', event, session?.user?.email);
-          
-          if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
-            if (session) {
-              const profile = await fetchUserProfile(session.user.id);
-              
-              if (profile) {
-                setUser({
-                  ...session.user,
-                  ...profile,
-                  email: session.user.email || '',
-                });
-                setIsAdmin(profile.is_admin || false);
-                setIsStaff(profile.is_staff || false);
-                setIsAuthenticated(true);
-              } else {
-                const isKnownAdmin = session.user.email === 'admin@example.com';
-                
-                setUser({
-                  ...session.user,
-                  id: session.user.id,
-                  email: session.user.email || '',
-                  full_name: session.user.user_metadata?.full_name || session.user.email || '',
-                  role: isKnownAdmin ? 'admin' : 'client' as UserRole,
-                  is_admin: isKnownAdmin,
-                  is_staff: false,
-                  status: 'Active' as const,
-                  access_level: 'Basic' as AccessLevel,
-                  created_at: new Date().toISOString(),
-                  updated_at: new Date().toISOString()
-                });
-                setIsAdmin(isKnownAdmin);
-                setIsStaff(false);
-                setIsAuthenticated(true);
-              }
-            }
-          } else if (event === 'SIGNED_OUT') {
-            setUser(null);
-            setIsAdmin(false);
-            setIsStaff(false);
-            setIsAuthenticated(false);
+          if (profile) {
+            setUser({
+              ...session.user,
+              ...profile,
+              email: session.user.email || '',
+            });
+            setIsAdmin(profile.is_admin || false);
+            setIsStaff(profile.is_staff || false);
+            setIsAuthenticated(true);
+          } else {
+            const defaultProfile = {
+              id: session.user.id,
+              email: session.user.email || '',
+              full_name: session.user.user_metadata?.full_name || session.user.email || '',
+              role: 'client' as UserRole,
+              is_admin: session.user.email === 'admin@example.com',
+              is_staff: false,
+              status: 'Active' as const,
+              access_level: 'Basic' as AccessLevel,
+              created_at: new Date().toISOString(),
+              updated_at: new Date().toISOString()
+            };
+            
+            setUser({
+              ...session.user,
+              ...defaultProfile
+            });
+            setIsAdmin(defaultProfile.is_admin);
+            setIsStaff(defaultProfile.is_staff);
+            setIsAuthenticated(true);
           }
         }
-      );
+        
+        setIsLoading(false);
+        
+        const { data: { subscription } } = supabase.auth.onAuthStateChange(
+          async (event, session) => {
+            console.log('Auth state changed:', event, session?.user?.email);
+            
+            if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
+              if (session) {
+                const profile = await fetchUserProfile(session.user.id);
+                
+                if (profile) {
+                  setUser({
+                    ...session.user,
+                    ...profile,
+                    email: session.user.email || '',
+                  });
+                  setIsAdmin(profile.is_admin || false);
+                  setIsStaff(profile.is_staff || false);
+                  setIsAuthenticated(true);
+                } else {
+                  const isKnownAdmin = session.user.email === 'admin@example.com';
+                  
+                  setUser({
+                    ...session.user,
+                    id: session.user.id,
+                    email: session.user.email || '',
+                    full_name: session.user.user_metadata?.full_name || session.user.email || '',
+                    role: isKnownAdmin ? 'admin' : 'client' as UserRole,
+                    is_admin: isKnownAdmin,
+                    is_staff: false,
+                    status: 'Active' as const,
+                    access_level: 'Basic' as AccessLevel,
+                    created_at: new Date().toISOString(),
+                    updated_at: new Date().toISOString()
+                  });
+                  setIsAdmin(isKnownAdmin);
+                  setIsStaff(false);
+                  setIsAuthenticated(true);
+                }
+              }
+            } else if (event === 'SIGNED_OUT') {
+              setUser(null);
+              setIsAdmin(false);
+              setIsStaff(false);
+              setIsAuthenticated(false);
+            }
+          }
+        );
 
-      return () => {
-        subscription.unsubscribe();
-      };
+        return () => {
+          subscription.unsubscribe();
+        };
+      } catch (error) {
+        console.error('Error setting up auth listener:', error);
+        setIsLoading(false);
+      }
     };
 
     setupAuthListener();
