@@ -1,6 +1,6 @@
 
 import { useState, useEffect } from 'react';
-import { supabase } from '@/integrations/supabase/client';
+import { supabase, getTable } from '@/integrations/supabase/client';
 import { useToast } from '@/components/ui/use-toast';
 
 export interface TrainerAttendanceRecord {
@@ -26,11 +26,10 @@ export const useTrainerAttendance = (trainerId?: string) => {
       setIsLoading(true);
       
       try {
-        let query = supabase
-          .from('trainer_attendance')
+        let query = getTable('trainer_attendance')
           .select(`
             *,
-            trainers(name)
+            trainers:trainer_id(name)
           `)
           .order('date', { ascending: false });
           
@@ -43,11 +42,11 @@ export const useTrainerAttendance = (trainerId?: string) => {
         if (error) throw error;
         
         if (data) {
-          const formattedData = data.map(record => ({
+          const formattedData = data.map((record: any) => ({
             ...record,
             trainer_name: record.trainers?.name
           }));
-          setRecords(formattedData);
+          setRecords(formattedData as TrainerAttendanceRecord[]);
         }
       } catch (err) {
         console.error('Error fetching trainer attendance:', err);
@@ -86,8 +85,7 @@ export const useTrainerAttendance = (trainerId?: string) => {
       const today = new Date().toISOString().split('T')[0];
       
       // Check if there's already a check-in for today
-      const { data: existingRecord } = await supabase
-        .from('trainer_attendance')
+      const { data: existingRecord } = await getTable('trainer_attendance')
         .select('*')
         .eq('trainer_id', trainerId)
         .eq('date', today)
@@ -117,14 +115,13 @@ export const useTrainerAttendance = (trainerId?: string) => {
       // Create new attendance record with check-in time
       const checkInTime = new Date().toISOString();
       
-      const { data, error } = await supabase
-        .from('trainer_attendance')
+      const { data, error } = await getTable('trainer_attendance')
         .upsert({
           trainer_id: trainerId,
           date: today,
           check_in_time: checkInTime,
           notes: notes || null
-        })
+        } as any)
         .select()
         .single();
         
@@ -152,8 +149,7 @@ export const useTrainerAttendance = (trainerId?: string) => {
       const today = new Date().toISOString().split('T')[0];
       
       // Find today's attendance record
-      const { data: existingRecord } = await supabase
-        .from('trainer_attendance')
+      const { data: existingRecord } = await getTable('trainer_attendance')
         .select('*')
         .eq('trainer_id', trainerId)
         .eq('date', today)
@@ -181,8 +177,7 @@ export const useTrainerAttendance = (trainerId?: string) => {
       // Update record with check-out time
       const checkOutTime = new Date().toISOString();
       
-      const { data, error } = await supabase
-        .from('trainer_attendance')
+      const { data, error } = await getTable('trainer_attendance')
         .update({
           check_out_time: checkOutTime,
           notes: notes || existingRecord.notes

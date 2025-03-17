@@ -1,6 +1,6 @@
 
 import { useState, useEffect } from 'react';
-import { supabase } from '@/integrations/supabase/client';
+import { supabase, getTable } from '@/integrations/supabase/client';
 import { useToast } from '@/components/ui/use-toast';
 
 export interface ClientProgressRecord {
@@ -52,8 +52,7 @@ export const useClientProgress = (clientId?: string, trainerId?: string) => {
       setIsLoading(true);
       
       try {
-        let query = supabase
-          .from('client_progress')
+        let query = getTable('client_progress')
           .select(`
             *,
             members:client_id(name)
@@ -73,11 +72,11 @@ export const useClientProgress = (clientId?: string, trainerId?: string) => {
         if (error) throw error;
         
         if (data) {
-          const formattedData = data.map(record => ({
+          const formattedData = data.map((record: any) => ({
             ...record,
             client_name: record.members?.name
           }));
-          setProgressRecords(formattedData);
+          setProgressRecords(formattedData as ClientProgressRecord[]);
         }
       } catch (err) {
         console.error('Error fetching client progress:', err);
@@ -113,9 +112,8 @@ export const useClientProgress = (clientId?: string, trainerId?: string) => {
   
   const addProgressRecord = async (progressData: ClientProgressInput) => {
     try {
-      const { data, error } = await supabase
-        .from('client_progress')
-        .insert(progressData)
+      const { data, error } = await getTable('client_progress')
+        .insert(progressData as any)
         .select()
         .single();
         
@@ -140,9 +138,8 @@ export const useClientProgress = (clientId?: string, trainerId?: string) => {
   
   const updateProgressRecord = async (id: string, progressData: Partial<ClientProgressInput>) => {
     try {
-      const { data, error } = await supabase
-        .from('client_progress')
-        .update(progressData)
+      const { data, error } = await getTable('client_progress')
+        .update(progressData as any)
         .eq('id', id)
         .select()
         .single();
@@ -168,8 +165,7 @@ export const useClientProgress = (clientId?: string, trainerId?: string) => {
   
   const deleteProgressRecord = async (id: string) => {
     try {
-      const { error } = await supabase
-        .from('client_progress')
+      const { error } = await getTable('client_progress')
         .delete()
         .eq('id', id);
         

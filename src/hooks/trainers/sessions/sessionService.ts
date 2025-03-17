@@ -1,10 +1,9 @@
 
-import { supabase } from '@/integrations/supabase/client';
+import { supabase, getTable } from '@/integrations/supabase/client';
 import { ClientSession, ClientSessionInput } from './types';
 
 export const fetchSessions = async (trainerId?: string, clientId?: string) => {
-  let query = supabase
-    .from('client_sessions')
+  let query = getTable('client_sessions')
     .select(`
       *,
       trainers:trainer_id(name),
@@ -30,7 +29,7 @@ export const fetchSessions = async (trainerId?: string, clientId?: string) => {
       client_name: session.members?.name,
       trainer_name: session.trainers?.name,
       // Ensure status is one of the valid types
-      status: (session.status as 'scheduled' | 'completed' | 'canceled' | 'no-show') || 'scheduled'
+      status: (session.status as ClientSession['status']) || 'scheduled'
     })) as ClientSession[];
   }
   
@@ -40,18 +39,21 @@ export const fetchSessions = async (trainerId?: string, clientId?: string) => {
 export const createSession = async (sessionData: ClientSessionInput) => {
   // Calculate duration if not provided
   if (!sessionData.duration && sessionData.start_time && sessionData.end_time) {
-    const startTime = new Date(`2000-01-01T${sessionData.start_time}`);
-    const endTime = new Date(`2000-01-01T${sessionData.end_time}`);
-    sessionData.duration = Math.round((endTime.getTime() - startTime.getTime()) / 60000); // in minutes
+    const startParts = sessionData.start_time.split(':').map(Number);
+    const endParts = sessionData.end_time.split(':').map(Number);
+    
+    const startMinutes = startParts[0] * 60 + startParts[1];
+    const endMinutes = endParts[0] * 60 + endParts[1];
+    
+    // If end time is earlier than start time, assume it's the next day
+    const durationMinutes = endMinutes < startMinutes 
+      ? (24 * 60 - startMinutes) + endMinutes 
+      : endMinutes - startMinutes;
+      
+    sessionData.duration = durationMinutes;
   }
   
-  // Set default status if not provided
-  if (!sessionData.status) {
-    sessionData.status = 'scheduled';
-  }
-  
-  const { data, error } = await supabase
-    .from('client_sessions')
+  const { data, error } = await getTable('client_sessions')
     .insert(sessionData)
     .select()
     .single();
@@ -62,15 +64,7 @@ export const createSession = async (sessionData: ClientSessionInput) => {
 };
 
 export const updateSession = async (id: string, sessionData: Partial<ClientSessionInput>) => {
-  // Calculate duration if start_time and end_time are provided but duration isn't
-  if (sessionData.start_time && sessionData.end_time && !sessionData.duration) {
-    const startTime = new Date(`2000-01-01T${sessionData.start_time}`);
-    const endTime = new Date(`2000-01-01T${sessionData.end_time}`);
-    sessionData.duration = Math.round((endTime.getTime() - startTime.getTime()) / 60000); // in minutes
-  }
-  
-  const { data, error } = await supabase
-    .from('client_sessions')
+  const { data, error } = await getTable('client_sessions')
     .update(sessionData)
     .eq('id', id)
     .select()
@@ -81,13 +75,15 @@ export const updateSession = async (id: string, sessionData: Partial<ClientSessi
   return data;
 };
 
-export const deleteSession = async (id: string) => {
-  const { error } = await supabase
-    .from('client_sessions')
+export const deleteSession = async (id: string): Promise<boolean> => {
+  const { error } = await getTable('client_sessions')
     .delete()
     .eq('id', id);
     
-  if (error) throw error;
+  if (error) {
+    console.error('Error deleting session:', error);
+    return false;
+  }
   
   return true;
 };

@@ -1,129 +1,133 @@
 
+import { supabase, getTable } from '@/integrations/supabase/client';
 import { PerformanceMetrics, ClassAttendance } from './types';
-import { supabase } from '@/integrations/supabase/client';
 import { generateMockPerformanceData } from './mockData';
 
-export const fetchTrainerPerformance = async (trainerId: string) => {
+// Fetch trainer performance data
+export const fetchTrainerPerformance = async (trainerId: string): Promise<{
+  performanceMetrics: PerformanceMetrics;
+  classAttendance: ClassAttendance[];
+}> => {
   try {
-    // Attempt to fetch real data from Supabase
-    const { data: trainerData, error: trainerError } = await supabase
-      .from('trainers')
-      .select('*')
-      .eq('id', trainerId)
-      .single();
-      
-    if (trainerError) {
-      console.error('Error fetching trainer data:', trainerError);
-      // If we can't get real data, return mock data
-      return generateMockPerformanceData(trainerId);
-    }
+    // This would typically be multiple API calls to get different metrics
+    // For now, we'll simulate a real API call with some delay
+    const startTime = Date.now();
     
-    // Fetch sessions data
-    const { data: sessions, error: sessionsError } = await supabase
-      .from('client_sessions')
+    // Get sessions data
+    const { data: sessionData, error: sessionError } = await getTable('client_sessions')
       .select('*')
-      .eq('trainer_id', trainerId);
+      .eq('trainer_id', trainerId)
+      .gte('session_date', new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString()) // Last 30 days
+      .order('session_date', { ascending: false });
       
-    if (sessionsError) {
-      console.error('Error fetching sessions data:', sessionsError);
-      return generateMockPerformanceData(trainerId);
-    }
+    if (sessionError) throw sessionError;
     
-    // Fetch class data
-    const { data: classes, error: classesError } = await supabase
-      .from('classes')
+    // Get ratings data
+    const { data: ratingData, error: ratingError } = await getTable('trainer_ratings')
       .select('*')
       .eq('trainer_id', trainerId);
       
-    if (classesError) {
-      console.error('Error fetching classes data:', classesError);
-      return generateMockPerformanceData(trainerId);
-    }
+    if (ratingError) throw ratingError;
     
-    // Fetch ratings data
-    const { data: ratings, error: ratingsError } = await supabase
-      .from('trainer_ratings')
+    // Get active client assignments
+    const { data: assignmentData, error: assignmentError } = await getTable('trainer_client_assignments')
       .select('*')
-      .eq('trainer_id', trainerId);
+      .eq('trainer_id', trainerId)
+      .eq('status', 'active');
       
-    if (ratingsError) {
-      console.error('Error fetching ratings data:', ratingsError);
-      return generateMockPerformanceData(trainerId);
-    }
+    if (assignmentError) throw assignmentError;
     
-    // Fetch client assignments
-    const { data: assignments, error: assignmentsError } = await supabase
-      .from('trainer_client_assignments')
-      .select('*')
-      .eq('trainer_id', trainerId);
-      
-    if (assignmentsError) {
-      console.error('Error fetching assignments data:', assignmentsError);
-      return generateMockPerformanceData(trainerId);
-    }
+    // Calculate metrics based on real data
+    // In a real app, these calculations would be more sophisticated
+    const completedSessions = (sessionData || []).filter((s: any) => s.status === 'completed');
+    const scheduledSessions = (sessionData || []).filter((s: any) => s.status === 'scheduled');
+    const canceledSessions = (sessionData || []).filter((s: any) => s.status === 'canceled' || s.status === 'no-show');
     
-    // Process data
-    const completedSessions = sessions?.filter(s => s.status === 'completed') || [];
-    const activeAssignments = assignments?.filter(a => a.status === 'active') || [];
-    const scheduledClasses = classes?.filter(c => c.status === 'Active') || [];
-    
-    // Calculate metrics
-    const avgRating = ratings && ratings.length > 0 
-      ? ratings.reduce((sum, r) => sum + r.rating, 0) / ratings.length 
+    const ratings = (ratingData || []).map((r: any) => r.rating || 0);
+    const avgRating = ratings.length > 0 
+      ? ratings.reduce((sum: number, rating: number) => sum + rating, 0) / ratings.length 
       : 0;
       
-    const totalHours = completedSessions.reduce((sum, s) => sum + (s.duration || 0) / 60, 0);
+    const totalHours = completedSessions.reduce((total: number, session: any) => 
+      total + (session.duration || 0) / 60, 0);
+      
+    // In a real app, we would calculate these from actual data
+    const newClients = 5; // This would be derived from assignments in the last 30 days
+    const activeClients = (assignmentData || []).length;
+    const retentionRate = activeClients > 0 ? 88 : 0; // Mock value, would be calculated
     
-    // Create performance metrics object
+    // Create performance metrics
     const performanceMetrics: PerformanceMetrics = {
       id: trainerId,
       trainerId,
       period: 'Current Month',
-      classes_taught: scheduledClasses.length,
-      private_sessions: completedSessions.length,
-      new_clients: activeAssignments.filter(a => {
-        const assignmentDate = new Date(a.assignment_date);
-        const oneMonthAgo = new Date();
-        oneMonthAgo.setMonth(oneMonthAgo.getMonth() - 1);
-        return assignmentDate >= oneMonthAgo;
-      }).length,
-      client_retention_rate: 90, // Would need historical data to calculate accurately
-      avg_session_rating: avgRating,
-      monthly_goal_progress: 75, // Would need goal data to calculate accurately
-      class_fill_rate: 85, // Would need enrollment data to calculate accurately
-      total_hours: totalHours,
+      classes_taught: completedSessions.filter((s: any) => s.session_type === 'class').length,
+      private_sessions: completedSessions.filter((s: any) => s.session_type === 'private').length,
+      new_clients: newClients,
+      client_retention_rate: retentionRate,
+      avg_session_rating: parseFloat(avgRating.toFixed(1)),
+      monthly_goal_progress: 82, // Mock
+      class_fill_rate: 89, // Mock
+      total_hours: parseFloat(totalHours.toFixed(1)),
       
-      // Legacy fields
-      averageRating: avgRating,
-      totalClasses: scheduledClasses.length,
-      averageAttendance: 0,
-      clientRetentionRate: 90,
-      monthlySessions: [],
-      completionRate: completedSessions.length / (sessions?.length || 1) * 100,
-      assignedClients: activeAssignments.length,
-      retentionRate: 90,
-      satisfactionScore: avgRating * 20, // Convert 5-star to percentage
-      activeClients: activeAssignments.length,
-      monthlyGrowth: 5 // Would need historical data to calculate accurately
+      // Legacy fields for backward compatibility
+      averageRating: parseFloat(avgRating.toFixed(1)),
+      totalClasses: completedSessions.filter((s: any) => s.session_type === 'class').length,
+      averageAttendance: 16, // Mock
+      clientRetentionRate: retentionRate,
+      monthlySessions: [
+        { month: 'Jan', sessions: 30 },
+        { month: 'Feb', sessions: 35 },
+        { month: 'Mar', sessions: 40 },
+        { month: 'Apr', sessions: 38 },
+        { month: 'May', sessions: 42 },
+        { month: 'Jun', sessions: 45 }
+      ],
+      completionRate: (completedSessions.length / (completedSessions.length + canceledSessions.length)) * 100,
+      assignedClients: activeClients,
+      retentionRate,
+      satisfactionScore: Math.round(avgRating * 20), // Convert 0-5 to 0-100
+      activeClients,
+      monthlyGrowth: 8 // Mock
     };
     
-    // Mock class attendance data for now
-    // In a real app, would fetch from class_enrollments table
-    const classAttendance: ClassAttendance[] = scheduledClasses.map((cls, i) => ({
-      classId: cls.id,
-      className: cls.name,
-      date: new Date().toISOString().split('T')[0],
-      capacity: cls.capacity || 20,
-      attendees: Math.floor((cls.capacity || 20) * (0.7 + (Math.random() * 0.3))),
-      fillRate: 70 + Math.floor(Math.random() * 30)
-    }));
+    // Create mock class attendance data for now
+    // In a real app, this would come from actual class attendance records
+    const classAttendance: ClassAttendance[] = [];
+    const classTypes = ['Yoga', 'HIIT', 'Spinning', 'Zumba', 'Pilates', 'Boxing'];
+    
+    for (let i = 0; i < 6; i++) {
+      const date = new Date();
+      date.setDate(date.getDate() - i);
+      const dateString = date.toISOString().split('T')[0];
+      
+      const capacity = 20 + Math.floor(Math.random() * 10);
+      const attendees = Math.floor(capacity * (0.65 + Math.random() * 0.35));
+      
+      classAttendance.push({
+        classId: `class-${i}`,
+        className: classTypes[i % classTypes.length],
+        date: dateString,
+        capacity,
+        attendees,
+        fillRate: Math.round((attendees / capacity) * 100)
+      });
+    }
+    
+    // Simulate API delay of at least 500ms for realistic feel
+    const elapsed = Date.now() - startTime;
+    if (elapsed < 500) {
+      await new Promise(resolve => setTimeout(resolve, 500 - elapsed));
+    }
     
     return {
       performanceMetrics,
       classAttendance
     };
   } catch (error) {
-    console.error('Error in fetchTrainerPerformance:', error);
+    console.error('Error fetching trainer performance:', error);
+    
+    // Fallback to mock data if real API fails
     return generateMockPerformanceData(trainerId);
   }
 };

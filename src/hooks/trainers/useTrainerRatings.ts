@@ -1,6 +1,6 @@
 
 import { useState, useEffect } from 'react';
-import { supabase } from '@/integrations/supabase/client';
+import { supabase, getTable } from '@/integrations/supabase/client';
 import { useToast } from '@/components/ui/use-toast';
 
 export interface TrainerRating {
@@ -45,8 +45,7 @@ export const useTrainerRatings = (trainerId?: string) => {
       
       try {
         // Fetch trainer ratings
-        const { data, error } = await supabase
-          .from('trainer_ratings')
+        const { data, error } = await getTable('trainer_ratings')
           .select('*')
           .eq('trainer_id', trainerId)
           .order('created_at', { ascending: false });
@@ -54,18 +53,19 @@ export const useTrainerRatings = (trainerId?: string) => {
         if (error) throw error;
         
         if (data && data.length > 0) {
-          setRatings(data as TrainerRating[]);
+          setRatings(data as unknown as TrainerRating[]);
           
           // Calculate summary statistics
           const totalRatings = data.length;
-          const ratingSum = data.reduce((sum, item) => sum + item.rating, 0);
+          const ratingSum = data.reduce((sum, item: any) => sum + (item.rating || 0), 0);
           const avgRating = ratingSum / totalRatings;
           
           // Count ratings by star level
           const distribution = {1: 0, 2: 0, 3: 0, 4: 0, 5: 0};
-          data.forEach(item => {
-            if (distribution[item.rating as keyof typeof distribution] !== undefined) {
-              distribution[item.rating as keyof typeof distribution]++;
+          data.forEach((item: any) => {
+            const rating = item.rating || 0;
+            if (rating >= 1 && rating <= 5) {
+              distribution[rating as keyof typeof distribution]++;
             }
           });
           
@@ -162,9 +162,8 @@ export const useTrainerRatings = (trainerId?: string) => {
   // Add a rating
   const addRating = async (data: Omit<TrainerRating, 'id' | 'created_at' | 'updated_at' | 'is_flagged' | 'member_name'>) => {
     try {
-      const { data: result, error } = await supabase
-        .from('trainer_ratings')
-        .insert(data)
+      const { data: result, error } = await getTable('trainer_ratings')
+        .insert(data as any)
         .select()
         .single();
         
@@ -190,9 +189,8 @@ export const useTrainerRatings = (trainerId?: string) => {
   // Update a rating (trainer response or flag)
   const updateRating = async (id: string, data: Partial<TrainerRating>) => {
     try {
-      const { error } = await supabase
-        .from('trainer_ratings')
-        .update(data)
+      const { error } = await getTable('trainer_ratings')
+        .update(data as any)
         .eq('id', id);
         
       if (error) throw error;

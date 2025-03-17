@@ -2,130 +2,98 @@
 import { ClientSession } from './types';
 
 export const generateMockSessions = (trainerId?: string, clientId?: string): ClientSession[] => {
-  const mockSessions: ClientSession[] = [];
+  const sessions: ClientSession[] = [];
+  const defaultTrainerId = trainerId || 'default-trainer-id';
+  const defaultClientId = clientId || 'default-client-id';
   
-  const mockTrainers = [
-    { id: trainerId || 'trainer-1', name: 'John Doe' },
-    { id: 'trainer-2', name: 'Jane Smith' },
-    { id: 'trainer-3', name: 'Mike Johnson' }
-  ];
+  const sessionTypes = ['Strength', 'Cardio', 'Flexibility', 'Balance', 'Full Body'];
+  const locations = ['Main Gym', 'Studio 1', 'Pool Area', 'Outdoor Track'];
+  const statuses: ('scheduled' | 'completed' | 'canceled' | 'no-show')[] = 
+    ['scheduled', 'scheduled', 'completed', 'completed', 'completed', 'canceled', 'no-show'];
   
-  const mockClients = [
-    { id: clientId || 'client-1', name: 'Sarah Parker' },
-    { id: 'client-2', name: 'James Wilson' },
-    { id: 'client-3', name: 'Emily Davis' },
-    { id: 'client-4', name: 'Robert Brown' },
-    { id: 'client-5', name: 'Lisa Miller' }
-  ];
-  
-  const sessionTypes = ['Strength', 'Cardio', 'Flexibility', 'Full Body', 'HIIT'];
-  const locations = ['Main Gym Floor', 'Functional Training Zone', 'Olympic Lifting Area', 'Studio 1', 'Studio 2'];
-  
-  // Generate schedules for next 7 days
-  for (let i = -3; i < 10; i++) {
+  // Generate sessions for the next 7 days and past 7 days
+  for (let i = -7; i < 7; i++) {
     const date = new Date();
     date.setDate(date.getDate() + i);
-    const dateString = date.toISOString().split('T')[0];
     
-    // Past sessions (completed, canceled or no-show)
-    if (i < 0) {
-      const sessionStatus = i === -1 ? 'completed' : (i === -2 ? 'canceled' : 'no-show');
+    // Skip some days randomly
+    if (Math.random() > 0.7 && i !== 0) continue;
+    
+    const sessionDate = date.toISOString().split('T')[0];
+    
+    // Create 1-2 sessions per day
+    const numSessions = Math.floor(Math.random() * 2) + 1;
+    
+    for (let j = 0; j < numSessions; j++) {
+      // For past sessions, use completed or canceled or no-show
+      // For future sessions, use scheduled
+      let status: 'scheduled' | 'completed' | 'canceled' | 'no-show' = 'scheduled';
       
-      // Determine which client and trainer to use
-      let useTrainer = mockTrainers[0];
-      let useClient = mockClients[0];
-      
-      if (trainerId) {
-        useTrainer = mockTrainers.find(t => t.id === trainerId) || mockTrainers[0];
-      } else {
-        useTrainer = mockTrainers[Math.abs(i) % mockTrainers.length];
+      if (i < 0) {
+        // Past sessions
+        status = statuses[Math.floor(Math.random() * statuses.length)];
       }
       
-      if (clientId) {
-        useClient = mockClients.find(c => c.id === clientId) || mockClients[0];
-      } else {
-        useClient = mockClients[Math.abs(i) % mockClients.length];
-      }
+      // Start times: 7am, 9am, 11am, 2pm, 4pm, 6pm
+      const startHours = [7, 9, 11, 14, 16, 18];
+      const startHour = startHours[Math.floor(Math.random() * startHours.length)];
       
-      // Create past session
-      mockSessions.push({
-        id: `session-past-${Math.abs(i)}`,
-        trainer_id: useTrainer.id,
-        client_id: useClient.id,
-        session_date: dateString,
-        start_time: '09:00:00',
-        end_time: '10:00:00',
-        duration: 60,
-        session_type: sessionTypes[Math.abs(i) % sessionTypes.length],
-        location: locations[Math.abs(i) % locations.length],
-        status: sessionStatus as 'scheduled' | 'completed' | 'canceled' | 'no-show',
-        notes: sessionStatus === 'completed' ? 'Great session!' : 
-               sessionStatus === 'canceled' ? 'Client canceled 2 hours before' : 
-               'Client did not show up',
-        achievements: sessionStatus === 'completed' ? 'Increased weight on squats by 10lbs' : undefined,
-        focus_areas: ['Strength', 'Form'],
-        created_at: new Date(date.getTime() - 86400000).toISOString(),
-        updated_at: new Date(date.getTime() - 3600000).toISOString(),
-        client_name: useClient.name,
-        trainer_name: useTrainer.name
+      // Random duration between 30 and 90 minutes, in 15 min increments
+      const durationOptions = [30, 45, 60, 75, 90];
+      const duration = durationOptions[Math.floor(Math.random() * durationOptions.length)];
+      
+      // Calculate end time
+      const endHour = Math.floor(startHour + duration / 60);
+      const endMinute = (startHour + duration / 60) % 1 * 60;
+      
+      const formatTime = (hour: number, minute: number) => 
+        `${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}`;
+      
+      const startTime = formatTime(startHour, 0);
+      const endTime = formatTime(endHour, endMinute);
+      
+      const sessionType = sessionTypes[Math.floor(Math.random() * sessionTypes.length)];
+      const location = locations[Math.floor(Math.random() * locations.length)];
+      
+      // Generate focus areas
+      const allFocusAreas = ['Upper Body', 'Lower Body', 'Core', 'Cardio', 'Flexibility', 'Balance'];
+      const numFocusAreas = Math.floor(Math.random() * 3) + 1;
+      const focusAreas = Array(numFocusAreas).fill(0).map(() => 
+        allFocusAreas[Math.floor(Math.random() * allFocusAreas.length)]
+      );
+      
+      // Create a unique session ID
+      const id = `mock-${i}-${j}-${Date.now()}`;
+      
+      sessions.push({
+        id,
+        trainer_id: defaultTrainerId,
+        client_id: defaultClientId,
+        session_date: sessionDate,
+        start_time: startTime,
+        end_time: endTime,
+        duration,
+        session_type: sessionType,
+        location,
+        status,
+        notes: status === 'completed' ? 'Client showed good progress' : 
+              status === 'canceled' ? 'Client had a scheduling conflict' : 
+              status === 'no-show' ? 'Client did not attend or notify' : 
+              'Regular training session',
+        focus_areas: focusAreas,
+        achievements: status === 'completed' ? 'Increased weight on bench press by 5lbs' : undefined,
+        created_at: new Date(Date.now() - (i < 0 ? Math.abs(i) : 0) * 86400000).toISOString(),
+        updated_at: new Date(Date.now() - (i < 0 ? Math.abs(i) : 0) * 86400000).toISOString(),
+        client_name: 'John Doe',
+        trainer_name: 'Jane Smith'
       });
-    } 
-    // Future sessions (scheduled)
-    else {
-      // For each day, create 1-3 sessions
-      const numSessionsPerDay = (i <= 3) ? 2 : 1; // More sessions for the next 3 days
-      
-      for (let j = 0; j < numSessionsPerDay; j++) {
-        // Determine which client and trainer to use
-        let useTrainer = mockTrainers[0];
-        let useClient = mockClients[0];
-        
-        if (trainerId) {
-          useTrainer = mockTrainers.find(t => t.id === trainerId) || mockTrainers[0];
-        } else {
-          useTrainer = mockTrainers[(i + j) % mockTrainers.length];
-        }
-        
-        if (clientId) {
-          useClient = mockClients.find(c => c.id === clientId) || mockClients[0];
-        } else {
-          useClient = mockClients[(i + j) % mockClients.length];
-        }
-        
-        // Create times - morning, afternoon, evening
-        let startTime, endTime;
-        if (j === 0) {
-          startTime = '09:00:00';
-          endTime = '10:00:00';
-        } else if (j === 1) {
-          startTime = '14:00:00';
-          endTime = '15:00:00';
-        } else {
-          startTime = '18:00:00';
-          endTime = '19:00:00';
-        }
-        
-        mockSessions.push({
-          id: `session-${i}-${j}`,
-          trainer_id: useTrainer.id,
-          client_id: useClient.id,
-          session_date: dateString,
-          start_time: startTime,
-          end_time: endTime,
-          duration: 60,
-          session_type: sessionTypes[(i + j) % sessionTypes.length],
-          location: locations[(i + j) % locations.length],
-          status: 'scheduled',
-          notes: i === 0 ? 'Focus on deadlift form' : undefined,
-          focus_areas: ['Strength', 'Mobility'],
-          created_at: new Date(date.getTime() - 86400000).toISOString(),
-          updated_at: new Date(date.getTime() - 86400000).toISOString(),
-          client_name: useClient.name,
-          trainer_name: useTrainer.name
-        });
-      }
     }
   }
   
-  return mockSessions;
+  // Sort by date and time
+  return sessions.sort((a, b) => {
+    const dateCompare = a.session_date.localeCompare(b.session_date);
+    if (dateCompare !== 0) return dateCompare;
+    return a.start_time.localeCompare(b.start_time);
+  });
 };

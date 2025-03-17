@@ -2,108 +2,76 @@
 import { ClientAssignment } from './types';
 
 export const generateMockAssignments = (trainerId?: string, clientId?: string): ClientAssignment[] => {
-  const mockAssignments: ClientAssignment[] = [];
+  const assignments: ClientAssignment[] = [];
+  const defaultTrainerId = trainerId || 'default-trainer-id';
+  const defaultClientId = clientId || 'default-client-id';
   
-  const mockTrainers = [
-    { id: trainerId || 'trainer-1', name: 'John Doe' },
-    { id: 'trainer-2', name: 'Jane Smith' },
-    { id: 'trainer-3', name: 'Mike Johnson' }
-  ];
+  const clientNames = ['John Doe', 'Jane Smith', 'Robert Johnson', 'Emily Davis', 'Michael Wilson'];
   
-  const mockClients = [
-    { id: clientId || 'client-1', name: 'Sarah Parker' },
-    { id: 'client-2', name: 'James Wilson' },
-    { id: 'client-3', name: 'Emily Davis' },
-    { id: 'client-4', name: 'Robert Brown' },
-    { id: 'client-5', name: 'Lisa Miller' },
-    { id: 'client-6', name: 'Michael Thompson' }
-  ];
-  
-  // Generate mock data
-  if (trainerId && !clientId) {
-    // Assignments for a specific trainer
-    const trainer = mockTrainers.find(t => t.id === trainerId) || mockTrainers[0];
+  // If specific client ID is provided, only generate for that client
+  if (clientId) {
+    const assignmentDate = new Date();
+    assignmentDate.setMonth(assignmentDate.getMonth() - 2);
     
-    mockClients.forEach((client, index) => {
-      const status = index < 4 ? 'active' : (index === 4 ? 'paused' : 'ended');
-      const assignmentDate = new Date();
-      assignmentDate.setMonth(assignmentDate.getMonth() - index);
-      
-      mockAssignments.push({
-        id: `assignment-${trainer.id}-${client.id}`,
-        trainer_id: trainer.id,
-        client_id: client.id,
-        assignment_date: assignmentDate.toISOString(),
-        status: status as 'active' | 'paused' | 'ended',
-        notes: index === 0 ? 'Regular sessions twice a week' : undefined,
-        created_at: assignmentDate.toISOString(),
-        updated_at: assignmentDate.toISOString(),
-        client_name: client.name,
-        trainer_name: trainer.name
-      });
-    });
-  } else if (clientId && !trainerId) {
-    // Assignments for a specific client
-    const client = mockClients.find(c => c.id === clientId) || mockClients[0];
-    
-    mockTrainers.forEach((trainer, index) => {
-      const status = index === 0 ? 'active' : (index === 1 ? 'paused' : 'ended');
-      const assignmentDate = new Date();
-      assignmentDate.setMonth(assignmentDate.getMonth() - index * 3);
-      
-      mockAssignments.push({
-        id: `assignment-${trainer.id}-${client.id}`,
-        trainer_id: trainer.id,
-        client_id: client.id,
-        assignment_date: assignmentDate.toISOString(),
-        status: status as 'active' | 'paused' | 'ended',
-        notes: index === 0 ? 'Focus on strength training' : undefined,
-        created_at: assignmentDate.toISOString(),
-        updated_at: assignmentDate.toISOString(),
-        client_name: client.name,
-        trainer_name: trainer.name
-      });
-    });
-  } else if (trainerId && clientId) {
-    // Specific trainer-client assignment
-    const trainer = mockTrainers.find(t => t.id === trainerId) || mockTrainers[0];
-    const client = mockClients.find(c => c.id === clientId) || mockClients[0];
-    
-    mockAssignments.push({
-      id: `assignment-${trainer.id}-${client.id}`,
-      trainer_id: trainer.id,
-      client_id: client.id,
-      assignment_date: new Date().toISOString(),
+    assignments.push({
+      id: `mock-specific-${defaultClientId}`,
+      trainer_id: defaultTrainerId,
+      client_id: defaultClientId,
+      assignment_date: assignmentDate.toISOString().split('T')[0],
       status: 'active',
-      notes: 'Customized fitness program',
-      created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString(),
-      client_name: client.name,
-      trainer_name: trainer.name
+      created_at: assignmentDate.toISOString(),
+      updated_at: assignmentDate.toISOString(),
+      client_name: 'John Doe',
+      trainer_name: 'Jane Smith'
     });
-  } else {
-    // Generate random assignments if no specific trainer or client
-    for (let i = 0; i < 10; i++) {
-      const trainerId = i % 3;
-      const clientId = i % 6;
-      const status = i < 5 ? 'active' : (i < 8 ? 'paused' : 'ended');
+    
+    return assignments;
+  }
+  
+  // If specific trainer ID is provided, generate multiple clients
+  if (trainerId) {
+    // Generate 5 client assignments with different statuses
+    for (let i = 0; i < 5; i++) {
+      const clientId = `client-${i}`;
       const assignmentDate = new Date();
-      assignmentDate.setMonth(assignmentDate.getMonth() - i);
       
-      mockAssignments.push({
-        id: `assignment-${i}`,
-        trainer_id: mockTrainers[trainerId].id,
-        client_id: mockClients[clientId].id,
-        assignment_date: assignmentDate.toISOString(),
-        status: status as 'active' | 'paused' | 'ended',
-        notes: i === 0 ? 'Regular sessions' : undefined,
+      // Some assignments started months ago, others more recently
+      assignmentDate.setMonth(assignmentDate.getMonth() - (i % 3) - 1);
+      
+      // Vary the statuses
+      let status: 'active' | 'paused' | 'ended';
+      
+      if (i < 3) {
+        status = 'active';
+      } else if (i === 3) {
+        status = 'paused';
+      } else {
+        status = 'ended';
+      }
+      
+      // For ended assignments, set an end date
+      let endDate = undefined;
+      if (status === 'ended') {
+        endDate = new Date();
+        endDate.setDate(endDate.getDate() - 15);
+        endDate = endDate.toISOString().split('T')[0];
+      }
+      
+      assignments.push({
+        id: `mock-${i}`,
+        trainer_id: defaultTrainerId,
+        client_id: clientId,
+        assignment_date: assignmentDate.toISOString().split('T')[0],
+        end_date: endDate,
+        status,
+        notes: i === 1 ? 'Client requested specific focus on strength training' : undefined,
         created_at: assignmentDate.toISOString(),
         updated_at: assignmentDate.toISOString(),
-        client_name: mockClients[clientId].name,
-        trainer_name: mockTrainers[trainerId].name
+        client_name: clientNames[i % clientNames.length],
+        trainer_name: 'Jane Smith'
       });
     }
   }
   
-  return mockAssignments;
+  return assignments;
 };
