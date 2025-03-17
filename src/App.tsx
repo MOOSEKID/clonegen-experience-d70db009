@@ -1,11 +1,11 @@
-
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { Toaster } from 'sonner';
 import { AuthProvider } from '@/contexts/AuthProvider';
 import { ThemeProvider } from '@/components/theme/theme-provider';
 import { ErrorBoundary } from '@/components/ui/error-boundary';
 import { ErrorMessage } from '@/components/ErrorMessage';
 import { useNavigate } from 'react-router-dom';
+import Header from '@/components/Header';
 
 // Page imports
 import Login from '@/pages/Login';
@@ -20,7 +20,6 @@ import AdminDashboard from '@/pages/admin/AdminDashboard';
 import PrivateRoute from '@/components/auth/PrivateRoute';
 import Index from '@/pages/Index';
 import NotFound from '@/components/NotFound';
-import Header from '@/components/Header';
 
 // Custom error fallback component to show when there's an error
 const ErrorFallback = () => {

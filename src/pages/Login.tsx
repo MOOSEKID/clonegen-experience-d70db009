@@ -12,18 +12,22 @@ const Login = () => {
   useEffect(() => {
     // Check if user is already authenticated and redirect accordingly
     if (isAuthenticated && !isLoading) {
-      const redirectPath = isAdmin ? '/admin' : '/dashboard';
+      const redirectPath = isAdmin ? '/admin/dashboard' : '/dashboard';
+      console.log('User is authenticated, redirecting to:', redirectPath);
       navigate(redirectPath, { replace: true });
     }
   }, [isAuthenticated, isAdmin, isLoading, navigate]);
 
   const handleLogin = async (email: string, password: string) => {
     try {
+      console.log('Attempting login with:', email);
       const success = await login(email, password);
       
       if (success) {
-        // Redirect will be handled by the useEffect
         toast.success('Login successful!');
+        // Redirect will be handled by the useEffect
+      } else {
+        toast.error('Login failed. Please check your credentials.');
       }
     } catch (error) {
       console.error('Login error:', error);
@@ -32,10 +36,12 @@ const Login = () => {
   };
 
   const handleAdminLogin = async () => {
+    console.log('Using quick admin login');
     await handleLogin('admin@uptowngym.rw', 'Admin123!');
   };
 
   const handleUserLogin = async () => {
+    console.log('Using quick user login');
     await handleLogin('user@example.com', 'user123');
   };
 

@@ -1,4 +1,3 @@
-
 import { ReactNode, useState, useEffect } from 'react';
 import { AuthContext } from './AuthContext';
 import { useAuthState } from '@/hooks/useAuthState';
@@ -54,68 +53,43 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       if (!existingAdmins || existingAdmins.length === 0) {
         console.log('No admin found, creating default admin account');
         
-        // Checking for existing admin user - this API might differ based on Supabase version
         try {
-          const { data: userList, error: userListError } = await supabase.auth.admin.listUsers({
-            perPage: 1,
-            page: 1,
-          });
-          
-          let adminExists = false;
-          
-          if (userList && userList.users && userList.users.length > 0) {
-            // Fix here: Make sure we properly access user properties with type safety
-            adminExists = userList.users.some(user => {
-              // Check if user exists and has an email property before accessing it
-              return user && typeof user === 'object' && 
-                    'email' in user && user.email !== null && 
-                    user.email === 'admin@uptowngym.rw';
-            });
-          }
-          
-          if (userListError) {
-            console.error('Error checking for existing admin user:', userListError);
-            return;
-          }
-          
-          if (!adminExists) {
-            const { data: authUser, error: authError } = await supabase.auth.admin.createUser({
-              email: 'admin@uptowngym.rw',
-              password: 'Admin123!',
-              email_confirm: true,
-              user_metadata: {
+          const { data: authUser, error: authError } = await supabase.auth.signUp({
+            email: 'admin@uptowngym.rw',
+            password: 'Admin123!',
+            options: {
+              data: {
                 full_name: 'System Administrator'
               }
-            });
-            
-            if (authError) {
-              console.error('Error creating default admin user:', authError);
-              return;
             }
+          });
+          
+          if (authError) {
+            console.error('Error creating default admin user:', authError);
+          } else if (authUser?.user) {
+            console.log('Admin user created, setting up profile');
             
-            if (authUser && authUser.user) {
-              const { error: profileError } = await supabase
-                .from('profiles')
-                .insert([
-                  {
-                    id: authUser.user.id,
-                    email: 'admin@uptowngym.rw',
-                    full_name: 'System Administrator',
-                    role: 'admin',
-                    is_admin: true,
-                    access_level: 'Full'
-                  }
-                ]);
-                
-              if (profileError) {
-                console.error('Error creating default admin profile:', profileError);
-              } else {
-                console.log('Default admin account created successfully');
-              }
+            const { error: profileError } = await supabase
+              .from('profiles')
+              .upsert([
+                {
+                  id: authUser.user.id,
+                  email: authUser.user.email,
+                  full_name: 'System Administrator',
+                  role: 'admin',
+                  is_admin: true,
+                  access_level: 'Full'
+                }
+              ]);
+              
+            if (profileError) {
+              console.error('Error creating default admin profile:', profileError);
+            } else {
+              console.log('Default admin account created successfully');
             }
           }
         } catch (err) {
-          console.error('Error in admin user check:', err);
+          console.error('Error in admin user creation:', err);
         }
       }
     } catch (error) {
@@ -132,12 +106,14 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         
         if (session) {
           console.log('Initial session found:', session.user.email);
+          const userEmail = session.user.email;
+          
           const profile = await fetchUserProfile(session.user.id);
           
           if (profile) {
             setUser({
               id: session.user.id,
-              email: session.user.email || '',
+              email: userEmail || '',
               full_name: profile.full_name || session.user.user_metadata?.full_name || '',
               role: profile.role || 'member',
               is_admin: profile.is_admin || false,
@@ -152,12 +128,12 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
             setIsAdmin(profile.is_admin || false);
             setIsAuthenticated(true);
           } else {
-            const isKnownAdmin = session.user.email === 'admin@uptowngym.rw';
+            const isKnownAdmin = userEmail === 'admin@uptowngym.rw';
             
             setUser({
               id: session.user.id,
-              email: session.user.email || '',
-              full_name: session.user.user_metadata?.full_name || session.user.email || '',
+              email: userEmail || '',
+              full_name: session.user.user_metadata?.full_name || userEmail || '',
               role: isKnownAdmin ? 'admin' : 'member',
               is_admin: isKnownAdmin,
               is_staff: false,
@@ -175,8 +151,8 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
               .insert([
                 { 
                   id: session.user.id,
-                  email: session.user.email,
-                  full_name: session.user.user_metadata?.full_name || session.user.email,
+                  email: userEmail,
+                  full_name: session.user.user_metadata?.full_name || userEmail,
                   role: isKnownAdmin ? 'admin' : 'member',
                   is_admin: isKnownAdmin
                 }
@@ -196,12 +172,13 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
             
             if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
               if (session) {
+                const userEmail = session.user.email;
                 const profile = await fetchUserProfile(session.user.id);
                 
                 if (profile) {
                   setUser({
                     id: session.user.id,
-                    email: session.user.email || '',
+                    email: userEmail || '',
                     full_name: profile.full_name || session.user.user_metadata?.full_name || '',
                     role: profile.role || 'member',
                     is_admin: profile.is_admin || false,
@@ -216,12 +193,12 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
                   setIsAdmin(profile.is_admin || false);
                   setIsAuthenticated(true);
                 } else {
-                  const isKnownAdmin = session.user.email === 'admin@uptowngym.rw';
+                  const isKnownAdmin = userEmail === 'admin@uptowngym.rw';
                   
                   setUser({
                     id: session.user.id,
-                    email: session.user.email || '',
-                    full_name: session.user.user_metadata?.full_name || session.user.email || '',
+                    email: userEmail || '',
+                    full_name: session.user.user_metadata?.full_name || userEmail || '',
                     role: isKnownAdmin ? 'admin' : 'member',
                     is_admin: isKnownAdmin,
                     is_staff: false,
@@ -239,8 +216,8 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
                     .insert([
                       { 
                         id: session.user.id,
-                        email: session.user.email,
-                        full_name: session.user.user_metadata?.full_name || session.user.email,
+                        email: userEmail,
+                        full_name: session.user.user_metadata?.full_name || userEmail,
                         role: isKnownAdmin ? 'admin' : 'member',
                         is_admin: isKnownAdmin
                       }
