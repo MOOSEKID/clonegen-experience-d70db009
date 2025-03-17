@@ -1,175 +1,140 @@
-import { Toaster } from "@/components/ui/toaster";
-import { Toaster as Sonner } from "@/components/ui/sonner";
-import { TooltipProvider } from "@/components/ui/tooltip";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
-import { AuthProvider } from "./contexts/AuthContext";
-import { RouteGuard } from "@/components/auth/RouteGuard";
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import Header from '@/components/Header';
+import Footer from '@/components/Footer';
+import { AuthProvider } from '@/contexts/auth/AuthContext';
+import { Toaster } from '@/components/ui/sonner';
+import { ThemeProvider } from '@/contexts/ThemeContext';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
+import { Suspense, lazy } from 'react';
+import LoadingSpinner from '@/components/LoadingSpinner';
+import ScrollToTop from '@/components/ScrollToTop';
+import ProtectedRoute from '@/components/auth/ProtectedRoute';
+import AdminRoute from '@/components/auth/AdminRoute';
 
-// Layout components
-import Header from "@/components/Header";
-import Footer from "@/components/Footer";
-import AdminLayout from "./pages/admin/AdminLayout";
-import DashboardLayout from "./pages/dashboard/DashboardLayout";
+// Lazy-loaded pages
+const Home = lazy(() => import('@/pages/Home'));
+const About = lazy(() => import('@/pages/About'));
+const Classes = lazy(() => import('@/pages/Classes'));
+const ClassDetails = lazy(() => import('@/pages/ClassDetails'));
+const Trainers = lazy(() => import('@/pages/Trainers'));
+const TrainerDetails = lazy(() => import('@/pages/TrainerDetails'));
+const Contact = lazy(() => import('@/pages/Contact'));
+const Login = lazy(() => import('@/pages/auth/Login'));
+const Signup = lazy(() => import('@/pages/auth/Signup'));
+const ForgotPassword = lazy(() => import('@/pages/auth/ForgotPassword'));
+const ResetPassword = lazy(() => import('@/pages/auth/ResetPassword'));
+const NotFound = lazy(() => import('@/pages/NotFound'));
+const PrivacyPolicy = lazy(() => import('@/pages/legal/PrivacyPolicy'));
+const TermsOfService = lazy(() => import('@/pages/legal/TermsOfService'));
 
-// Main pages
-import Index from "./pages/Index";
-import AboutUs from "./pages/AboutUs";
-import Services from "./pages/Services";
-import Blogs from "./pages/Blogs";
-import ContactUs from "./pages/ContactUs";
-import NotFound from "./pages/NotFound";
-
-// Service pages
-import FitnessFacilities from "./pages/FitnessFacilities";
-import YouthPrograms from "./pages/YouthPrograms";
-import SpaWellness from "./pages/SpaWellness";
-import Membership from "./pages/Membership";
-import Classes from "./pages/Classes";
-import Timetable from "./pages/Timetable";
-import OpeningTimes from "./pages/OpeningTimes";
-
-// Shop pages
-import ShopPage from "./pages/Shop";
-import CategoryPage from "./pages/shop/CategoryPage";
-import ProductPage from "./pages/shop/ProductPage";
-
-// Auth pages
-import Login from "./pages/auth/Login";
-import Signup from "./pages/auth/Signup";
+// Dashboard pages
+const DashboardLayout = lazy(() => import('@/pages/dashboard/DashboardLayout'));
+const Dashboard = lazy(() => import('@/pages/dashboard/Dashboard'));
+const Workouts = lazy(() => import('@/pages/dashboard/Workouts'));
+const WorkoutDetails = lazy(() => import('@/pages/dashboard/WorkoutDetails'));
+const Progress = lazy(() => import('@/pages/dashboard/Progress'));
+const Nutrition = lazy(() => import('@/pages/dashboard/Nutrition'));
+const Billing = lazy(() => import('@/pages/dashboard/Billing'));
+const Notifications = lazy(() => import('@/pages/dashboard/Notifications'));
+const Settings = lazy(() => import('@/pages/dashboard/Settings'));
+const ClassSchedule = lazy(() => import('@/pages/dashboard/ClassSchedule'));
 
 // Admin pages
-import AdminClasses from "./pages/admin/Classes";
-import AdminTrainers from "./pages/admin/Trainers";
-import AdminPayments from "./pages/admin/Payments";
-import AdminWorkouts from "./pages/admin/Workouts";
-import AdminShop from "./pages/admin/Shop";
-import AdminContent from "./pages/admin/Content";
-import AdminReports from "./pages/admin/Reports";
-import AdminSettings from "./pages/admin/Settings";
-import AdminSupport from "./pages/admin/Support";
+const AdminLayout = lazy(() => import('@/pages/admin/AdminLayout'));
+const AdminDashboard = lazy(() => import('@/pages/admin/AdminDashboard'));
+const AdminMembers = lazy(() => import('@/pages/admin/AdminMembers'));
+const AdminTrainers = lazy(() => import('@/pages/admin/AdminTrainers'));
+const AdminClasses = lazy(() => import('@/pages/admin/AdminClasses'));
+const AdminSettings = lazy(() => import('@/pages/admin/AdminSettings'));
 
-// Trainer pages
-import TrainerProfiles from "./pages/admin/trainers/TrainerProfiles";
-import PerformanceTracking from "./pages/admin/trainers/PerformanceTracking";
-import TrainerRatings from "./pages/admin/trainers/TrainerRatings";
-import TrainerDashboard from "./pages/trainer/TrainerDashboard";
-
-// Customer pages
-import CustomerDashboard from "./pages/customer/CustomerDashboard";
-
-// Staff pages
-import StaffDashboard from "./pages/staff/StaffDashboard";
-
-// Create a new query client instance
+// Create a client
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      refetchOnWindowFocus: false,
-      retry: 1
-    }
-  }
+      staleTime: 1000 * 60 * 5, // 5 minutes
+      retry: 1,
+    },
+  },
 });
 
-const App = () => {
+function App() {
   return (
     <QueryClientProvider client={queryClient}>
-      <AuthProvider>
-        <TooltipProvider>
-          <Toaster />
-          <Sonner />
-          <BrowserRouter basename={import.meta.env.PROD ? '/clonegen-experience' : '/'}>
-            <Routes>
-              {/* Public Routes with Header and Footer */}
-              <Route path="/" element={
-                <div className="flex flex-col min-h-screen">
-                  <Header />
-                  <div className="flex-grow">
-                    <Routes>
-                      <Route index element={<Index />} />
-                      <Route path="/about-us" element={<AboutUs />} />
-                      <Route path="/services" element={<Services />} />
-                      <Route path="/services/fitness-facilities" element={<FitnessFacilities />} />
-                      <Route path="/services/youth-programs" element={<YouthPrograms />} />
-                      <Route path="/services/spa-wellness" element={<SpaWellness />} />
-                      <Route path="/membership" element={<Membership />} />
-                      <Route path="/classes" element={<Classes />} />
-                      <Route path="/blogs" element={<Blogs />} />
-                      <Route path="/shop" element={<ShopPage />} />
-                      <Route path="/shop/category/:categoryId" element={<CategoryPage />} />
-                      <Route path="/shop/product/:productId" element={<ProductPage />} />
-                      <Route path="/contact-us" element={<ContactUs />} />
-                      <Route path="/timetable" element={<Timetable />} />
-                      <Route path="/opening-times" element={<OpeningTimes />} />
-                    </Routes>
-                  </div>
-                  <Footer />
-                </div>
-              } />
+      <ThemeProvider>
+        <AuthProvider>
+          <Router>
+            <ScrollToTop />
+            <div className="flex flex-col min-h-screen">
+              <Header />
+              <main className="flex-grow">
+                <Suspense fallback={<LoadingSpinner />}>
+                  <Routes>
+                    {/* Public routes */}
+                    <Route path="/" element={<Home />} />
+                    <Route path="/about" element={<About />} />
+                    <Route path="/classes" element={<Classes />} />
+                    <Route path="/classes/:id" element={<ClassDetails />} />
+                    <Route path="/trainers" element={<Trainers />} />
+                    <Route path="/trainers/:id" element={<TrainerDetails />} />
+                    <Route path="/contact" element={<Contact />} />
+                    <Route path="/login" element={<Login />} />
+                    <Route path="/signup" element={<Signup />} />
+                    <Route path="/forgot-password" element={<ForgotPassword />} />
+                    <Route path="/reset-password" element={<ResetPassword />} />
+                    <Route path="/privacy" element={<PrivacyPolicy />} />
+                    <Route path="/terms" element={<TermsOfService />} />
 
-              {/* Auth Routes */}
-              <Route path="/login" element={<Login />} />
-              <Route path="/signup" element={<Signup />} />
-              
-              {/* Admin Routes */}
-              <Route path="/admin/*" element={
-                <RouteGuard requiredAccess="full" allowedCategories={['management']}>
-                  <AdminLayout />
-                </RouteGuard>
-              }>
-                <Route index element={<Navigate to="trainers" replace />} />
-                <Route path="trainers" element={<AdminTrainers />} />
-                <Route path="trainers/profiles" element={<TrainerProfiles />} />
-                <Route path="trainers/performance" element={<PerformanceTracking />} />
-                <Route path="trainers/ratings" element={<TrainerRatings />} />
-                <Route path="classes" element={<AdminClasses />} />
-                <Route path="payments" element={<AdminPayments />} />
-                <Route path="workouts" element={<AdminWorkouts />} />
-                <Route path="shop" element={<AdminShop />} />
-                <Route path="content" element={<AdminContent />} />
-                <Route path="reports" element={<AdminReports />} />
-                <Route path="settings" element={<AdminSettings />} />
-                <Route path="support" element={<AdminSupport />} />
-              </Route>
-              
-              {/* Trainer Routes */}
-              <Route path="/trainer/*" element={
-                <RouteGuard requiredAccess="basic" allowedCategories={['training']}>
-                  <DashboardLayout />
-                </RouteGuard>
-              }>
-                <Route index element={<TrainerDashboard />} />
-                <Route path="*" element={<NotFound />} />
-              </Route>
+                    {/* Protected customer dashboard routes */}
+                    <Route
+                      path="/dashboard"
+                      element={
+                        <ProtectedRoute>
+                          <DashboardLayout />
+                        </ProtectedRoute>
+                      }
+                    >
+                      <Route index element={<Dashboard />} />
+                      <Route path="workouts" element={<Workouts />} />
+                      <Route path="workouts/:id" element={<WorkoutDetails />} />
+                      <Route path="classes" element={<ClassSchedule />} />
+                      <Route path="progress" element={<Progress />} />
+                      <Route path="nutrition" element={<Nutrition />} />
+                      <Route path="billing" element={<Billing />} />
+                      <Route path="notifications" element={<Notifications />} />
+                      <Route path="settings" element={<Settings />} />
+                    </Route>
 
-              {/* Customer Routes */}
-              <Route path="/customer/*" element={
-                <RouteGuard requiredAccess="limited" allowedCategories={['customer']}>
-                  <DashboardLayout />
-                </RouteGuard>
-              }>
-                <Route index element={<CustomerDashboard />} />
-                <Route path="*" element={<NotFound />} />
-              </Route>
+                    {/* Protected admin routes */}
+                    <Route
+                      path="/admin"
+                      element={
+                        <AdminRoute>
+                          <AdminLayout />
+                        </AdminRoute>
+                      }
+                    >
+                      <Route index element={<AdminDashboard />} />
+                      <Route path="members" element={<AdminMembers />} />
+                      <Route path="trainers" element={<AdminTrainers />} />
+                      <Route path="classes" element={<AdminClasses />} />
+                      <Route path="settings" element={<AdminSettings />} />
+                    </Route>
 
-              {/* Staff Routes */}
-              <Route path="/staff/*" element={
-                <RouteGuard requiredAccess="basic" allowedCategories={['operations', 'reception', 'maintenance']}>
-                  <DashboardLayout />
-                </RouteGuard>
-              }>
-                <Route index element={<StaffDashboard />} />
-                <Route path="*" element={<NotFound />} />
-              </Route>
-
-              {/* Catch-all route */}
-              <Route path="*" element={<NotFound />} />
-            </Routes>
-          </BrowserRouter>
-        </TooltipProvider>
-      </AuthProvider>
+                    {/* 404 route */}
+                    <Route path="*" element={<NotFound />} />
+                  </Routes>
+                </Suspense>
+              </main>
+              <Footer />
+            </div>
+          </Router>
+          <Toaster position="top-right" />
+        </AuthProvider>
+      </ThemeProvider>
+      <ReactQueryDevtools initialIsOpen={false} />
     </QueryClientProvider>
   );
-};
+}
 
 export default App;
