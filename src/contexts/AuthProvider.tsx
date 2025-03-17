@@ -63,7 +63,9 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
           let adminExists = false;
           
           if (userList && userList.users) {
-            adminExists = userList.users.some(user => user.email === 'admin@uptowngym.rw');
+            adminExists = userList.users.some(user => 
+              user.email && user.email === 'admin@uptowngym.rw'
+            );
           }
           
           if (userListError) {

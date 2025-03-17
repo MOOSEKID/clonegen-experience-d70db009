@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { toast } from 'sonner';
 import { Plus } from 'lucide-react';
@@ -168,8 +167,8 @@ const MemberManagement = () => {
     setCurrentPage(1);
   };
 
-  const handleSearchChange = (value: string) => {
-    setSearchTerm(value);
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchTerm(e.target.value);
   };
 
   const handleStatusFilterChange = (status: string) => {
@@ -255,6 +254,7 @@ const MemberManagement = () => {
         membershipFilter={membershipFilter}
         handleStatusFilterChange={handleStatusFilterChange}
         handleMembershipFilterChange={handleMembershipFilterChange}
+        totalItems={members.length}
       />
 
       {/* Using simplified props for dialogs */}

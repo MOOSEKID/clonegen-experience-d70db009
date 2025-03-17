@@ -1,68 +1,55 @@
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { Member } from '@/types/memberTypes';
 
-export const useMemberFilters = (initialMembers: Member[]) => {
-  const [members, setMembers] = useState<Member[]>(initialMembers);
+export const useMemberFilters = (initialMembers: Member[] = []) => {
+  const [members, setAllMembers] = useState<Member[]>(initialMembers);
   const [searchTerm, setSearchTerm] = useState('');
-  const [filterType, setFilterType] = useState('all');
-  const [filteredMembers, setFilteredMembers] = useState<Member[]>(initialMembers);
+  const [filterType, setFilterType] = useState('All');
+  const [filteredMembers, setFilteredMembers] = useState<Member[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
-  const membersPerPage = 10;
-
-  // Calculate total pages based on filtered members
-  const totalPages = Math.ceil(filteredMembers.length / membersPerPage);
-
-  // Set all members - useful when fetching from API
-  const setAllMembers = (newMembers: Member[]) => {
-    setMembers(newMembers);
-  };
+  const [membersPerPage] = useState(10);
+  const [currentMembers, setCurrentMembers] = useState<Member[]>([]);
+  const [totalPages, setTotalPages] = useState(1);
 
   // Filter members based on search term and filter type
   useEffect(() => {
     let result = [...members];
-    
+
     // Apply search filter
-    if (searchTerm) {
-      result = result.filter(member => 
-        member.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        member.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        (member.phone && member.phone.includes(searchTerm))
+    if (searchTerm.trim() !== '') {
+      const searchLower = searchTerm.toLowerCase();
+      result = result.filter(
+        (member) =>
+          member.name.toLowerCase().includes(searchLower) ||
+          member.email.toLowerCase().includes(searchLower) ||
+          (member.phone && member.phone.toLowerCase().includes(searchLower))
       );
     }
-    
+
     // Apply status filter
-    if (filterType !== 'all') {
-      result = result.filter(member => {
-        switch (filterType) {
-          case 'active':
-            return member.status === 'Active';
-          case 'inactive':
-            return member.status === 'Inactive';
-          case 'pending':
-            return member.status === 'Pending';
-          case 'individual':
-            return member.membershipCategory === 'Individual';
-          case 'company':
-            return member.membershipCategory === 'Company';
-          default:
-            return true;
-        }
-      });
+    if (filterType !== 'All') {
+      result = result.filter((member) => 
+        member.status === filterType || 
+        member.membershipType === filterType
+      );
     }
-    
+
     setFilteredMembers(result);
+    setTotalPages(Math.ceil(result.length / membersPerPage));
     setCurrentPage(1); // Reset to first page when filters change
-  }, [members, searchTerm, filterType]);
+  }, [members, searchTerm, filterType, membersPerPage]);
 
-  // Get current members for pagination
-  const indexOfLastMember = currentPage * membersPerPage;
-  const indexOfFirstMember = indexOfLastMember - membersPerPage;
-  const currentMembers = filteredMembers.slice(indexOfFirstMember, indexOfLastMember);
+  // Update current members based on pagination
+  useEffect(() => {
+    const indexOfLastMember = currentPage * membersPerPage;
+    const indexOfFirstMember = indexOfLastMember - membersPerPage;
+    setCurrentMembers(filteredMembers.slice(indexOfFirstMember, indexOfLastMember));
+  }, [filteredMembers, currentPage, membersPerPage]);
 
-  // Handle search input change
-  const handleSearch = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    setSearchTerm(e.target.value);
+  // Handle search
+  const handleSearch = useCallback((search: string) => {
+    setSearchTerm(search);
   }, []);
 
   // Handle filter change
@@ -70,20 +57,20 @@ export const useMemberFilters = (initialMembers: Member[]) => {
     setFilterType(filter);
   }, []);
 
-  // Pagination handlers
+  // Pagination
   const paginate = useCallback((pageNumber: number) => {
     setCurrentPage(pageNumber);
   }, []);
 
   const nextPage = useCallback(() => {
     if (currentPage < totalPages) {
-      setCurrentPage(prev => prev + 1);
+      setCurrentPage(currentPage + 1);
     }
   }, [currentPage, totalPages]);
 
   const prevPage = useCallback(() => {
     if (currentPage > 1) {
-      setCurrentPage(prev => prev - 1);
+      setCurrentPage(currentPage - 1);
     }
   }, [currentPage]);
 
