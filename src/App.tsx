@@ -3,6 +3,7 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { Toaster } from '@/components/ui/toaster';
 import { Toaster as SonnerToaster } from 'sonner';
 import { AuthProvider } from '@/contexts/AuthProvider';
+import { ErrorBoundary } from '@/components/ui/error-boundary';
 import Header from '@/components/Header';
 
 // Public pages
@@ -40,54 +41,58 @@ import TrainerRatings from '@/pages/admin/trainers/TrainerRatings';
 import PerformanceTracking from '@/pages/admin/trainers/PerformanceTracking';
 
 function App() {
+  console.log("App component rendering");
+  
   return (
-    <AuthProvider>
-      <Router>
-        <Header />
-        <Routes>
-          {/* Public routes */}
-          <Route path="/" element={<Index />} />
-          <Route path="/about-us" element={<AboutUs />} />
-          <Route path="/classes" element={<Classes />} />
-          <Route path="/contact-us" element={<ContactUs />} />
-          <Route path="/facilities" element={<FitnessFacilities />} />
-          <Route path="/login" element={<Login />} />
-          <Route path="/membership" element={<Membership />} />
-          <Route path="/register" element={<Register />} />
-          <Route path="/spa-wellness" element={<SpaWellness />} />
-          <Route path="/youth-programs" element={<YouthPrograms />} />
-          <Route path="/timetable" element={<Timetable />} />
-          <Route path="/blogs" element={<Blogs />} />
-          <Route path="/shop" element={<Shop />} />
-          <Route path="/services" element={<FitnessFacilities />} />
+    <ErrorBoundary>
+      <AuthProvider>
+        <Router>
+          <Header />
+          <Routes>
+            {/* Public routes */}
+            <Route path="/" element={<Index />} />
+            <Route path="/about-us" element={<AboutUs />} />
+            <Route path="/classes" element={<Classes />} />
+            <Route path="/contact-us" element={<ContactUs />} />
+            <Route path="/facilities" element={<FitnessFacilities />} />
+            <Route path="/login" element={<Login />} />
+            <Route path="/membership" element={<Membership />} />
+            <Route path="/register" element={<Register />} />
+            <Route path="/spa-wellness" element={<SpaWellness />} />
+            <Route path="/youth-programs" element={<YouthPrograms />} />
+            <Route path="/timetable" element={<Timetable />} />
+            <Route path="/blogs" element={<Blogs />} />
+            <Route path="/shop" element={<Shop />} />
+            <Route path="/services" element={<FitnessFacilities />} />
 
-          {/* Dashboard routes */}
-          <Route path="/dashboard" element={<DashboardLayout />}>
-            <Route index element={<Dashboard />} />
-            <Route path="customer" element={<CustomerDashboard />} />
-          </Route>
-
-          {/* Admin routes */}
-          <Route path="/admin" element={<AdminDashboard />}>
-            <Route path="dashboard" element={<AdminHome />} />
-            <Route path="members" element={<MemberManagement />} />
-            <Route path="trainers" element={<Trainers />}>
-              <Route path="profiles" element={<TrainerProfiles />} />
-              <Route path="ratings" element={<TrainerRatings />} />
-              <Route path="performance" element={<PerformanceTracking />} />
+            {/* Dashboard routes */}
+            <Route path="/dashboard" element={<DashboardLayout />}>
+              <Route index element={<Dashboard />} />
+              <Route path="customer" element={<CustomerDashboard />} />
             </Route>
-            <Route path="classes" element={<AdminClasses />} />
-            <Route path="reports" element={<Reports />} />
-            <Route path="settings" element={<Settings />} />
-          </Route>
 
-          {/* 404 route */}
-          <Route path="*" element={<NotFound />} />
-        </Routes>
-        <Toaster />
-        <SonnerToaster position="top-right" />
-      </Router>
-    </AuthProvider>
+            {/* Admin routes */}
+            <Route path="/admin" element={<AdminDashboard />}>
+              <Route path="dashboard" element={<AdminHome />} />
+              <Route path="members" element={<Members />} />
+              <Route path="trainers" element={<Trainers />}>
+                <Route path="profiles" element={<TrainerProfiles />} />
+                <Route path="ratings" element={<TrainerRatings />} />
+                <Route path="performance" element={<PerformanceTracking />} />
+              </Route>
+              <Route path="classes" element={<AdminClasses />} />
+              <Route path="reports" element={<Reports />} />
+              <Route path="settings" element={<Settings />} />
+            </Route>
+
+            {/* 404 route */}
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+          <Toaster />
+          <SonnerToaster position="top-right" />
+        </Router>
+      </AuthProvider>
+    </ErrorBoundary>
   );
 }
 

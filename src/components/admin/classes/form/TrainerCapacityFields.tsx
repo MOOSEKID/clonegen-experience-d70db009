@@ -18,7 +18,7 @@ import {
 import { Info, Loader2, AlertCircle } from 'lucide-react';
 import { useTrainersData } from '@/hooks/useTrainersData';
 import { cn } from '@/lib/utils';
-import { TrainerStatusBadge } from '@/components/admin/trainers/profiles/card';
+import TrainerStatusBadge from '@/components/admin/trainers/profiles/card/TrainerStatusBadge';
 
 interface TrainerCapacityFieldsProps {
   classData: Omit<ClassType, 'id'>;
