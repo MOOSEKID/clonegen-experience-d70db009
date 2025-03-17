@@ -16,7 +16,7 @@ const Login = () => {
   const [password, setPassword] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
   const [isCheckingAuth, setIsCheckingAuth] = useState(true);
-  const { signIn, isAuthenticated, isAdmin, isLoading } = useAuth();
+  const { login, isAuthenticated, isAdmin, isLoading } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   
@@ -69,15 +69,12 @@ const Login = () => {
     };
     
     checkSession();
-  }, [navigate]);
-
-  // Check if user becomes authenticated through context
-  useEffect(() => {
+    
+    // If user is already authenticated through the context, also redirect
     if (isAuthenticated && !isCheckingAuth) {
-      console.log('User authenticated through context, redirecting');
-      // Redirect based on user role
-      const basePath = import.meta.env.PROD ? '/clonegen-experience' : '';
-      navigate(isAdmin ? `${basePath}/admin/trainers` : `${basePath}/dashboard`, { replace: true });
+      console.log('User authenticated through context, redirecting to:', isAdmin ? '/admin' : '/dashboard');
+      // Force navigation with replace to prevent back button from returning to login
+      navigate(isAdmin ? '/admin' : '/dashboard', { replace: true });
     }
   }, [isAuthenticated, isAdmin, navigate, isCheckingAuth]);
 
@@ -115,8 +112,15 @@ const Login = () => {
     
     try {
       setErrorMessage('');
-      await signIn(email, password);
-      // Note: Redirection is handled by the useEffect watching isAuthenticated
+      const success = await login(email, password);
+      
+      if (success) {
+        // Redirection is handled by the useEffect watching isAuthenticated
+        toast.success('Login successful!');
+      } else {
+        setErrorMessage('Login failed. Please check your credentials.');
+        toast.error('Login failed. Please check your credentials.');
+      }
     } catch (error) {
       console.error('Login error:', error);
       setErrorMessage(error instanceof Error ? error.message : 'Login failed');
@@ -129,7 +133,7 @@ const Login = () => {
       setErrorMessage('');
       // Use the admin password from .env
       const adminPassword = import.meta.env.VITE_ADMIN_PASSWORD || 'admin@123';
-      await signIn('admin@uptowngym.rw', adminPassword);
+      await login('admin@uptowngym.rw', adminPassword);
       // Note: Redirection is handled by the useEffect watching isAuthenticated
     } catch (error) {
       console.error('Admin login error:', error);

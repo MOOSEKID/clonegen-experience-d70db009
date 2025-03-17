@@ -1,108 +1,189 @@
 
-import { Separator } from "@/components/ui/separator"
-import { ScrollArea } from "@/components/ui/scroll-area"
-import { Button } from "@/components/ui/button"
-import { Link, useLocation } from "react-router-dom"
-import { CalendarIcon, DumbellIcon, LayoutDashboard, LineChart, LogOut, Settings, User, Users } from "lucide-react"
-import { cn } from "@/lib/utils"
-import { useAuth } from "@/contexts/AuthContext"
+import { Link, useLocation } from 'react-router-dom';
+import {
+  Dumbbell,
+  Calendar,
+  ClipboardList,
+  Bell,
+  Settings,
+  LogOut,
+  Home,
+  DumbbellIcon,
+  Award,
+  CreditCard
+} from 'lucide-react';
+import { useAuth } from '@/hooks/useAuth';
+import { useState } from 'react';
 
-const CustomerSidebar = () => {
-  const { pathname } = useLocation()
-  const { logout } = useAuth()
-  
+interface CustomerSidebarProps {
+  isOpen: boolean;
+}
+
+const CustomerSidebar = ({ isOpen }: CustomerSidebarProps) => {
+  const location = useLocation();
+  const { logout, user } = useAuth();
+  const [isCollapsed, setIsCollapsed] = useState(false);
+
   const handleLogout = async () => {
     try {
       await logout();
     } catch (error) {
-      console.error("Error logging out:", error);
+      console.error('Logout failed:', error);
     }
-  }
+  };
 
-  const links = [
-    {
-      name: "Dashboard",
-      href: "/dashboard",
-      icon: LayoutDashboard
-    },
-    {
-      name: "My Profile",
-      href: "/dashboard/profile",
-      icon: User
-    },
-    {
-      name: "Workouts",
-      href: "/dashboard/workouts",
-      icon: DumbellIcon
-    },
-    {
-      name: "Classes",
-      href: "/dashboard/classes",
-      icon: Users
-    },
-    {
-      name: "Schedule",
-      href: "/dashboard/schedule",
-      icon: CalendarIcon
-    },
-    {
-      name: "Progress",
-      href: "/dashboard/progress",
-      icon: LineChart
-    },
-    {
-      name: "Settings",
-      href: "/dashboard/settings",
-      icon: Settings
-    }
-  ]
+  const isActive = (path: string) => {
+    return location.pathname === path || location.pathname.startsWith(`${path}/`);
+  };
 
   return (
-    <div className="hidden border-r bg-gray-100/40 lg:block dark:bg-gray-800/40">
-      <div className="flex flex-col gap-2">
-        <div className="flex h-[60px] items-center px-6">
-          <Link to="/" className="flex items-center gap-2 font-semibold">
-            <img src="/lovable-uploads/01fa474e-e83a-48f4-9ffc-2047ca448aa7.png" alt="Uptown Gym" className="h-6 w-auto" />
-            <span className="font-bold">Member Portal</span>
+    <div
+      className={`bg-gym-darkblue text-white w-full md:w-64 flex-shrink-0 transition-all duration-300 ease-in-out overflow-y-auto
+        ${isOpen ? 'block' : 'hidden md:block md:w-20'} ${isCollapsed ? 'md:w-20' : ''}`}
+    >
+      <div className="p-4 flex flex-col h-full">
+        <div className="mb-8 flex items-center justify-center">
+          <Link to="/" className="text-2xl font-bold text-gym-orange">
+            {isOpen && !isCollapsed ? 'Uptown Gym' : 'UG'}
           </Link>
         </div>
-        <Separator />
-        <ScrollArea className="flex-1 h-[calc(100vh-60px)]">
-          <div className="flex flex-col gap-2 p-6">
-            <nav className="grid gap-2 text-sm">
-              {links.map((link, i) => (
-                <Button
-                  key={i}
-                  variant={pathname === link.href ? "secondary" : "ghost"}
-                  size="sm"
-                  className={cn(
-                    "justify-start",
-                    pathname === link.href && "font-medium bg-gray-200 dark:bg-gray-700"
-                  )}
-                  asChild
-                >
-                  <Link to={link.href}>
-                    <link.icon className="mr-2 h-4 w-4" />
-                    {link.name}
-                  </Link>
-                </Button>
-              ))}
-              <Separator className="my-2" />
-              <Button 
-                variant="ghost" 
-                size="sm" 
-                className="justify-start text-red-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20"
-                onClick={handleLogout}
+
+        <nav className="flex-1">
+          <ul className="space-y-2">
+            <li>
+              <Link
+                to="/dashboard"
+                className={`flex items-center p-3 rounded-md transition-colors ${
+                  isActive('/dashboard')
+                    ? 'bg-gym-orange text-white'
+                    : 'text-white/70 hover:bg-white/10'
+                }`}
               >
-                <LogOut className="mr-2 h-4 w-4" />
-                Log out
-              </Button>
-            </nav>
-          </div>
-        </ScrollArea>
+                <Home size={20} />
+                {(isOpen && !isCollapsed) && <span className="ml-3">Dashboard</span>}
+              </Link>
+            </li>
+            <li>
+              <Link
+                to="/dashboard/workouts"
+                className={`flex items-center p-3 rounded-md transition-colors ${
+                  isActive('/dashboard/workouts')
+                    ? 'bg-gym-orange text-white'
+                    : 'text-white/70 hover:bg-white/10'
+                }`}
+              >
+                <DumbbellIcon size={20} />
+                {(isOpen && !isCollapsed) && <span className="ml-3">Workouts</span>}
+              </Link>
+            </li>
+            <li>
+              <Link
+                to="/dashboard/classes"
+                className={`flex items-center p-3 rounded-md transition-colors ${
+                  isActive('/dashboard/classes')
+                    ? 'bg-gym-orange text-white'
+                    : 'text-white/70 hover:bg-white/10'
+                }`}
+              >
+                <Calendar size={20} />
+                {(isOpen && !isCollapsed) && <span className="ml-3">Classes</span>}
+              </Link>
+            </li>
+            <li>
+              <Link
+                to="/dashboard/progress"
+                className={`flex items-center p-3 rounded-md transition-colors ${
+                  isActive('/dashboard/progress')
+                    ? 'bg-gym-orange text-white'
+                    : 'text-white/70 hover:bg-white/10'
+                }`}
+              >
+                <Award size={20} />
+                {(isOpen && !isCollapsed) && <span className="ml-3">Progress</span>}
+              </Link>
+            </li>
+            <li>
+              <Link
+                to="/dashboard/nutrition"
+                className={`flex items-center p-3 rounded-md transition-colors ${
+                  isActive('/dashboard/nutrition')
+                    ? 'bg-gym-orange text-white'
+                    : 'text-white/70 hover:bg-white/10'
+                }`}
+              >
+                <ClipboardList size={20} />
+                {(isOpen && !isCollapsed) && <span className="ml-3">Nutrition</span>}
+              </Link>
+            </li>
+            <li>
+              <Link
+                to="/dashboard/billing"
+                className={`flex items-center p-3 rounded-md transition-colors ${
+                  isActive('/dashboard/billing')
+                    ? 'bg-gym-orange text-white'
+                    : 'text-white/70 hover:bg-white/10'
+                }`}
+              >
+                <CreditCard size={20} />
+                {(isOpen && !isCollapsed) && <span className="ml-3">Billing</span>}
+              </Link>
+            </li>
+            <li>
+              <Link
+                to="/dashboard/notifications"
+                className={`flex items-center p-3 rounded-md transition-colors ${
+                  isActive('/dashboard/notifications')
+                    ? 'bg-gym-orange text-white'
+                    : 'text-white/70 hover:bg-white/10'
+                }`}
+              >
+                <Bell size={20} />
+                {(isOpen && !isCollapsed) && <span className="ml-3">Notifications</span>}
+              </Link>
+            </li>
+          </ul>
+        </nav>
+
+        <div className="mt-auto pt-4 border-t border-white/10">
+          <ul className="space-y-2">
+            <li>
+              <Link
+                to="/dashboard/settings"
+                className={`flex items-center p-3 rounded-md transition-colors ${
+                  isActive('/dashboard/settings')
+                    ? 'bg-gym-orange text-white'
+                    : 'text-white/70 hover:bg-white/10'
+                }`}
+              >
+                <Settings size={20} />
+                {(isOpen && !isCollapsed) && <span className="ml-3">Settings</span>}
+              </Link>
+            </li>
+            <li>
+              <button
+                onClick={handleLogout}
+                className="w-full flex items-center p-3 rounded-md transition-colors text-white/70 hover:bg-white/10"
+              >
+                <LogOut size={20} />
+                {(isOpen && !isCollapsed) && <span className="ml-3">Logout</span>}
+              </button>
+            </li>
+          </ul>
+          
+          {isOpen && !isCollapsed && user && (
+            <div className="mt-4 pt-4 border-t border-white/10">
+              <div className="text-white/50 text-xs">
+                Signed in as:
+              </div>
+              <div className="text-sm font-medium text-white truncate">
+                {user.full_name || user.email}
+              </div>
+            </div>
+          )}
+        </div>
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default CustomerSidebar
+export default CustomerSidebar;
