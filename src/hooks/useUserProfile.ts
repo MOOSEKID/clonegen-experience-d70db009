@@ -58,13 +58,14 @@ export const useUserProfile = () => {
                 id: user.id,
                 full_name: user.user_metadata.full_name || user.email,
                 username: null,
-                role: 'member',
-                is_admin: false,
                 contact_number: null,
                 preferred_workout_time: null,
-                gym_location: null
+                gym_location: null,
+                role: 'member',
+                is_admin: false,
+                avatar_url: null
               }])
-              .select('*')
+              .select()
               .single();
               
             if (createError) {
@@ -81,14 +82,10 @@ export const useUserProfile = () => {
             throw new Error('Failed to fetch user profile');
           }
         } else {
-          // Add email from auth user to profile data and ensure all required fields
+          // Add email from auth user to profile data
           const profileWithEmail = {
             ...profileData,
-            email: user.email,
-            username: profileData.username || null,
-            contact_number: profileData.contact_number || null,
-            preferred_workout_time: profileData.preferred_workout_time || null,
-            gym_location: profileData.gym_location || null
+            email: user.email
           } as UserProfile;
           
           setUserProfile(profileWithEmail);
@@ -125,13 +122,14 @@ export const useUserProfile = () => {
                   id: session.user.id,
                   full_name: session.user.user_metadata.full_name || session.user.email,
                   username: null,
-                  role: 'member',
-                  is_admin: false,
                   contact_number: null,
                   preferred_workout_time: null,
-                  gym_location: null
+                  gym_location: null,
+                  role: 'member',
+                  is_admin: false,
+                  avatar_url: null
                 }])
-                .select('*')
+                .select()
                 .single();
                 
               if (!createError) {
@@ -142,14 +140,10 @@ export const useUserProfile = () => {
                 } as UserProfile);
               }
             } else if (!error) {
-              // Convert to UserProfile format with default values for missing fields
+              // Convert to UserProfile format
               setUserProfile({
                 ...profile,
-                email: session.user.email,
-                username: profile.username || null,
-                contact_number: profile.contact_number || null,
-                preferred_workout_time: profile.preferred_workout_time || null,
-                gym_location: profile.gym_location || null
+                email: session.user.email
               } as UserProfile);
             }
           }
@@ -177,7 +171,7 @@ export const useUserProfile = () => {
         .from('profiles')
         .update(profileUpdates)
         .eq('id', userProfile.id)
-        .select('*')
+        .select()
         .single();
         
       if (error) {
@@ -188,11 +182,7 @@ export const useUserProfile = () => {
       // Ensure UserProfile format is maintained
       setUserProfile({
         ...data,
-        email: userProfile.email,
-        username: data.username || null,
-        contact_number: data.contact_number || null,
-        preferred_workout_time: data.preferred_workout_time || null,
-        gym_location: data.gym_location || null
+        email: userProfile.email
       } as UserProfile);
       
       return data;
