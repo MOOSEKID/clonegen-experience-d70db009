@@ -1,4 +1,3 @@
-
 import { ReactNode, useState, useEffect } from 'react';
 import { AuthContext } from './AuthContext';
 import { useAuthState } from '@/hooks/useAuthState';
@@ -57,21 +56,22 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         // Checking for existing admin user - this API might differ based on Supabase version
         try {
           const { data: userList, error: userListError } = await supabase.auth.admin.listUsers({
-            page: 1,
             perPage: 1,
-            filter: {
-              email: 'admin@uptowngym.rw'
-            }
+            page: 1,
           });
+          
+          let adminExists = false;
+          
+          if (userList && userList.users) {
+            adminExists = userList.users.some(user => user.email === 'admin@uptowngym.rw');
+          }
           
           if (userListError) {
             console.error('Error checking for existing admin user:', userListError);
             return;
           }
           
-          const existingUser = userList && userList.users && userList.users.length > 0 ? userList.users[0] : null;
-          
-          if (!existingUser) {
+          if (!adminExists) {
             const { data: authUser, error: authError } = await supabase.auth.admin.createUser({
               email: 'admin@uptowngym.rw',
               password: 'Admin123!',

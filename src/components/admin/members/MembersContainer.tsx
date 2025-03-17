@@ -22,11 +22,12 @@ interface MembersContainerProps {
   handlePageChange: (page: number) => void;
   handleItemsPerPageChange: (itemsPerPage: number) => void;
   searchTerm: string;
-  handleSearchChange: (value: string) => void;
+  handleSearchChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   statusFilter: string;
   membershipFilter: string;
   handleStatusFilterChange: (status: string) => void;
   handleMembershipFilterChange: (membership: string) => void;
+  totalItems: number;
 }
 
 const MembersContainer = ({
@@ -49,7 +50,8 @@ const MembersContainer = ({
   statusFilter,
   membershipFilter,
   handleStatusFilterChange,
-  handleMembershipFilterChange
+  handleMembershipFilterChange,
+  totalItems
 }: MembersContainerProps) => {
   // Responsive state
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
@@ -100,7 +102,7 @@ const MembersContainer = ({
         currentPage={currentPage}
         totalPages={totalPages}
         itemsPerPage={membersPerPage}
-        totalItems={filteredMembers.length}
+        totalItems={totalItems}
         onPageChange={handlePageChange}
         onItemsPerPageChange={handleItemsPerPageChange}
       />

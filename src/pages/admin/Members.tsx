@@ -31,9 +31,9 @@ const AdminMembers = () => {
 
   console.log("AdminMembers rendered, isCreating:", isCreating);
 
-  // Adapt props to match what MembersContainer expects
-  const handleSearchChange = (value: string) => {
-    handleSearch(value);
+  // Adapt handler to match what's expected (an event object)
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    handleSearch(e.target.value);
   };
 
   // Create handler for items per page change
@@ -42,6 +42,7 @@ const AdminMembers = () => {
     // Implementation would go here
   };
 
+  // Fixed membersPerPage prop to match what MembersContainer expects
   return (
     <MembersContainer
       members={members}
@@ -63,7 +64,7 @@ const AdminMembers = () => {
       handlePageChange={paginate}
       handleItemsPerPageChange={handleItemsPerPageChange}
       onViewProfile={(memberId) => console.log("View profile", memberId)}
-      itemsPerPage={10}
+      membersPerPage={10}
       totalItems={members.length}
     />
   );
