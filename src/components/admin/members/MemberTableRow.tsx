@@ -10,6 +10,7 @@ interface MemberTableRowProps {
   onToggleSelect: (id: string) => void;
   onStatusChange: (id: string, status: string) => void;
   onDelete: (id: string) => void;
+  onViewProfile: (id: string) => void;
 }
 
 const MemberTableRow = ({ 
@@ -17,7 +18,8 @@ const MemberTableRow = ({
   isSelected, 
   onToggleSelect,
   onStatusChange,
-  onDelete
+  onDelete,
+  onViewProfile
 }: MemberTableRowProps) => {
   const getStatusBadge = (status: string) => {
     if (status === 'Active') {
@@ -85,7 +87,10 @@ const MemberTableRow = ({
             </div>
           )}
           <div className="ml-3">
-            <div className="font-medium">{member.name}</div>
+            <div className="font-medium cursor-pointer hover:text-blue-600" 
+                 onClick={() => onViewProfile(member.id as string)}>
+              {member.name}
+            </div>
             <div className="text-xs text-gray-500">{member.email}</div>
           </div>
         </div>
@@ -102,6 +107,7 @@ const MemberTableRow = ({
           status={member.status}
           onStatusChange={onStatusChange}
           onDelete={onDelete}
+          onViewProfile={onViewProfile}
         />
       </td>
     </tr>

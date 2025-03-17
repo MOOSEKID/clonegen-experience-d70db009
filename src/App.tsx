@@ -1,4 +1,3 @@
-
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { Toaster } from '@/components/ui/toaster';
 import { Toaster as SonnerToaster } from 'sonner';
@@ -25,7 +24,8 @@ import CustomerDashboard from '@/pages/dashboard/CustomerDashboard';
 
 // Admin dashboard
 import AdminDashboard from '@/pages/admin/AdminDashboard';
-import DashboardHome from '@/pages/admin/DashboardHome';
+import AdminHome from '@/pages/admin/DashboardHome';
+import MemberManagement from "./pages/admin/MemberManagement";
 import Members from '@/pages/admin/Members';
 import Trainers from '@/pages/admin/Trainers';
 import AdminClasses from '@/pages/admin/Classes';
@@ -61,8 +61,8 @@ function App() {
 
           {/* Admin routes */}
           <Route path="/admin" element={<AdminDashboard />}>
-            <Route path="dashboard" element={<DashboardHome />} />
-            <Route path="members" element={<Members />} />
+            <Route path="dashboard" element={<AdminHome />} />
+            <Route path="members" element={<MemberManagement />} />
             <Route path="trainers" element={<Trainers />}>
               <Route path="profiles" element={<TrainerProfiles />} />
               <Route path="ratings" element={<TrainerRatings />} />

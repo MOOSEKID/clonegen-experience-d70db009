@@ -16,9 +16,16 @@ interface MemberActionsProps {
   status: string;
   onStatusChange: (id: string, status: string) => void;
   onDelete: (id: string) => void;
+  onViewProfile: (id: string) => void;
 }
 
-const MemberActions = ({ memberId, status, onStatusChange, onDelete }: MemberActionsProps) => {
+const MemberActions = ({ 
+  memberId, 
+  status, 
+  onStatusChange, 
+  onDelete,
+  onViewProfile 
+}: MemberActionsProps) => {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
@@ -29,7 +36,7 @@ const MemberActions = ({ memberId, status, onStatusChange, onDelete }: MemberAct
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
         <DropdownMenuLabel>Actions</DropdownMenuLabel>
-        <DropdownMenuItem className="cursor-pointer" onClick={() => console.log(`View member ${memberId}`)}>
+        <DropdownMenuItem className="cursor-pointer" onClick={() => onViewProfile(memberId)}>
           <Eye className="mr-2 h-4 w-4" />
           <span>View Details</span>
         </DropdownMenuItem>
