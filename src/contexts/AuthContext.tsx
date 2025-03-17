@@ -1,312 +1,296 @@
-import React, { createContext, ReactNode, useEffect } from 'react';
-import { useAuthState } from '@/hooks/useAuthState';
-import { AuthContextType } from '@/types/auth.types';
-import { useLoginService } from '@/hooks/auth/useLoginService';
-import { useSignUpService } from '@/hooks/auth/useSignUpService';
-import { useLogoutService } from '@/hooks/auth/useLogoutService';
-import { usePasswordService } from '@/hooks/auth/usePasswordService';
-import { useTestUsers } from '@/hooks/auth/useTestUsers';
-import { authStorageService } from '@/services/authStorageService';
-import { supabase } from '@/integrations/supabase/client';
-import { toast } from 'sonner';
+import { createContext, useContext, useEffect, useState } from 'react'
+import { User, createClient } from '@supabase/supabase-js'
+import { toast } from 'sonner'
+import { Database } from '../types/database.types'
+import { UserProfile, ProfileInsert } from '../types/database.types'
 
-// Create the auth context with default values
-export const AuthContext = createContext<AuthContextType | undefined>(undefined);
+const supabase = createClient<Database>(
+  import.meta.env.VITE_SUPABASE_URL,
+  import.meta.env.VITE_SUPABASE_ANON_KEY,
+  {
+    auth: {
+      autoRefreshToken: true,
+      persistSession: true,
+      detectSessionInUrl: true
+    }
+  }
+)
 
-interface AuthProviderProps {
-  children: ReactNode;
+export interface AuthContextType {
+  user: User | null
+  profile: UserProfile | null
+  signIn: (email: string, password: string) => Promise<void>
+  signOut: () => Promise<void>
+  isLoading: boolean
+  refreshSession: () => Promise<void>
+  isAuthenticated: boolean
+  isAdmin: boolean
 }
 
-export const AuthProvider = ({ children }: AuthProviderProps) => {
-  // Get the authentication state using our custom hook
-  const { 
-    user, 
-    isAdmin, 
-    isLoading, 
-    isAuthenticated,
-    setUser,
-    setIsAdmin, 
-    setIsAuthenticated 
-  } = useAuthState();
+export const AuthContext = createContext<AuthContextType>({
+  user: null,
+  profile: null,
+  signIn: async () => {},
+  signOut: async () => {},
+  isLoading: false,
+  refreshSession: async () => {},
+  isAuthenticated: false,
+  isAdmin: false
+})
 
-  // Initialize test users
-  useTestUsers();
+export const useAuth = () => {
+  return useContext(AuthContext)
+}
 
-  // Get authentication service hooks
-  const { login: loginService } = useLoginService();
-  const { signUp: signUpService } = useSignUpService();
-  const { logout: logoutService } = useLogoutService();
-  const { requestPasswordReset, updatePassword } = usePasswordService();
+export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
+  const [user, setUser] = useState<User | null>(null)
+  const [profile, setProfile] = useState<UserProfile | null>(null)
+  const [isLoading, setIsLoading] = useState(false)
 
-  // Listen for auth changes
-  useEffect(() => {
-    console.log("Setting up auth state change listener in AuthContext");
-    
-    // Initial session check
-    const checkCurrentSession = async () => {
-      const { data: { session }, error } = await supabase.auth.getSession();
+  const refreshSession = async () => {
+    try {
+      const { data: { session }, error } = await supabase.auth.refreshSession()
       if (error) {
-        console.error('Error checking current session:', error);
-        return;
+        console.error('Error refreshing session:', error)
+        return
       }
-      
-      if (session) {
-        handleSessionUpdate(session);
-      } else {
-        // No session, ensure auth state is cleared
-        setUser(null);
-        setIsAdmin(false);
-        setIsAuthenticated(false);
-        authStorageService.setAuthData(false, false, '', '');
-      }
-    };
-    
-    // Check current session immediately
-    checkCurrentSession();
-    
-    // Set up the auth state change listener
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event, session) => {
-        console.log('Auth state changed in context:', event);
-        
-        if (event === 'SIGNED_IN' && session) {
-          // Handle signed in event
-          await handleSessionUpdate(session);
-        } else if (event === 'SIGNED_OUT') {
-          console.log('User signed out, clearing auth state');
-          setUser(null);
-          setIsAdmin(false);
-          setIsAuthenticated(false);
-          authStorageService.setAuthData(false, false, '', '');
-        } else if (event === 'USER_UPDATED') {
-          console.log('User was updated');
-          if (session) {
-            await handleSessionUpdate(session);
-          }
-        }
-      }
-    );
-    
-    return () => {
-      subscription.unsubscribe();
-    };
-  }, [setUser, setIsAdmin, setIsAuthenticated]);
 
-  /**
-   * Handle session update - common logic for SIGNED_IN and initial session check
-   */
-  const handleSessionUpdate = async (session: any) => {
-    if (!session?.user) {
-      console.error('Invalid session object received');
-      setUser(null);
-      setIsAdmin(false);
-      setIsAuthenticated(false);
-      authStorageService.setAuthData(false, false, '', '');
-      return;
+      if (session?.user) {
+        setUser(session.user)
+        await fetchProfile(session.user)
+      }
+    } catch (error) {
+      console.error('Error in refreshSession:', error)
+    }
+  }
+
+  useEffect(() => {
+    // Initial session check
+    const checkSession = async () => {
+      try {
+        const { data: { session } } = await supabase.auth.getSession()
+        if (session?.user) {
+          setUser(session.user)
+          await fetchProfile(session.user)
+        }
+      } catch (error) {
+        console.error('Error checking session:', error)
+      }
     }
 
-    // Additional setup after sign-in or session found
-    console.log('Session established', session);
-    
-    // Get user profile to check if admin
+    checkSession()
+
+    // Listen for auth changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      async (event, session) => {
+        if (event === 'TOKEN_REFRESHED') {
+          console.log('Token refreshed')
+          if (session?.user) {
+            setUser(session.user)
+            await fetchProfile(session.user)
+          }
+        } else if (event === 'SIGNED_IN') {
+          if (session?.user) {
+            setUser(session.user)
+            await fetchProfile(session.user)
+          }
+        } else if (event === 'SIGNED_OUT') {
+          setUser(null)
+          setProfile(null)
+        }
+      }
+    )
+
+    // Set up token refresh interval
+    const refreshInterval = setInterval(refreshSession, 3300000) // Refresh every 55 minutes
+
+    return () => {
+      subscription.unsubscribe()
+      clearInterval(refreshInterval)
+    }
+  }, [])
+
+  const fetchProfile = async (user: User) => {
     try {
       const { data: profile, error } = await supabase
         .from('profiles')
-        .select('role, is_admin, full_name')
-        .eq('id', session.user.id)
-        .single();
-      
+        .select('*')
+        .eq('id', user.id)
+        .single()
+
       if (error) {
-        console.error('Error fetching user profile after session update:', error);
-        
-        // Create a default profile if one doesn't exist
-        if (error.code === 'PGRST116') {
-          console.log('Profile not found, creating profile...');
-          
-          const { error: insertError } = await supabase
-            .from('profiles')
-            .insert([
-              { 
-                id: session.user.id,
-                full_name: session.user.user_metadata?.full_name || session.user.email || 'User',
-                role: 'member',
-                is_admin: session.user.email === 'admin@example.com'
-              }
-            ]);
-            
-          if (insertError) {
-            console.error('Error creating profile after session update:', insertError);
-            // Set default values if profile creation fails
-            setUser({
-              ...session.user,
-              email: session.user.email || '',
-              role: 'member'
-            });
-            setIsAdmin(false);
-            setIsAuthenticated(true);
-            authStorageService.setAuthData(true, false, session.user.email || '', session.user.user_metadata?.full_name || session.user.email || '');
-            toast.error('Error setting up user profile. Some features may be limited.');
-          } else {
-            console.log('Profile created after session update');
-            
-            // Set state with newly created profile
-            setUser({
-              ...session.user,
-              email: session.user.email || '',
-              role: 'member'
-            });
-            
-            const isAdminUser = session.user.email === 'admin@example.com';
-            setIsAdmin(isAdminUser);
-            setIsAuthenticated(true);
-            
-            authStorageService.setAuthData(
-              true, 
-              isAdminUser, 
-              session.user.email || '', 
-              session.user.user_metadata?.full_name || session.user.email || ''
-            );
+        console.error('Error fetching profile:', error)
+        return
+      }
+
+      if (profile) {
+        setProfile(profile as UserProfile)
+      }
+    } catch (error) {
+      console.error('Error in fetchProfile:', error)
+    }
+  }
+
+  const verifyAdminProfile = async (user: User): Promise<UserProfile> => {
+    try {
+      // First check if admin profile exists
+      const { data: profile, error: fetchError } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('email', 'admin@uptowngym.rw')
+        .single()
+
+      if (fetchError && fetchError.code !== 'PGRST116') {
+        console.error('Error checking admin profile:', fetchError)
+        throw new Error('Failed to verify admin profile')
+      }
+
+      const defaultAdminProfile: ProfileInsert = {
+        id: user.id,
+        email: 'admin@uptowngym.rw',
+        full_name: 'System Administrator',
+        role: 'admin',
+        is_admin: true,
+        is_staff: true,
+        staff_category: 'management',
+        department: 'management',
+        access_level: 'full',
+        status: 'active',
+        specializations: null,
+        reporting_to: null,
+        shift_preference: null,
+        max_clients: null,
+        certifications: null,
+        working_hours: null,
+        primary_location: null,
+        secondary_locations: null,
+        contact_email: null,
+        contact_phone: null,
+        emergency_contact: null,
+        last_login: new Date().toISOString(),
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
+      }
+
+      // If no profile exists, create it
+      if (!profile) {
+        const { data: newProfile, error: insertError } = await supabase
+          .from('profiles')
+          .insert([defaultAdminProfile])
+          .select()
+          .single()
+
+        if (insertError) {
+          console.error('Error creating admin profile:', insertError)
+          throw new Error('Failed to create admin profile')
+        }
+
+        return newProfile as UserProfile
+      }
+
+      // If profile exists but needs updating
+      const { data: updatedProfile, error: updateError } = await supabase
+        .from('profiles')
+        .update({
+          id: user.id,
+          is_admin: true,
+          is_staff: true,
+          staff_category: 'management',
+          department: 'management',
+          access_level: 'full',
+          status: 'active',
+          last_login: new Date().toISOString(),
+          updated_at: new Date().toISOString()
+        })
+        .eq('email', 'admin@uptowngym.rw')
+        .select()
+        .single()
+
+      if (updateError) {
+        console.error('Error updating admin profile:', updateError)
+        throw new Error('Failed to update admin profile')
+      }
+
+      return updatedProfile as UserProfile
+    } catch (error) {
+      console.error('Error in verifyAdminProfile:', error)
+      throw error
+    }
+  }
+
+  const signIn = async (email: string, password: string) => {
+    if (isLoading) return // Prevent multiple simultaneous sign-in attempts
+
+    try {
+      setIsLoading(true)
+
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email,
+        password
+      })
+
+      if (error) {
+        console.error('Sign in error:', error)
+        throw error
+      }
+
+      if (data.user) {
+        if (email === 'admin@uptowngym.rw') {
+          try {
+            const adminProfile = await verifyAdminProfile(data.user)
+            setProfile(adminProfile)
+            toast.success('Welcome back, Administrator!')
+          } catch (error) {
+            console.error('Error verifying admin profile:', error)
+            toast.error('Failed to verify admin profile')
           }
         } else {
-          // Handle other profile fetch errors
-          console.error('Unexpected error fetching profile:', error);
-          setUser({
-            ...session.user,
-            email: session.user.email || '',
-            role: 'member'
-          });
-          setIsAdmin(false);
-          setIsAuthenticated(true);
-          authStorageService.setAuthData(true, false, session.user.email || '', session.user.user_metadata?.full_name || session.user.email || '');
-          toast.error('Error loading user profile. Some features may be limited.');
+          await fetchProfile(data.user)
+          toast.success('Successfully signed in!')
         }
-      } else {
-        // Profile exists, update auth state
-        console.log('User profile found after session update:', profile);
-        
-        const userRole = profile?.role || 'member';
-        const userIsAdmin = profile?.is_admin || false;
-        
-        setUser({
-          ...session.user,
-          email: session.user.email || '',
-          role: userRole
-        });
-        
-        setIsAdmin(userIsAdmin);
-        setIsAuthenticated(true);
-        
-        authStorageService.setAuthData(
-          true, 
-          userIsAdmin, 
-          session.user.email || '', 
-          session.user.user_metadata?.full_name || profile?.full_name || session.user.email || ''
-        );
       }
     } catch (error) {
-      console.error('Error in profile check after session update:', error);
-      // Set safe defaults in case of error
-      setUser({
-        ...session.user,
-        email: session.user.email || '',
-        role: 'member'
-      });
-      setIsAdmin(false);
-      setIsAuthenticated(true);
-      authStorageService.setAuthData(true, false, session.user.email || '', session.user.user_metadata?.full_name || session.user.email || '');
-      toast.error('Error loading user profile. Some features may be limited.');
+      console.error('Error signing in:', error)
+      toast.error('Failed to sign in. Please check your credentials.')
+    } finally {
+      setIsLoading(false)
     }
-  };
+  }
 
-  /**
-   * Login with email and password
-   */
-  const login = async (email: string, password: string): Promise<boolean> => {
+  const signOut = async () => {
+    if (isLoading) return // Prevent sign-out during loading state
+
     try {
-      console.log('Login attempt in context for:', email);
-      const result = await loginService(email, password);
+      setIsLoading(true)
+      const { error } = await supabase.auth.signOut()
+      if (error) throw error
       
-      if (result.success && result.user) {
-        // After successful login, refresh the session
-        const { data: { session }, error } = await supabase.auth.getSession();
-        
-        if (error) {
-          console.error('Error refreshing session after login:', error);
-        } else if (session) {
-          // Session successfully refreshed, handle the update
-          await handleSessionUpdate(session);
-        }
-        
-        // Update auth state
-        setUser(result.user);
-        setIsAdmin(result.isAdmin || false);
-        setIsAuthenticated(true);
-        
-        // Store auth data in local storage and cookies
-        authStorageService.setAuthData(
-          true, 
-          result.isAdmin || false, 
-          result.user.email, 
-          result.user.user_metadata?.full_name || result.user.email
-        );
-        
-        console.log('Login success in context, auth state updated:', { 
-          isAuthenticated: true, 
-          isAdmin: result.isAdmin 
-        });
-        
-        return true;
-      }
-      
-      console.log('Login failed in context');
-      return false;
+      setUser(null)
+      setProfile(null)
+      toast.success('Successfully signed out!')
     } catch (error) {
-      console.error('Error in login context method:', error);
-      return false;
+      console.error('Error signing out:', error)
+      toast.error('Failed to sign out. Please try again.')
+    } finally {
+      setIsLoading(false)
     }
-  };
+  }
 
-  /**
-   * Sign up a new user
-   */
-  const signUp = async (email: string, password: string, fullName: string): Promise<boolean> => {
-    return signUpService(email, password, fullName);
-  };
-
-  /**
-   * Log out the current user
-   */
-  const logout = async (): Promise<boolean> => {
-    const success = await logoutService();
-    
-    if (success) {
-      // Clear auth state
-      setUser(null);
-      setIsAdmin(false);
-      setIsAuthenticated(false);
-      
-      // Clear local storage and cookies
-      authStorageService.setAuthData(false, false, '', '');
-    }
-    
-    return success;
-  };
-
-  const value: AuthContextType = {
-    user,
-    isAdmin,
-    isLoading,
-    isAuthenticated,
-    login,
-    signUp,
-    logout,
-    requestPasswordReset,
-    updatePassword
-  };
+  const isAuthenticated = !!user && !!profile
+  const isAdmin = isAuthenticated && profile?.is_admin === true
 
   return (
-    <AuthContext.Provider value={value}>
+    <AuthContext.Provider value={{ 
+      user, 
+      profile, 
+      signIn, 
+      signOut, 
+      isLoading, 
+      refreshSession,
+      isAuthenticated,
+      isAdmin
+    }}>
       {children}
     </AuthContext.Provider>
-  );
-};
+  )
+}

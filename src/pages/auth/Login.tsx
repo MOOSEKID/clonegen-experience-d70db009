@@ -13,8 +13,7 @@ const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
-  const { login, isAuthenticated, isAdmin } = useAuth();
+  const { signIn, isAuthenticated, isAdmin, isLoading } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   
@@ -37,59 +36,51 @@ const Login = () => {
       setErrorMessage('Please enter both email and password');
       return;
     }
+
+    // Validate staff email format
+    if (email.endsWith('@uptowngym.rw')) {
+      const [prefix] = email.split('@');
+      const parts = prefix.split('.');
+      if (parts.length < 2) {
+        setErrorMessage('Invalid staff email format. Expected: role.name@uptowngym.rw');
+        return;
+      }
+    }
     
     try {
-      setIsLoading(true);
       setErrorMessage('');
-      
-      const success = await login(email, password);
-      
-      if (success) {
-        toast.success('Login successful');
-        // Let the useEffect handle navigation after auth state updates
-        console.log('Login successful, waiting for auth state update');
-      }
+      await signIn(email, password);
+      // Auth state update and navigation handled by useEffect
     } catch (error) {
       console.error('Login error:', error);
       setErrorMessage(error instanceof Error ? error.message : 'Login failed');
-      toast.error('Login failed. Please try again.');
-    } finally {
-      setIsLoading(false);
+      toast.error('Login failed. Please check your credentials.');
     }
   };
   
   const handleAdminLogin = async () => {
     try {
-      setIsLoading(true);
       setErrorMessage('');
-      
-      const success = await login('admin@example.com', 'admin123');
-      
-      if (success) {
-        toast.success('Admin login successful');
-        // Navigation is handled in login function
-        console.log('Admin login successful');
-      }
+      await signIn('admin@uptowngym.rw', import.meta.env.VITE_ADMIN_PASSWORD || 'admin123');
+      // Auth state update and navigation handled by useEffect
     } catch (error) {
       console.error('Admin login error:', error);
       setErrorMessage(error instanceof Error ? error.message : 'Admin login failed');
-    } finally {
-      setIsLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100 p-4">
-      <Card className="w-full max-w-md">
+    <div className="min-h-screen flex items-center justify-center p-6 bg-gym-dark pt-20">
+      <Card className="w-full max-w-md p-6 bg-gym-darkblue text-white border border-white/10">
         <CardHeader className="space-y-1">
           <CardTitle className="text-2xl font-bold text-center">Sign In</CardTitle>
-          <CardDescription className="text-center">
+          <CardDescription className="text-center text-white/70">
             Enter your email and password to access your account
           </CardDescription>
         </CardHeader>
         <CardContent>
           {errorMessage && (
-            <Alert variant="destructive" className="mb-4">
+            <Alert variant="destructive" className="mb-4 bg-red-900/20 text-red-400 border-red-900">
               <AlertCircle className="h-4 w-4" />
               <AlertDescription>{errorMessage}</AlertDescription>
             </Alert>
@@ -97,37 +88,37 @@ const Login = () => {
           
           <form onSubmit={handleLogin} className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
+              <Label htmlFor="email" className="text-white">Email</Label>
               <div className="relative">
-                <Mail className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+                <Mail className="absolute left-3 top-3 h-4 w-4 text-white/40" />
                 <Input
                   id="email"
                   type="email"
-                  placeholder="john@example.com"
-                  className="pl-10"
+                  placeholder="role.name@uptowngym.rw"
+                  className="pl-10 bg-white/5 border-white/10 text-white placeholder:text-white/40"
                   value={email}
-                  onChange={(e) => setEmail(e.target.value)}
+                  onChange={(e) => setEmail(e.target.value.toLowerCase())}
                   disabled={isLoading}
                 />
               </div>
             </div>
             <div className="space-y-2">
               <div className="flex items-center justify-between">
-                <Label htmlFor="password">Password</Label>
+                <Label htmlFor="password" className="text-white">Password</Label>
                 <Link 
                   to="/forgot-password" 
-                  className="text-sm text-gym-orange hover:underline"
+                  className="text-sm text-gym-orange hover:text-gym-orange/80"
                 >
                   Forgot password?
                 </Link>
               </div>
               <div className="relative">
-                <Lock className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+                <Lock className="absolute left-3 top-3 h-4 w-4 text-white/40" />
                 <Input
                   id="password"
                   type="password"
                   placeholder="••••••••"
-                  className="pl-10"
+                  className="pl-10 bg-white/5 border-white/10 text-white"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   disabled={isLoading}
@@ -144,35 +135,35 @@ const Login = () => {
           </form>
           
           <div className="my-4 flex items-center">
-            <div className="flex-grow h-0.5 bg-gray-200"></div>
-            <span className="px-4 text-sm text-gray-400">OR</span>
-            <div className="flex-grow h-0.5 bg-gray-200"></div>
+            <div className="flex-grow h-0.5 bg-white/10"></div>
+            <span className="px-4 text-sm text-white/40">OR</span>
+            <div className="flex-grow h-0.5 bg-white/10"></div>
           </div>
           
           <Button 
             variant="outline" 
-            className="w-full" 
+            className="w-full border-white/10 text-white hover:bg-white/5" 
             onClick={handleAdminLogin}
             disabled={isLoading}
           >
-            Admin Login (admin@example.com)
+            Admin Login (admin@uptowngym.rw)
           </Button>
         </CardContent>
         <CardFooter className="flex flex-col space-y-4">
-          <div className="text-center text-sm">
+          <div className="text-center text-sm text-white/70">
             Don't have an account?{' '}
             <Link 
               to="/signup" 
-              className="text-gym-orange hover:underline font-medium"
+              className="text-gym-orange hover:text-gym-orange/80 font-medium"
             >
               Sign up
             </Link>
           </div>
-          <div className="text-center text-xs text-gray-500">
+          <div className="text-center text-xs text-white/40">
             By signing in, you agree to our{' '}
-            <Link to="/terms" className="underline">Terms of Service</Link>{' '}
+            <Link to="/terms" className="underline hover:text-white/60">Terms of Service</Link>{' '}
             and{' '}
-            <Link to="/privacy" className="underline">Privacy Policy</Link>
+            <Link to="/privacy" className="underline hover:text-white/60">Privacy Policy</Link>
           </div>
         </CardFooter>
       </Card>

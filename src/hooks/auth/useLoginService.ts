@@ -1,208 +1,230 @@
-import { toast } from 'sonner';
+import { useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { AuthUser, UserRole } from '@/types/auth.types';
+import { AuthUser, UserRole, StaffCategory, AccessLevel, Department, StaffStatus } from '@/types/auth.types';
 import { Database } from '@/types/database.types';
+import { toast } from 'sonner';
 
 type Profile = Database['public']['Tables']['profiles']['Row'];
 type ProfileInsert = Database['public']['Tables']['profiles']['Insert'];
 
-/**
- * Hook that provides login functionality
- */
+interface LoginResponse {
+  success: boolean;
+  message: string;
+  user?: AuthUser;
+}
+
+// Get default access level based on role
+const getDefaultAccessLevel = (role: UserRole): AccessLevel => {
+  switch (role) {
+    case 'admin':
+    case 'general_manager':
+      return 'full';
+    case 'operations_manager':
+    case 'fitness_manager':
+    case 'head_trainer':
+      return 'high';
+    case 'senior_trainer':
+    case 'operations_supervisor':
+    case 'maintenance_supervisor':
+      return 'medium';
+    case 'trainer':
+    case 'receptionist':
+    case 'membership_coordinator':
+    case 'nutritionist':
+    case 'physiotherapist':
+    case 'maintenance_staff':
+      return 'basic';
+    default:
+      return 'limited';
+  }
+};
+
+// Get staff category based on role
+const getStaffCategory = (role: UserRole): StaffCategory | null => {
+  if (role === 'admin' || role.includes('manager')) {
+    return 'management';
+  }
+  if (role.includes('trainer')) {
+    return 'training';
+  }
+  if (role === 'receptionist') {
+    return 'reception';
+  }
+  if (role.includes('maintenance') || role === 'cleaner') {
+    return 'maintenance';
+  }
+  if (
+    role === 'operations_supervisor' ||
+    role === 'membership_coordinator' ||
+    role === 'nutritionist' ||
+    role === 'physiotherapist'
+  ) {
+    return 'operations';
+  }
+  return null;
+};
+
+// Get department based on role
+const getDepartment = (role: UserRole): Department => {
+  if (role === 'admin' || role === 'general_manager') {
+    return 'management';
+  }
+  if (role.includes('trainer') || role === 'fitness_manager') {
+    return 'training';
+  }
+  if (role === 'receptionist') {
+    return 'reception';
+  }
+  if (role.includes('maintenance') || role === 'cleaner') {
+    return 'maintenance';
+  }
+  if (role === 'nutritionist') {
+    return 'nutrition';
+  }
+  if (role === 'physiotherapist') {
+    return 'rehabilitation';
+  }
+  if (role.includes('operations') || role === 'membership_coordinator') {
+    return 'operations';
+  }
+  return 'management'; // Default to management
+};
+
 export const useLoginService = () => {
-  /**
-   * Login with email and password
-   */
-  const login = async (email: string, password: string): Promise<{
-    success: boolean;
-    user?: AuthUser;
-    isAdmin?: boolean;
-    isStaff?: boolean;
-  }> => {
+  const [loading, setLoading] = useState(false);
+
+  const login = async (email: string, password: string): Promise<LoginResponse> => {
     try {
-      console.log('Attempting login for:', email);
+      setLoading(true);
+
+      // Sign in user
       const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password,
       });
-      
+
       if (error) {
-        console.error('Login error:', error);
-        toast.error(error.message);
-        return { success: false };
-      }
-      
-      if (data.user) {
-        console.log('User authenticated:', data.user.email);
-        
-        // Determine initial role based on email
-        const initialRole = determineInitialRole(email);
-        console.log('Initial role determined:', initialRole);
-        
-        // Get user profile from profiles table
-        const { data: profile, error: profileError } = await supabase
-          .from('profiles')
-          .select('*')
-          .eq('id', data.user.id)
-          .single();
-          
-        if (profileError) {
-          console.error('Error fetching user profile:', profileError);
-          // Handle the case where profile doesn't exist yet
-          if (profileError.code === 'PGRST116') {
-            console.log('Profile not found, creating new profile');
-            // Create a default profile
-            const newProfile: ProfileInsert = {
-              id: data.user.id,
-              email: email,
-              full_name: data.user.user_metadata?.full_name || email,
-              role: initialRole,
-              is_admin: initialRole === 'admin',
-              is_staff: isStaffRole(initialRole),
-              staff_type: getStaffType(initialRole),
-              customer_type: getCustomerType(initialRole),
-              membership_status: 'pending'
-            };
-            
-            const { error: insertError } = await supabase
-              .from('profiles')
-              .insert(newProfile);
-              
-            if (insertError) {
-              console.error('Error creating profile:', insertError);
-              toast.error('Error setting up user profile');
-            } else {
-              console.log('Profile created successfully');
-            }
-          }
-        } else {
-          console.log('Existing profile found:', profile);
-          // Update profile if role needs to be changed
-          if (shouldUpdateRole(profile, initialRole)) {
-            console.log('Updating profile role and permissions');
-            const updates: Partial<Profile> = {
-              role: initialRole,
-              is_admin: initialRole === 'admin',
-              is_staff: isStaffRole(initialRole),
-              staff_type: getStaffType(initialRole),
-              customer_type: getCustomerType(initialRole)
-            };
-            
-            const { error: updateError } = await supabase
-              .from('profiles')
-              .update(updates)
-              .eq('id', data.user.id);
-              
-            if (updateError) {
-              console.error('Error updating profile:', updateError);
-              toast.error('Error updating user permissions');
-            } else {
-              console.log('Profile updated successfully');
-            }
-          }
-        }
-        
-        // Get the final profile state
-        const { data: finalProfile, error: finalProfileError } = await supabase
-          .from('profiles')
-          .select('*')
-          .eq('id', data.user.id)
-          .single();
-        
-        if (finalProfileError) {
-          console.error('Error fetching final profile:', finalProfileError);
-          toast.error('Error loading user profile');
-          return { success: false };
-        }
-        
-        console.log('Final user state:', {
-          role: finalProfile.role,
-          isAdmin: finalProfile.is_admin,
-          isStaff: finalProfile.is_staff
-        });
-        
-        toast.success('Login successful');
-        
-        return { 
-          success: true,
-          user: {
-            ...data.user,
-            email: data.user.email || '',
-            role: finalProfile.role as UserRole
-          },
-          isAdmin: finalProfile.is_admin,
-          isStaff: finalProfile.is_staff
+        console.error('Login error:', error.message);
+        return {
+          success: false,
+          message: 'Invalid email or password',
         };
       }
-      
-      console.error('Login failed: No user data returned');
-      toast.error('Login failed. Please try again.');
-      return { success: false };
+
+      if (!data.user) {
+        return {
+          success: false,
+          message: 'No user data returned',
+        };
+      }
+
+      // Get user profile
+      const { data: profile, error: profileError } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', data.user.id)
+        .single();
+
+      if (profileError) {
+        console.error('Profile fetch error:', profileError.message);
+        return {
+          success: false,
+          message: 'Error fetching user profile',
+        };
+      }
+
+      // If profile doesn't exist, create it
+      if (!profile) {
+        const role: UserRole = email === 'admin@uptowngym.rw' ? 'admin' : 'individual_client';
+        const staffCategory = getStaffCategory(role);
+        const accessLevel = getDefaultAccessLevel(role);
+        const department = getDepartment(role);
+
+        const newProfile: ProfileInsert = {
+          id: data.user.id,
+          email: email,
+          full_name: data.user.user_metadata?.full_name || email.split('@')[0],
+          role: role,
+          is_admin: role === 'admin',
+          is_staff: staffCategory !== null,
+          staff_category: staffCategory || undefined,
+          access_level: accessLevel,
+          department: department,
+          status: 'active' as StaffStatus,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString()
+        };
+
+        const { error: createError } = await supabase
+          .from('profiles')
+          .insert(newProfile);
+
+        if (createError) {
+          console.error('Profile creation error:', createError.message);
+          return {
+            success: false,
+            message: 'Error creating user profile',
+          };
+        }
+
+        // Return the new profile as AuthUser
+        const authUser: AuthUser = {
+          id: data.user.id,
+          email: email,
+          full_name: newProfile.full_name,
+          role: role,
+          is_admin: newProfile.is_admin,
+          is_staff: newProfile.is_staff,
+          app_metadata: data.user.app_metadata,
+          aud: data.user.aud
+        };
+
+        toast.success('Login successful');
+        return {
+          success: true,
+          message: 'Login successful',
+          user: authUser
+        };
+      }
+
+      // Update last login
+      await supabase
+        .from('profiles')
+        .update({ 
+          last_login: new Date().toISOString(),
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', profile.id);
+
+      // Convert profile to AuthUser
+      const authUser: AuthUser = {
+        id: data.user.id,
+        email: profile.email,
+        full_name: profile.full_name,
+        role: profile.role as UserRole,
+        is_admin: profile.is_admin,
+        is_staff: profile.is_staff,
+        app_metadata: data.user.app_metadata,
+        aud: data.user.aud
+      };
+
+      toast.success('Login successful');
+      return {
+        success: true,
+        message: 'Login successful',
+        user: authUser
+      };
+
     } catch (error) {
       console.error('Unexpected login error:', error);
-      toast.error(error instanceof Error ? error.message : 'Login failed');
-      return { success: false };
+      return {
+        success: false,
+        message: 'An unexpected error occurred',
+      };
+    } finally {
+      setLoading(false);
     }
   };
 
-  return { login };
+  return { login, loading };
 };
-
-// Helper functions
-function determineInitialRole(email: string): UserRole {
-  if (email === 'admin@uptowngym.rw') {
-    return 'admin';
-  }
-  if (email.endsWith('@uptowngym.rw')) {
-    if (email.includes('manager')) return 'manager';
-    if (email.includes('trainer')) return 'trainer';
-    return 'staff';
-  }
-  if (email.includes('corporate') || email.endsWith('@company.com')) {
-    return 'corporate_client';
-  }
-  return 'individual_client';
-}
-
-function isStaffRole(role: UserRole): boolean {
-  return ['admin', 'manager', 'trainer', 'staff'].includes(role);
-}
-
-function getStaffType(role: UserRole): string | undefined {
-  switch (role) {
-    case 'manager': return 'manager';
-    case 'trainer': return 'trainer';
-    case 'staff': return 'other';
-    default: return undefined;
-  }
-}
-
-function getCustomerType(role: UserRole): string | undefined {
-  switch (role) {
-    case 'individual_client': return 'individual';
-    case 'corporate_client': return 'corporate';
-    default: return undefined;
-  }
-}
-
-function shouldUpdateRole(profile: Profile, newRole: UserRole): boolean {
-  // Always update if roles don't match
-  if (profile.role !== newRole) return true;
-  
-  // Update if admin status doesn't match role
-  if (newRole === 'admin' && !profile.is_admin) return true;
-  
-  // Update if staff status doesn't match role
-  const shouldBeStaff = isStaffRole(newRole);
-  if (profile.is_staff !== shouldBeStaff) return true;
-  
-  // Update if staff type doesn't match role
-  const expectedStaffType = getStaffType(newRole);
-  if (expectedStaffType && profile.staff_type !== expectedStaffType) return true;
-  
-  // Update if customer type doesn't match role
-  const expectedCustomerType = getCustomerType(newRole);
-  if (expectedCustomerType && profile.customer_type !== expectedCustomerType) return true;
-  
-  return false;
-}
