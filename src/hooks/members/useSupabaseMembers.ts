@@ -1,3 +1,4 @@
+
 import { useState, useCallback, useEffect } from 'react';
 import { toast } from 'sonner';
 import { Member, MemberFormAction } from '@/types/memberTypes';
@@ -19,7 +20,7 @@ export const useSupabaseMembers = () => {
     currentMembers,
     currentPage,
     totalPages,
-    handleSearch,
+    handleSearch: handleFilterSearch,
     handleFilterChange,
     paginate,
     nextPage,
@@ -165,12 +166,10 @@ export const useSupabaseMembers = () => {
     toast.success(`${newMembers.length} members imported successfully`);
   }, [setMembers]);
 
-  const handleSearch = useCallback((searchText: string) => {
-    console.log("Searching for:", searchText);
-    if (typeof handleSearch === 'function') {
-      handleSearch(searchText);
-    }
-  }, []);
+  const handleSearchChange = useCallback((searchText: React.ChangeEvent<HTMLInputElement>) => {
+    console.log("Searching for:", searchText.target.value);
+    handleFilterSearch(searchText.target.value);
+  }, [handleFilterSearch]);
 
   return {
     members,
@@ -184,7 +183,8 @@ export const useSupabaseMembers = () => {
     isCreating,
     isLoading,
     error,
-    handleSearch,
+    handleSearch: handleFilterSearch,
+    handleSearchChange,
     handleStatusChange,
     handleDelete,
     handleFilterChange,

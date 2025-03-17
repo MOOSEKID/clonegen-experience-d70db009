@@ -1,3 +1,4 @@
+
 import { ReactNode, useState, useEffect } from 'react';
 import { AuthContext } from './AuthContext';
 import { useAuthState } from '@/hooks/useAuthState';
@@ -62,7 +63,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
           
           let adminExists = false;
           
-          if (userList && userList.users) {
+          if (userList && userList.users && userList.users.length > 0) {
             adminExists = userList.users.some(user => 
               user.email && user.email === 'admin@uptowngym.rw'
             );
