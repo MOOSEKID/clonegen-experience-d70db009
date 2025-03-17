@@ -18,7 +18,7 @@ export const supabase = createClient<Database>(SUPABASE_URL, SUPABASE_PUBLISHABL
 
 // Create a version with table decorations for type safety with newly added tables
 // This is a temporary workaround until the types file can be properly updated
-export const extendedSupabase = supabase.from('') as unknown as typeof supabase & {
+export const extendedSupabase = supabase as unknown as typeof supabase & {
   from: (table: string) => ReturnType<typeof supabase.from>
 };
 
@@ -26,4 +26,3 @@ export const extendedSupabase = supabase.from('') as unknown as typeof supabase 
 export const getTable = (tableName: string) => {
   return extendedSupabase.from(tableName);
 };
-
