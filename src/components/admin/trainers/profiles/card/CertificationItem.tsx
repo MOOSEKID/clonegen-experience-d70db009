@@ -1,9 +1,9 @@
 
 import React from 'react';
-import { format } from 'date-fns';
 import { Button } from '@/components/ui/button';
-import { Trash2Icon } from 'lucide-react';
+import { X, Award } from 'lucide-react';
 import { TrainerCertification } from '@/hooks/trainers/useTrainerProfiles';
+import { format } from 'date-fns';
 
 interface CertificationItemProps {
   certification: TrainerCertification;
@@ -11,28 +11,35 @@ interface CertificationItemProps {
 }
 
 const CertificationItem: React.FC<CertificationItemProps> = ({ certification, onDelete }) => {
+  // Format date for display if available
+  const formatDate = (dateString?: string): string => {
+    if (!dateString) return 'N/A';
+    try {
+      return format(new Date(dateString), 'MMM d, yyyy');
+    } catch (e) {
+      return dateString;
+    }
+  };
+
   return (
-    <div className="bg-muted p-2 rounded-sm text-sm relative group">
-      <div className="font-medium">{certification.certification_name}</div>
-      <div className="text-muted-foreground">{certification.issuing_organization}</div>
-      {(certification.issue_date || certification.expiry_date) && (
-        <div className="text-xs text-muted-foreground mt-1">
+    <div className="flex justify-between items-center p-2 bg-gray-50 rounded text-sm">
+      <div className="flex-1">
+        <div className="flex items-center">
+          <Award className="h-3 w-3 mr-1 text-muted-foreground" />
+          <span className="font-medium">{certification.certification_name}</span>
+        </div>
+        <div className="text-xs text-muted-foreground">
+          {certification.issuing_organization}
           {certification.issue_date && (
-            <span>Issued: {format(new Date(certification.issue_date), 'MMM yyyy')}</span>
-          )}
-          {certification.issue_date && certification.expiry_date && <span> • </span>}
-          {certification.expiry_date && (
-            <span>Expires: {format(new Date(certification.expiry_date), 'MMM yyyy')}</span>
+            <span className="ml-1">
+              (Issued: {formatDate(certification.issue_date)}
+              {certification.expiry_date && `, Expires: ${formatDate(certification.expiry_date)}`})
+            </span>
           )}
         </div>
-      )}
-      <Button
-        variant="ghost"
-        size="icon"
-        className="h-6 w-6 absolute top-1 right-1 opacity-0 group-hover:opacity-100 transition-opacity"
-        onClick={onDelete}
-      >
-        <Trash2Icon className="h-3 w-3" />
+      </div>
+      <Button variant="ghost" size="sm" onClick={onDelete} className="h-6 w-6 p-0">
+        <X className="h-3 w-3" />
       </Button>
     </div>
   );

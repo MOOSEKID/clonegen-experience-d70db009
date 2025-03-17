@@ -1,42 +1,36 @@
 
-import React, { useState } from "react";
+import React, { useState } from 'react';
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
-import { Form } from "@/components/ui/form";
-import { useTrainerFileUpload } from "@/hooks/trainers/useTrainerFileUpload";
-import { TrainerProfile } from "@/hooks/trainers/useTrainerProfiles";
-import TrainerAddFormFields from "./form/TrainerAddFormFields";
-import TrainerAddSpecializationsField from "./form/TrainerAddSpecializationsField";
-import TrainerBioField from "./form/TrainerBioField";
-import FormActions from "./form/FormActions";
+import { Button } from "@/components/ui/button";
+import { Form, FormField, FormItem, FormLabel, FormControl, FormMessage } from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Textarea } from "@/components/ui/textarea";
+import TrainerAddSpecializationsField from './form/TrainerAddSpecializationsField';
 
 const trainerFormSchema = z.object({
   name: z.string().min(2, { message: "Name must be at least 2 characters." }),
   email: z.string().email({ message: "Please enter a valid email address." }),
   phone: z.string().optional(),
   bio: z.string().optional(),
-  status: z.string(),
-  specialization: z.array(z.string()).optional(),
-  hire_date: z.string().optional(),
-  experience_years: z.number().optional(),
-  experience_level: z.string().optional(),
+  status: z.string().default("Active"),
+  hire_date: z.string().default(() => new Date().toISOString().split('T')[0]),
+  profile_picture: z.string().optional(),
 });
 
-export type TrainerAddFormValues = z.infer<typeof trainerFormSchema>;
+type TrainerFormValues = z.infer<typeof trainerFormSchema>;
 
 interface TrainerAddFormProps {
-  onSubmit: (data: Omit<TrainerProfile, "id" | "certifications" | "availability">) => Promise<void>;
+  onSubmit: (data: any) => Promise<void>;
   onCancel: () => void;
 }
 
 const TrainerAddForm = ({ onSubmit, onCancel }: TrainerAddFormProps) => {
-  const [selectedSpecializations, setSelectedSpecializations] = useState<string[]>([]);
-  const [profilePictureUrl, setProfilePictureUrl] = useState<string | null>(null);
-  
-  const { uploadFile, isUploading, uploadProgress } = useTrainerFileUpload();
-  
-  const form = useForm<TrainerAddFormValues>({
+  const [specializations, setSpecializations] = useState<string[]>([]);
+
+  const form = useForm<TrainerFormValues>({
     resolver: zodResolver(trainerFormSchema),
     defaultValues: {
       name: "",
@@ -44,68 +38,160 @@ const TrainerAddForm = ({ onSubmit, onCancel }: TrainerAddFormProps) => {
       phone: "",
       bio: "",
       status: "Active",
-      specialization: [],
       hire_date: new Date().toISOString().split('T')[0],
-      experience_years: undefined,
-      experience_level: "Beginner",
+      profile_picture: "",
     },
   });
 
-  const handleFormSubmit = async (data: TrainerAddFormValues) => {
-    // Combine form data with uploaded profile picture
-    const formData = {
+  const handleAddSpecialization = (spec: string) => {
+    if (!specializations.includes(spec)) {
+      setSpecializations([...specializations, spec]);
+    }
+  };
+
+  const handleRemoveSpecialization = (spec: string) => {
+    setSpecializations(specializations.filter(s => s !== spec));
+  };
+
+  const handleFormSubmit = async (data: TrainerFormValues) => {
+    const completeData = {
       ...data,
-      specialization: selectedSpecializations,
-      profile_picture: profilePictureUrl,
+      specialization: specializations
     };
     
-    await onSubmit(formData as Omit<TrainerProfile, "id" | "certifications" | "availability">);
-    form.reset();
-    setSelectedSpecializations([]);
-    setProfilePictureUrl(null);
-  };
-
-  const addSpecialization = (spec: string) => {
-    if (spec.trim() === "") return;
-    
-    if (!selectedSpecializations.includes(spec)) {
-      setSelectedSpecializations([...selectedSpecializations, spec]);
-    }
-  };
-
-  const removeSpecialization = (spec: string) => {
-    setSelectedSpecializations(selectedSpecializations.filter(s => s !== spec));
-  };
-
-  const handleProfilePictureUpload = async (file: File) => {
-    // Use a temporary ID for the upload, it will be replaced when the trainer is created
-    const tempId = "temp-" + Date.now();
-    const url = await uploadFile(file, tempId, 'profile_picture');
-    if (url) {
-      setProfilePictureUrl(url);
-    }
+    await onSubmit(completeData);
   };
 
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(handleFormSubmit)} className="space-y-6">
-        <TrainerAddFormFields 
-          form={form}
-          profilePictureUrl={profilePictureUrl}
-          isUploading={isUploading}
-          uploadProgress={uploadProgress}
-          onProfilePictureUpload={handleProfilePictureUpload}
-        />
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <FormField
+            control={form.control}
+            name="name"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Name*</FormLabel>
+                <FormControl>
+                  <Input placeholder="Full Name" {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="email"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Email*</FormLabel>
+                <FormControl>
+                  <Input type="email" placeholder="Email" {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="phone"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Phone</FormLabel>
+                <FormControl>
+                  <Input placeholder="Phone Number" {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="status"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Status</FormLabel>
+                <Select onValueChange={field.onChange} defaultValue={field.value}>
+                  <FormControl>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select status" />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    <SelectItem value="Active">Active</SelectItem>
+                    <SelectItem value="Inactive">Inactive</SelectItem>
+                    <SelectItem value="On Leave">On Leave</SelectItem>
+                  </SelectContent>
+                </Select>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="hire_date"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Hire Date</FormLabel>
+                <FormControl>
+                  <Input type="date" {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="profile_picture"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Profile Picture URL</FormLabel>
+                <FormControl>
+                  <Input placeholder="http://example.com/image.jpg" {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </div>
 
         <TrainerAddSpecializationsField
-          selectedSpecializations={selectedSpecializations}
-          onAddSpecialization={addSpecialization}
-          onRemoveSpecialization={removeSpecialization}
+          selectedSpecializations={specializations}
+          onAddSpecialization={handleAddSpecialization}
+          onRemoveSpecialization={handleRemoveSpecialization}
         />
 
-        <TrainerBioField form={form} />
+        <FormField
+          control={form.control}
+          name="bio"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Bio</FormLabel>
+              <FormControl>
+                <Textarea 
+                  placeholder="Trainer's biography and experience"
+                  className="resize-none min-h-24"
+                  {...field} 
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
 
-        <FormActions onCancel={onCancel} />
+        <div className="flex justify-end space-x-2 pt-4">
+          <Button variant="outline" onClick={onCancel} type="button">
+            Cancel
+          </Button>
+          <Button type="submit" className="bg-gym-orange hover:bg-opacity-90">
+            Add Trainer
+          </Button>
+        </div>
       </form>
     </Form>
   );

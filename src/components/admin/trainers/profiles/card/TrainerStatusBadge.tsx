@@ -1,14 +1,17 @@
 
 import React from 'react';
 import { Badge } from '@/components/ui/badge';
+import { cn } from '@/lib/utils';
 
 interface TrainerStatusBadgeProps {
   status: string;
 }
 
 const TrainerStatusBadge: React.FC<TrainerStatusBadgeProps> = ({ status }) => {
-  const getStatusColor = (status: string) => {
-    switch (status?.toLowerCase()) {
+  const getStatusStyles = (status: string) => {
+    const lowerStatus = status.toLowerCase();
+    
+    switch (lowerStatus) {
       case 'active':
         return 'bg-green-100 text-green-800 border-green-200';
       case 'inactive':
@@ -21,8 +24,8 @@ const TrainerStatusBadge: React.FC<TrainerStatusBadgeProps> = ({ status }) => {
   };
 
   return (
-    <Badge variant="outline" className={getStatusColor(status || '')}>
-      {status || 'Unknown'}
+    <Badge variant="outline" className={cn("font-normal", getStatusStyles(status))}>
+      {status}
     </Badge>
   );
 };

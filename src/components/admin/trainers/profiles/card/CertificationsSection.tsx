@@ -27,7 +27,7 @@ const CertificationsSection: React.FC<CertificationsSectionProps> = ({
       </div>
       
       {certifications?.length ? (
-        <div className="space-y-2">
+        <div className="space-y-1">
           {certifications.map(cert => (
             <CertificationItem 
               key={cert.id} 

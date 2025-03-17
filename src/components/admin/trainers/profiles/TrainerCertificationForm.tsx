@@ -1,51 +1,40 @@
 
+import React from 'react';
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { Button } from "@/components/ui/button";
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { Form, FormField, FormItem, FormLabel, FormControl, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { TrainerCertification } from "@/hooks/trainers/useTrainerProfiles";
 
 const certificationFormSchema = z.object({
-  certification_name: z.string().min(2, { message: "Certification name is required." }),
-  issuing_organization: z.string().min(2, { message: "Issuing organization is required." }),
+  trainer_id: z.string(),
+  certification_name: z.string().min(2, "Certification name is required"),
+  issuing_organization: z.string().min(2, "Organization name is required"),
   issue_date: z.string().optional(),
-  expiry_date: z.string().optional(),
-}).refine(data => !data.issue_date || !data.expiry_date || data.expiry_date >= data.issue_date, {
-  message: "Expiry date must be after issue date.",
-  path: ["expiry_date"],
+  expiry_date: z.string().optional()
 });
-
-type CertificationFormValues = z.infer<typeof certificationFormSchema>;
 
 interface TrainerCertificationFormProps {
   trainerId: string;
-  onSubmit: (data: Omit<TrainerCertification, 'id'>) => Promise<void>;
+  onSubmit: (data: z.infer<typeof certificationFormSchema>) => Promise<void>;
   onCancel: () => void;
 }
 
 const TrainerCertificationForm = ({ trainerId, onSubmit, onCancel }: TrainerCertificationFormProps) => {
-  const form = useForm<CertificationFormValues>({
+  const form = useForm<z.infer<typeof certificationFormSchema>>({
     resolver: zodResolver(certificationFormSchema),
     defaultValues: {
+      trainer_id: trainerId,
       certification_name: "",
       issuing_organization: "",
       issue_date: "",
-      expiry_date: "",
-    },
+      expiry_date: ""
+    }
   });
 
-  const handleSubmit = async (data: CertificationFormValues) => {
-    const certData: Omit<TrainerCertification, 'id'> = {
-      trainer_id: trainerId,
-      certification_name: data.certification_name,
-      issuing_organization: data.issuing_organization,
-      issue_date: data.issue_date || undefined,
-      expiry_date: data.expiry_date || undefined
-    };
-    await onSubmit(certData);
-    form.reset();
+  const handleSubmit = async (data: z.infer<typeof certificationFormSchema>) => {
+    await onSubmit(data);
   };
 
   return (
@@ -58,7 +47,7 @@ const TrainerCertificationForm = ({ trainerId, onSubmit, onCancel }: TrainerCert
             <FormItem>
               <FormLabel>Certification Name*</FormLabel>
               <FormControl>
-                <Input placeholder="e.g., Personal Trainer Certification" {...field} />
+                <Input placeholder="e.g. Certified Personal Trainer" {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -72,7 +61,7 @@ const TrainerCertificationForm = ({ trainerId, onSubmit, onCancel }: TrainerCert
             <FormItem>
               <FormLabel>Issuing Organization*</FormLabel>
               <FormControl>
-                <Input placeholder="e.g., American Council on Exercise" {...field} />
+                <Input placeholder="e.g. National Academy of Sports Medicine" {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -109,8 +98,8 @@ const TrainerCertificationForm = ({ trainerId, onSubmit, onCancel }: TrainerCert
           />
         </div>
 
-        <div className="flex justify-end space-x-2 pt-2">
-          <Button type="button" variant="outline" onClick={onCancel}>
+        <div className="flex justify-end space-x-2 pt-4">
+          <Button variant="outline" onClick={onCancel} type="button">
             Cancel
           </Button>
           <Button type="submit">Add Certification</Button>

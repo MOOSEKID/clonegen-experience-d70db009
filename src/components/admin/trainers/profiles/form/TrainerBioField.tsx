@@ -1,7 +1,7 @@
 
 import React from "react";
-import { FormField, FormItem, FormLabel, FormControl, FormMessage } from "@/components/ui/form";
 import { Textarea } from "@/components/ui/textarea";
+import { FormField, FormItem, FormLabel, FormControl, FormMessage } from "@/components/ui/form";
 import { UseFormReturn } from "react-hook-form";
 import { TrainerFormValues } from "../TrainerEditForm";
 
@@ -18,10 +18,10 @@ const TrainerBioField: React.FC<TrainerBioFieldProps> = ({ form }) => {
         <FormItem>
           <FormLabel>Bio</FormLabel>
           <FormControl>
-            <Textarea
-              placeholder="Trainer biography"
-              className="min-h-[100px]"
-              {...field}
+            <Textarea 
+              placeholder="Trainer's biography and experience"
+              className="resize-none min-h-24"
+              {...field} 
             />
           </FormControl>
           <FormMessage />

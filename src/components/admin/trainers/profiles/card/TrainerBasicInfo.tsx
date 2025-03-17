@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { CardTitle, CardDescription } from '@/components/ui/card';
+import { Mail, Phone } from 'lucide-react';
 
 interface TrainerBasicInfoProps {
   name: string;
@@ -10,34 +10,42 @@ interface TrainerBasicInfoProps {
   profilePicture?: string;
 }
 
-const TrainerBasicInfo: React.FC<TrainerBasicInfoProps> = ({ 
-  name, 
-  email, 
-  phone, 
-  profilePicture 
+const TrainerBasicInfo: React.FC<TrainerBasicInfoProps> = ({
+  name,
+  email,
+  phone,
+  profilePicture
 }) => {
+  // Get initials from the name
   const getInitials = (name: string) => {
-    const nameArray = name.split(' ');
-    return nameArray.length > 1
-      ? `${nameArray[0][0]}${nameArray[1][0]}`
-      : nameArray[0].substring(0, 2);
+    return name
+      .split(' ')
+      .map(part => part[0])
+      .join('')
+      .toUpperCase()
+      .slice(0, 2);
   };
 
   return (
-    <div className="flex items-center gap-4 mt-2">
-      <Avatar className="h-16 w-16">
-        {profilePicture ? (
-          <AvatarImage src={profilePicture} alt={name} />
-        ) : (
-          <AvatarFallback className="text-lg bg-primary text-primary-foreground">
-            {getInitials(name)}
-          </AvatarFallback>
-        )}
+    <div className="flex items-center">
+      <Avatar className="h-12 w-12 mr-3">
+        <AvatarImage src={profilePicture || ''} alt={name} />
+        <AvatarFallback>{getInitials(name)}</AvatarFallback>
       </Avatar>
       <div>
-        <CardTitle>{name}</CardTitle>
-        <CardDescription>{email}</CardDescription>
-        {phone && <CardDescription>{phone}</CardDescription>}
+        <h2 className="text-lg font-semibold">{name}</h2>
+        <div className="flex flex-col text-sm text-muted-foreground">
+          <div className="flex items-center gap-1">
+            <Mail className="h-3 w-3" />
+            <span>{email}</span>
+          </div>
+          {phone && (
+            <div className="flex items-center gap-1">
+              <Phone className="h-3 w-3" />
+              <span>{phone}</span>
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );

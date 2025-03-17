@@ -1,48 +1,117 @@
 
-import React from 'react';
-import { TabsContent } from '@/components/ui/tabs';
-import TrainerProfileHeader from '@/components/admin/trainers/profiles/TrainerProfileHeader';
-import TrainerProfileTabs from '@/components/admin/trainers/profiles/TrainerProfileTabs';
+import React, { useState } from 'react';
+import { useTrainerProfiles, TrainerProfile } from '@/hooks/trainers/useTrainerProfiles';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Button } from '@/components/ui/button';
+import { Plus } from 'lucide-react';
+import { Separator } from '@/components/ui/separator';
+
 import TrainerProfilesGrid from '@/components/admin/trainers/profiles/TrainerProfilesGrid';
 import TrainerDialogs from '@/components/admin/trainers/profiles/TrainerDialogs';
-import { useTrainerProfilesState } from '@/components/admin/trainers/profiles/useTrainerProfilesState';
 
 const TrainerProfiles = () => {
   const {
+    trainers,
     isLoading,
-    filteredTrainers,
-    isAddDialogOpen,
-    setIsAddDialogOpen,
-    isEditDialogOpen,
-    setIsEditDialogOpen,
-    isCertDialogOpen,
-    setIsCertDialogOpen,
-    isAvailDialogOpen,
-    setIsAvailDialogOpen,
-    selectedTrainer,
-    activeTab,
-    setActiveTab,
-    getSelectedTrainer,
-    handleAddTrainer,
-    handleEditTrainer,
-    handleAddCertification,
-    handleAddAvailability,
-    handleAddTrainerSubmit,
-    handleUpdateTrainerSubmit,
-    handleDeleteTrainerSubmit,
-    handleAddCertificationSubmit,
-    handleDeleteCertificationSubmit,
-    handleAddAvailabilitySubmit,
-    handleDeleteAvailabilitySubmit,
-  } = useTrainerProfilesState();
+    addTrainer,
+    updateTrainer,
+    deleteTrainer,
+    addCertification,
+    deleteCertification,
+    addAvailability,
+    deleteAvailability
+  } = useTrainerProfiles();
+
+  const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const [isCertDialogOpen, setIsCertDialogOpen] = useState(false);
+  const [isAvailDialogOpen, setIsAvailDialogOpen] = useState(false);
+  const [selectedTrainer, setSelectedTrainer] = useState<string | null>(null);
+  const [activeTab, setActiveTab] = useState('all');
+
+  // Filter trainers based on active tab
+  const filteredTrainers = trainers.filter((trainer) => {
+    if (activeTab === 'all') return true;
+    return trainer.status?.toLowerCase() === activeTab;
+  });
+
+  // Get the selected trainer object
+  const getSelectedTrainer = () => {
+    return trainers.find((trainer) => trainer.id === selectedTrainer) || null;
+  };
+
+  const handleAddTrainer = () => {
+    setIsAddDialogOpen(true);
+  };
+
+  const handleEditTrainer = (trainerId: string) => {
+    setSelectedTrainer(trainerId);
+    setIsEditDialogOpen(true);
+  };
+
+  const handleAddCertification = (trainerId: string) => {
+    setSelectedTrainer(trainerId);
+    setIsCertDialogOpen(true);
+  };
+
+  const handleAddAvailability = (trainerId: string) => {
+    setSelectedTrainer(trainerId);
+    setIsAvailDialogOpen(true);
+  };
+
+  const handleAddTrainerSubmit = async (data: any) => {
+    await addTrainer(data);
+    setIsAddDialogOpen(false);
+  };
+
+  const handleUpdateTrainerSubmit = async (id: string, data: any) => {
+    await updateTrainer(id, data);
+    setIsEditDialogOpen(false);
+  };
+
+  const handleDeleteTrainerSubmit = async (id: string) => {
+    await deleteTrainer(id);
+  };
+
+  const handleAddCertificationSubmit = async (data: any) => {
+    await addCertification(data);
+    setIsCertDialogOpen(false);
+  };
+
+  const handleDeleteCertificationSubmit = async (id: string) => {
+    await deleteCertification(id);
+  };
+
+  const handleAddAvailabilitySubmit = async (data: any) => {
+    await addAvailability(data);
+    setIsAvailDialogOpen(false);
+  };
+
+  const handleDeleteAvailabilitySubmit = async (id: string) => {
+    await deleteAvailability(id);
+  };
 
   return (
     <div className="container mx-auto p-6">
-      <TrainerProfileHeader onAddTrainer={handleAddTrainer} />
+      <div className="flex justify-between items-center mb-6">
+        <div>
+          <h1 className="text-3xl font-bold text-gray-800">Trainer Profiles</h1>
+          <p className="text-gray-500">Manage your gym's trainers, specializations and availability</p>
+        </div>
+        <Button onClick={handleAddTrainer} className="bg-gym-orange hover:bg-opacity-90">
+          <Plus className="mr-1 h-4 w-4" />
+          Add Trainer
+        </Button>
+      </div>
       
-      <TrainerProfileTabs activeTab={activeTab} onTabChange={setActiveTab} />
-      
-      <div className="mt-4">
+      <Tabs defaultValue="all" value={activeTab} onValueChange={setActiveTab}>
+        <TabsList className="grid grid-cols-4 mb-6">
+          <TabsTrigger value="all">All Trainers</TabsTrigger>
+          <TabsTrigger value="active">Active</TabsTrigger>
+          <TabsTrigger value="inactive">Inactive</TabsTrigger>
+          <TabsTrigger value="on leave">On Leave</TabsTrigger>
+        </TabsList>
+        
         <TabsContent value={activeTab} className="space-y-4 mt-4">
           <TrainerProfilesGrid
             trainers={filteredTrainers}
@@ -55,7 +124,7 @@ const TrainerProfiles = () => {
             onDeleteAvailability={handleDeleteAvailabilitySubmit}
           />
         </TabsContent>
-      </div>
+      </Tabs>
       
       <TrainerDialogs
         isAddDialogOpen={isAddDialogOpen}
