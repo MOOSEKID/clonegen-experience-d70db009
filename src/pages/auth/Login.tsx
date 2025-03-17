@@ -1,15 +1,12 @@
 
 import { useState, useEffect } from 'react';
-import { Link, useNavigate, useLocation } from 'react-router-dom';
-import { Mail, Lock, AlertCircle } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { Alert, AlertDescription } from '@/components/ui/alert';
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from 'sonner';
-import TermsAgreement from '@/components/auth/TermsAgreement';
+import LoginInputForm from '@/components/auth/LoginInputForm';
+import QuickLogin from '@/components/auth/QuickLogin';
+import LoginFooter from '@/components/auth/LoginFooter';
 
 const Login = () => {
   const [email, setEmail] = useState('');
@@ -126,110 +123,26 @@ const Login = () => {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          {errorMessage && (
-            <Alert variant="destructive" className="mb-4">
-              <AlertCircle className="h-4 w-4" />
-              <AlertDescription>{errorMessage}</AlertDescription>
-            </Alert>
-          )}
+          <LoginInputForm 
+            email={email}
+            setEmail={setEmail}
+            password={password}
+            setPassword={setPassword}
+            termsAccepted={termsAccepted}
+            setTermsAccepted={setTermsAccepted}
+            errorMessage={errorMessage}
+            isLoading={isLoading}
+            onSubmit={handleLogin}
+          />
           
-          <form onSubmit={handleLogin} className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
-              <div className="relative">
-                <Mail className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
-                <Input
-                  id="email"
-                  type="email"
-                  placeholder="john@example.com"
-                  className="pl-10"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  disabled={isLoading}
-                />
-              </div>
-            </div>
-            <div className="space-y-2">
-              <div className="flex items-center justify-between">
-                <Label htmlFor="password">Password</Label>
-                <Link 
-                  to="/forgot-password" 
-                  className="text-sm text-gym-orange hover:underline"
-                >
-                  Forgot password?
-                </Link>
-              </div>
-              <div className="relative">
-                <Lock className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
-                <Input
-                  id="password"
-                  type="password"
-                  placeholder="••••••••"
-                  className="pl-10"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  disabled={isLoading}
-                />
-              </div>
-            </div>
-            
-            <TermsAgreement 
-              accepted={termsAccepted}
-              onChange={setTermsAccepted}
-              disabled={isLoading}
-            />
-            
-            <Button 
-              type="submit" 
-              className="w-full bg-gym-orange hover:bg-gym-orange/90" 
-              disabled={isLoading || !termsAccepted}
-            >
-              {isLoading ? 'Signing in...' : 'Sign In'}
-            </Button>
-          </form>
-          
-          <div className="my-4 flex items-center">
-            <div className="flex-grow h-0.5 bg-gray-200"></div>
-            <span className="px-4 text-sm text-gray-400">OR</span>
-            <div className="flex-grow h-0.5 bg-gray-200"></div>
-          </div>
-          
-          <div className="grid grid-cols-2 gap-4">
-            <Button 
-              variant="outline" 
-              className="w-full" 
-              onClick={handleAdminLogin}
-              disabled={isLoading}
-            >
-              Admin Login
-            </Button>
-            
-            <Button 
-              variant="outline" 
-              className="w-full" 
-              onClick={handleUserLogin}
-              disabled={isLoading}
-            >
-              User Login
-            </Button>
-          </div>
+          <QuickLogin 
+            onAdminLogin={handleAdminLogin}
+            onUserLogin={handleUserLogin}
+            isLoading={isLoading}
+          />
         </CardContent>
         <CardFooter className="flex flex-col space-y-4">
-          <div className="text-center text-sm">
-            Don't have an account?{' '}
-            <Link 
-              to="/signup" 
-              className="text-gym-orange hover:underline font-medium"
-            >
-              Sign up
-            </Link>
-          </div>
-          <div className="text-center text-xs text-gray-500">
-            By signing in, you agree to our{' '}
-            <Link to="/terms" className="underline">Terms of Service</Link>{' '}
-            and{' '}
-            <Link to="/privacy" className="underline">Privacy Policy</Link>
-          </div>
+          <LoginFooter />
         </CardFooter>
       </Card>
     </div>
