@@ -1,5 +1,6 @@
+
 import { useState, useEffect } from 'react';
-import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 import { Menu, X, ShoppingBag, User, LayoutDashboard } from 'lucide-react';
 import { toast } from 'sonner';
@@ -14,7 +15,6 @@ const Header = () => {
   const [isServicesDropdownOpen, setIsServicesDropdownOpen] = useState(false);
   const { isAuthenticated, isAdmin, logout } = useAuth();
   const location = useLocation();
-  const navigate = useNavigate();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -50,18 +50,10 @@ const Header = () => {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, [isCompanyDropdownOpen, isServicesDropdownOpen]);
 
-  const handleDashboardClick = () => {
-    if (!isAuthenticated) {
-      navigate('/login', { state: { from: '/dashboard' } });
-      return;
-    }
-    navigate(isAdmin ? '/admin' : '/dashboard');
-  };
-
   const handleLogout = async () => {
     const success = await logout();
     if (success) {
-      navigate('/login');
+      toast.success('Logged out successfully');
     }
   };
 
@@ -75,9 +67,9 @@ const Header = () => {
 
   const serviceItems = [
     { label: 'All Services', path: '/services' },
-    { label: 'Fitness Facilities', path: '/services/fitness-facilities' },
-    { label: 'Youth Programs', path: '/services/youth-programs' },
-    { label: 'Spa & Wellness', path: '/services/spa-wellness' },
+    { label: 'Fitness Facilities', path: '/facilities' },
+    { label: 'Youth Programs', path: '/youth-programs' },
+    { label: 'Spa & Wellness', path: '/spa-wellness' },
   ];
 
   const companyItems = [
@@ -91,7 +83,6 @@ const Header = () => {
     label: 'Dashboard', 
     path: isAdmin ? '/admin' : '/dashboard', 
     icon: LayoutDashboard,
-    action: handleDashboardClick
   };
   
   const authItems = isAuthenticated 
@@ -118,7 +109,7 @@ const Header = () => {
         isScrolled ? 'bg-gym-darkblue shadow-lg py-2' : 'bg-gym-dark/90 backdrop-blur-md py-4'
       )}
     >
-      <div className="container-custom flex items-center justify-between">
+      <div className="container-custom mx-auto px-4 flex items-center justify-between">
         <Link to="/" className="flex items-center space-x-2">
           <div className="h-12 w-auto">
             <img 

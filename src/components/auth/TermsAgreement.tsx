@@ -1,31 +1,44 @@
 
+import { Checkbox } from '@/components/ui/checkbox';
+import { Label } from '@/components/ui/label';
+
 interface TermsAgreementProps {
   accepted: boolean;
-  onChange: (accepted: boolean) => void;
+  onChange: (value: boolean) => void;
   disabled?: boolean;
 }
 
-const TermsAgreement = ({ accepted, onChange, disabled }: TermsAgreementProps) => {
+const TermsAgreement = ({ accepted, onChange, disabled = false }: TermsAgreementProps) => {
   return (
-    <div className="flex items-center">
-      <input
-        id="terms"
-        type="checkbox"
-        className="h-4 w-4 rounded border-white/20 bg-gym-dark text-gym-orange focus:ring-gym-orange"
-        checked={accepted}
-        onChange={(e) => onChange(e.target.checked)}
-        disabled={disabled}
+    <div className="flex items-center space-x-2">
+      <Checkbox 
+        id="terms" 
+        checked={accepted} 
+        onCheckedChange={(checked) => onChange(checked === true)} 
+        disabled={disabled} 
+        className="data-[state=checked]:bg-gym-orange"
       />
-      <label htmlFor="terms" className="ml-2 block text-sm text-white/70">
-        I agree to the{" "}
-        <a href="/terms" className="text-gym-orange hover:underline">
-          Terms of Service
-        </a>{" "}
-        and{" "}
-        <a href="/privacy" className="text-gym-orange hover:underline">
-          Privacy Policy
+      <Label 
+        htmlFor="terms" 
+        className="text-sm text-muted-foreground cursor-pointer"
+      >
+        I agree to the{' '}
+        <a 
+          href="/terms" 
+          className="text-gym-orange hover:underline" 
+          onClick={(e) => e.stopPropagation()}
+        >
+          terms of service
         </a>
-      </label>
+        {' '}and{' '}
+        <a 
+          href="/privacy" 
+          className="text-gym-orange hover:underline" 
+          onClick={(e) => e.stopPropagation()}
+        >
+          privacy policy
+        </a>
+      </Label>
     </div>
   );
 };

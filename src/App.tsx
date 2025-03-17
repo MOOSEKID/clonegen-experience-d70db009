@@ -1,7 +1,9 @@
+
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { Toaster } from '@/components/ui/toaster';
 import { Toaster as SonnerToaster } from 'sonner';
 import { AuthProvider } from '@/contexts/AuthProvider';
+import Header from '@/components/Header';
 
 // Public pages
 import Index from '@/pages/Index';
@@ -16,6 +18,8 @@ import Register from '@/pages/auth/Register';
 import SpaWellness from '@/pages/services/SpaWellness';
 import YouthPrograms from '@/pages/services/YouthPrograms';
 import Timetable from '@/pages/Timetable';
+import Blogs from '@/pages/Blogs';
+import Shop from '@/pages/Shop';
 
 // Dashboard pages
 import DashboardLayout from '@/pages/dashboard/DashboardLayout';
@@ -39,12 +43,13 @@ function App() {
   return (
     <AuthProvider>
       <Router>
+        <Header />
         <Routes>
           {/* Public routes */}
           <Route path="/" element={<Index />} />
-          <Route path="/about" element={<AboutUs />} />
+          <Route path="/about-us" element={<AboutUs />} />
           <Route path="/classes" element={<Classes />} />
-          <Route path="/contact" element={<ContactUs />} />
+          <Route path="/contact-us" element={<ContactUs />} />
           <Route path="/facilities" element={<FitnessFacilities />} />
           <Route path="/login" element={<Login />} />
           <Route path="/membership" element={<Membership />} />
@@ -52,6 +57,9 @@ function App() {
           <Route path="/spa-wellness" element={<SpaWellness />} />
           <Route path="/youth-programs" element={<YouthPrograms />} />
           <Route path="/timetable" element={<Timetable />} />
+          <Route path="/blogs" element={<Blogs />} />
+          <Route path="/shop" element={<Shop />} />
+          <Route path="/services" element={<FitnessFacilities />} />
 
           {/* Dashboard routes */}
           <Route path="/dashboard" element={<DashboardLayout />}>
