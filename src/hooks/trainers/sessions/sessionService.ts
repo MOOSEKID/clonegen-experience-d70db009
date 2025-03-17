@@ -3,101 +3,91 @@ import { supabase } from '@/integrations/supabase/client';
 import { ClientSession, ClientSessionInput } from './types';
 
 export const fetchSessions = async (trainerId?: string, clientId?: string) => {
-  try {
-    let query = supabase
-      .from('client_sessions')
-      .select(`
-        *,
-        trainers:trainer_id(name),
-        members:client_id(name)
-      `)
-      .order('session_date', { ascending: false });
-      
-    if (trainerId) {
-      query = query.eq('trainer_id', trainerId);
-    }
+  let query = supabase
+    .from('client_sessions')
+    .select(`
+      *,
+      trainers:trainer_id(name),
+      members:client_id(name)
+    `)
+    .order('session_date', { ascending: false });
     
-    if (clientId) {
-      query = query.eq('client_id', clientId);
-    }
-    
-    const { data, error } = await query;
-      
-    if (error) throw error;
-    
-    if (data) {
-      return data.map(session => ({
-        ...session,
-        client_name: session.members?.name,
-        trainer_name: session.trainers?.name,
-        // Ensure status is one of the valid types
-        status: (session.status as 'scheduled' | 'completed' | 'canceled' | 'no-show') || 'scheduled'
-      })) as ClientSession[];
-    }
-    
-    return [];
-  } catch (error) {
-    console.error('Error fetching sessions:', error);
-    throw error;
+  if (trainerId) {
+    query = query.eq('trainer_id', trainerId);
   }
+  
+  if (clientId) {
+    query = query.eq('client_id', clientId);
+  }
+  
+  const { data, error } = await query;
+  
+  if (error) throw error;
+  
+  if (data) {
+    return data.map(session => ({
+      ...session,
+      client_name: session.members?.name,
+      trainer_name: session.trainers?.name,
+      // Ensure status is one of the valid types
+      status: (session.status as 'scheduled' | 'completed' | 'canceled' | 'no-show') || 'scheduled'
+    })) as ClientSession[];
+  }
+  
+  return [];
 };
 
 export const createSession = async (sessionData: ClientSessionInput) => {
-  try {
-    const { data, error } = await supabase
-      .from('client_sessions')
-      .insert({
-        trainer_id: sessionData.trainer_id,
-        client_id: sessionData.client_id,
-        session_date: sessionData.session_date,
-        duration: sessionData.duration,
-        status: sessionData.status || 'scheduled',
-        notes: sessionData.notes || null,
-        focus_areas: sessionData.focus_areas || null,
-        achievements: sessionData.achievements || null
-      })
-      .select()
-      .single();
-      
-    if (error) throw error;
-    
-    return data;
-  } catch (error) {
-    console.error('Error creating session:', error);
-    throw error;
+  // Calculate duration if not provided
+  if (!sessionData.duration && sessionData.start_time && sessionData.end_time) {
+    const startTime = new Date(`2000-01-01T${sessionData.start_time}`);
+    const endTime = new Date(`2000-01-01T${sessionData.end_time}`);
+    sessionData.duration = Math.round((endTime.getTime() - startTime.getTime()) / 60000); // in minutes
   }
+  
+  // Set default status if not provided
+  if (!sessionData.status) {
+    sessionData.status = 'scheduled';
+  }
+  
+  const { data, error } = await supabase
+    .from('client_sessions')
+    .insert(sessionData)
+    .select()
+    .single();
+    
+  if (error) throw error;
+  
+  return data;
 };
 
 export const updateSession = async (id: string, sessionData: Partial<ClientSessionInput>) => {
-  try {
-    const { data, error } = await supabase
-      .from('client_sessions')
-      .update(sessionData)
-      .eq('id', id)
-      .select()
-      .single();
-      
-    if (error) throw error;
-    
-    return data;
-  } catch (error) {
-    console.error('Error updating session:', error);
-    throw error;
+  // Calculate duration if start_time and end_time are provided but duration isn't
+  if (sessionData.start_time && sessionData.end_time && !sessionData.duration) {
+    const startTime = new Date(`2000-01-01T${sessionData.start_time}`);
+    const endTime = new Date(`2000-01-01T${sessionData.end_time}`);
+    sessionData.duration = Math.round((endTime.getTime() - startTime.getTime()) / 60000); // in minutes
   }
+  
+  const { data, error } = await supabase
+    .from('client_sessions')
+    .update(sessionData)
+    .eq('id', id)
+    .select()
+    .single();
+    
+  if (error) throw error;
+  
+  return data;
 };
 
 export const deleteSession = async (id: string) => {
-  try {
-    const { error } = await supabase
-      .from('client_sessions')
-      .delete()
-      .eq('id', id);
-      
-    if (error) throw error;
+  const { error } = await supabase
+    .from('client_sessions')
+    .delete()
+    .eq('id', id);
     
-    return true;
-  } catch (error) {
-    console.error('Error deleting session:', error);
-    throw error;
-  }
+  if (error) throw error;
+  
+  return true;
 };

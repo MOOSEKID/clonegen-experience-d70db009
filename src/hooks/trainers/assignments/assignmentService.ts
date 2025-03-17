@@ -29,7 +29,6 @@ export const fetchAssignments = async (trainerId?: string, clientId?: string) =>
       ...assignment,
       client_name: assignment.members?.name,
       trainer_name: assignment.trainers?.name,
-      // Ensure status is one of the valid types
       status: (assignment.status as 'active' | 'paused' | 'ended') || 'active'
     })) as ClientAssignment[];
   }

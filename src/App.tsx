@@ -1,143 +1,86 @@
-import { Toaster } from "@/components/ui/toaster";
-import { Toaster as Sonner } from "@/components/ui/sonner";
-import { TooltipProvider } from "@/components/ui/tooltip";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
-import { AuthProvider } from "./contexts/AuthContext";
 
-// Layout components
-import Header from "@/components/Header";
-import Footer from "@/components/Footer";
-import AdminLayout from "./pages/admin/AdminLayout";
-import DashboardLayout from "./pages/dashboard/DashboardLayout";
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { Toaster } from '@/components/ui/toaster';
+import { Toaster as SonnerToaster } from 'sonner';
+import { AuthProvider } from '@/contexts/AuthProvider';
 
-// Main pages
-import Index from "./pages/Index";
-import AboutUs from "./pages/AboutUs";
-import Services from "./pages/Services";
-import Blogs from "./pages/Blogs";
-import ContactUs from "./pages/ContactUs";
-import NotFound from "./pages/NotFound";
+// Public pages
+import Index from '@/pages/Index';
+import AboutUs from '@/pages/AboutUs';
+import Classes from '@/pages/Classes';
+import ContactUs from '@/pages/ContactUs';
+import FitnessFacilities from '@/pages/services/FitnessFacilities';
+import Login from '@/pages/auth/Login';
+import Membership from '@/pages/Membership';
+import NotFound from '@/pages/NotFound';
+import Register from '@/pages/auth/Register';
+import SpaWellness from '@/pages/services/SpaWellness';
+import YouthPrograms from '@/pages/services/YouthPrograms';
+import Timetable from '@/pages/Timetable';
 
-// Service pages
-import FitnessFacilities from "./pages/FitnessFacilities";
-import YouthPrograms from "./pages/YouthPrograms";
-import SpaWellness from "./pages/SpaWellness";
-import Membership from "./pages/Membership";
-import Classes from "./pages/Classes";
-import Timetable from "./pages/Timetable";
-import OpeningTimes from "./pages/OpeningTimes";
+// Dashboard pages
+import DashboardLayout from '@/pages/dashboard/DashboardLayout';
+import Dashboard from '@/pages/dashboard/Dashboard';
+import CustomerDashboard from '@/pages/dashboard/CustomerDashboard';
 
-// Shop pages
-import ShopPage from "./pages/Shop";
-import CategoryPage from "./pages/shop/CategoryPage";
-import ProductPage from "./pages/shop/ProductPage";
+// Admin dashboard
+import AdminDashboard from '@/pages/admin/AdminDashboard';
+import DashboardHome from '@/pages/admin/DashboardHome';
+import Members from '@/pages/admin/Members';
+import Trainers from '@/pages/admin/Trainers';
+import AdminClasses from '@/pages/admin/Classes';
+import Reports from '@/pages/admin/Reports';
+import Settings from '@/pages/admin/Settings';
+import TrainerProfiles from '@/pages/admin/trainers/TrainerProfiles';
+import TrainerRatings from '@/pages/admin/trainers/TrainerRatings';
+import PerformanceTracking from '@/pages/admin/trainers/PerformanceTracking';
 
-// Auth pages
-import Login from "./pages/Login";
-import Signup from "./pages/Signup";
-
-// Admin pages
-import AdminDashboard from "./pages/admin/Dashboard";
-import AdminMembers from "./pages/admin/Members";
-import AdminClasses from "./pages/admin/Classes";
-import AdminTrainers from "./pages/admin/Trainers";
-import AdminPayments from "./pages/admin/Payments";
-import AdminWorkouts from "./pages/admin/Workouts";
-import AdminShop from "./pages/admin/Shop";
-import AdminContent from "./pages/admin/Content";
-import AdminReports from "./pages/admin/Reports";
-import AdminSettings from "./pages/admin/Settings";
-import AdminSupport from "./pages/admin/Support";
-
-// Trainer subpages
-import TrainerProfiles from "./pages/admin/trainers/TrainerProfiles";
-import PerformanceTracking from "./pages/admin/trainers/PerformanceTracking";
-import TrainerRatings from "./pages/admin/trainers/TrainerRatings";
-
-// Customer Dashboard pages
-import Dashboard from "./pages/dashboard/Dashboard";
-
-// Create a new query client instance
-const queryClient = new QueryClient({
-  defaultOptions: {
-    queries: {
-      refetchOnWindowFocus: false,
-      retry: 1
-    }
-  }
-});
-
-const App = () => {
-  console.log("App component rendering"); // Debug log
-  
+function App() {
   return (
-    <QueryClientProvider client={queryClient}>
-      <AuthProvider>
-        <TooltipProvider>
-          <Toaster />
-          <Sonner />
-          <BrowserRouter>
-            <Routes>
-              {/* Main Routes with Header and Footer */}
-              <Route path="*" element={
-                <div className="flex flex-col min-h-screen">
-                  <Header />
-                  <div className="flex-grow">
-                    <Routes>
-                      <Route index element={<Index />} />
-                      <Route path="/about-us" element={<AboutUs />} />
-                      <Route path="/services" element={<Services />} />
-                      <Route path="/services/fitness-facilities" element={<FitnessFacilities />} />
-                      <Route path="/services/youth-programs" element={<YouthPrograms />} />
-                      <Route path="/services/spa-wellness" element={<SpaWellness />} />
-                      <Route path="/membership" element={<Membership />} />
-                      <Route path="/classes" element={<Classes />} />
-                      <Route path="/blogs" element={<Blogs />} />
-                      <Route path="/shop" element={<ShopPage />} />
-                      <Route path="/shop/category/:categoryId" element={<CategoryPage />} />
-                      <Route path="/shop/product/:productId" element={<ProductPage />} />
-                      <Route path="/login" element={<Login />} />
-                      <Route path="/signup" element={<Signup />} />
-                      <Route path="/contact-us" element={<ContactUs />} />
-                      <Route path="/timetable" element={<Timetable />} />
-                      <Route path="/opening-times" element={<OpeningTimes />} />
-                      <Route path="*" element={<NotFound />} />
-                    </Routes>
-                  </div>
-                  <Footer />
-                </div>
-              } />
-              
-              {/* Admin Routes */}
-              <Route path="/admin/*" element={<AdminLayout />}>
-                <Route index element={<AdminDashboard />} />
-                <Route path="members" element={<AdminMembers />} />
-                <Route path="classes" element={<AdminClasses />} />
-                <Route path="trainers" element={<AdminTrainers />} />
-                <Route path="trainers/profiles" element={<TrainerProfiles />} />
-                <Route path="trainers/performance" element={<PerformanceTracking />} />
-                <Route path="trainers/ratings" element={<TrainerRatings />} />
-                <Route path="payments" element={<AdminPayments />} />
-                <Route path="workouts" element={<AdminWorkouts />} />
-                <Route path="shop" element={<AdminShop />} />
-                <Route path="content" element={<AdminContent />} />
-                <Route path="reports" element={<AdminReports />} />
-                <Route path="settings" element={<AdminSettings />} />
-                <Route path="support" element={<AdminSupport />} />
-              </Route>
-              
-              {/* Customer Dashboard Routes */}
-              <Route path="/dashboard/*" element={<DashboardLayout />}>
-                <Route index element={<Dashboard />} />
-                <Route path="*" element={<NotFound />} />
-              </Route>
-            </Routes>
-          </BrowserRouter>
-        </TooltipProvider>
-      </AuthProvider>
-    </QueryClientProvider>
+    <AuthProvider>
+      <Router>
+        <Routes>
+          {/* Public routes */}
+          <Route path="/" element={<Index />} />
+          <Route path="/about" element={<AboutUs />} />
+          <Route path="/classes" element={<Classes />} />
+          <Route path="/contact" element={<ContactUs />} />
+          <Route path="/facilities" element={<FitnessFacilities />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/membership" element={<Membership />} />
+          <Route path="/register" element={<Register />} />
+          <Route path="/spa-wellness" element={<SpaWellness />} />
+          <Route path="/youth-programs" element={<YouthPrograms />} />
+          <Route path="/timetable" element={<Timetable />} />
+
+          {/* Dashboard routes */}
+          <Route path="/dashboard" element={<DashboardLayout />}>
+            <Route index element={<Dashboard />} />
+            <Route path="customer" element={<CustomerDashboard />} />
+          </Route>
+
+          {/* Admin routes */}
+          <Route path="/admin" element={<AdminDashboard />}>
+            <Route path="dashboard" element={<DashboardHome />} />
+            <Route path="members" element={<Members />} />
+            <Route path="trainers" element={<Trainers />}>
+              <Route path="profiles" element={<TrainerProfiles />} />
+              <Route path="ratings" element={<TrainerRatings />} />
+              <Route path="performance" element={<PerformanceTracking />} />
+            </Route>
+            <Route path="classes" element={<AdminClasses />} />
+            <Route path="reports" element={<Reports />} />
+            <Route path="settings" element={<Settings />} />
+          </Route>
+
+          {/* 404 route */}
+          <Route path="*" element={<NotFound />} />
+        </Routes>
+        <Toaster />
+        <SonnerToaster position="top-right" />
+      </Router>
+    </AuthProvider>
   );
-};
+}
 
 export default App;
