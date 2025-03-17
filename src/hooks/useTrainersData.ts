@@ -10,6 +10,8 @@ export interface Trainer {
   email: string;
   phone?: string | null;
   status?: string | null;
+  profilepicture?: string | null; // Match the database field name
+  hiredate?: string | null; // Match the database field name
 }
 
 export const useTrainersData = () => {
@@ -23,7 +25,7 @@ export const useTrainersData = () => {
       try {
         const { data, error } = await supabase
           .from('trainers')
-          .select('id, name, specialization, email, phone, status')
+          .select('id, name, specialization, email, phone, status, profilepicture, hiredate')
           .eq('status', 'Active');
         
         if (error) throw error;

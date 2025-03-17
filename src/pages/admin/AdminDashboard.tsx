@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useNavigate, Link, Outlet } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
@@ -34,6 +33,30 @@ const AdminDashboard = () => {
     await logout();
     toast.success('Logged out successfully');
     navigate('/login');
+  };
+
+  const renderUserProfile = () => {
+    if (!user) return null;
+    
+    return (
+      <div className="flex items-center gap-2">
+        <Avatar>
+          <AvatarImage 
+            src={user.user_metadata?.avatar_url || "/placeholder.svg"} 
+            alt="User profile"
+          />
+          <AvatarFallback>
+            {user.email ? user.email.substring(0, 2).toUpperCase() : "U"}
+          </AvatarFallback>
+        </Avatar>
+        <div>
+          <h3 className="font-semibold">
+            {user.user_metadata?.full_name || user.email || "User"}
+          </h3>
+          <p className="text-xs text-muted-foreground">{user.email}</p>
+        </div>
+      </div>
+    );
   };
 
   return (
@@ -160,10 +183,15 @@ const AdminDashboard = () => {
 
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="ghost" className="relative h-10 w-10 rounded-full">
-                  <Avatar>
-                    <AvatarImage src={user?.avatar_url || undefined} />
-                    <AvatarFallback>{user?.email?.charAt(0).toUpperCase() || 'A'}</AvatarFallback>
+                <Button variant="ghost" className="relative h-8 w-8 rounded-full">
+                  <Avatar className="h-8 w-8">
+                    <AvatarImage 
+                      src={user?.user_metadata?.avatar_url || "/placeholder.svg"} 
+                      alt="User profile" 
+                    />
+                    <AvatarFallback>
+                      {user?.email ? user.email.substring(0, 2).toUpperCase() : "U"}
+                    </AvatarFallback>
                   </Avatar>
                 </Button>
               </DropdownMenuTrigger>
@@ -191,3 +219,4 @@ const AdminDashboard = () => {
 };
 
 export default AdminDashboard;
+

@@ -69,16 +69,27 @@ export const useUserProfile = () => {
               throw new Error('Failed to create user profile');
             }
             
-            setUserProfile(newProfile);
+            // Convert to UserProfile format
+            setUserProfile({
+              ...newProfile,
+              email: user.email,
+              contact_number: null,
+              preferred_workout_time: null,
+              gym_location: null
+            } as UserProfile);
           } else {
             throw new Error('Failed to fetch user profile');
           }
         } else {
-          // Add email from auth user to profile data
+          // Add email from auth user to profile data and ensure all required fields
           const profileWithEmail = {
             ...profileData,
-            email: user.email
-          };
+            email: user.email,
+            username: profileData.username || null,
+            contact_number: profileData.contact_number || null,
+            preferred_workout_time: profileData.preferred_workout_time || null,
+            gym_location: profileData.gym_location || null
+          } as UserProfile;
           
           setUserProfile(profileWithEmail);
         }
@@ -121,20 +132,25 @@ export const useUserProfile = () => {
                 .single();
                 
               if (!createError) {
-                const profileWithEmail = {
+                // Convert to UserProfile format
+                setUserProfile({
                   ...newProfile,
-                  email: session.user.email
-                };
-                
-                setUserProfile(profileWithEmail);
+                  email: session.user.email,
+                  contact_number: null,
+                  preferred_workout_time: null,
+                  gym_location: null
+                } as UserProfile);
               }
             } else if (!error) {
-              const profileWithEmail = {
+              // Convert to UserProfile format
+              setUserProfile({
                 ...profile,
-                email: session.user.email
-              };
-              
-              setUserProfile(profileWithEmail);
+                email: session.user.email,
+                username: profile.username || null,
+                contact_number: profile.contact_number || null,
+                preferred_workout_time: profile.preferred_workout_time || null,
+                gym_location: profile.gym_location || null
+              } as UserProfile);
             }
           }
         } else if (event === 'SIGNED_OUT') {
@@ -169,10 +185,15 @@ export const useUserProfile = () => {
         throw new Error('Failed to update user profile');
       }
       
+      // Ensure UserProfile format is maintained
       setUserProfile({
         ...data,
-        email: userProfile.email // Preserve email
-      });
+        email: userProfile.email,
+        username: data.username || null,
+        contact_number: data.contact_number || null,
+        preferred_workout_time: data.preferred_workout_time || null,
+        gym_location: data.gym_location || null
+      } as UserProfile);
       
       return data;
     } catch (err) {

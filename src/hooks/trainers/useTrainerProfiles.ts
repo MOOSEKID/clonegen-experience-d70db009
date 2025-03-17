@@ -71,8 +71,8 @@ export const useTrainerProfiles = () => {
                 
               if (availError) console.error('Error fetching availability:', availError);
               
-              const profile_picture = trainer.profile_picture || trainer.profilepicture || null;
-              const hire_date = trainer.hire_date || trainer.hiredate || new Date().toISOString().split('T')[0];
+              const profile_picture = trainer.profilepicture || null;
+              const hire_date = trainer.hiredate || new Date().toISOString().split('T')[0];
                 
               return {
                 ...trainer,
@@ -80,8 +80,8 @@ export const useTrainerProfiles = () => {
                 hire_date,
                 certifications: certifications || [],
                 availability: availability || [],
-                experience_years: trainer.experience_years || null,
-                experience_level: trainer.experience_level || null
+                experience_years: null,
+                experience_level: null
               } as TrainerProfile;
             })
           );
