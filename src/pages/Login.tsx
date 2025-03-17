@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { Card } from '@/components/ui/card';
@@ -8,7 +9,7 @@ import PresetButtons from '@/components/auth/PresetButtons';
 import LoginInfo from '@/components/auth/LoginInfo';
 import { supabase } from '@/integrations/supabase/client';
 
-// Fallback test credentials for when Supabase is unreachable
+// Test credentials for when Supabase is unreachable
 const TEST_CREDENTIALS = {
   'admin@example.com': { password: 'admin123', isAdmin: true },
   'user@example.com': { password: 'user123', isAdmin: false },
@@ -17,12 +18,12 @@ const TEST_CREDENTIALS = {
 const Login = () => {
   const [loginError, setLoginError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
-  const [fallbackMode, setFallbackMode] = useState(false); // New state to track fallback mode
+  const [fallbackMode, setFallbackMode] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
   const { login, isAuthenticated, isAdmin } = useAuth();
   
-  // Default redirect path (can be overridden by location state)
+  // Default redirect path
   const from = location.state?.from || '/dashboard';
 
   useEffect(() => {
@@ -38,7 +39,7 @@ const Login = () => {
         if (error) {
           console.error('Supabase connection error:', error);
           setFallbackMode(true);
-          console.log('Using fallback authentication mode');
+          toast.warning('Using test authentication mode - Supabase is unreachable');
         } else {
           console.log('Supabase connection successful');
           setFallbackMode(false);
@@ -46,16 +47,15 @@ const Login = () => {
       } catch (error) {
         console.error('Failed to connect to Supabase:', error);
         setFallbackMode(true);
-        console.log('Using fallback authentication mode due to connection error');
+        toast.warning('Using test authentication mode - Supabase is unreachable');
       }
     };
     
     checkSupabaseConnection();
     
+    // Check if user is already authenticated
     const checkAuthStatus = async () => {
       try {
-        console.log('Checking authentication status in Login page');
-        
         // If in fallback mode, check localStorage for fallback auth
         if (fallbackMode) {
           const fallbackAuth = localStorage.getItem('fallbackAuth');
@@ -68,62 +68,66 @@ const Login = () => {
           }
         }
         
-        // Otherwise check Supabase session
-        try {
-          // Get the session directly from Supabase
+        // Check Supabase session if not in fallback mode
+        if (!fallbackMode) {
           const { data: { session }, error } = await supabase.auth.getSession();
           
           if (error) {
-            console.error("Error checking authentication status:", error);
+            console.error("Error checking session:", error);
+            setFallbackMode(true);
             return;
           }
           
           if (session) {
-            console.log('User is authenticated via Supabase, redirecting');
+            console.log('User authenticated via Supabase:', session.user.email);
             
-            // Check if user is admin by querying the profiles table
+            // Get user role from profiles table
             const { data: profileData, error: profileError } = await supabase
               .from('profiles')
               .select('is_admin, role')
               .eq('id', session.user.id)
               .single();
               
-            if (profileError) {
+            if (profileError && profileError.code !== 'PGRST116') {
               console.error("Error fetching profile:", profileError);
-              // Continue with redirect to dashboard as fallback
               navigate('/dashboard', { replace: true });
               return;
             }
             
-            // Check if it's one of our admin users
+            // Special handling for admin emails
             const userEmail = session.user.email;
             let userIsAdmin = profileData?.is_admin || false;
             
-            // Explicitly check for the admin email addresses
             if (userEmail === 'admin@example.com' || userEmail === 'admin@uptowngym.rw') {
               userIsAdmin = true;
+              
+              // Ensure profile has admin role
+              if (!profileData || !profileData.is_admin) {
+                await supabase
+                  .from('profiles')
+                  .upsert({ 
+                    id: session.user.id, 
+                    is_admin: true, 
+                    role: 'admin' 
+                  });
+              }
             }
             
             const redirectPath = userIsAdmin ? '/admin' : '/dashboard';
-            
-            // Force navigation with replace to prevent back button from returning to login
             navigate(redirectPath, { replace: true });
           }
-        } catch (error) {
-          console.error("Error in Supabase authentication check:", error);
-          setFallbackMode(true);
         }
       } catch (error) {
-        console.error("Error in authentication check:", error);
+        console.error("Auth check error:", error);
+        setFallbackMode(true);
       }
     };
     
     checkAuthStatus();
     
-    // If user is already authenticated through the context, also redirect
+    // Also check context authentication
     if (isAuthenticated) {
-      console.log('User is authenticated through context, redirecting to:', isAdmin ? '/admin' : '/dashboard');
-      // Force navigation with replace to prevent back button from returning to login
+      console.log('User authenticated through context, redirecting');
       navigate(isAdmin ? '/admin' : '/dashboard', { replace: true });
     }
   }, [isAuthenticated, isAdmin, navigate, fallbackMode]);
@@ -133,31 +137,30 @@ const Login = () => {
     setLoginError(null);
     
     try {
-      console.log('Attempting login with:', email);
+      console.log('Login attempt with:', email);
       
-      // If in fallback mode or if Supabase connection fails, use test accounts directly
+      // Handle fallback mode authentication
       if (fallbackMode) {
-        console.log('Using fallback login method');
+        console.log('Using fallback authentication mode');
         const testAccount = TEST_CREDENTIALS[email as keyof typeof TEST_CREDENTIALS];
         
         if (testAccount && testAccount.password === password) {
           console.log('Test account login successful');
           
-          // Store fallback auth in localStorage
+          // Store auth info in localStorage
           localStorage.setItem('fallbackAuth', JSON.stringify({
             email: email,
             isAdmin: testAccount.isAdmin,
             timestamp: new Date().toISOString()
           }));
           
-          // Simulate redirect based on admin status
+          // Redirect based on admin status
           const targetPath = testAccount.isAdmin ? '/admin' : '/dashboard';
-          console.log('Redirecting to:', targetPath);
+          toast.success('Login successful (Test Mode)');
           navigate(targetPath, { replace: true });
-          toast.success('Login successful! (Using fallback mode)');
         } else {
-          console.log('Fallback login failed - invalid credentials');
-          setLoginError('Login failed. Please check your credentials.');
+          console.log('Test login failed - invalid credentials');
+          setLoginError('Invalid email or password');
           toast.error('Login failed. Please check your credentials.');
         }
         
@@ -165,108 +168,99 @@ const Login = () => {
         return;
       }
       
-      // Try to login with Supabase if not in fallback mode
-      let success = false;
-      
+      // Try Supabase login
       try {
-        success = await login(email, password);
-      } catch (supabaseError) {
-        console.error('Supabase login error:', supabaseError);
+        console.log('Attempting Supabase login');
+        const success = await login(email, password);
         
-        // If Supabase is unreachable, use fallback for test accounts
-        if (supabaseError.message?.includes('Failed to fetch')) {
-          console.log('Supabase unreachable, trying fallback login');
+        if (success) {
+          console.log('Supabase login successful');
+          toast.success('Login successful!');
+          
+          // Special handling for known admin emails
+          const isAdminUser = email === 'admin@example.com' || email === 'admin@uptowngym.rw';
+          
+          // Force navigation to correct dashboard
+          const targetPath = isAdminUser ? '/admin' : '/dashboard';
+          navigate(targetPath, { replace: true });
+        } else {
+          console.log('Supabase login failed');
+          setLoginError('Invalid email or password');
+          toast.error('Login failed. Please check your credentials.');
+        }
+      } catch (error) {
+        console.error('Supabase login error:', error);
+        
+        // If Supabase is unreachable, try fallback for test accounts
+        if (error instanceof Error && error.message?.includes('Failed to fetch')) {
           setFallbackMode(true);
           
           // Check if this is a test account
           const testAccount = TEST_CREDENTIALS[email as keyof typeof TEST_CREDENTIALS];
           if (testAccount && testAccount.password === password) {
-            console.log('Test account login successful');
+            console.log('Fallback to test account successful');
             
-            // Store fallback auth in localStorage
             localStorage.setItem('fallbackAuth', JSON.stringify({
               email: email,
               isAdmin: testAccount.isAdmin,
               timestamp: new Date().toISOString()
             }));
             
-            // Simulate redirect based on admin status
+            toast.success('Login successful (Fallback Mode)');
             const targetPath = testAccount.isAdmin ? '/admin' : '/dashboard';
-            console.log('Redirecting to:', targetPath);
             navigate(targetPath, { replace: true });
-            toast.success('Login successful! (Using fallback mode)');
             setIsLoading(false);
             return;
           }
         }
         
-        // If it's not a test account or the password is wrong, show error
-        setLoginError('Login failed. Please check your credentials.');
-        toast.error('Login failed. Please check your credentials.');
-        setIsLoading(false);
-        return;
-      }
-      
-      if (success) {
-        console.log('Login successful!');
-        toast.success('Login successful!');
-        
-        // Check if this is one of our admin emails
-        const isAdminUser = email === 'admin@example.com' || email === 'admin@uptowngym.rw';
-        
-        // Force navigation to dashboard
-        const targetPath = isAdminUser ? '/admin' : '/dashboard';
-        console.log('Forcing navigation to:', targetPath);
-        
-        navigate(targetPath, { replace: true });
-      } else {
-        console.log('Login failed');
         setLoginError('Login failed. Please check your credentials.');
         toast.error('Login failed. Please check your credentials.');
       }
     } catch (error) {
       console.error('Login error:', error);
       setLoginError(error instanceof Error ? error.message : 'Login failed');
-      toast.error(error instanceof Error ? error.message : 'Login failed');
+      toast.error('Login failed. An unexpected error occurred.');
     } finally {
       setIsLoading(false);
     }
   };
 
   const handleAdminLogin = () => {
-    console.log('Admin login button clicked');
+    console.log('Admin login clicked');
     handleLoginSubmit('admin@example.com', 'admin123');
   };
 
   const handleUserLogin = () => {
-    console.log('User login button clicked');
+    console.log('User login clicked');
     handleLoginSubmit('user@example.com', 'user123');
   };
 
   const handleResetAuth = () => {
     console.log('Resetting authentication state');
-    // Clear any localStorage fallback auth
+    
+    // Clear localStorage fallback auth
     localStorage.removeItem('fallbackAuth');
     
-    // Clear Supabase session
+    // Sign out from Supabase
     supabase.auth.signOut().catch(error => {
       console.error('Error signing out from Supabase:', error);
     });
     
-    // Clear local storage items that might be used for auth
+    // Clear all localStorage auth items
     localStorage.removeItem('isLoggedIn');
     localStorage.removeItem('isAdmin');
     localStorage.removeItem('userEmail');
     localStorage.removeItem('userName');
     
-    // Clear cookies
+    // Clear session cookies
     document.cookie = "session_active=; path=/; max-age=0";
     document.cookie = "user_role=; path=/; max-age=0";
     
-    toast.success('Authentication has been reset');
+    toast.success('Authentication reset successful');
     
-    // Refresh the page to clear any in-memory auth state
-    setTimeout(() => window.location.reload(), 1000);
+    // Reload page to clear memory state
+    setTimeout(() => window.location.reload(), 500);
   };
 
   return (
@@ -301,6 +295,12 @@ const Login = () => {
           >
             Reset Authentication
           </button>
+          
+          {fallbackMode && (
+            <div className="mt-2 text-xs text-amber-400">
+              ⚠️ Using test authentication mode - Supabase is unreachable
+            </div>
+          )}
         </div>
       </Card>
     </div>

@@ -21,7 +21,6 @@ const LoginForm = ({ onLogin, isLoading }: LoginFormProps) => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    // Email validation
     if (!email || !password) {
       toast.error('Please enter both email and password');
       return;
@@ -33,7 +32,7 @@ const LoginForm = ({ onLogin, isLoading }: LoginFormProps) => {
     }
     
     try {
-      console.log('Form submitted, calling onLogin with:', email);
+      console.log('Form submitted with email:', email);
       await onLogin(email, password);
     } catch (error) {
       console.error('Error in form submission:', error);
