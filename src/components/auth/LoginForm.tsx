@@ -32,7 +32,12 @@ const LoginForm = ({ onLogin, isLoading }: LoginFormProps) => {
       return;
     }
     
-    await onLogin(email, password);
+    try {
+      console.log('Form submitted, calling onLogin with:', email);
+      await onLogin(email, password);
+    } catch (error) {
+      console.error('Error in form submission:', error);
+    }
   };
 
   const togglePasswordVisibility = () => {

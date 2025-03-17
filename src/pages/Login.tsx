@@ -47,7 +47,8 @@ const Login = () => {
             
           if (profileError) {
             console.error("Error fetching profile:", profileError);
-            // Don't try to access properties on error
+            // Continue with redirect to dashboard as fallback
+            navigate('/dashboard', { replace: true });
             return;
           }
           
@@ -58,18 +59,6 @@ const Login = () => {
           // Explicitly check for the admin email addresses
           if (userEmail === 'admin@example.com' || userEmail === 'admin@uptowngym.rw') {
             userIsAdmin = true;
-            
-            // Update profile if needed
-            if (!userIsAdmin) {
-              const { error: updateError } = await supabase
-                .from('profiles')
-                .update({ is_admin: true, role: 'admin' })
-                .eq('id', session.user.id);
-                
-              if (updateError) {
-                console.error("Error updating admin status:", updateError);
-              }
-            }
           }
           
           const redirectPath = userIsAdmin ? '/admin' : '/dashboard';
@@ -111,11 +100,7 @@ const Login = () => {
         const targetPath = isAdminUser ? '/admin' : '/dashboard';
         console.log('Forcing navigation to:', targetPath);
         
-        // Small timeout to ensure state is updated before redirect
-        setTimeout(() => {
-          console.log('Executing redirect now');
-          navigate(targetPath, { replace: true });
-        }, 500);
+        navigate(targetPath, { replace: true });
       } else {
         console.log('Login failed');
         setLoginError('Login failed. Please check your credentials.');
