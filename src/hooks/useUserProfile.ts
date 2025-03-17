@@ -10,11 +10,13 @@ export interface UserProfile {
   preferred_workout_time: string | null;
   gym_location: string | null;
   avatar_url: string | null;
+  bio: string | null; // Added bio field
   role: string;
   is_admin: boolean;
   email?: string;
   created_at: string;
   updated_at: string;
+  specialization?: string[]; // Added specialization field
 }
 
 export const useUserProfile = () => {

@@ -1,3 +1,4 @@
+
 import { User } from '@supabase/supabase-js';
 
 export type StaffCategory = 'Management' | 'Training' | 'Operations' | 'Reception' | 'Maintenance';
@@ -16,7 +17,8 @@ export type UserRole =
   | 'physiotherapist'
   | 'maintenance_supervisor'
   | 'maintenance_staff'
-  | 'client';
+  | 'client'
+  | 'member'; // Added 'member' to support existing code
 
 export type TrainerSpecialization = 
   | 'Strength Training'
@@ -74,6 +76,7 @@ export interface AuthUser {
   created_at: string;
   updated_at: string;
   last_login?: string;
+  user_metadata?: any; // Added for backward compatibility
 }
 
 export interface AuthContextType {

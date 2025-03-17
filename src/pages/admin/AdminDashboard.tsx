@@ -36,8 +36,8 @@ const AdminDashboard = () => {
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
-  const userAvatarUrl = user?.user_metadata?.avatar_url || '/placeholder.svg';
-  const userName = user?.user_metadata?.full_name || 'Admin User';
+  const userAvatar = user?.avatar_url || '/placeholder.svg';
+  const userName = user?.full_name || 'Admin User';
 
   return (
     <div className="flex flex-col md:flex-row min-h-screen bg-gray-100">
@@ -46,7 +46,7 @@ const AdminDashboard = () => {
       <div className="flex-1 flex flex-col">
         <AdminHeader 
           toggleSidebar={toggleSidebar} 
-          userAvatar={userAvatarUrl}
+          avatarUrl={userAvatar}
           userName={userName}
         />
         

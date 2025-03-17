@@ -70,15 +70,15 @@ const MembersContainer = ({
         <div className="flex-1">
           <MemberSearch 
             searchTerm={searchTerm}
-            handleSearchChange={handleSearchChange}
+            onSearchChange={handleSearchChange}
           />
         </div>
         <div className="flex flex-col md:flex-row gap-2">
           <MemberFilters
             statusFilter={statusFilter}
             membershipFilter={membershipFilter}
-            handleStatusFilterChange={handleStatusFilterChange}
-            handleMembershipFilterChange={handleMembershipFilterChange}
+            onStatusFilterChange={handleStatusFilterChange}
+            onMembershipFilterChange={handleMembershipFilterChange}
           />
         </div>
       </div>
@@ -98,10 +98,10 @@ const MembersContainer = ({
       <MemberPagination
         currentPage={currentPage}
         totalPages={totalPages}
-        membersPerPage={membersPerPage}
-        totalMembers={filteredMembers.length}
-        handlePageChange={handlePageChange}
-        handleItemsPerPageChange={handleItemsPerPageChange}
+        itemsPerPage={membersPerPage}
+        totalItems={filteredMembers.length}
+        onPageChange={handlePageChange}
+        onItemsPerPageChange={handleItemsPerPageChange}
       />
     </div>
   );

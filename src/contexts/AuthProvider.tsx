@@ -1,4 +1,3 @@
-
 import { ReactNode, useState, useEffect } from 'react';
 import { AuthContext } from './AuthContext';
 import { useAuthState } from '@/hooks/useAuthState';
@@ -14,15 +13,16 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   const { 
     user, 
     isAdmin,
+    isStaff,
     isLoading, 
     isAuthenticated,
     setUser,
     setIsAdmin,
+    setIsStaff,
     setIsAuthenticated,
     setIsLoading
   } = useAuthState();
 
-  // Fetch user profile from database
   const fetchUserProfile = async (userId: string): Promise<AuthUser | null> => {
     try {
       const { data, error } = await supabase
@@ -39,10 +39,8 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     }
   };
 
-  // Handle session changes
   useEffect(() => {
     const setupAuthListener = async () => {
-      // First get the initial session
       const { data: { session } } = await supabase.auth.getSession();
       
       if (session) {
@@ -56,9 +54,9 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
             email: session.user.email || '',
           });
           setIsAdmin(profile.is_admin || false);
+          setIsStaff(profile.is_staff || false);
           setIsAuthenticated(true);
         } else {
-          // Create default profile if none exists
           const defaultProfile = {
             id: session.user.id,
             email: session.user.email || '',
@@ -74,13 +72,13 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
             ...defaultProfile
           });
           setIsAdmin(defaultProfile.is_admin);
+          setIsStaff(defaultProfile.is_staff);
           setIsAuthenticated(true);
         }
       }
       
       setIsLoading(false);
       
-      // Setup listener for auth changes
       const { data: { subscription } } = supabase.auth.onAuthStateChange(
         async (event, session) => {
           console.log('Auth state changed:', event, session?.user?.email);
@@ -96,9 +94,9 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
                   email: session.user.email || '',
                 });
                 setIsAdmin(profile.is_admin || false);
+                setIsStaff(profile.is_staff || false);
                 setIsAuthenticated(true);
               } else {
-                // Handle case with no profile
                 const isKnownAdmin = session.user.email === 'admin@example.com';
                 
                 setUser({
@@ -112,12 +110,14 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
                   status: 'Active' as const
                 });
                 setIsAdmin(isKnownAdmin);
+                setIsStaff(false);
                 setIsAuthenticated(true);
               }
             }
           } else if (event === 'SIGNED_OUT') {
             setUser(null);
             setIsAdmin(false);
+            setIsStaff(false);
             setIsAuthenticated(false);
           }
         }
@@ -129,7 +129,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     };
 
     setupAuthListener();
-  }, [setUser, setIsAdmin, setIsAuthenticated, setIsLoading]);
+  }, [setUser, setIsAdmin, setIsStaff, setIsAuthenticated, setIsLoading]);
 
   const login = async (email: string, password: string): Promise<boolean> => {
     try {
@@ -140,7 +140,6 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
 
       if (error) throw error;
       
-      // Login is successful, the useEffect with onAuthStateChange will handle updating the state
       return true;
     } catch (error) {
       console.error('Login error:', error);
@@ -169,7 +168,6 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       if (error) throw error;
       if (!user?.id) throw new Error('User ID not found');
 
-      // Create user profile
       const { error: profileError } = await supabase
         .from('profiles')
         .insert([
@@ -199,7 +197,6 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       const { error } = await supabase.auth.signOut();
       if (error) throw error;
       
-      // State will be cleared by the onAuthStateChange listener
       toast.success('Successfully logged out');
       return true;
     } catch (error) {
@@ -251,7 +248,6 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
 
       if (error) throw error;
 
-      // Refresh user profile
       const profile = await fetchUserProfile(user.id);
       if (profile) {
         setUser({
@@ -259,6 +255,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
           ...profile
         });
         setIsAdmin(profile.is_admin || false);
+        setIsStaff(profile.is_staff || false);
       }
 
       toast.success('Profile updated successfully.');
@@ -273,6 +270,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   const value: AuthContextType = {
     user,
     isAdmin,
+    isStaff,
     isLoading,
     isAuthenticated,
     login,
