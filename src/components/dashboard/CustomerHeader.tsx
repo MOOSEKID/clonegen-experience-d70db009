@@ -1,36 +1,25 @@
+
 import { useState } from 'react';
-import { Search, Bell, Menu, User, Settings, LogOut, CreditCard, CalendarDays, UserCog } from 'lucide-react';
+import { Search, Bell, Menu, ChevronDown, User } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { toast } from 'sonner';
+import { useAuth } from '@/contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
-import { useAuth } from '@/hooks/useAuth';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 
 interface CustomerHeaderProps {
   toggleSidebar: () => void;
 }
 
 const CustomerHeader = ({ toggleSidebar }: CustomerHeaderProps) => {
+  const [userMenuOpen, setUserMenuOpen] = useState(false);
   const navigate = useNavigate();
-  const userEmail = localStorage.getItem('userEmail') || '';
-  const userName = localStorage.getItem('userName') || 'User';
+  const { user, signOut } = useAuth();
+  
+  // Get user details from supabase user or fallback to localStorage
+  const userEmail = user?.email || localStorage.getItem('userEmail') || '';
+  const userName = user?.user_metadata?.name || localStorage.getItem('userName') || 'User';
 
-  const handleLogout = () => {
-    localStorage.removeItem('isLoggedIn');
-    localStorage.removeItem('isAdmin');
-    localStorage.removeItem('userEmail');
-    localStorage.removeItem('userName');
-    document.cookie = "session_active=; path=/; max-age=0";
-    document.cookie = "user_role=; path=/; max-age=0";
-    console.log('Logged out successfully');
-    toast.success('Logged out successfully');
+  const handleSignOut = async () => {
+    await signOut();
     navigate('/login');
   };
 
@@ -63,46 +52,39 @@ const CustomerHeader = ({ toggleSidebar }: CustomerHeaderProps) => {
           </span>
         </button>
         
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <button className="flex items-center gap-2 text-white hover:text-gym-orange transition-colors">
-              <div className="h-8 w-8 rounded-full bg-gym-orange/20 text-gym-orange flex items-center justify-center">
-                <User size={16} />
+        <div className="relative">
+          <button 
+            onClick={() => setUserMenuOpen(!userMenuOpen)}
+            className="flex items-center gap-2 text-white hover:text-gym-orange transition-colors"
+          >
+            <div className="h-8 w-8 rounded-full bg-gym-orange/20 text-gym-orange flex items-center justify-center">
+              <User size={16} />
+            </div>
+            <span className="hidden md:block font-medium">{userName}</span>
+            <ChevronDown size={16} className={cn("transition-transform", userMenuOpen && "rotate-180")} />
+          </button>
+          
+          {userMenuOpen && (
+            <div className="absolute right-0 top-full mt-2 w-48 bg-gym-darkblue border border-gray-700 rounded-md shadow-lg py-1 z-10">
+              <div className="px-4 py-2 border-b border-gray-700">
+                <p className="text-sm font-medium text-white">{userName}</p>
+                <p className="text-xs text-gray-400">{userEmail}</p>
               </div>
-              <span className="hidden md:block font-medium">{userName}</span>
-            </button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent className="w-56" align="end">
-            <DropdownMenuLabel>
-              <div className="flex flex-col">
-                <p className="font-semibold">{userName}</p>
-                <p className="text-xs text-muted-foreground mt-1">{userEmail}</p>
-              </div>
-            </DropdownMenuLabel>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem onClick={() => navigate('/dashboard/profile')}>
-              <User className="mr-2 h-4 w-4" />
-              <span>My Profile</span>
-            </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => navigate('/dashboard/memberships')}>
-              <CreditCard className="mr-2 h-4 w-4" />
-              <span>My Membership</span>
-            </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => navigate('/dashboard/schedule')}>
-              <CalendarDays className="mr-2 h-4 w-4" />
-              <span>My Schedule</span>
-            </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => navigate('/dashboard/settings')}>
-              <Settings className="mr-2 h-4 w-4" />
-              <span>Settings</span>
-            </DropdownMenuItem>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem onClick={handleLogout}>
-              <LogOut className="mr-2 h-4 w-4" />
-              <span>Log out</span>
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
+              <a href="/dashboard/profile" className="block px-4 py-2 text-sm text-gray-300 hover:bg-gym-dark hover:text-white transition-colors">
+                Your Profile
+              </a>
+              <a href="/dashboard/settings" className="block px-4 py-2 text-sm text-gray-300 hover:bg-gym-dark hover:text-white transition-colors">
+                Settings
+              </a>
+              <button 
+                onClick={handleSignOut}
+                className="w-full text-left block px-4 py-2 text-sm text-gray-300 hover:bg-gym-dark hover:text-white transition-colors"
+              >
+                Sign Out
+              </button>
+            </div>
+          )}
+        </div>
       </div>
     </header>
   );

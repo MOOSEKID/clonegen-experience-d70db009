@@ -3,19 +3,6 @@ import { PerformanceMetrics, ClassAttendance } from './types';
 
 export const generateMockPerformanceMetrics = (trainerId?: string): PerformanceMetrics => {
   return {
-    id: trainerId || 'mock-id',
-    trainerId: trainerId || 'mock-trainer-id',
-    period: 'monthly',
-    classes_taught: 156,
-    private_sessions: 45,
-    new_clients: 12,
-    client_retention_rate: 78,
-    avg_session_rating: 4.3,
-    monthly_goal_progress: 85,
-    class_fill_rate: 85,
-    total_hours: 210,
-    
-    // Additional properties for backward compatibility
     averageRating: 4.3,
     totalClasses: 156,
     averageAttendance: 85,
@@ -29,9 +16,11 @@ export const generateMockPerformanceMetrics = (trainerId?: string): PerformanceM
       { month: 'Jun', count: 28 }
     ],
     completionRate: 95,
+    // Fields for PerformanceMetricsCard
     assignedClients: 12,
     retentionRate: 78,
     satisfactionScore: 89,
+    // Fields for PerformanceStatsGrid
     activeClients: 15,
     monthlyGrowth: 8
   };

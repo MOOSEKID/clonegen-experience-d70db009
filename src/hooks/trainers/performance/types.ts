@@ -1,30 +1,26 @@
 
 export interface PerformanceMetrics {
-  id: string;
-  trainerId: string;
-  period: string;
-  classes_taught: number;
-  private_sessions: number;
-  new_clients: number;
-  client_retention_rate: number;
-  avg_session_rating: number;
-  monthly_goal_progress: number;
-  class_fill_rate: number;
-  total_hours: number;
-  trainerName?: string;
-  
-  // Additional properties needed by the components
-  averageRating?: number;
-  totalClasses?: number;
-  averageAttendance?: number;
-  clientRetentionRate?: number;
-  monthlySessions?: Array<{ month: string; count: number }>;
-  completionRate?: number;
+  averageRating: number;
+  totalClasses: number;
+  averageAttendance: number;
+  clientRetentionRate: number;
+  monthlySessions: { month: string; count: number }[];
+  completionRate: number;
+  // Fields for PerformanceMetricsCard
   assignedClients?: number;
   retentionRate?: number;
   satisfactionScore?: number;
+  // Fields for PerformanceStatsGrid
   activeClients?: number;
   monthlyGrowth?: number;
+  // Legacy field names (for backwards compatibility)
+  classes_taught?: number;
+  private_sessions?: number;
+  new_clients?: number;
+  avg_session_rating?: number;
+  monthly_goal_progress?: number;
+  class_fill_rate?: number;
+  total_hours?: number;
 }
 
 export interface ClassAttendance {
@@ -35,13 +31,29 @@ export interface ClassAttendance {
   attendance_rate: number;
 }
 
-export interface TrainerPerformanceSummary {
-  trainerId: string;
-  trainerName: string;
-  metrics: PerformanceMetrics;
-  trendData: {
-    clientGrowth: number[];
-    classRatings: number[];
-    retention: number[];
-  };
+export interface TrainerPerformanceRecord {
+  id: string;
+  trainer_id: string;
+  date: string;
+  classes_taught: number;
+  private_sessions: number;
+  new_clients: number;
+  avg_session_rating: number;
+  total_hours: number;
+  monthly_goal_progress: number;
+  class_fill_rate: number;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface AttendanceRecord {
+  id: string;
+  trainer_id: string;
+  member_id?: string;
+  check_in: string;
+  check_out?: string;
+  status: string;
+  notes?: string;
+  created_at: string;
+  updated_at: string;
 }

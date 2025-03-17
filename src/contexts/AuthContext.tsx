@@ -1,301 +1,282 @@
-
-import { createContext, ReactNode, useEffect } from 'react';
-import { useAuthState } from '@/hooks/useAuthState';
+import { createContext, useContext, useEffect, useState, ReactNode } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { AuthContextType } from '@/types/auth.types';
+import { User, Session } from '@supabase/supabase-js';
 import { toast } from 'sonner';
-import { passwordManager, storageManager } from '@/utils/auth.utils';
-import { createAdminUser } from '@/services/createAdmin';
 
-// Create the auth context with default values
-export const AuthContext = createContext<AuthContextType | undefined>(undefined);
-
-interface AuthProviderProps {
-  children: ReactNode;
+interface AuthContextType {
+  user: User | null;
+  session: Session | null;
+  isLoading: boolean;
+  isAdmin: boolean;
+  signIn: (email: string, password: string) => Promise<{ error: any | null }>;
+  signUp: (email: string, password: string, userData: any) => Promise<{ error: any | null, data: any | null }>;
+  signOut: () => Promise<void>;
+  createAdminAccount: (email: string, password: string, name: string) => Promise<{ error: any | null, data: any | null }>;
 }
 
-export const AuthProvider = ({ children }: AuthProviderProps) => {
-  // Get the authentication state using our custom hook
-  const { 
-    user, 
-    isAdmin, 
-    isLoading, 
-    isAuthenticated,
-    setUser,
-    setIsAdmin, 
-    setIsAuthenticated 
-  } = useAuthState();
+const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-  // Initialize test users on mount
+export function AuthProvider({ children }: { children: ReactNode }) {
+  const [user, setUser] = useState<User | null>(null);
+  const [session, setSession] = useState<Session | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isAdmin, setIsAdmin] = useState(false);
+
   useEffect(() => {
-    const createTestUsers = async () => {
-      try {
-        // Check if admin exists first
-        const { data: adminExists, error: checkAdminError } = await supabase
-          .from('profiles')
-          .select('id')
-          .eq('role', 'admin')
-          .maybeSingle();
-          
-        if (checkAdminError) {
-          console.error('Error checking for admin user:', checkAdminError);
-        }
-        
-        // If admin doesn't exist, create one
-        if (!adminExists) {
-          console.log('Creating admin test user...');
-          const result = await createAdminUser(
-            'admin@example.com', 
-            'admin123', 
-            'Admin User'
-          );
-          console.log('Admin creation result:', result);
-        }
-        
-        // Check if regular user exists
-        const { data: userExists, error: checkUserError } = await supabase
-          .from('profiles')
-          .select('id')
-          .eq('role', 'member')
-          .maybeSingle();
-          
-        if (checkUserError) {
-          console.error('Error checking for regular user:', checkUserError);
-        }
-        
-        // If regular user doesn't exist, create one
-        if (!userExists) {
-          console.log('Creating regular test user...');
-          const { data, error } = await supabase.auth.signUp({
-            email: 'user@example.com',
-            password: 'user123',
-            options: {
-              data: {
-                full_name: 'Regular User'
-              }
-            }
-          });
-          
-          if (error) {
-            console.error('Error creating regular user:', error);
-          } else if (data.user) {
-            // Create a profile entry for the new user
-            const { error: profileError } = await supabase
-              .from('profiles')
-              .upsert([
-                { 
-                  id: data.user.id,
-                  full_name: 'Regular User',
-                  role: 'member',
-                  is_admin: false
-                }
-              ]);
-              
-            if (profileError) {
-              console.error('Error creating user profile:', profileError);
-            } else {
-              console.log('Regular user created successfully');
-            }
-          }
-        }
-      } catch (err) {
-        console.error('Error creating test users:', err);
+    const getSession = async () => {
+      setIsLoading(true);
+      const { data: { session }, error } = await supabase.auth.getSession();
+      
+      if (error) {
+        console.error('Error fetching session:', error);
       }
+      
+      setSession(session);
+      setUser(session?.user ?? null);
+      
+      if (session?.user) {
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('is_admin')
+          .eq('id', session.user.id)
+          .single();
+        
+        setIsAdmin(profile?.is_admin || false);
+      }
+      
+      setIsLoading(false);
     };
-    
-    createTestUsers();
+
+    getSession();
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
+      setSession(session);
+      setUser(session?.user ?? null);
+      
+      if (session) {
+        localStorage.setItem('isLoggedIn', 'true');
+        localStorage.setItem('userEmail', session.user.email || '');
+        localStorage.setItem('userName', session.user.user_metadata.name || '');
+        
+        const expiryDate = new Date();
+        expiryDate.setDate(expiryDate.getDate() + 30);
+        document.cookie = `session_active=true; path=/; expires=${expiryDate.toUTCString()}`;
+        
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('is_admin')
+          .eq('id', session.user.id)
+          .single();
+        
+        setIsAdmin(profile?.is_admin || false);
+      } else {
+        localStorage.removeItem('isLoggedIn');
+        localStorage.removeItem('userEmail');
+        localStorage.removeItem('userName');
+        localStorage.removeItem('isAdmin');
+        document.cookie = 'session_active=; path=/; max-age=0';
+        document.cookie = 'user_role=; path=/; max-age=0';
+      }
+    });
+
+    return () => {
+      subscription.unsubscribe();
+    };
   }, []);
 
-  /**
-   * Login with email and password
-   */
-  const login = async (email: string, password: string): Promise<boolean> => {
+  const signIn = async (email: string, password: string) => {
     try {
-      const { data, error } = await supabase.auth.signInWithPassword({
+      const { error } = await supabase.auth.signInWithPassword({
         email,
         password,
       });
       
       if (error) {
-        console.error('Login error:', error);
         toast.error(error.message);
-        return false;
+        return { error };
       }
       
-      if (data.user) {
-        // Get user role from profiles table
-        const { data: profile, error: profileError } = await supabase
-          .from('profiles')
-          .select('role, is_admin, full_name')
-          .eq('id', data.user.id)
-          .single();
-          
-        if (profileError) {
-          console.error('Error fetching user profile:', profileError);
-          // Handle the case where profile doesn't exist yet
-          if (profileError.code === 'PGRST116') {
-            // Create a default profile
-            const { error: insertError } = await supabase
-              .from('profiles')
-              .insert([
-                { 
-                  id: data.user.id,
-                  full_name: data.user.user_metadata?.full_name || '',
-                  role: 'member',
-                  is_admin: false
-                }
-              ]);
-              
-            if (insertError) {
-              console.error('Error creating profile:', insertError);
-            }
-          }
-        }
-        
-        const userRole = profile?.role || 'member';
-        const userIsAdmin = profile?.is_admin || false;
-        const fullName = profile?.full_name || data.user.user_metadata?.full_name || '';
-        
-        // Update auth state
-        setUser({
-          ...data.user,
-          email: data.user.email || '', // Ensure email is always provided
-          role: userRole
-        });
-        setIsAdmin(userIsAdmin);
-        setIsAuthenticated(true);
-        
-        // Store auth data in local storage and cookies
-        storageManager.setAuthData(
-          true, 
-          userIsAdmin, 
-          data.user.email || '', 
-          fullName
-        );
-        
-        toast.success('Login successful');
-        return true;
-      }
-      
-      return false;
+      toast.success('Logged in successfully');
+      return { error: null };
     } catch (error) {
-      console.error('Unexpected login error:', error);
-      toast.error(error instanceof Error ? error.message : 'Login failed');
-      return false;
+      toast.error('An unexpected error occurred');
+      return { error };
     }
   };
 
-  /**
-   * Sign up a new user
-   */
-  const signUp = async (email: string, password: string, fullName: string): Promise<boolean> => {
+  const signUp = async (email: string, password: string, userData: any) => {
     try {
+      console.log('Signing up user with data:', { email, ...userData });
+      
       const { data, error } = await supabase.auth.signUp({
         email,
         password,
         options: {
           data: {
-            full_name: fullName,
+            name: userData.name,
+            username: userData.username || email.split('@')[0],
           },
-        },
+          emailRedirectTo: `${window.location.origin}/auth/callback`,
+        }
       });
       
       if (error) {
-        console.error('Sign up error:', error);
         toast.error(error.message);
-        return false;
+        return { error, data: null };
       }
+      
+      console.log('Signup successful:', data);
       
       if (data.user) {
-        // Create a profile entry for the new user
-        const { error: profileError } = await supabase
-          .from('profiles')
-          .insert([
-            { 
-              id: data.user.id,
-              email: data.user.email,
-              full_name: fullName,
-              role: 'member',
-              is_admin: false
-            }
-          ]);
+        setTimeout(async () => {
+          const { data: profile, error: profileError } = await supabase
+            .from('profiles')
+            .select('*')
+            .eq('id', data.user?.id)
+            .single();
           
-        if (profileError) {
-          console.error('Error creating user profile:', profileError);
-          toast.error('Account created but profile setup failed');
-        }
-        
-        toast.success('Sign up successful! Please check your email to confirm your account.');
-        return true;
+          if (profileError || !profile) {
+            console.warn('Profile not created automatically, attempting manual creation');
+            const { error: insertError } = await supabase
+              .from('profiles')
+              .insert([{
+                id: data.user?.id,
+                full_name: userData.name,
+                username: userData.username || email.split('@')[0],
+              }]);
+              
+            if (insertError) {
+              console.error('Error creating profile manually:', insertError);
+            } else {
+              console.log('Profile created manually');
+            }
+          } else {
+            console.log('Profile created automatically:', profile);
+          }
+        }, 1000);
       }
       
-      return false;
+      toast.success('Account created successfully!');
+      return { error: null, data };
     } catch (error) {
-      console.error('Unexpected sign up error:', error);
-      toast.error(error instanceof Error ? error.message : 'Sign up failed');
-      return false;
+      toast.error('An unexpected error occurred during signup');
+      return { error, data: null };
     }
   };
 
-  /**
-   * Log out the current user
-   */
-  const logout = async (): Promise<boolean> => {
+  const signOut = async () => {
     try {
-      const { error } = await supabase.auth.signOut();
+      await supabase.auth.signOut();
+      toast.success('Logged out successfully');
+      
+      localStorage.removeItem('isLoggedIn');
+      localStorage.removeItem('isAdmin');
+      localStorage.removeItem('userEmail');
+      localStorage.removeItem('userName');
+      document.cookie = "session_active=; path=/; max-age=0";
+      document.cookie = "user_role=; path=/; max-age=0";
+    } catch (error) {
+      toast.error('Error signing out');
+      console.error('Error signing out:', error);
+    }
+  };
+
+  const createAdminAccount = async (email: string, password: string, name: string) => {
+    try {
+      console.log('Creating admin account:', email);
+      
+      const { data, error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          data: {
+            name: name || email.split('@')[0],
+            username: email.split('@')[0],
+          }
+        }
+      });
       
       if (error) {
-        console.error('Logout error:', error);
-        toast.error(error.message);
-        return false;
+        toast.error(`Error creating admin: ${error.message}`);
+        return { error, data: null };
       }
       
-      // Clear auth state
-      setUser(null);
-      setIsAdmin(false);
-      setIsAuthenticated(false);
+      console.log('Admin signup successful:', data);
       
-      // Clear local storage and cookies
-      storageManager.setAuthData(false, false, '', '');
+      if (data.user) {
+        setTimeout(async () => {
+          const { data: profile, error: profileError } = await supabase
+            .from('profiles')
+            .select('*')
+            .eq('id', data.user?.id)
+            .single();
+          
+          if (profileError || !profile) {
+            console.warn('Profile not created automatically, creating manually');
+            const { error: insertError } = await supabase
+              .from('profiles')
+              .insert([{
+                id: data.user?.id,
+                full_name: name || email.split('@')[0],
+                username: email.split('@')[0],
+                is_admin: true,
+                role: 'admin'
+              }]);
+              
+            if (insertError) {
+              console.error('Error creating admin profile manually:', insertError);
+              toast.error('Error setting admin privileges');
+            } else {
+              console.log('Admin profile created manually');
+              toast.success('Admin account created successfully');
+            }
+          } else {
+            const { error: updateError } = await supabase
+              .from('profiles')
+              .update({ 
+                is_admin: true,
+                role: 'admin'
+              })
+              .eq('id', data.user?.id);
+              
+            if (updateError) {
+              console.error('Error updating profile to admin:', updateError);
+              toast.error('Error setting admin privileges');
+            } else {
+              console.log('Profile updated to admin');
+              toast.success('Admin account created successfully');
+            }
+          }
+        }, 1000);
+      }
       
-      toast.success('Logged out successfully');
-      return true;
+      return { error: null, data };
     } catch (error) {
-      console.error('Unexpected logout error:', error);
-      toast.error(error instanceof Error ? error.message : 'Logout failed');
-      return false;
+      toast.error('An unexpected error occurred creating admin account');
+      return { error, data: null };
     }
   };
 
-  /**
-   * Request a password reset for the given email
-   */
-  const requestPasswordReset = async (email: string): Promise<boolean> => {
-    return passwordManager.requestPasswordReset(email);
-  };
-
-  /**
-   * Update the password for the currently logged in user
-   */
-  const updatePassword = async (newPassword: string): Promise<boolean> => {
-    return passwordManager.updatePassword(newPassword);
-  };
-
-  const value: AuthContextType = {
+  const value = {
     user,
-    isAdmin,
+    session,
     isLoading,
-    isAuthenticated,
-    login,
+    isAdmin,
+    signIn,
     signUp,
-    logout,
-    requestPasswordReset,
-    updatePassword
+    signOut,
+    createAdminAccount,
   };
 
-  return (
-    <AuthContext.Provider value={value}>
-      {children}
-    </AuthContext.Provider>
-  );
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
+}
+
+export const useAuth = () => {
+  const context = useContext(AuthContext);
+  
+  if (context === undefined) {
+    throw new Error('useAuth must be used within an AuthProvider');
+  }
+  
+  return context;
 };

@@ -1,20 +1,22 @@
+
 import { useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 import { Menu, X, ShoppingBag, User, LayoutDashboard } from 'lucide-react';
-import { toast } from 'sonner';
 import DesktopNav from './header/DesktopNav';
 import MobileMenu from './header/MobileMenu';
-import { useAuth } from '@/hooks/useAuth';
+import { useAuth } from '@/contexts/AuthContext';
 
 const Header = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isCompanyDropdownOpen, setIsCompanyDropdownOpen] = useState(false);
   const [isServicesDropdownOpen, setIsServicesDropdownOpen] = useState(false);
-  const { isAuthenticated, isAdmin, logout } = useAuth();
   const location = useLocation();
   const navigate = useNavigate();
+  
+  const { user, isAdmin, signOut } = useAuth();
+  const isLoggedIn = !!user;
 
   useEffect(() => {
     const handleScroll = () => {
@@ -51,18 +53,11 @@ const Header = () => {
   }, [isCompanyDropdownOpen, isServicesDropdownOpen]);
 
   const handleDashboardClick = () => {
-    if (!isAuthenticated) {
+    if (!isLoggedIn) {
       navigate('/login', { state: { from: '/dashboard' } });
       return;
     }
     navigate(isAdmin ? '/admin' : '/dashboard');
-  };
-
-  const handleLogout = async () => {
-    const success = await logout();
-    if (success) {
-      navigate('/login');
-    }
   };
 
   const navItems = [
@@ -94,13 +89,16 @@ const Header = () => {
     action: handleDashboardClick
   };
   
-  const authItems = isAuthenticated 
+  const authItems = isLoggedIn 
     ? [
         {
           label: 'Logout',
-          path: '#',
+          path: '/logout',
           icon: User,
-          action: handleLogout
+          action: () => {
+            signOut();
+            navigate('/login');
+          }
         }
       ]
     : [
@@ -139,7 +137,7 @@ const Header = () => {
           setIsServicesDropdownOpen={setIsServicesDropdownOpen}
           isCompanyDropdownOpen={isCompanyDropdownOpen}
           setIsCompanyDropdownOpen={setIsCompanyDropdownOpen}
-          isLoggedIn={isAuthenticated}
+          isLoggedIn={isLoggedIn}
         />
 
         <button
@@ -157,7 +155,7 @@ const Header = () => {
           companyItems={companyItems}
           dashboardItem={dashboardItem}
           authItems={authItems}
-          isLoggedIn={isAuthenticated}
+          isLoggedIn={isLoggedIn}
         />
       </div>
     </header>

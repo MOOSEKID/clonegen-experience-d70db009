@@ -1,10 +1,10 @@
 
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Button } from '@/components/Button';
+import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
 import { Eye, EyeOff } from 'lucide-react';
-import { useAuth } from '@/hooks/useAuth';
+import { useAuth } from '@/contexts/AuthContext';
 import {
   Card,
   CardContent,
@@ -13,6 +13,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { Input } from '@/components/ui/input';
 
 const Signup = () => {
   const [name, setName] = useState('');
@@ -23,6 +24,7 @@ const Signup = () => {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
+  
   const { signUp } = useAuth();
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -43,18 +45,19 @@ const Signup = () => {
     }
     
     try {
-      const success = await signUp(email, password, name);
+      // Create the account using Supabase
+      const { error } = await signUp(email, password, { name });
       
-      if (success) {
-        toast.success('Account created successfully! Please check your email to confirm your account.');
+      if (!error) {
+        // Success message is already shown in the signUp function
+        
         // Use a small timeout to ensure the toast appears before redirect
         setTimeout(() => {
-          navigate('/login');
-        }, 500);
+          navigate('/dashboard');
+        }, 1500);
       }
     } catch (error) {
       console.error('Signup error:', error);
-      toast.error('Signup failed. Please try again.');
     } finally {
       setIsLoading(false);
     }
@@ -82,14 +85,13 @@ const Signup = () => {
               <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">
                 Full Name
               </label>
-              <input
+              <Input
                 id="name"
                 type="text"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gym-orange focus:border-transparent"
                 placeholder="Your name"
-                disabled={isLoading}
               />
             </div>
             
@@ -97,14 +99,13 @@ const Signup = () => {
               <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
                 Email Address
               </label>
-              <input
+              <Input
                 id="email"
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gym-orange focus:border-transparent"
                 placeholder="Your email"
-                disabled={isLoading}
               />
             </div>
             
@@ -113,21 +114,19 @@ const Signup = () => {
                 Password
               </label>
               <div className="relative">
-                <input
+                <Input
                   id="password"
                   type={showPassword ? "text" : "password"}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gym-orange focus:border-transparent pr-10"
                   placeholder="Your password"
-                  disabled={isLoading}
                 />
                 <button
                   type="button"
                   className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700 focus:outline-none"
                   onClick={togglePasswordVisibility}
                   aria-label={showPassword ? "Hide password" : "Show password"}
-                  disabled={isLoading}
                 >
                   {showPassword ? (
                     <EyeOff size={18} />
@@ -143,21 +142,19 @@ const Signup = () => {
                 Confirm Password
               </label>
               <div className="relative">
-                <input
+                <Input
                   id="confirmPassword"
                   type={showConfirmPassword ? "text" : "password"}
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
                   className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gym-orange focus:border-transparent pr-10"
                   placeholder="Confirm your password"
-                  disabled={isLoading}
                 />
                 <button
                   type="button"
                   className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700 focus:outline-none"
                   onClick={toggleConfirmPasswordVisibility}
                   aria-label={showConfirmPassword ? "Hide password" : "Show password"}
-                  disabled={isLoading}
                 >
                   {showConfirmPassword ? (
                     <EyeOff size={18} />
@@ -170,7 +167,11 @@ const Signup = () => {
           </CardContent>
           
           <CardFooter className="flex flex-col space-y-4">
-            <Button type="submit" className="w-full" disabled={isLoading}>
+            <Button 
+              type="submit" 
+              className="w-full" 
+              disabled={isLoading}
+            >
               {isLoading ? 'Creating account...' : 'Create Account'}
             </Button>
             
