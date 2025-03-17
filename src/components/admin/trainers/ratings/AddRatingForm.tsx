@@ -1,10 +1,9 @@
-
 import { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { StarRating } from "./StarRating";
-import { TrainerRating } from "@/hooks/trainers/useTrainerRatings";
+import { TrainerRating } from "@/hooks/trainers/ratings/types";
 
 interface AddRatingFormProps {
   trainerId: string;
@@ -36,11 +35,9 @@ const AddRatingForm = ({
         trainer_response: null
       });
       
-      // Reset form after successful submission
       setRating(0);
       setReview('');
       
-      // Close form if cancel handler is provided
       if (onCancel) {
         onCancel();
       }

@@ -8,4 +8,5 @@ export * from './assignments/assignmentService';
 export * from './sessions/sessionService';
 export * from './attendance/types';
 export * from './attendance/useTrainerAttendance';
-
+export * from './ratings/types';
+export * from './ratings/useTrainerRatings';
