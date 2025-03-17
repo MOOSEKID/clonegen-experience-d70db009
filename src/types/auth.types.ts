@@ -77,6 +77,9 @@ export interface AuthUser {
   updated_at: string;
   last_login?: string;
   user_metadata?: any; // Added for backward compatibility
+  avatar_url?: string; // Added for profile pictures
+  bio?: string; // Added for user bio
+  app_metadata?: any; // Added for Supabase compatibility
 }
 
 export interface AuthContextType {

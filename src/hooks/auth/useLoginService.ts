@@ -1,7 +1,7 @@
 
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
-import { AuthUser } from '@/types/auth.types';
+import { AuthUser, UserRole, AccessLevel } from '@/types/auth.types';
 
 /**
  * Hook that provides login functionality
@@ -59,6 +59,8 @@ export const useLoginService = () => {
         if (profileError.code === 'PGRST116') {
           console.log('Profile not found, creating default profile');
           
+          const userRole = isKnownAdmin ? 'admin' : 'member';
+          
           // Create a default profile
           const { error: insertError } = await supabase
             .from('profiles')
@@ -66,8 +68,10 @@ export const useLoginService = () => {
               { 
                 id: data.user.id,
                 full_name: data.user.user_metadata?.full_name || email,
-                role: isKnownAdmin ? 'admin' : 'member',
-                is_admin: isKnownAdmin
+                role: userRole as UserRole,
+                is_admin: isKnownAdmin,
+                access_level: 'Basic' as AccessLevel,
+                status: 'Active'
               }
             ]);
             
@@ -83,9 +87,16 @@ export const useLoginService = () => {
           return { 
             success: true,
             user: {
-              ...data.user,
+              id: data.user.id,
               email: data.user.email || '', 
-              role: isKnownAdmin ? 'admin' : 'member'
+              role: userRole as UserRole,
+              full_name: data.user.user_metadata?.full_name || email,
+              is_admin: isKnownAdmin,
+              is_staff: false,
+              status: 'Active',
+              access_level: 'Basic' as AccessLevel,
+              created_at: new Date().toISOString(),
+              updated_at: new Date().toISOString()
             },
             isAdmin: isKnownAdmin
           };
@@ -100,7 +111,7 @@ export const useLoginService = () => {
           .from('profiles')
           .update({
             is_admin: true,
-            role: 'admin'
+            role: 'admin' as UserRole
           })
           .eq('id', data.user.id);
           
@@ -118,7 +129,7 @@ export const useLoginService = () => {
         .eq('id', data.user.id)
         .single();
       
-      const userRole = updatedProfile?.role || (isKnownAdmin ? 'admin' : 'member');
+      const userRole = (updatedProfile?.role || (isKnownAdmin ? 'admin' : 'member')) as UserRole;
       const userIsAdmin = updatedProfile?.is_admin || isKnownAdmin;
       
       console.log('User authenticated with role:', userRole, 'isAdmin:', userIsAdmin);
@@ -127,9 +138,16 @@ export const useLoginService = () => {
       return { 
         success: true,
         user: {
-          ...data.user,
+          id: data.user.id,
           email: data.user.email || '', 
-          role: userRole
+          role: userRole,
+          full_name: data.user.user_metadata?.full_name || email,
+          is_admin: userIsAdmin,
+          is_staff: false,
+          status: 'Active',
+          access_level: 'Basic' as AccessLevel,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString()
         },
         isAdmin: userIsAdmin
       };

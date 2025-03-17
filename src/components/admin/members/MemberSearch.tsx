@@ -1,6 +1,7 @@
 
 import { Search } from 'lucide-react';
 import { Input } from '@/components/ui/input';
+import { useState, ChangeEvent } from 'react';
 
 interface MemberSearchProps {
   searchTerm: string;
@@ -8,7 +9,7 @@ interface MemberSearchProps {
 }
 
 const MemberSearch = ({ searchTerm, onSearchChange }: MemberSearchProps) => {
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleInputChange = (e: ChangeEvent<HTMLInputElement>) => {
     onSearchChange(e.target.value);
   };
 

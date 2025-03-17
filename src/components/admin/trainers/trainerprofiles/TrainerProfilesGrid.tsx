@@ -1,17 +1,17 @@
-import React from 'react';
-import { Skeleton } from '@/components/ui/skeleton';
-import { TrainerProfile } from '../profiles/useTrainerProfilesState';
-import TrainerCard from './TrainerCard';
 
-interface TrainerProfilesGridProps {
+import { TrainerCard } from './TrainerCard';
+import { Skeleton } from '@/components/ui/skeleton';
+import { TrainerProfile } from '../profiles/TrainerProfileType';
+
+export interface TrainerProfilesGridProps {
   trainers: TrainerProfile[];
   isLoading: boolean;
-  onEdit: (id: string) => void;
-  onDelete: (id: string) => void;
-  onAddCertification: (id: string) => void;
-  onDeleteCertification: (trainerId: string, certIndex: number) => void;
-  onAddAvailability: (id: string) => void;
-  onDeleteAvailability: (trainerId: string, availIndex: number) => void;
+  onEdit: (trainerId: string) => void;
+  onDelete: (trainerId: string) => void;
+  onAddCertification: (trainerId: string) => void;
+  onDeleteCertification: (certificationId: string) => void;
+  onAddAvailability: (trainerId: string) => void;
+  onDeleteAvailability: (availabilityId: string) => void;
 }
 
 export const TrainerProfilesGrid = ({
@@ -22,22 +22,30 @@ export const TrainerProfilesGrid = ({
   onAddCertification,
   onDeleteCertification,
   onAddAvailability,
-  onDeleteAvailability,
+  onDeleteAvailability
 }: TrainerProfilesGridProps) => {
   if (isLoading) {
     return (
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {[...Array(6)].map((_, i) => (
-          <Skeleton key={i} className="h-[400px] rounded-lg" />
-        ))}
+        {Array(6)
+          .fill(0)
+          .map((_, index) => (
+            <Skeleton
+              key={index}
+              className="w-full h-[340px] rounded-lg"
+            />
+          ))}
       </div>
     );
   }
 
   if (trainers.length === 0) {
     return (
-      <div className="text-center py-12">
-        <p className="text-lg text-muted-foreground">No trainers found</p>
+      <div className="p-8 text-center">
+        <h3 className="text-lg font-medium text-gray-600">No trainers found</h3>
+        <p className="text-gray-500 mt-2">
+          Try adjusting your filters or add a new trainer.
+        </p>
       </div>
     );
   }
@@ -51,9 +59,9 @@ export const TrainerProfilesGrid = ({
           onEdit={() => onEdit(trainer.id)}
           onDelete={() => onDelete(trainer.id)}
           onAddCertification={() => onAddCertification(trainer.id)}
-          onDeleteCertification={(certIndex) => onDeleteCertification(trainer.id, certIndex)}
+          onDeleteCertification={onDeleteCertification}
           onAddAvailability={() => onAddAvailability(trainer.id)}
-          onDeleteAvailability={(availIndex) => onDeleteAvailability(trainer.id, availIndex)}
+          onDeleteAvailability={onDeleteAvailability}
         />
       ))}
     </div>

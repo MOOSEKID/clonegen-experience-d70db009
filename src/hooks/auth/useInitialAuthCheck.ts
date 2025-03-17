@@ -1,5 +1,6 @@
+
 import { supabase } from '@/integrations/supabase/client';
-import type { AuthUser } from '@/types/auth.types';
+import type { AuthUser, UserRole, AccessLevel } from '@/types/auth.types';
 import { authStorageService } from '@/services/authStorageService';
 import { toast } from 'sonner';
 
@@ -51,8 +52,10 @@ export const useInitialAuthCheck = () => {
                 { 
                   id: currentUser.id,
                   full_name: currentUser.user_metadata?.full_name || currentUser.email || 'User',
-                  role: 'member',
-                  is_admin: currentUser.email === 'admin@example.com' // Set admin based on email
+                  role: 'member' as UserRole,
+                  is_admin: currentUser.email === 'admin@example.com', // Set admin based on email
+                  access_level: 'Basic' as AccessLevel,
+                  status: 'Active'
                 }
               ]);
               
@@ -60,9 +63,16 @@ export const useInitialAuthCheck = () => {
               console.error('Error creating default profile in initial check:', insertError);
               // Handle profile creation error - still set user as authenticated
               setUser({
-                ...currentUser,
+                id: currentUser.id,
                 email: currentUser.email || '',
-                role: 'member'
+                full_name: currentUser.user_metadata?.full_name || currentUser.email || '',
+                role: 'member' as UserRole,
+                is_admin: currentUser.email === 'admin@example.com',
+                is_staff: false,
+                status: 'Active',
+                access_level: 'Basic' as AccessLevel,
+                created_at: new Date().toISOString(),
+                updated_at: new Date().toISOString()
               });
               
               setIsAdmin(currentUser.email === 'admin@example.com');
@@ -85,7 +95,7 @@ export const useInitialAuthCheck = () => {
                 .single();
                 
               if (newProfile) {
-                const userRole = newProfile.role || 'member';
+                const userRole = (newProfile.role || 'member') as UserRole;
                 const userIsAdmin = newProfile.is_admin || false;
                 
                 console.log('User authenticated with new profile in initial check:', {
@@ -95,9 +105,16 @@ export const useInitialAuthCheck = () => {
                 });
                 
                 setUser({
-                  ...currentUser,
+                  id: currentUser.id,
                   email: currentUser.email || '',
-                  role: userRole
+                  full_name: newProfile.full_name || currentUser.email || '',
+                  role: userRole,
+                  is_admin: userIsAdmin,
+                  is_staff: false,
+                  status: 'Active',
+                  access_level: 'Basic' as AccessLevel,
+                  created_at: new Date().toISOString(),
+                  updated_at: new Date().toISOString()
                 });
                 
                 setIsAdmin(userIsAdmin);
@@ -115,9 +132,16 @@ export const useInitialAuthCheck = () => {
             // Other error fetching profile, but still set basic auth state
             console.warn('Error fetching profile, setting basic auth state');
             setUser({
-              ...currentUser,
+              id: currentUser.id,
               email: currentUser.email || '',
-              role: 'member'
+              full_name: currentUser.user_metadata?.full_name || currentUser.email || '',
+              role: 'member' as UserRole,
+              is_admin: currentUser.email === 'admin@example.com',
+              is_staff: false,
+              status: 'Active',
+              access_level: 'Basic' as AccessLevel,
+              created_at: new Date().toISOString(),
+              updated_at: new Date().toISOString()
             });
             
             setIsAdmin(currentUser.email === 'admin@example.com');
@@ -132,7 +156,7 @@ export const useInitialAuthCheck = () => {
           }
         } else {
           // Profile exists
-          const userRole = profile?.role || 'member';
+          const userRole = (profile?.role || 'member') as UserRole;
           const userIsAdmin = profile?.is_admin || false;
           
           console.log('User authenticated in initial check:', {
@@ -142,9 +166,16 @@ export const useInitialAuthCheck = () => {
           });
           
           setUser({
-            ...currentUser,
+            id: currentUser.id,
             email: currentUser.email || '',
-            role: userRole
+            full_name: profile?.full_name || currentUser.email || '',
+            role: userRole,
+            is_admin: userIsAdmin,
+            is_staff: false,
+            status: 'Active',
+            access_level: 'Basic' as AccessLevel,
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString()
           });
           
           setIsAdmin(userIsAdmin);

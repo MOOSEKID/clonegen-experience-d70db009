@@ -46,8 +46,6 @@ const AdminDashboard = () => {
       <div className="flex-1 flex flex-col">
         <AdminHeader 
           toggleSidebar={toggleSidebar} 
-          avatarUrl={userAvatar}
-          userName={userName}
         />
         
         <main className="flex-1 p-4 md:p-6 overflow-auto">

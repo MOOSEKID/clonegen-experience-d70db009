@@ -11,14 +11,37 @@ import {
 import { toast } from 'sonner';
 
 interface MemberFiltersProps {
-  selectedMembers: number[];
+  selectedMembers?: string[];
+  statusFilter?: string;
+  membershipFilter?: string;
   onFilterChange?: (filter: string) => void;
+  onStatusFilterChange?: (status: string) => void;
+  onMembershipFilterChange?: (membership: string) => void;
 }
 
-const MemberFilters = ({ selectedMembers, onFilterChange }: MemberFiltersProps) => {
+const MemberFilters = ({ 
+  selectedMembers = [], 
+  statusFilter = 'All', 
+  membershipFilter = 'All',
+  onFilterChange,
+  onStatusFilterChange,
+  onMembershipFilterChange
+}: MemberFiltersProps) => {
   const handleFilterClick = (filter: string) => {
     if (onFilterChange) {
       onFilterChange(filter);
+    }
+  };
+
+  const handleStatusFilterChange = (status: string) => {
+    if (onStatusFilterChange) {
+      onStatusFilterChange(status);
+    }
+  };
+
+  const handleMembershipFilterChange = (membership: string) => {
+    if (onMembershipFilterChange) {
+      onMembershipFilterChange(membership);
     }
   };
 
@@ -33,23 +56,41 @@ const MemberFilters = ({ selectedMembers, onFilterChange }: MemberFiltersProps) 
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent>
-          <DropdownMenuItem onClick={() => handleFilterClick('all')}>
+          <DropdownMenuItem onClick={() => {
+            handleFilterClick('all');
+            handleStatusFilterChange('All');
+          }}>
             All Members
           </DropdownMenuItem>
-          <DropdownMenuItem onClick={() => handleFilterClick('active')}>
+          <DropdownMenuItem onClick={() => {
+            handleFilterClick('active');
+            handleStatusFilterChange('Active');
+          }}>
             Active Members
           </DropdownMenuItem>
-          <DropdownMenuItem onClick={() => handleFilterClick('inactive')}>
+          <DropdownMenuItem onClick={() => {
+            handleFilterClick('inactive');
+            handleStatusFilterChange('Inactive');
+          }}>
             Inactive Members
           </DropdownMenuItem>
           <DropdownMenuSeparator />
-          <DropdownMenuItem onClick={() => handleFilterClick('premium')}>
+          <DropdownMenuItem onClick={() => {
+            handleFilterClick('premium');
+            handleMembershipFilterChange('Premium');
+          }}>
             Premium
           </DropdownMenuItem>
-          <DropdownMenuItem onClick={() => handleFilterClick('standard')}>
+          <DropdownMenuItem onClick={() => {
+            handleFilterClick('standard');
+            handleMembershipFilterChange('Standard');
+          }}>
             Standard
           </DropdownMenuItem>
-          <DropdownMenuItem onClick={() => handleFilterClick('basic')}>
+          <DropdownMenuItem onClick={() => {
+            handleFilterClick('basic');
+            handleMembershipFilterChange('Basic');
+          }}>
             Basic
           </DropdownMenuItem>
         </DropdownMenuContent>

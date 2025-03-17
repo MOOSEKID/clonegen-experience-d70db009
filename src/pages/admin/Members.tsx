@@ -11,13 +11,16 @@ const AdminMembers = () => {
     currentMembers,
     currentPage,
     totalPages,
-    filterType,
+    statusFilter,
+    membershipFilter,
+    membersPerPage,
     isCreating,
     isLoading,
     handleSearch,
     handleStatusChange,
     handleDelete,
-    handleFilterChange,
+    handleStatusFilterChange,
+    handleMembershipFilterChange,
     toggleMemberSelection,
     selectAllMembers,
     handleBulkAction,
@@ -26,6 +29,7 @@ const AdminMembers = () => {
     paginate,
     nextPage,
     prevPage,
+    handleItemsPerPageChange
   } = useSupabaseMembers();
 
   console.log("AdminMembers rendered, isCreating:", isCreating);
@@ -38,22 +42,20 @@ const AdminMembers = () => {
       currentPage={currentPage}
       totalPages={totalPages}
       selectedMembers={selectedMembers}
+      membersPerPage={membersPerPage}
       searchTerm={searchTerm}
-      filterType={filterType}
-      isCreating={isCreating}
-      isLoading={isLoading}
-      onSearchChange={handleSearch}
-      onStatusChange={handleStatusChange}
-      onDelete={handleDelete}
-      onToggleSelect={toggleMemberSelection}
-      onSelectAll={() => selectAllMembers(filteredMembers)}
-      onFilterChange={handleFilterChange}
-      onBulkAction={(action) => handleBulkAction(action, filteredMembers)}
-      onPageChange={paginate}
-      onPrevPage={prevPage}
-      onNextPage={nextPage}
-      onAddMember={addMember}
-      onImportMembers={importMembers}
+      statusFilter={statusFilter}
+      membershipFilter={membershipFilter}
+      handleSearchChange={handleSearch}
+      handleStatusChange={handleStatusChange}
+      handleDelete={handleDelete}
+      handleStatusFilterChange={handleStatusFilterChange}
+      handleMembershipFilterChange={handleMembershipFilterChange}
+      toggleMemberSelection={toggleMemberSelection}
+      selectAllMembers={selectAllMembers}
+      handlePageChange={paginate}
+      handleItemsPerPageChange={handleItemsPerPageChange}
+      onViewProfile={(memberId) => console.log("View profile", memberId)}
     />
   );
 };

@@ -1,7 +1,11 @@
+
+// This fix only addresses the specific issue with access_level
+// In a wider refactoring, this file should be broken down
+
 import { ReactNode, useState, useEffect } from 'react';
 import { AuthContext } from './AuthContext';
 import { useAuthState } from '@/hooks/useAuthState';
-import { AuthContextType, AuthUser, UserRole } from '@/types/auth.types';
+import { AuthContextType, AuthUser, UserRole, AccessLevel } from '@/types/auth.types';
 import { supabase } from '@/lib/supabase';
 import { toast } from 'sonner';
 
@@ -64,7 +68,10 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
             role: 'client' as UserRole,
             is_admin: session.user.email === 'admin@example.com',
             is_staff: false,
-            status: 'Active' as const
+            status: 'Active' as const,
+            access_level: 'Basic' as AccessLevel,
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString()
           };
           
           setUser({
@@ -107,7 +114,10 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
                   role: isKnownAdmin ? 'admin' : 'client' as UserRole,
                   is_admin: isKnownAdmin,
                   is_staff: false,
-                  status: 'Active' as const
+                  status: 'Active' as const,
+                  access_level: 'Basic' as AccessLevel,
+                  created_at: new Date().toISOString(),
+                  updated_at: new Date().toISOString()
                 });
                 setIsAdmin(isKnownAdmin);
                 setIsStaff(false);
@@ -177,7 +187,8 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
             full_name: fullName,
             role,
             status: 'Active',
-            is_admin: email === 'admin@example.com'
+            is_admin: email === 'admin@example.com',
+            access_level: 'Basic'
           },
         ]);
 

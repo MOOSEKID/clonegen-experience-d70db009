@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 
 interface MembersToolbarProps {
   searchTerm: string;
-  onSearchChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  onSearchChange: (value: string) => void;
   selectedMembers: string[]; // Changed from number[] to string[]
   onFilterChange: (filter: string) => void;
   onBulkAction: (action: string) => void;

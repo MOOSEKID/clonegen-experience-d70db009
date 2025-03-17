@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { useTrainerProfiles, TrainerProfile } from '@/hooks/trainers/useTrainerProfiles';
+import { useTrainerProfiles } from '@/hooks/trainers/useTrainerProfiles';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
 import { Plus } from 'lucide-react';

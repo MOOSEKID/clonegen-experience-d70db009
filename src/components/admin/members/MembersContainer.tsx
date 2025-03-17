@@ -79,6 +79,7 @@ const MembersContainer = ({
             membershipFilter={membershipFilter}
             onStatusFilterChange={handleStatusFilterChange}
             onMembershipFilterChange={handleMembershipFilterChange}
+            selectedMembers={selectedMembers}
           />
         </div>
       </div>
