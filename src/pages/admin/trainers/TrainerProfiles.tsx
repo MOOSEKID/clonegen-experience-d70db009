@@ -1,13 +1,20 @@
-
 import React from 'react';
-import { TabsContent } from '@/components/ui/tabs';
-import TrainerProfileHeader from '@/components/admin/trainers/profiles/TrainerProfileHeader';
-import TrainerProfileTabs from '@/components/admin/trainers/profiles/TrainerProfileTabs';
-import TrainerProfilesGrid from '@/components/admin/trainers/profiles/TrainerProfilesGrid';
-import TrainerDialogs from '@/components/admin/trainers/profiles/TrainerDialogs';
+import { useAuth } from '@/hooks/useAuth';
 import { useTrainerProfilesState } from '@/components/admin/trainers/profiles/useTrainerProfilesState';
+import { TrainerProfilesGrid } from '@/components/admin/trainers/profiles/TrainerProfilesGrid';
+import { TrainerDialogs } from '@/components/admin/trainers/profiles/TrainerDialogs';
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Button } from '@/components/ui/button';
+import { PlusIcon } from 'lucide-react';
 
-const TrainerProfiles = () => {
+const TrainerProfiles: React.FC = () => {
+  const { user, isAdmin } = useAuth();
+
+  // Redirect if not authenticated or not admin
+  if (!user || !isAdmin) {
+    return null;
+  }
+
   const {
     isLoading,
     filteredTrainers,
@@ -37,41 +44,49 @@ const TrainerProfiles = () => {
   } = useTrainerProfilesState();
 
   return (
-    <div className="container mx-auto p-6">
-      <TrainerProfileHeader onAddTrainer={handleAddTrainer} />
-      
-      <TrainerProfileTabs activeTab={activeTab} onTabChange={setActiveTab} />
-      
-      <div className="mt-4">
-        <TabsContent value={activeTab} className="space-y-4 mt-4">
-          <TrainerProfilesGrid
-            trainers={filteredTrainers}
-            isLoading={isLoading}
-            onEdit={handleEditTrainer}
-            onDelete={handleDeleteTrainerSubmit}
-            onAddCertification={handleAddCertification}
-            onDeleteCertification={handleDeleteCertificationSubmit}
-            onAddAvailability={handleAddAvailability}
-            onDeleteAvailability={handleDeleteAvailabilitySubmit}
-          />
-        </TabsContent>
+    <div className="container mx-auto py-6 space-y-6">
+      <div className="flex justify-between items-center">
+        <h1 className="text-2xl font-bold">Trainer Profiles</h1>
+        <Button onClick={handleAddTrainer}>
+          <PlusIcon className="h-4 w-4 mr-2" />
+          Add Trainer
+        </Button>
       </div>
-      
+
+      <Tabs value={activeTab} onValueChange={setActiveTab}>
+        <TabsList>
+          <TabsTrigger value="all">All</TabsTrigger>
+          <TabsTrigger value="active">Active</TabsTrigger>
+          <TabsTrigger value="inactive">Inactive</TabsTrigger>
+          <TabsTrigger value="on leave">On Leave</TabsTrigger>
+        </TabsList>
+      </Tabs>
+
+      <TrainerProfilesGrid
+        trainers={filteredTrainers}
+        isLoading={isLoading}
+        onEdit={handleEditTrainer}
+        onDelete={handleDeleteTrainerSubmit}
+        onAddCertification={handleAddCertification}
+        onDeleteCertification={handleDeleteCertificationSubmit}
+        onAddAvailability={handleAddAvailability}
+        onDeleteAvailability={handleDeleteAvailabilitySubmit}
+      />
+
       <TrainerDialogs
-        isAddDialogOpen={isAddDialogOpen}
-        setIsAddDialogOpen={setIsAddDialogOpen}
-        isEditDialogOpen={isEditDialogOpen}
-        setIsEditDialogOpen={setIsEditDialogOpen}
-        isCertDialogOpen={isCertDialogOpen}
-        setIsCertDialogOpen={setIsCertDialogOpen}
-        isAvailDialogOpen={isAvailDialogOpen}
-        setIsAvailDialogOpen={setIsAvailDialogOpen}
-        selectedTrainer={selectedTrainer}
-        selectedTrainerData={getSelectedTrainer()}
-        onAddTrainerSubmit={handleAddTrainerSubmit}
-        onUpdateTrainerSubmit={handleUpdateTrainerSubmit}
-        onAddCertificationSubmit={handleAddCertificationSubmit}
-        onAddAvailabilitySubmit={handleAddAvailabilitySubmit}
+        isAddOpen={isAddDialogOpen}
+        setIsAddOpen={setIsAddDialogOpen}
+        isEditOpen={isEditDialogOpen}
+        setIsEditOpen={setIsEditDialogOpen}
+        isCertOpen={isCertDialogOpen}
+        setIsCertOpen={setIsCertDialogOpen}
+        isAvailOpen={isAvailDialogOpen}
+        setIsAvailOpen={setIsAvailDialogOpen}
+        selectedTrainer={getSelectedTrainer()}
+        onAddSubmit={handleAddTrainerSubmit}
+        onEditSubmit={handleUpdateTrainerSubmit}
+        onAddCertSubmit={handleAddCertificationSubmit}
+        onAddAvailSubmit={handleAddAvailabilitySubmit}
       />
     </div>
   );

@@ -2,8 +2,9 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider } from "./contexts/AuthContext";
+import { RouteGuard } from "@/components/auth/RouteGuard";
 
 // Layout components
 import Header from "@/components/Header";
@@ -34,12 +35,10 @@ import CategoryPage from "./pages/shop/CategoryPage";
 import ProductPage from "./pages/shop/ProductPage";
 
 // Auth pages
-import Login from "./pages/Login";
-import Signup from "./pages/Signup";
+import Login from "./pages/auth/Login";
+import Signup from "./pages/auth/Signup";
 
 // Admin pages
-import AdminDashboard from "./pages/admin/Dashboard";
-import AdminMembers from "./pages/admin/Members";
 import AdminClasses from "./pages/admin/Classes";
 import AdminTrainers from "./pages/admin/Trainers";
 import AdminPayments from "./pages/admin/Payments";
@@ -50,13 +49,17 @@ import AdminReports from "./pages/admin/Reports";
 import AdminSettings from "./pages/admin/Settings";
 import AdminSupport from "./pages/admin/Support";
 
-// Trainer subpages
+// Trainer pages
 import TrainerProfiles from "./pages/admin/trainers/TrainerProfiles";
 import PerformanceTracking from "./pages/admin/trainers/PerformanceTracking";
 import TrainerRatings from "./pages/admin/trainers/TrainerRatings";
+import TrainerDashboard from "./pages/trainer/TrainerDashboard";
 
-// Customer Dashboard pages
-import Dashboard from "./pages/dashboard/Dashboard";
+// Customer pages
+import CustomerDashboard from "./pages/customer/CustomerDashboard";
+
+// Staff pages
+import StaffDashboard from "./pages/staff/StaffDashboard";
 
 // Create a new query client instance
 const queryClient = new QueryClient({
@@ -69,18 +72,16 @@ const queryClient = new QueryClient({
 });
 
 const App = () => {
-  console.log("App component rendering"); // Debug log
-  
   return (
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
         <TooltipProvider>
           <Toaster />
           <Sonner />
-          <BrowserRouter>
+          <BrowserRouter basename={import.meta.env.PROD ? '/clonegen-experience' : '/'}>
             <Routes>
-              {/* Main Routes with Header and Footer */}
-              <Route path="*" element={
+              {/* Public Routes with Header and Footer */}
+              <Route path="/" element={
                 <div className="flex flex-col min-h-screen">
                   <Header />
                   <div className="flex-grow">
@@ -97,27 +98,31 @@ const App = () => {
                       <Route path="/shop" element={<ShopPage />} />
                       <Route path="/shop/category/:categoryId" element={<CategoryPage />} />
                       <Route path="/shop/product/:productId" element={<ProductPage />} />
-                      <Route path="/login" element={<Login />} />
-                      <Route path="/signup" element={<Signup />} />
                       <Route path="/contact-us" element={<ContactUs />} />
                       <Route path="/timetable" element={<Timetable />} />
                       <Route path="/opening-times" element={<OpeningTimes />} />
-                      <Route path="*" element={<NotFound />} />
                     </Routes>
                   </div>
                   <Footer />
                 </div>
               } />
+
+              {/* Auth Routes */}
+              <Route path="/login" element={<Login />} />
+              <Route path="/signup" element={<Signup />} />
               
               {/* Admin Routes */}
-              <Route path="/admin/*" element={<AdminLayout />}>
-                <Route index element={<AdminDashboard />} />
-                <Route path="members" element={<AdminMembers />} />
-                <Route path="classes" element={<AdminClasses />} />
+              <Route path="/admin/*" element={
+                <RouteGuard requiredAccess="full" allowedCategories={['management']}>
+                  <AdminLayout />
+                </RouteGuard>
+              }>
+                <Route index element={<Navigate to="trainers" replace />} />
                 <Route path="trainers" element={<AdminTrainers />} />
                 <Route path="trainers/profiles" element={<TrainerProfiles />} />
                 <Route path="trainers/performance" element={<PerformanceTracking />} />
                 <Route path="trainers/ratings" element={<TrainerRatings />} />
+                <Route path="classes" element={<AdminClasses />} />
                 <Route path="payments" element={<AdminPayments />} />
                 <Route path="workouts" element={<AdminWorkouts />} />
                 <Route path="shop" element={<AdminShop />} />
@@ -127,11 +132,38 @@ const App = () => {
                 <Route path="support" element={<AdminSupport />} />
               </Route>
               
-              {/* Customer Dashboard Routes */}
-              <Route path="/dashboard/*" element={<DashboardLayout />}>
-                <Route index element={<Dashboard />} />
+              {/* Trainer Routes */}
+              <Route path="/trainer/*" element={
+                <RouteGuard requiredAccess="basic" allowedCategories={['training']}>
+                  <DashboardLayout />
+                </RouteGuard>
+              }>
+                <Route index element={<TrainerDashboard />} />
                 <Route path="*" element={<NotFound />} />
               </Route>
+
+              {/* Customer Routes */}
+              <Route path="/customer/*" element={
+                <RouteGuard requiredAccess="limited" allowedCategories={['customer']}>
+                  <DashboardLayout />
+                </RouteGuard>
+              }>
+                <Route index element={<CustomerDashboard />} />
+                <Route path="*" element={<NotFound />} />
+              </Route>
+
+              {/* Staff Routes */}
+              <Route path="/staff/*" element={
+                <RouteGuard requiredAccess="basic" allowedCategories={['operations', 'reception', 'maintenance']}>
+                  <DashboardLayout />
+                </RouteGuard>
+              }>
+                <Route index element={<StaffDashboard />} />
+                <Route path="*" element={<NotFound />} />
+              </Route>
+
+              {/* Catch-all route */}
+              <Route path="*" element={<NotFound />} />
             </Routes>
           </BrowserRouter>
         </TooltipProvider>

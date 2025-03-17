@@ -1,21 +1,20 @@
-
-import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
-import { TrainerProfile } from '@/hooks/trainers/useTrainerProfiles';
-import TrainerCard from '@/components/admin/trainers/profiles/TrainerCard';
+import { TrainerProfile } from './useTrainerProfilesState';
+import TrainerCard from './TrainerCard';
+import { Skeleton } from '@/components/ui/skeleton';
 
 interface TrainerProfilesGridProps {
   trainers: TrainerProfile[];
   isLoading: boolean;
-  onEdit: (trainerId: string) => void;
-  onDelete: (trainerId: string) => Promise<void>;
-  onAddCertification: (trainerId: string) => void;
-  onDeleteCertification: (id: string) => Promise<void>;
-  onAddAvailability: (trainerId: string) => void;
-  onDeleteAvailability: (id: string) => Promise<void>;
+  onEdit: (id: string) => void;
+  onDelete: (id: string) => void;
+  onAddCertification: (id: string) => void;
+  onDeleteCertification: (trainerId: string, certIndex: number) => void;
+  onAddAvailability: (id: string) => void;
+  onDeleteAvailability: (trainerId: string, availIndex: number) => void;
 }
 
-const TrainerProfilesGrid = ({
+export const TrainerProfilesGrid = ({
   trainers,
   isLoading,
   onEdit,
@@ -27,26 +26,24 @@ const TrainerProfilesGrid = ({
 }: TrainerProfilesGridProps) => {
   if (isLoading) {
     return (
-      <Card>
-        <CardContent className="p-6">
-          <p>Loading trainer data...</p>
-        </CardContent>
-      </Card>
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {[...Array(6)].map((_, i) => (
+          <Skeleton key={i} className="h-[400px] rounded-lg" />
+        ))}
+      </div>
     );
   }
 
   if (trainers.length === 0) {
     return (
-      <Card>
-        <CardContent className="p-6 text-center">
-          <p className="text-muted-foreground">No trainers found in this category.</p>
-        </CardContent>
-      </Card>
+      <div className="text-center py-12">
+        <p className="text-lg text-muted-foreground">No trainers found</p>
+      </div>
     );
   }
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
       {trainers.map((trainer) => (
         <TrainerCard
           key={trainer.id}
@@ -54,13 +51,11 @@ const TrainerProfilesGrid = ({
           onEdit={() => onEdit(trainer.id)}
           onDelete={() => onDelete(trainer.id)}
           onAddCertification={() => onAddCertification(trainer.id)}
-          onDeleteCertification={onDeleteCertification}
+          onDeleteCertification={(certIndex) => onDeleteCertification(trainer.id, certIndex)}
           onAddAvailability={() => onAddAvailability(trainer.id)}
-          onDeleteAvailability={onDeleteAvailability}
+          onDeleteAvailability={(availIndex) => onDeleteAvailability(trainer.id, availIndex)}
         />
       ))}
     </div>
   );
 };
-
-export default TrainerProfilesGrid;

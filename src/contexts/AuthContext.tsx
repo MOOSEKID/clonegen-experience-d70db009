@@ -1,296 +1,273 @@
-import { createContext, useContext, useEffect, useState } from 'react'
-import { User, createClient } from '@supabase/supabase-js'
-import { toast } from 'sonner'
-import { Database } from '../types/database.types'
-import { UserProfile, ProfileInsert } from '../types/database.types'
+import { createContext, useContext, useState, useEffect } from 'react';
+import { supabase } from '@/lib/supabase';
+import { toast } from 'sonner';
 
-const supabase = createClient<Database>(
-  import.meta.env.VITE_SUPABASE_URL,
-  import.meta.env.VITE_SUPABASE_ANON_KEY,
-  {
-    auth: {
-      autoRefreshToken: true,
-      persistSession: true,
-      detectSessionInUrl: true
-    }
-  }
-)
-
-export interface AuthContextType {
-  user: User | null
-  profile: UserProfile | null
-  signIn: (email: string, password: string) => Promise<void>
-  signOut: () => Promise<void>
-  isLoading: boolean
-  refreshSession: () => Promise<void>
-  isAuthenticated: boolean
-  isAdmin: boolean
+export interface Profile {
+  id: string;
+  email: string;
+  full_name: string;
+  staff_category: 'management' | 'training' | 'operations' | 'reception' | 'maintenance' | 'customer' | null;
+  role: string | null;
+  is_admin: boolean;
+  access_level: 'full' | 'high' | 'medium' | 'basic' | 'limited' | null;
+  department: string | null;
+  specializations: string[] | null;
+  reporting_to: string | null;
+  shift_preference: string | null;
+  max_clients: number | null;
+  certifications: string[] | null;
+  primary_location: string | null;
+  secondary_locations: string[] | null;
+  working_hours: {
+    start: string;
+    end: string;
+    days: string[];
+  } | null;
+  contact_email: string | null;
+  contact_phone: string | null;
+  emergency_contact: {
+    name: string;
+    phone: string;
+    relationship: string;
+  } | null;
+  status: 'active' | 'inactive' | 'on_leave' | 'terminated' | null;
+  created_at: string | null;
+  updated_at: string | null;
+  last_login: string | null;
 }
 
-export const AuthContext = createContext<AuthContextType>({
-  user: null,
-  profile: null,
-  signIn: async () => {},
-  signOut: async () => {},
-  isLoading: false,
-  refreshSession: async () => {},
-  isAuthenticated: false,
-  isAdmin: false
-})
-
-export const useAuth = () => {
-  return useContext(AuthContext)
+interface AuthContextType {
+  isAuthenticated: boolean;
+  isAdmin: boolean;
+  isLoading: boolean;
+  profile: Profile | null;
+  signIn: (email: string, password: string) => Promise<void>;
+  signUp: (email: string, password: string, fullName: string) => Promise<void>;
+  signOut: () => Promise<void>;
 }
+
+const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
-  const [user, setUser] = useState<User | null>(null)
-  const [profile, setProfile] = useState<UserProfile | null>(null)
-  const [isLoading, setIsLoading] = useState(false)
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const [profile, setProfile] = useState<Profile | null>(null);
 
-  const refreshSession = async () => {
+  // Fetch profile data
+  const fetchProfile = async (userId: string) => {
     try {
-      const { data: { session }, error } = await supabase.auth.refreshSession()
-      if (error) {
-        console.error('Error refreshing session:', error)
-        return
-      }
-
-      if (session?.user) {
-        setUser(session.user)
-        await fetchProfile(session.user)
-      }
-    } catch (error) {
-      console.error('Error in refreshSession:', error)
-    }
-  }
-
-  useEffect(() => {
-    // Initial session check
-    const checkSession = async () => {
-      try {
-        const { data: { session } } = await supabase.auth.getSession()
-        if (session?.user) {
-          setUser(session.user)
-          await fetchProfile(session.user)
-        }
-      } catch (error) {
-        console.error('Error checking session:', error)
-      }
-    }
-
-    checkSession()
-
-    // Listen for auth changes
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event, session) => {
-        if (event === 'TOKEN_REFRESHED') {
-          console.log('Token refreshed')
-          if (session?.user) {
-            setUser(session.user)
-            await fetchProfile(session.user)
-          }
-        } else if (event === 'SIGNED_IN') {
-          if (session?.user) {
-            setUser(session.user)
-            await fetchProfile(session.user)
-          }
-        } else if (event === 'SIGNED_OUT') {
-          setUser(null)
-          setProfile(null)
-        }
-      }
-    )
-
-    // Set up token refresh interval
-    const refreshInterval = setInterval(refreshSession, 3300000) // Refresh every 55 minutes
-
-    return () => {
-      subscription.unsubscribe()
-      clearInterval(refreshInterval)
-    }
-  }, [])
-
-  const fetchProfile = async (user: User) => {
-    try {
-      const { data: profile, error } = await supabase
+      const { data, error } = await supabase
         .from('profiles')
         .select('*')
-        .eq('id', user.id)
-        .single()
+        .eq('id', userId)
+        .single();
 
-      if (error) {
-        console.error('Error fetching profile:', error)
-        return
-      }
+      if (error) throw error;
 
-      if (profile) {
-        setProfile(profile as UserProfile)
-      }
-    } catch (error) {
-      console.error('Error in fetchProfile:', error)
-    }
-  }
-
-  const verifyAdminProfile = async (user: User): Promise<UserProfile> => {
-    try {
-      // First check if admin profile exists
-      const { data: profile, error: fetchError } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('email', 'admin@uptowngym.rw')
-        .single()
-
-      if (fetchError && fetchError.code !== 'PGRST116') {
-        console.error('Error checking admin profile:', fetchError)
-        throw new Error('Failed to verify admin profile')
-      }
-
-      const defaultAdminProfile: ProfileInsert = {
-        id: user.id,
-        email: 'admin@uptowngym.rw',
-        full_name: 'System Administrator',
-        role: 'admin',
-        is_admin: true,
-        is_staff: true,
-        staff_category: 'management',
-        department: 'management',
-        access_level: 'full',
-        status: 'active',
-        specializations: null,
-        reporting_to: null,
-        shift_preference: null,
-        max_clients: null,
-        certifications: null,
-        working_hours: null,
-        primary_location: null,
-        secondary_locations: null,
-        contact_email: null,
-        contact_phone: null,
-        emergency_contact: null,
-        last_login: new Date().toISOString(),
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString()
-      }
-
-      // If no profile exists, create it
-      if (!profile) {
-        const { data: newProfile, error: insertError } = await supabase
-          .from('profiles')
-          .insert([defaultAdminProfile])
-          .select()
-          .single()
-
-        if (insertError) {
-          console.error('Error creating admin profile:', insertError)
-          throw new Error('Failed to create admin profile')
-        }
-
-        return newProfile as UserProfile
-      }
-
-      // If profile exists but needs updating
-      const { data: updatedProfile, error: updateError } = await supabase
-        .from('profiles')
-        .update({
-          id: user.id,
-          is_admin: true,
-          is_staff: true,
+      if (data) {
+        setProfile(data);
+        setIsAdmin(data.is_admin || false);
+      } else if (isAdmin) {
+        // Create admin profile if it doesn't exist
+        const adminProfile: Profile = {
+          id: userId,
+          email: 'admin@uptowngym.rw',
+          full_name: 'System Admin',
           staff_category: 'management',
-          department: 'management',
+          role: 'admin',
+          is_admin: true,
           access_level: 'full',
           status: 'active',
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
           last_login: new Date().toISOString(),
-          updated_at: new Date().toISOString()
-        })
-        .eq('email', 'admin@uptowngym.rw')
-        .select()
-        .single()
+          department: 'management',
+          specializations: null,
+          reporting_to: null,
+          shift_preference: null,
+          max_clients: null,
+          certifications: null,
+          primary_location: null,
+          secondary_locations: null,
+          working_hours: null,
+          contact_email: null,
+          contact_phone: null,
+          emergency_contact: null
+        };
 
-      if (updateError) {
-        console.error('Error updating admin profile:', updateError)
-        throw new Error('Failed to update admin profile')
+        const { error: insertError } = await supabase
+          .from('profiles')
+          .insert([adminProfile]);
+
+        if (insertError) throw insertError;
+        setProfile(adminProfile);
       }
-
-      return updatedProfile as UserProfile
     } catch (error) {
-      console.error('Error in verifyAdminProfile:', error)
-      throw error
+      console.error('Error fetching profile:', error);
+      toast.error('Failed to load user profile');
     }
-  }
+  };
+
+  // Check auth status on mount
+  useEffect(() => {
+    const checkAuth = async () => {
+      try {
+        const { data: { session }, error } = await supabase.auth.getSession();
+        
+        if (error) throw error;
+        
+        if (session?.user) {
+          setIsAuthenticated(true);
+          // Check if user is admin
+          setIsAdmin(session.user.email === 'admin@uptowngym.rw');
+          await fetchProfile(session.user.id);
+        }
+      } catch (error) {
+        console.error('Auth check error:', error);
+        toast.error('Authentication check failed');
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    checkAuth();
+
+    // Subscribe to auth changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+      if (event === 'SIGNED_IN' && session?.user) {
+        setIsAuthenticated(true);
+        setIsAdmin(session.user.email === 'admin@uptowngym.rw');
+        await fetchProfile(session.user.id);
+      } else if (event === 'SIGNED_OUT') {
+        setIsAuthenticated(false);
+        setIsAdmin(false);
+        setProfile(null);
+      }
+    });
+
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, []);
 
   const signIn = async (email: string, password: string) => {
-    if (isLoading) return // Prevent multiple simultaneous sign-in attempts
-
     try {
-      setIsLoading(true)
-
+      setIsLoading(true);
       const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password
-      })
+      });
 
-      if (error) {
-        console.error('Sign in error:', error)
-        throw error
-      }
+      if (error) throw error;
 
       if (data.user) {
-        if (email === 'admin@uptowngym.rw') {
-          try {
-            const adminProfile = await verifyAdminProfile(data.user)
-            setProfile(adminProfile)
-            toast.success('Welcome back, Administrator!')
-          } catch (error) {
-            console.error('Error verifying admin profile:', error)
-            toast.error('Failed to verify admin profile')
-          }
-        } else {
-          await fetchProfile(data.user)
-          toast.success('Successfully signed in!')
-        }
+        setIsAuthenticated(true);
+        setIsAdmin(data.user.email === 'admin@uptowngym.rw');
+        await fetchProfile(data.user.id);
+        toast.success('Signed in successfully');
       }
     } catch (error) {
-      console.error('Error signing in:', error)
-      toast.error('Failed to sign in. Please check your credentials.')
+      console.error('Sign in error:', error);
+      toast.error('Failed to sign in');
+      throw error;
     } finally {
-      setIsLoading(false)
+      setIsLoading(false);
     }
-  }
+  };
+
+  const signUp = async (email: string, password: string, fullName: string) => {
+    try {
+      setIsLoading(true);
+      const { data, error } = await supabase.auth.signUp({
+        email,
+        password
+      });
+
+      if (error) throw error;
+
+      if (data.user) {
+        // Create customer profile
+        const customerProfile: Profile = {
+          id: data.user.id,
+          email,
+          full_name: fullName,
+          staff_category: 'customer',
+          role: 'customer',
+          is_admin: false,
+          access_level: 'limited',
+          status: 'active',
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+          last_login: new Date().toISOString(),
+          department: null,
+          specializations: null,
+          reporting_to: null,
+          shift_preference: null,
+          max_clients: null,
+          certifications: null,
+          primary_location: null,
+          secondary_locations: null,
+          working_hours: null,
+          contact_email: null,
+          contact_phone: null,
+          emergency_contact: null
+        };
+
+        const { error: profileError } = await supabase
+          .from('profiles')
+          .insert([customerProfile]);
+
+        if (profileError) throw profileError;
+        toast.success('Account created successfully');
+      }
+    } catch (error) {
+      console.error('Sign up error:', error);
+      toast.error('Failed to create account');
+      throw error;
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const signOut = async () => {
-    if (isLoading) return // Prevent sign-out during loading state
-
     try {
-      setIsLoading(true)
-      const { error } = await supabase.auth.signOut()
-      if (error) throw error
+      setIsLoading(true);
+      const { error } = await supabase.auth.signOut();
+      if (error) throw error;
       
-      setUser(null)
-      setProfile(null)
-      toast.success('Successfully signed out!')
+      setIsAuthenticated(false);
+      setIsAdmin(false);
+      setProfile(null);
+      toast.success('Signed out successfully');
     } catch (error) {
-      console.error('Error signing out:', error)
-      toast.error('Failed to sign out. Please try again.')
+      console.error('Sign out error:', error);
+      toast.error('Failed to sign out');
+      throw error;
     } finally {
-      setIsLoading(false)
+      setIsLoading(false);
     }
-  }
-
-  const isAuthenticated = !!user && !!profile
-  const isAdmin = isAuthenticated && profile?.is_admin === true
+  };
 
   return (
-    <AuthContext.Provider value={{ 
-      user, 
-      profile, 
-      signIn, 
-      signOut, 
-      isLoading, 
-      refreshSession,
+    <AuthContext.Provider value={{
       isAuthenticated,
-      isAdmin
+      isAdmin,
+      isLoading,
+      profile,
+      signIn,
+      signUp,
+      signOut
     }}>
       {children}
     </AuthContext.Provider>
-  )
-}
+  );
+};
+
+export const useAuth = () => {
+  const context = useContext(AuthContext);
+  if (context === undefined) {
+    throw new Error('useAuth must be used within an AuthProvider');
+  }
+  return context;
+};

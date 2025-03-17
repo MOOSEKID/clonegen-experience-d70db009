@@ -4,19 +4,44 @@ import { useToast } from '@/components/ui/use-toast';
 
 export interface TrainerProfile {
   id: string;
-  name: string;
   email: string;
-  phone?: string;
-  bio?: string;
-  profile_picture?: string;
-  specialization: string[];
-  status?: string;
-  hire_date?: string;
-  experience_years?: number;
-  experience_level?: string;
-  stripe_account_id?: string;
-  certifications: TrainerCertification[];
-  availability: TrainerAvailability[];
+  full_name: string;
+  staff_category: string;
+  role: string;
+  is_admin: boolean;
+  is_staff: boolean;
+  access_level: string;
+  status: string;
+  created_at: string;
+  updated_at: string;
+  last_login: string;
+  department: string | null;
+  specializations: string[] | null;
+  reporting_to: string | null;
+  shift_preference: string | null;
+  max_clients: number | null;
+  certifications: string[] | null;
+  primary_location: string | null;
+  secondary_locations: string[] | null;
+  working_hours: {
+    start: string;
+    end: string;
+    days: string[];
+  } | null;
+  contact_email: string | null;
+  contact_phone: string | null;
+  emergency_contact: {
+    name: string;
+    phone: string;
+    relationship: string;
+  } | null;
+  availability: {
+    id: string;
+    trainer_id: string;
+    day_of_week: string;
+    start_time: string;
+    end_time: string;
+  }[];
 }
 
 export interface TrainerCertification {
@@ -48,43 +73,41 @@ export const useTrainerProfiles = () => {
       
       try {
         const { data: trainersData, error: trainersError } = await supabase
-          .from('trainers')
-          .select('*')
-          .order('name');
+          .from('profiles')
+          .select('*, availability(*)')
+          .eq('staff_category', 'training')
+          .not('role', 'eq', 'trainee');
           
         if (trainersError) throw trainersError;
         
         if (trainersData) {
-          const processedTrainers = await Promise.all(
-            trainersData.map(async (trainer) => {
-              const { data: certifications, error: certError } = await supabase
-                .from('trainer_certifications')
-                .select('*')
-                .eq('trainer_id', trainer.id);
-                
-              if (certError) console.error('Error fetching certifications:', certError);
-              
-              const { data: availability, error: availError } = await supabase
-                .from('trainer_availability')
-                .select('*')
-                .eq('trainer_id', trainer.id);
-                
-              if (availError) console.error('Error fetching availability:', availError);
-              
-              const profile_picture = trainer.profile_picture || trainer.profilepicture || null;
-              const hire_date = trainer.hire_date || trainer.hiredate || new Date().toISOString().split('T')[0];
-                
-              return {
-                ...trainer,
-                profile_picture,
-                hire_date,
-                certifications: certifications || [],
-                availability: availability || [],
-                experience_years: trainer.experience_years || null,
-                experience_level: trainer.experience_level || null
-              } as TrainerProfile;
-            })
-          );
+          const processedTrainers = trainersData.map((trainer: any) => ({
+            id: trainer.id,
+            email: trainer.email,
+            full_name: trainer.full_name,
+            staff_category: trainer.staff_category,
+            role: trainer.role,
+            is_admin: trainer.is_admin,
+            is_staff: true,
+            access_level: trainer.access_level,
+            status: trainer.status,
+            created_at: trainer.created_at,
+            updated_at: trainer.updated_at,
+            last_login: trainer.last_login,
+            department: trainer.department,
+            specializations: trainer.specializations,
+            reporting_to: trainer.reporting_to,
+            shift_preference: trainer.shift_preference,
+            max_clients: trainer.max_clients,
+            certifications: trainer.certifications,
+            primary_location: trainer.primary_location,
+            secondary_locations: trainer.secondary_locations,
+            working_hours: trainer.working_hours,
+            contact_email: trainer.contact_email,
+            contact_phone: trainer.contact_phone,
+            emergency_contact: trainer.emergency_contact,
+            availability: trainer.availability || []
+          })) as TrainerProfile[];
           
           setTrainers(processedTrainers);
         } else {
@@ -103,11 +126,11 @@ export const useTrainerProfiles = () => {
     fetchTrainers();
     
     const subscription = supabase
-      .channel('public:trainers')
+      .channel('public:profiles')
       .on('postgres_changes', { 
           event: '*', 
           schema: 'public', 
-          table: 'trainers'
+          table: 'profiles'
       }, () => {
         fetchTrainers();
       })
@@ -121,18 +144,27 @@ export const useTrainerProfiles = () => {
   const addTrainer = async (trainer: Omit<TrainerProfile, 'id' | 'certifications' | 'availability'>) => {
     try {
       const { data, error } = await supabase
-        .from('trainers')
+        .from('profiles')
         .insert({
-          name: trainer.name,
           email: trainer.email,
-          phone: trainer.phone || null,
-          bio: trainer.bio || null,
-          profile_picture: trainer.profile_picture || null,
-          specialization: trainer.specialization || [],
-          status: trainer.status || 'Active',
-          hire_date: trainer.hire_date || new Date().toISOString().split('T')[0],
-          experience_years: trainer.experience_years || null,
-          experience_level: trainer.experience_level || null
+          full_name: trainer.full_name,
+          staff_category: trainer.staff_category,
+          role: trainer.role,
+          is_admin: trainer.is_admin,
+          access_level: trainer.access_level,
+          status: trainer.status,
+          department: trainer.department || null,
+          specializations: trainer.specializations || null,
+          reporting_to: trainer.reporting_to || null,
+          shift_preference: trainer.shift_preference || null,
+          max_clients: trainer.max_clients || null,
+          certifications: trainer.certifications || null,
+          primary_location: trainer.primary_location || null,
+          secondary_locations: trainer.secondary_locations || null,
+          working_hours: trainer.working_hours || null,
+          contact_email: trainer.contact_email || null,
+          contact_phone: trainer.contact_phone || null,
+          emergency_contact: trainer.emergency_contact || null,
         })
         .select()
         .single();
@@ -141,7 +173,7 @@ export const useTrainerProfiles = () => {
       
       toast({
         title: "Trainer added",
-        description: `${trainer.name} has been added successfully.`
+        description: `${trainer.full_name} has been added successfully.`
       });
       
       return data;
@@ -159,7 +191,7 @@ export const useTrainerProfiles = () => {
   const updateTrainer = async (id: string, updates: Partial<Omit<TrainerProfile, 'id' | 'certifications' | 'availability'>>) => {
     try {
       const { error } = await supabase
-        .from('trainers')
+        .from('profiles')
         .update(updates)
         .eq('id', id);
         
@@ -185,7 +217,7 @@ export const useTrainerProfiles = () => {
   const deleteTrainer = async (id: string) => {
     try {
       const { error } = await supabase
-        .from('trainers')
+        .from('profiles')
         .delete()
         .eq('id', id);
         
@@ -332,156 +364,108 @@ const getMockTrainers = (): TrainerProfile[] => {
   const mockTrainers = [
     {
       id: "1",
-      name: "John Doe",
       email: "john.doe@uptowngym.com",
-      phone: "+1234567890",
-      bio: "Certified personal trainer with 5+ years of experience in strength training and weight loss.",
-      specialization: ["Strength Training", "Weight Loss"],
-      status: "Active",
-      hire_date: "2022-01-15",
-      profile_picture: null,
-      experience_years: 5,
-      experience_level: "Intermediate",
-      certifications: [
-        {
-          id: "cert1",
-          trainer_id: "1",
-          certification_name: "NASM Certified Personal Trainer",
-          issuing_organization: "National Academy of Sports Medicine",
-          issue_date: "2020-05-20",
-          expiry_date: "2024-05-20"
-        },
-        {
-          id: "cert2",
-          trainer_id: "1",
-          certification_name: "First Aid & CPR",
-          issuing_organization: "Red Cross",
-          issue_date: "2023-01-10",
-          expiry_date: "2025-01-10"
-        }
-      ],
-      availability: [
-        {
-          id: "avail1",
-          trainer_id: "1",
-          day_of_week: "Monday",
-          start_time: "09:00",
-          end_time: "17:00"
-        },
-        {
-          id: "avail2",
-          trainer_id: "1",
-          day_of_week: "Wednesday",
-          start_time: "09:00",
-          end_time: "17:00"
-        },
-        {
-          id: "avail3",
-          trainer_id: "1",
-          day_of_week: "Friday",
-          start_time: "09:00",
-          end_time: "17:00"
-        }
-      ]
+      full_name: "John Doe",
+      staff_category: "training",
+      role: "trainer",
+      is_admin: false,
+      is_staff: true,
+      access_level: "staff",
+      status: "active",
+      created_at: "2022-01-15T14:30:00.000Z",
+      updated_at: "2022-01-15T14:30:00.000Z",
+      last_login: "2022-01-15T14:30:00.000Z",
+      department: "Training",
+      specializations: ["Strength Training", "Weight Loss"],
+      reporting_to: "Jane Smith",
+      shift_preference: "morning",
+      max_clients: 10,
+      certifications: ["NASM Certified Personal Trainer", "First Aid & CPR"],
+      primary_location: "Uptown Gym",
+      secondary_locations: ["Downtown Gym", "Suburban Gym"],
+      working_hours: {
+        start: "09:00",
+        end: "17:00",
+        days: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"]
+      },
+      contact_email: "john.doe@uptowngym.com",
+      contact_phone: "+1234567890",
+      emergency_contact: {
+        name: "Jane Doe",
+        phone: "+1987654321",
+        relationship: "spouse"
+      },
+      availability: []
     },
     {
       id: "2",
-      name: "Jane Smith",
       email: "jane.smith@uptowngym.com",
-      phone: "+1987654321",
-      bio: "Yoga instructor and mindfulness coach with expertise in Hatha and Vinyasa styles.",
-      specialization: ["Yoga", "Pilates", "Meditation"],
-      status: "Active",
-      hire_date: "2022-03-10",
-      profile_picture: null,
-      experience_years: 8,
-      experience_level: "Advanced",
-      certifications: [
-        {
-          id: "cert3",
-          trainer_id: "2",
-          certification_name: "RYT 200-Hour Yoga Teacher",
-          issuing_organization: "Yoga Alliance",
-          issue_date: "2019-11-15",
-          expiry_date: null
-        }
-      ],
-      availability: [
-        {
-          id: "avail4",
-          trainer_id: "2",
-          day_of_week: "Tuesday",
-          start_time: "08:00",
-          end_time: "14:00"
-        },
-        {
-          id: "avail5",
-          trainer_id: "2",
-          day_of_week: "Thursday",
-          start_time: "08:00",
-          end_time: "14:00"
-        },
-        {
-          id: "avail6",
-          trainer_id: "2",
-          day_of_week: "Saturday",
-          start_time: "10:00",
-          end_time: "15:00"
-        }
-      ]
+      full_name: "Jane Smith",
+      staff_category: "training",
+      role: "trainer",
+      is_admin: false,
+      is_staff: true,
+      access_level: "staff",
+      status: "active",
+      created_at: "2022-03-10T14:30:00.000Z",
+      updated_at: "2022-03-10T14:30:00.000Z",
+      last_login: "2022-03-10T14:30:00.000Z",
+      department: "Training",
+      specializations: ["Yoga", "Pilates", "Meditation"],
+      reporting_to: "John Doe",
+      shift_preference: "afternoon",
+      max_clients: 15,
+      certifications: ["RYT 200-Hour Yoga Teacher"],
+      primary_location: "Uptown Gym",
+      secondary_locations: ["Downtown Gym"],
+      working_hours: {
+        start: "08:00",
+        end: "14:00",
+        days: ["Tuesday", "Thursday", "Saturday"]
+      },
+      contact_email: "jane.smith@uptowngym.com",
+      contact_phone: "+1122334455",
+      emergency_contact: {
+        name: "John Smith",
+        phone: "+1234567890",
+        relationship: "spouse"
+      },
+      availability: []
     },
     {
       id: "3",
-      name: "Mike Johnson",
       email: "mike.johnson@uptowngym.com",
-      phone: "+1122334455",
-      bio: "Former athlete specializing in sports-specific training and athletic performance.",
-      specialization: ["Sports Performance", "HIIT", "Functional Training"],
-      status: "Active",
-      hire_date: "2022-06-01",
-      profile_picture: null,
-      experience_years: 3,
-      experience_level: "Beginner",
-      certifications: [
-        {
-          id: "cert4",
-          trainer_id: "3",
-          certification_name: "CSCS",
-          issuing_organization: "NSCA",
-          issue_date: "2021-02-28",
-          expiry_date: "2025-02-28"
-        }
-      ],
-      availability: [
-        {
-          id: "avail7",
-          trainer_id: "3",
-          day_of_week: "Monday",
-          start_time: "14:00",
-          end_time: "21:00"
-        },
-        {
-          id: "avail8",
-          trainer_id: "3",
-          day_of_week: "Wednesday",
-          start_time: "14:00",
-          end_time: "21:00"
-        },
-        {
-          id: "avail9",
-          trainer_id: "3",
-          day_of_week: "Friday",
-          start_time: "14:00",
-          end_time: "21:00"
-        },
-        {
-          id: "avail10",
-          trainer_id: "3",
-          day_of_week: "Sunday",
-          start_time: "10:00",
-          end_time: "16:00"
-        }
-      ]
+      full_name: "Mike Johnson",
+      staff_category: "training",
+      role: "trainer",
+      is_admin: false,
+      is_staff: true,
+      access_level: "staff",
+      status: "active",
+      created_at: "2022-06-01T14:30:00.000Z",
+      updated_at: "2022-06-01T14:30:00.000Z",
+      last_login: "2022-06-01T14:30:00.000Z",
+      department: "Training",
+      specializations: ["Sports Performance", "HIIT", "Functional Training"],
+      reporting_to: "Jane Smith",
+      shift_preference: "evening",
+      max_clients: 12,
+      certifications: ["CSCS"],
+      primary_location: "Uptown Gym",
+      secondary_locations: ["Suburban Gym"],
+      working_hours: {
+        start: "14:00",
+        end: "21:00",
+        days: ["Monday", "Wednesday", "Friday", "Sunday"]
+      },
+      contact_email: "mike.johnson@uptowngym.com",
+      contact_phone: "+1987654321",
+      emergency_contact: {
+        name: "Emily Johnson",
+        phone: "+1122334455",
+        relationship: "spouse"
+      },
+      availability: []
     }
   ];
   

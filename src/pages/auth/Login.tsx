@@ -17,15 +17,18 @@ const Login = () => {
   const navigate = useNavigate();
   const location = useLocation();
   
-  // Get referrer from state or query parameter
-  const from = location.state?.from || new URLSearchParams(location.search).get('redirect') || '/dashboard';
+  // Get referrer from state or query parameter, ensure it works with base URL
+  const from = location.state?.from || 
+    new URLSearchParams(location.search).get('redirect') || 
+    (import.meta.env.PROD ? '/clonegen-experience/dashboard' : '/dashboard');
   
   // Check if user is already authenticated
   useEffect(() => {
     if (isAuthenticated) {
       console.log('User authenticated, redirecting to:', from);
       // Redirect based on saved path or user role
-      navigate(from || (isAdmin ? '/admin' : '/dashboard'), { replace: true });
+      const basePath = import.meta.env.PROD ? '/clonegen-experience' : '';
+      navigate(from || (isAdmin ? `${basePath}/admin/trainers` : `${basePath}/dashboard`), { replace: true });
     }
   }, [isAuthenticated, isAdmin, navigate, from]);
 
@@ -38,11 +41,25 @@ const Login = () => {
     }
 
     // Validate staff email format
-    if (email.endsWith('@uptowngym.rw')) {
+    if (email.endsWith('@uptowngym.rw') && email !== 'admin@uptowngym.rw') {
       const [prefix] = email.split('@');
       const parts = prefix.split('.');
+      
       if (parts.length < 2) {
         setErrorMessage('Invalid staff email format. Expected: role.name@uptowngym.rw');
+        return;
+      }
+
+      const [role] = parts;
+      const validRoles = [
+        'general.manager', 'operations.manager', 'fitness.manager',
+        'head.trainer', 'senior.trainer', 'trainer', 'trainee',
+        'supervisor', 'receptionist', 'membership', 'nutritionist', 'physio',
+        'maintenance.supervisor', 'maintenance', 'cleaner'
+      ];
+
+      if (!validRoles.some(validRole => role.startsWith(validRole))) {
+        setErrorMessage('Invalid role prefix in email');
         return;
       }
     }
@@ -50,7 +67,6 @@ const Login = () => {
     try {
       setErrorMessage('');
       await signIn(email, password);
-      // Auth state update and navigation handled by useEffect
     } catch (error) {
       console.error('Login error:', error);
       setErrorMessage(error instanceof Error ? error.message : 'Login failed');
@@ -61,11 +77,13 @@ const Login = () => {
   const handleAdminLogin = async () => {
     try {
       setErrorMessage('');
-      await signIn('admin@uptowngym.rw', import.meta.env.VITE_ADMIN_PASSWORD || 'admin123');
-      // Auth state update and navigation handled by useEffect
+      // Use the admin password from .env
+      const adminPassword = import.meta.env.VITE_ADMIN_PASSWORD || 'admin@123';
+      await signIn('admin@uptowngym.rw', adminPassword);
     } catch (error) {
       console.error('Admin login error:', error);
       setErrorMessage(error instanceof Error ? error.message : 'Admin login failed');
+      toast.error('Admin login failed. Please check your credentials.');
     }
   };
 
@@ -146,7 +164,7 @@ const Login = () => {
             onClick={handleAdminLogin}
             disabled={isLoading}
           >
-            Admin Login (admin@uptowngym.rw)
+            Admin Login
           </Button>
         </CardContent>
         <CardFooter className="flex flex-col space-y-4">
