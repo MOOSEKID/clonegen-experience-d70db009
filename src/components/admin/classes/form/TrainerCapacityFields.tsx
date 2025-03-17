@@ -18,6 +18,7 @@ import {
 import { Info, Loader2, AlertCircle } from 'lucide-react';
 import { useTrainersData } from '@/hooks/useTrainersData';
 import { cn } from '@/lib/utils';
+import { TrainerStatusBadge } from '@/components/admin/trainers/profiles/card';
 
 interface TrainerCapacityFieldsProps {
   classData: Omit<ClassType, 'id'>;
@@ -72,7 +73,17 @@ const TrainerCapacityFields = ({
             <SelectContent>
               {trainers.map((trainer) => (
                 <SelectItem key={trainer.id} value={trainer.id}>
-                  {trainer.name} {trainer.specialization ? `- ${trainer.specialization.join(', ')}` : ''}
+                  <div className="flex items-center justify-between w-full">
+                    <span>{trainer.name}</span>
+                    {trainer.status && (
+                      <TrainerStatusBadge status={trainer.status} className="ml-2 text-xs" />
+                    )}
+                  </div>
+                  {trainer.specialization && (
+                    <div className="text-xs text-gray-500 mt-1">
+                      {trainer.specialization.join(', ')}
+                    </div>
+                  )}
                 </SelectItem>
               ))}
             </SelectContent>
