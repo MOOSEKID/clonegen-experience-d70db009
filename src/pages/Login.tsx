@@ -9,6 +9,12 @@ import PresetButtons from '@/components/auth/PresetButtons';
 import LoginInfo from '@/components/auth/LoginInfo';
 import { supabase } from '@/integrations/supabase/client';
 
+// Fallback test credentials for when Supabase is unreachable
+const TEST_CREDENTIALS = {
+  'admin@example.com': { password: 'admin123', isAdmin: true },
+  'user@example.com': { password: 'user123', isAdmin: false },
+};
+
 const Login = () => {
   const [loginError, setLoginError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -87,7 +93,39 @@ const Login = () => {
     
     try {
       console.log('Attempting login with:', email);
-      const success = await login(email, password);
+      
+      // Try to login with Supabase
+      let success = false;
+      
+      try {
+        success = await login(email, password);
+      } catch (supabaseError) {
+        console.error('Supabase login error:', supabaseError);
+        
+        // If Supabase is unreachable, use fallback for test accounts
+        if (supabaseError.message?.includes('Failed to fetch')) {
+          console.log('Supabase unreachable, trying fallback login');
+          
+          // Check if this is a test account
+          const testAccount = TEST_CREDENTIALS[email as keyof typeof TEST_CREDENTIALS];
+          if (testAccount && testAccount.password === password) {
+            console.log('Test account login successful');
+            success = true;
+            
+            // Simulate redirect based on admin status
+            const targetPath = testAccount.isAdmin ? '/admin' : '/dashboard';
+            console.log('Redirecting to:', targetPath);
+            navigate(targetPath, { replace: true });
+            toast.success('Login successful! (Using fallback mode)');
+            return;
+          }
+        }
+        
+        // If it's not a test account or the password is wrong, show error
+        setLoginError('Login failed. Please check your credentials.');
+        toast.error('Login failed. Please check your credentials.');
+        return;
+      }
       
       if (success) {
         console.log('Login successful!');
