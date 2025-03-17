@@ -1,91 +1,49 @@
 
-import { Dialog } from "@/components/ui/dialog";
-import { ContentElement, ElementProperties } from '../ContentEditor';
-
-// Mapping for padding classes
-const paddingClasses = {
-  none: '',
-  small: 'p-2',
-  medium: 'p-4',
-  large: 'p-6'
-};
+import { ElementProperties } from '@/types/content.types';
 
 interface ImageElementProps {
-  element: ContentElement;
+  content: string;
+  properties: ElementProperties;
+  alt?: string;
   isEditing: boolean;
-  onUpdate: (element: ContentElement) => void;
 }
 
-const ImageElement = ({ element, isEditing, onUpdate }: ImageElementProps) => {
-  const { content, properties, alt } = element;
-  
-  // Get padding class based on properties
-  const paddingClass = paddingClasses[properties.padding as keyof typeof paddingClasses] || paddingClasses.medium;
-  
-  // Size classes
-  const sizeClass = properties.size === 'small' 
-    ? 'max-w-xs' 
-    : properties.size === 'medium'
-      ? 'max-w-md'
-      : properties.size === 'large'
-        ? 'max-w-lg'
-        : 'w-full';
-        
-  // Alignment classes
-  const alignmentClass = properties.align === 'center' 
-    ? 'mx-auto' 
-    : properties.align === 'right' 
-      ? 'ml-auto' 
-      : '';
-    
-  // Handle URL change in edit mode
-  const handleUrlChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    onUpdate({
-      ...element,
-      content: e.target.value
-    });
+const ImageElement = ({ content, properties, alt, isEditing }: ImageElementProps) => {
+  const getSizeClass = () => {
+    switch (properties.size) {
+      case 'sm': return 'max-w-[200px]';
+      case 'md': return 'max-w-[400px]';
+      case 'lg': return 'max-w-[600px]';
+      case 'full': return 'w-full';
+      default: return 'max-w-[400px]';
+    }
   };
-  
-  // Handle alt text change in edit mode
-  const handleAltChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    onUpdate({
-      ...element,
-      alt: e.target.value
-    });
+
+  const getAlignClass = () => {
+    switch (properties.align) {
+      case 'left': return 'mr-auto';
+      case 'center': return 'mx-auto';
+      case 'right': return 'ml-auto';
+      default: return 'mx-auto';
+    }
   };
-  
+
+  const getPaddingClass = () => {
+    switch (properties.padding) {
+      case 'sm': return 'p-2';
+      case 'md': return 'p-4';
+      case 'lg': return 'p-6';
+      default: return '';
+    }
+  };
+
   return (
-    <div className={paddingClass}>
-      {isEditing ? (
-        <div className="space-y-2">
-          <input
-            type="text"
-            value={content}
-            onChange={handleUrlChange}
-            className="w-full p-2 border border-gray-300 rounded"
-            placeholder="Image URL"
-          />
-          <input
-            type="text"
-            value={alt || ''}
-            onChange={handleAltChange}
-            className="w-full p-2 border border-gray-300 rounded"
-            placeholder="Alt Text (for accessibility)"
-          />
-          <Dialog>
-            {/* Media Library Dialog would go here */}
-          </Dialog>
-        </div>
-      ) : (
-        <img 
-          src={content || '/placeholder.svg'} 
-          alt={alt || 'Image'} 
-          className={`${sizeClass} ${alignmentClass} rounded`}
-          style={{
-            borderRadius: properties.borderRadius ? `${properties.borderRadius}px` : '0.25rem'
-          }}
-        />
-      )}
+    <div className={`${getPaddingClass()}`}>
+      <img
+        src={content}
+        alt={alt || "Image"}
+        className={`${getSizeClass()} ${getAlignClass()} block object-contain ${isEditing ? 'border border-dashed border-gray-300' : ''}`}
+      />
     </div>
   );
 };

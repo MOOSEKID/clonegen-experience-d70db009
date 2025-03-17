@@ -831,45 +831,95 @@ export type Database = {
       }
       profiles: {
         Row: {
+          access_level: Database["public"]["Enums"]["access_level"] | null
           avatar_url: string | null
+          bio: string | null
           contact_number: string | null
           created_at: string | null
+          department: Database["public"]["Enums"]["department_type"] | null
+          email: string
+          experience_level: string | null
+          experience_years: number | null
           full_name: string | null
           gym_location: string | null
+          hire_date: string | null
           id: string
-          is_admin: boolean | null
+          is_admin: boolean
+          is_staff: boolean
+          phone: string | null
           preferred_workout_time: string | null
-          role: string | null
+          profile_picture: string | null
+          reporting_to: string | null
+          role: Database["public"]["Enums"]["user_role"]
+          specializations: string[] | null
+          staff_category: Database["public"]["Enums"]["staff_category"] | null
+          status: Database["public"]["Enums"]["staff_status"] | null
           updated_at: string | null
           username: string | null
         }
         Insert: {
+          access_level?: Database["public"]["Enums"]["access_level"] | null
           avatar_url?: string | null
+          bio?: string | null
           contact_number?: string | null
           created_at?: string | null
+          department?: Database["public"]["Enums"]["department_type"] | null
+          email: string
+          experience_level?: string | null
+          experience_years?: number | null
           full_name?: string | null
           gym_location?: string | null
+          hire_date?: string | null
           id: string
-          is_admin?: boolean | null
+          is_admin?: boolean
+          is_staff?: boolean
+          phone?: string | null
           preferred_workout_time?: string | null
-          role?: string | null
+          profile_picture?: string | null
+          reporting_to?: string | null
+          role?: Database["public"]["Enums"]["user_role"]
+          specializations?: string[] | null
+          staff_category?: Database["public"]["Enums"]["staff_category"] | null
+          status?: Database["public"]["Enums"]["staff_status"] | null
           updated_at?: string | null
           username?: string | null
         }
         Update: {
+          access_level?: Database["public"]["Enums"]["access_level"] | null
           avatar_url?: string | null
+          bio?: string | null
           contact_number?: string | null
           created_at?: string | null
+          department?: Database["public"]["Enums"]["department_type"] | null
+          email?: string
+          experience_level?: string | null
+          experience_years?: number | null
           full_name?: string | null
           gym_location?: string | null
+          hire_date?: string | null
           id?: string
-          is_admin?: boolean | null
+          is_admin?: boolean
+          is_staff?: boolean
+          phone?: string | null
           preferred_workout_time?: string | null
-          role?: string | null
+          profile_picture?: string | null
+          reporting_to?: string | null
+          role?: Database["public"]["Enums"]["user_role"]
+          specializations?: string[] | null
+          staff_category?: Database["public"]["Enums"]["staff_category"] | null
+          status?: Database["public"]["Enums"]["staff_status"] | null
           updated_at?: string | null
           username?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "profiles_reporting_to_fkey"
+            columns: ["reporting_to"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       program_exercises: {
         Row: {
@@ -1434,7 +1484,42 @@ export type Database = {
       [_ in never]: never
     }
     Enums: {
-      [_ in never]: never
+      access_level: "full" | "high" | "medium" | "basic" | "limited"
+      department_type:
+        | "management"
+        | "training"
+        | "operations"
+        | "maintenance"
+        | "reception"
+        | "nutrition"
+        | "rehabilitation"
+        | "customer_service"
+      staff_category:
+        | "management"
+        | "training"
+        | "operations"
+        | "reception"
+        | "maintenance"
+        | "customer"
+      staff_status: "active" | "inactive" | "on_leave" | "terminated"
+      user_role:
+        | "admin"
+        | "general_manager"
+        | "operations_manager"
+        | "fitness_manager"
+        | "head_trainer"
+        | "senior_trainer"
+        | "trainer"
+        | "trainee_trainer"
+        | "operations_supervisor"
+        | "receptionist"
+        | "membership_coordinator"
+        | "nutritionist"
+        | "physiotherapist"
+        | "maintenance_supervisor"
+        | "maintenance_staff"
+        | "cleaner"
+        | "individual_client"
     }
     CompositeTypes: {
       [_ in never]: never

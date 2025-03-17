@@ -1,86 +1,73 @@
 
-import { ContentElement, ElementProperties } from '../ContentEditor';
-
-// Size mapping to tailwind classes
-const sizeClasses = {
-  small: 'text-sm',
-  medium: 'text-base',
-  large: 'text-lg',
-  xlarge: 'text-xl',
-  '2xlarge': 'text-2xl',
-  '3xlarge': 'text-3xl',
-  '4xlarge': 'text-4xl'
-};
-
-// Style mapping to tailwind classes
-const styleClasses = {
-  normal: '',
-  bold: 'font-bold',
-  italic: 'italic',
-  'bold-italic': 'font-bold italic'
-};
-
-// Padding mapping to tailwind classes
-const paddingClasses = {
-  none: '',
-  small: 'p-2',
-  medium: 'p-4',
-  large: 'p-6'
-};
+import { ElementProperties } from '@/types/content.types';
 
 interface TextElementProps {
-  element: ContentElement;
+  content: string;
+  properties: ElementProperties;
   isEditing: boolean;
-  onUpdate: (element: ContentElement) => void;
+  onChange?: (content: string) => void;
 }
 
-const TextElement = ({ element, isEditing, onUpdate }: TextElementProps) => {
-  const { content, properties } = element;
-  
-  // Get size class based on properties
-  const sizeClass = sizeClasses[properties.size as keyof typeof sizeClasses] || sizeClasses.medium;
-  
-  // Get style class based on properties
-  const styleClass = styleClasses[properties.style as keyof typeof styleClasses] || styleClasses.normal;
-  
-  // Get padding class based on properties
-  const paddingClass = paddingClasses[properties.padding as keyof typeof paddingClasses] || paddingClasses.medium;
-  
-  // Get alignment class based on properties
-  const alignClass = properties.align === 'center' 
-    ? 'text-center' 
-    : properties.align === 'right' 
-      ? 'text-right' 
-      : properties.align === 'justify' 
-        ? 'text-justify' 
-        : 'text-left';
-  
-  // Handle content change in edit mode
-  const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    onUpdate({
-      ...element,
-      content: e.target.value
-    });
+const TextElement = ({ content, properties, isEditing, onChange }: TextElementProps) => {
+  const getSizeClass = () => {
+    switch (properties.size) {
+      case 'sm': return 'text-sm';
+      case 'lg': return 'text-lg';
+      case 'xl': return 'text-xl';
+      default: return 'text-base';
+    }
   };
-  
+
+  const getStyleClass = () => {
+    switch (properties.style) {
+      case 'bold': return 'font-bold';
+      case 'italic': return 'italic';
+      case 'underline': return 'underline';
+      default: return '';
+    }
+  };
+
+  const getAlignClass = () => {
+    switch (properties.align) {
+      case 'left': return 'text-left';
+      case 'center': return 'text-center';
+      case 'right': return 'text-right';
+      default: return 'text-left';
+    }
+  };
+
+  const getColorClass = () => {
+    switch (properties.color) {
+      case 'primary': return 'text-primary';
+      case 'secondary': return 'text-secondary';
+      case 'muted': return 'text-muted-foreground';
+      default: return '';
+    }
+  };
+
+  const getPaddingClass = () => {
+    switch (properties.padding) {
+      case 'sm': return 'p-2';
+      case 'md': return 'p-4';
+      case 'lg': return 'p-6';
+      default: return '';
+    }
+  };
+
+  const handleChange = (e: React.ChangeEvent<HTMLDivElement>) => {
+    if (onChange && isEditing) {
+      onChange(e.currentTarget.textContent || '');
+    }
+  };
+
   return (
-    <div className={paddingClass}>
-      {isEditing ? (
-        <textarea
-          value={content}
-          onChange={handleChange}
-          className="w-full p-2 border border-gray-300 rounded min-h-[100px]"
-          placeholder="Enter text content here..."
-        />
-      ) : (
-        <p 
-          className={`${sizeClass} ${styleClass} ${alignClass}`}
-          style={{ color: properties.color || '#000000' }}
-        >
-          {content || 'Text content goes here'}
-        </p>
-      )}
-    </div>
+    <div
+      className={`${getSizeClass()} ${getStyleClass()} ${getAlignClass()} ${getColorClass()} ${getPaddingClass()}`}
+      contentEditable={isEditing}
+      suppressContentEditableWarning={true}
+      onBlur={handleChange}
+      dangerouslySetInnerHTML={{ __html: content }}
+    ></div>
   );
 };
 

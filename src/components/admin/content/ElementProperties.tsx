@@ -1,40 +1,57 @@
 
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import TextProperties from "./properties/TextProperties";
-import ImageProperties from "./properties/ImageProperties";
-import VideoProperties from "./properties/VideoProperties";
-import ButtonProperties from "./properties/ButtonProperties";
-import SpacingProperties from "./properties/SpacingProperties";
+import { useState } from 'react';
 import { ContentElement, ElementProperties as ElementPropsType } from '@/types/content.types';
+import ButtonProperties from './properties/ButtonProperties';
+import ImageProperties from './properties/ImageProperties';
+import TextProperties from './properties/TextProperties';
+import VideoProperties from './properties/VideoProperties';
+import SpacingProperties from './properties/SpacingProperties';
 
 interface ElementPropertiesProps {
   element: ContentElement;
-  onUpdate: (properties: ElementPropsType) => void;
+  onUpdate: (updatedElement: ContentElement) => void;
 }
 
 const ElementProperties = ({ element, onUpdate }: ElementPropertiesProps) => {
-  const { type, properties = {} } = element;
-  
-  const handleUpdate = (newProperties: Partial<ElementPropsType>) => {
-    onUpdate({ ...properties, ...newProperties });
+  const [localElement, setLocalElement] = useState<ContentElement>(element);
+
+  const updateProperties = (newProps: Partial<ElementPropsType>) => {
+    const updatedElement = {
+      ...localElement,
+      properties: {
+        ...localElement.properties,
+        ...newProps
+      }
+    };
+    
+    setLocalElement(updatedElement);
+    onUpdate(updatedElement);
   };
 
   return (
-    <Tabs defaultValue="style">
-      <TabsList className="w-full">
-        <TabsTrigger value="style" className="flex-1">Style</TabsTrigger>
-        <TabsTrigger value="spacing" className="flex-1">Spacing</TabsTrigger>
-      </TabsList>
-      <TabsContent value="style" className="space-y-6 py-4">
-        {type === 'text' && <TextProperties properties={properties} onUpdate={handleUpdate} />}
-        {type === 'image' && <ImageProperties element={element} properties={properties} onUpdate={handleUpdate} />}
-        {type === 'video' && <VideoProperties properties={properties} onUpdate={handleUpdate} />}
-        {type === 'button' && <ButtonProperties properties={properties} onUpdate={handleUpdate} />}
-      </TabsContent>
-      <TabsContent value="spacing" className="space-y-6 py-4">
-        <SpacingProperties properties={properties} onUpdate={handleUpdate} />
-      </TabsContent>
-    </Tabs>
+    <div className="p-4 border border-gray-200 rounded-md">
+      <h3 className="text-lg font-medium mb-4">Properties</h3>
+      
+      {element.type === 'text' && (
+        <TextProperties element={element} onUpdate={updateProperties} />
+      )}
+      
+      {element.type === 'image' && (
+        <ImageProperties element={element} onUpdate={updateProperties} onElementUpdate={onUpdate} />
+      )}
+      
+      {element.type === 'button' && (
+        <ButtonProperties element={element} onUpdate={updateProperties} />
+      )}
+      
+      {element.type === 'video' && (
+        <VideoProperties element={element} onUpdate={updateProperties} onElementUpdate={onUpdate} />
+      )}
+      
+      <div className="mt-4 pt-4 border-t border-gray-200">
+        <SpacingProperties element={element} onUpdate={updateProperties} />
+      </div>
+    </div>
   );
 };
 

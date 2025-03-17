@@ -1,107 +1,85 @@
 
-import { ContentElement, ElementProperties } from '../ContentEditor';
-
-// Mapping for padding classes
-const paddingClasses = {
-  none: '',
-  small: 'p-2',
-  medium: 'p-4',
-  large: 'p-6'
-};
+import { ElementProperties } from '@/types/content.types';
 
 interface VideoElementProps {
-  element: ContentElement;
+  content: string;
+  properties: ElementProperties;
+  videoUrl?: string;
   isEditing: boolean;
-  onUpdate: (element: ContentElement) => void;
 }
 
-const VideoElement = ({ element, isEditing, onUpdate }: VideoElementProps) => {
-  const { content, properties } = element;
-  
-  // Get padding class based on properties
-  const paddingClass = paddingClasses[properties.padding as keyof typeof paddingClasses] || paddingClasses.medium;
-  
-  // Size classes
-  const sizeClass = properties.size === 'small' 
-    ? 'max-w-md' 
-    : properties.size === 'medium'
-      ? 'max-w-lg'
-      : properties.size === 'large'
-        ? 'max-w-2xl'
-        : 'w-full';
-        
-  // Alignment classes
-  const alignmentClass = properties.align === 'center' 
-    ? 'mx-auto' 
-    : properties.align === 'right' 
-      ? 'ml-auto' 
-      : '';
-    
-  // Handle URL change in edit mode
-  const handleUrlChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    onUpdate({
-      ...element,
-      content: e.target.value
-    });
+const VideoElement = ({ properties, videoUrl, isEditing }: VideoElementProps) => {
+  const getSizeClass = () => {
+    switch (properties.size) {
+      case 'sm': return 'max-w-[300px] aspect-video';
+      case 'md': return 'max-w-[500px] aspect-video';
+      case 'lg': return 'max-w-[700px] aspect-video';
+      case 'full': return 'w-full aspect-video';
+      default: return 'max-w-[500px] aspect-video';
+    }
   };
-  
-  // Extract video ID from YouTube or Vimeo URL
+
+  const getAlignClass = () => {
+    switch (properties.align) {
+      case 'left': return 'mr-auto';
+      case 'center': return 'mx-auto';
+      case 'right': return 'ml-auto';
+      default: return 'mx-auto';
+    }
+  };
+
+  const getPaddingClass = () => {
+    switch (properties.padding) {
+      case 'sm': return 'p-2';
+      case 'md': return 'p-4';
+      case 'lg': return 'p-6';
+      default: return '';
+    }
+  };
+
+  // Basic function to get embed URL from YouTube or Vimeo URL
   const getEmbedUrl = (url: string) => {
     if (!url) return '';
-    
+
     // YouTube
-    if (url.includes('youtube.com') || url.includes('youtu.be')) {
-      const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/;
-      const match = url.match(regExp);
-      const videoId = (match && match[2].length === 11) ? match[2] : null;
-      
-      if (videoId) {
-        return `https://www.youtube.com/embed/${videoId}`;
-      }
+    const youtubeRegex = /(?:youtube\.com\/(?:[^\/\n\s]+\/\S+\/|(?:v|e(?:mbed)?)\/|\S*?[?&]v=)|youtu\.be\/)([a-zA-Z0-9_-]{11})/;
+    const youtubeMatch = url.match(youtubeRegex);
+    
+    if (youtubeMatch && youtubeMatch[1]) {
+      return `https://www.youtube.com/embed/${youtubeMatch[1]}`;
     }
     
     // Vimeo
-    if (url.includes('vimeo.com')) {
-      const regExp = /^.*(vimeo.com\/)((channels\/[A-z]+\/)|(groups\/[A-z]+\/videos\/))?([0-9]+)/;
-      const match = url.match(regExp);
-      const videoId = match ? match[5] : null;
-      
-      if (videoId) {
-        return `https://player.vimeo.com/video/${videoId}`;
-      }
+    const vimeoRegex = /vimeo\.com\/(?:channels\/(?:\w+\/)?|groups\/([^\/]*)\/videos\/|album\/(\d+)\/video\/|)(\d+)(?:$|\/|\?)/;
+    const vimeoMatch = url.match(vimeoRegex);
+    
+    if (vimeoMatch && vimeoMatch[3]) {
+      return `https://player.vimeo.com/video/${vimeoMatch[3]}`;
     }
     
+    // Return original URL if no matches
     return url;
   };
-  
+
   return (
-    <div className={paddingClass}>
-      {isEditing ? (
-        <div className="space-y-2">
-          <input
-            type="text"
-            value={content}
-            onChange={handleUrlChange}
-            className="w-full p-2 border border-gray-300 rounded"
-            placeholder="YouTube or Vimeo URL"
-          />
-          <p className="text-xs text-gray-500">
-            Paste a YouTube or Vimeo video URL here
-          </p>
-        </div>
-      ) : (
-        <div className={`${sizeClass} ${alignmentClass} aspect-w-16 aspect-h-9`}>
+    <div className={`${getPaddingClass()}`}>
+      <div className={`${getSizeClass()} ${getAlignClass()}`}>
+        {videoUrl ? (
           <iframe
-            src={getEmbedUrl(content)}
-            title="Video"
-            allowFullScreen
+            src={getEmbedUrl(videoUrl)}
             className="w-full h-full"
-            style={{
-              borderRadius: properties.borderRadius ? `${properties.borderRadius}px` : '0.25rem'
-            }}
+            frameBorder="0"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+            allowFullScreen
           ></iframe>
-        </div>
-      )}
+        ) : (
+          <div className="w-full h-full bg-gray-100 flex items-center justify-center border border-dashed border-gray-300">
+            <p className="text-muted-foreground">
+              {isEditing ? "Enter a video URL in the properties panel" : "No video URL provided"}
+            </p>
+          </div>
+        )}
+      </div>
     </div>
   );
 };

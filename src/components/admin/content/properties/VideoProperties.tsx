@@ -1,76 +1,97 @@
 
-import { Label } from "@/components/ui/label";
-import { Input } from "@/components/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { ElementProperties } from '@/types/content.types';
+import { useState } from 'react';
+import { Label } from '@/components/ui/label';
+import { Input } from '@/components/ui/input';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import { ContentElement, ElementProperties } from '@/types/content.types';
 
 interface VideoPropertiesProps {
-  properties: ElementProperties;
+  element: ContentElement;
   onUpdate: (properties: Partial<ElementProperties>) => void;
+  onElementUpdate: (element: ContentElement) => void;
 }
 
-const VideoProperties = ({ properties, onUpdate }: VideoPropertiesProps) => {
-  const handleSizeChange = (value: string) => {
-    onUpdate({ size: value });
-  };
+const VideoProperties = ({ element, onUpdate, onElementUpdate }: VideoPropertiesProps) => {
+  const [videoUrl, setVideoUrl] = useState(element.videoUrl || '');
   
-  const handleAlignChange = (value: string) => {
-    onUpdate({ align: value });
+  const handleSizeChange = (size: string) => {
+    onUpdate({ size });
   };
 
-  const handleVideoUrlChange = (value: string) => {
-    onUpdate({ videoUrl: value });
+  const handleAlignChange = (align: string) => {
+    onUpdate({ align });
   };
-  
+
+  const handleVideoUrlChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const newUrl = e.target.value;
+    setVideoUrl(newUrl);
+    
+    // Update the element with the new video URL
+    const updatedElement = {
+      ...element,
+      videoUrl: newUrl
+    };
+    onElementUpdate(updatedElement);
+  };
+
   return (
     <div className="space-y-4">
       <div>
-        <Label>Video URL</Label>
-        <Input 
-          type="text" 
-          value={properties.videoUrl || ''} 
-          onChange={(e) => handleVideoUrlChange(e.target.value)}
-          className="mt-1.5"
-          placeholder="YouTube or Vimeo URL"
+        <Label htmlFor="video-url" className="block mb-2">Video URL</Label>
+        <Input
+          id="video-url"
+          value={videoUrl}
+          onChange={handleVideoUrlChange}
+          placeholder="Enter YouTube or Vimeo URL"
         />
-        <p className="text-xs text-gray-500 mt-1">
-          Supports YouTube and Vimeo videos
-        </p>
       </div>
-      
+
       <div>
-        <Label>Size</Label>
-        <Select 
-          value={properties.size || 'medium'} 
+        <Label className="block mb-2">Video Size</Label>
+        <RadioGroup
+          defaultValue={element.properties.size}
           onValueChange={handleSizeChange}
+          className="flex flex-wrap gap-2"
         >
-          <SelectTrigger className="mt-1.5">
-            <SelectValue placeholder="Select size" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="small">Small</SelectItem>
-            <SelectItem value="medium">Medium</SelectItem>
-            <SelectItem value="large">Large</SelectItem>
-            <SelectItem value="full">Full Width</SelectItem>
-          </SelectContent>
-        </Select>
+          <div className="flex items-center space-x-2">
+            <RadioGroupItem value="sm" id="size-sm" />
+            <Label htmlFor="size-sm">Small</Label>
+          </div>
+          <div className="flex items-center space-x-2">
+            <RadioGroupItem value="md" id="size-md" />
+            <Label htmlFor="size-md">Medium</Label>
+          </div>
+          <div className="flex items-center space-x-2">
+            <RadioGroupItem value="lg" id="size-lg" />
+            <Label htmlFor="size-lg">Large</Label>
+          </div>
+          <div className="flex items-center space-x-2">
+            <RadioGroupItem value="full" id="size-full" />
+            <Label htmlFor="size-full">Full Width</Label>
+          </div>
+        </RadioGroup>
       </div>
-      
+
       <div>
-        <Label>Alignment</Label>
-        <Select 
-          value={properties.align || 'left'} 
+        <Label className="block mb-2">Video Alignment</Label>
+        <RadioGroup
+          defaultValue={element.properties.align}
           onValueChange={handleAlignChange}
+          className="flex flex-wrap gap-2"
         >
-          <SelectTrigger className="mt-1.5">
-            <SelectValue placeholder="Select alignment" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="left">Left</SelectItem>
-            <SelectItem value="center">Center</SelectItem>
-            <SelectItem value="right">Right</SelectItem>
-          </SelectContent>
-        </Select>
+          <div className="flex items-center space-x-2">
+            <RadioGroupItem value="left" id="align-left" />
+            <Label htmlFor="align-left">Left</Label>
+          </div>
+          <div className="flex items-center space-x-2">
+            <RadioGroupItem value="center" id="align-center" />
+            <Label htmlFor="align-center">Center</Label>
+          </div>
+          <div className="flex items-center space-x-2">
+            <RadioGroupItem value="right" id="align-right" />
+            <Label htmlFor="align-right">Right</Label>
+          </div>
+        </RadioGroup>
       </div>
     </div>
   );

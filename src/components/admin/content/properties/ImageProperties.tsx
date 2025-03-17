@@ -1,101 +1,139 @@
 
-import { Label } from "@/components/ui/label";
-import { Input } from "@/components/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Button } from "@/components/ui/button";
-import { Dialog, DialogTrigger } from "@/components/ui/dialog";
-import { ElementProperties, ContentElement } from '@/types/content.types';
+import { useState } from 'react';
+import { Label } from '@/components/ui/label';
+import { Input } from '@/components/ui/input';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import { Button } from '@/components/ui/button';
+import { ContentElement, ElementProperties } from '@/types/content.types';
+import SelectImageDialog from '../dialogs/SelectImageDialog';
 
 interface ImagePropertiesProps {
   element: ContentElement;
-  properties: ElementProperties;
   onUpdate: (properties: Partial<ElementProperties>) => void;
+  onElementUpdate: (element: ContentElement) => void;
 }
 
-const ImageProperties = ({ element, properties, onUpdate }: ImagePropertiesProps) => {
-  const handleSizeChange = (value: string) => {
-    onUpdate({ size: value });
-  };
+const ImageProperties = ({ element, onUpdate, onElementUpdate }: ImagePropertiesProps) => {
+  const [isSelectImageOpen, setIsSelectImageOpen] = useState(false);
+  const [altText, setAltText] = useState(element.alt || '');
   
-  const handleAlignChange = (value: string) => {
-    onUpdate({ align: value });
+  const handleSizeChange = (size: string) => {
+    onUpdate({ size });
   };
 
-  const handleContentChange = (value: string) => {
-    // We're updating the element content which is the image URL
-    onUpdate({ content: value } as any);
+  const handleAlignChange = (align: string) => {
+    onUpdate({ align });
   };
 
-  const handleAltChange = (value: string) => {
-    // We're updating the alt attribute
-    onUpdate({ alt: value } as any);
+  const handleSelectImage = (imageUrl: string) => {
+    const updatedElement = {
+      ...element,
+      content: imageUrl
+    };
+    onElementUpdate(updatedElement);
+    setIsSelectImageOpen(false);
   };
-  
+
+  const handleAltTextChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const newAltText = e.target.value;
+    setAltText(newAltText);
+    
+    // Update the element with the new alt text
+    const updatedElement = {
+      ...element,
+      alt: newAltText
+    };
+    onElementUpdate(updatedElement);
+  };
+
   return (
     <div className="space-y-4">
-      <div>
-        <Label>Image Source (URL)</Label>
-        <Input 
-          type="text" 
-          value={element.content || ''} 
-          onChange={(e) => handleContentChange(e.target.value)}
-          className="mt-1.5"
-          placeholder="Enter image URL or select from media library"
-        />
-        <Dialog>
-          <DialogTrigger asChild>
-            <Button variant="outline" size="sm" className="mt-2 w-full">
-              Select from Media Library
-            </Button>
-          </DialogTrigger>
-        </Dialog>
+      <div className="flex items-center justify-between">
+        <Label className="block">Current Image</Label>
+        <Button 
+          type="button" 
+          variant="outline" 
+          onClick={() => setIsSelectImageOpen(true)}
+        >
+          Change Image
+        </Button>
       </div>
       
+      {element.content && (
+        <div className="mt-2 border border-gray-200 rounded-md p-2">
+          <img 
+            src={element.content} 
+            alt={element.alt || "Preview"} 
+            className="max-h-32 mx-auto object-contain"
+          />
+        </div>
+      )}
+
       <div>
-        <Label>Alt Text</Label>
-        <Input 
-          type="text" 
-          value={element.alt || ''} 
-          onChange={(e) => handleAltChange(e.target.value)}
-          className="mt-1.5"
+        <Label htmlFor="alt-text" className="block mb-2">Alt Text</Label>
+        <Input
+          id="alt-text"
+          value={altText}
+          onChange={handleAltTextChange}
           placeholder="Describe the image for accessibility"
         />
       </div>
-      
+
       <div>
-        <Label>Size</Label>
-        <Select 
-          value={properties.size || 'medium'} 
+        <Label className="block mb-2">Image Size</Label>
+        <RadioGroup
+          defaultValue={element.properties.size}
           onValueChange={handleSizeChange}
+          className="flex flex-wrap gap-2"
         >
-          <SelectTrigger className="mt-1.5">
-            <SelectValue placeholder="Select size" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="small">Small</SelectItem>
-            <SelectItem value="medium">Medium</SelectItem>
-            <SelectItem value="large">Large</SelectItem>
-            <SelectItem value="full">Full Width</SelectItem>
-          </SelectContent>
-        </Select>
+          <div className="flex items-center space-x-2">
+            <RadioGroupItem value="sm" id="size-sm" />
+            <Label htmlFor="size-sm">Small</Label>
+          </div>
+          <div className="flex items-center space-x-2">
+            <RadioGroupItem value="md" id="size-md" />
+            <Label htmlFor="size-md">Medium</Label>
+          </div>
+          <div className="flex items-center space-x-2">
+            <RadioGroupItem value="lg" id="size-lg" />
+            <Label htmlFor="size-lg">Large</Label>
+          </div>
+          <div className="flex items-center space-x-2">
+            <RadioGroupItem value="full" id="size-full" />
+            <Label htmlFor="size-full">Full Width</Label>
+          </div>
+        </RadioGroup>
       </div>
-      
+
       <div>
-        <Label>Alignment</Label>
-        <Select 
-          value={properties.align || 'left'} 
+        <Label className="block mb-2">Image Alignment</Label>
+        <RadioGroup
+          defaultValue={element.properties.align}
           onValueChange={handleAlignChange}
+          className="flex flex-wrap gap-2"
         >
-          <SelectTrigger className="mt-1.5">
-            <SelectValue placeholder="Select alignment" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="left">Left</SelectItem>
-            <SelectItem value="center">Center</SelectItem>
-            <SelectItem value="right">Right</SelectItem>
-          </SelectContent>
-        </Select>
+          <div className="flex items-center space-x-2">
+            <RadioGroupItem value="left" id="align-left" />
+            <Label htmlFor="align-left">Left</Label>
+          </div>
+          <div className="flex items-center space-x-2">
+            <RadioGroupItem value="center" id="align-center" />
+            <Label htmlFor="align-center">Center</Label>
+          </div>
+          <div className="flex items-center space-x-2">
+            <RadioGroupItem value="right" id="align-right" />
+            <Label htmlFor="align-right">Right</Label>
+          </div>
+        </RadioGroup>
       </div>
+
+      {isSelectImageOpen && (
+        <SelectImageDialog
+          isOpen={isSelectImageOpen}
+          onClose={() => setIsSelectImageOpen(false)}
+          onSelectImage={handleSelectImage}
+        />
+      )}
     </div>
   );
 };

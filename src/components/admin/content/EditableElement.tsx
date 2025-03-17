@@ -1,42 +1,65 @@
 
-import { useState, useEffect } from 'react';
 import TextElement from './elements/TextElement';
 import ImageElement from './elements/ImageElement';
-import VideoElement from './elements/VideoElement';
 import ButtonElement from './elements/ButtonElement';
+import VideoElement from './elements/VideoElement';
 import { ContentElement } from '@/types/content.types';
 
 interface EditableElementProps {
   element: ContentElement;
   isEditing: boolean;
-  onUpdate: (element: ContentElement) => void;
+  onUpdate: (updatedElement: ContentElement) => void;
 }
 
 const EditableElement = ({ element, isEditing, onUpdate }: EditableElementProps) => {
-  const [contentValue, setContentValue] = useState(element.content);
-
-  useEffect(() => {
-    setContentValue(element.content);
-  }, [element.content]);
-
-  const renderElement = () => {
-    const { type } = element;
-
-    switch (type) {
-      case 'text':
-        return <TextElement element={element} isEditing={isEditing} onUpdate={onUpdate} />;
-      case 'image':
-        return <ImageElement element={element} isEditing={isEditing} onUpdate={onUpdate} />;
-      case 'video':
-        return <VideoElement element={element} isEditing={isEditing} onUpdate={onUpdate} />;
-      case 'button':
-        return <ButtonElement element={element} isEditing={isEditing} onUpdate={onUpdate} />;
-      default:
-        return <div>Unknown element type</div>;
-    }
+  const handleContentChange = (contentValue: string) => {
+    const updatedElement = {
+      ...element,
+      content: contentValue
+    };
+    onUpdate(updatedElement);
   };
 
-  return renderElement();
+  switch (element.type) {
+    case 'text':
+      return (
+        <TextElement
+          content={element.content}
+          properties={element.properties}
+          isEditing={isEditing}
+          onChange={handleContentChange}
+        />
+      );
+    case 'image':
+      return (
+        <ImageElement
+          content={element.content}
+          properties={element.properties}
+          alt={element.alt}
+          isEditing={isEditing}
+        />
+      );
+    case 'button':
+      return (
+        <ButtonElement
+          content={element.content}
+          properties={element.properties}
+          link={element.link}
+          isEditing={isEditing}
+        />
+      );
+    case 'video':
+      return (
+        <VideoElement
+          content={element.content}
+          properties={element.properties}
+          videoUrl={element.videoUrl}
+          isEditing={isEditing}
+        />
+      );
+    default:
+      return <div>Unknown element type: {element.type}</div>;
+  }
 };
 
 export default EditableElement;

@@ -1,93 +1,70 @@
 
-import { ContentElement, ElementProperties } from '../ContentEditor';
-
-// Mapping for padding classes
-const paddingClasses = {
-  none: '',
-  small: 'p-2',
-  medium: 'p-4',
-  large: 'p-6'
-};
+import { ElementProperties } from '@/types/content.types';
 
 interface ButtonElementProps {
-  element: ContentElement;
+  content: string;
+  properties: ElementProperties;
+  link?: string;
   isEditing: boolean;
-  onUpdate: (element: ContentElement) => void;
 }
 
-const ButtonElement = ({ element, isEditing, onUpdate }: ButtonElementProps) => {
-  const { content, properties, link } = element;
-  
-  // Get padding class based on properties
-  const paddingClass = paddingClasses[properties.padding as keyof typeof paddingClasses] || paddingClasses.medium;
-  
-  // Alignment classes
-  const alignmentClass = properties.align === 'center' 
-    ? 'flex justify-center' 
-    : properties.align === 'right' 
-      ? 'flex justify-end' 
-      : '';
-      
-  // Button classes
-  const buttonClasses = `
-    inline-block px-4 py-2 rounded
-    ${properties.size === 'small' ? 'text-sm' : ''}
-    ${properties.size === 'large' ? 'text-lg px-6 py-3' : ''}
-  `;
-  
-  // Button style
-  const buttonStyle = {
-    backgroundColor: properties.color || '#3B82F6',
-    color: '#ffffff',
-    borderRadius: properties.borderRadius ? `${properties.borderRadius}px` : '0.25rem'
+const ButtonElement = ({ content, properties, link, isEditing }: ButtonElementProps) => {
+  const getVariantClass = () => {
+    switch (properties.color) {
+      case 'primary': return 'bg-primary text-primary-foreground hover:bg-primary/90';
+      case 'secondary': return 'bg-secondary text-secondary-foreground hover:bg-secondary/90';
+      case 'accent': return 'bg-accent text-accent-foreground hover:bg-accent/90';
+      case 'destructive': return 'bg-destructive text-destructive-foreground hover:bg-destructive/90';
+      default: return 'bg-primary text-primary-foreground hover:bg-primary/90';
+    }
   };
-  
-  // Handle content change in edit mode
-  const handleContentChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    onUpdate({
-      ...element,
-      content: e.target.value
-    });
+
+  const getSizeClass = () => {
+    switch (properties.size) {
+      case 'sm': return 'h-8 px-3 text-xs';
+      case 'lg': return 'h-11 px-8 text-base';
+      default: return 'h-10 px-4 py-2';
+    }
   };
-  
-  // Handle link change in edit mode
-  const handleLinkChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    onUpdate({
-      ...element,
-      link: e.target.value
-    });
+
+  const getAlignClass = () => {
+    switch (properties.align) {
+      case 'left': return 'mr-auto';
+      case 'center': return 'mx-auto';
+      case 'right': return 'ml-auto';
+      default: return '';
+    }
   };
-  
+
+  const getPaddingClass = () => {
+    switch (properties.padding) {
+      case 'sm': return 'p-2';
+      case 'md': return 'p-4';
+      case 'lg': return 'p-6';
+      default: return '';
+    }
+  };
+
+  const ButtonContent = () => (
+    <button
+      type="button"
+      className={`inline-flex items-center justify-center rounded-md font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 ${getVariantClass()} ${getSizeClass()}`}
+    >
+      {content}
+    </button>
+  );
+
   return (
-    <div className={`${paddingClass} ${alignmentClass}`}>
-      {isEditing ? (
-        <div className="space-y-2">
-          <input
-            type="text"
-            value={content}
-            onChange={handleContentChange}
-            className="w-full p-2 border border-gray-300 rounded"
-            placeholder="Button Text"
-          />
-          <input
-            type="text"
-            value={link || ''}
-            onChange={handleLinkChange}
-            className="w-full p-2 border border-gray-300 rounded"
-            placeholder="Button Link (URL)"
-          />
-        </div>
-      ) : (
-        <a 
-          href={link || '#'} 
-          className={buttonClasses}
-          style={buttonStyle}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          {content || 'Button'}
-        </a>
-      )}
+    <div className={`${getPaddingClass()} flex`}>
+      <div className={`${getAlignClass()}`}>
+        {isEditing || !link ? (
+          <ButtonContent />
+        ) : (
+          <a href={link} target="_blank" rel="noopener noreferrer">
+            <ButtonContent />
+          </a>
+        )}
+      </div>
     </div>
   );
 };

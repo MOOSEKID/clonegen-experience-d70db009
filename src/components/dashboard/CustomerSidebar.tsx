@@ -1,93 +1,108 @@
 
-import { Link, useLocation } from 'react-router-dom';
-import { Home, BarChart2, Calendar, Dumbbell, Heart, Award, MapPin, Settings, LogOut } from 'lucide-react';
-import { cn } from '@/lib/utils';
-import { useAuth } from '@/hooks/useAuth';
+import { Separator } from "@/components/ui/separator"
+import { ScrollArea } from "@/components/ui/scroll-area"
+import { Button } from "@/components/ui/button"
+import { Link, useLocation } from "react-router-dom"
+import { CalendarIcon, DumbellIcon, LayoutDashboard, LineChart, LogOut, Settings, User, Users } from "lucide-react"
+import { cn } from "@/lib/utils"
+import { useAuth } from "@/contexts/AuthContext"
 
-interface CustomerSidebarProps {
-  isOpen: boolean;
-}
-
-const CustomerSidebar = ({ isOpen }: CustomerSidebarProps) => {
-  const location = useLocation();
-  const { logout } = useAuth();
+const CustomerSidebar = () => {
+  const { pathname } = useLocation()
+  const { logout } = useAuth()
   
-  const sidebarItems = [
-    { icon: Home, label: 'Dashboard', path: '/dashboard' },
-    { icon: Dumbbell, label: 'Workouts', path: '/dashboard/workouts' },
-    { icon: BarChart2, label: 'Progress', path: '/dashboard/progress' },
-    { icon: Calendar, label: 'Schedule', path: '/dashboard/schedule' },
-    { icon: Heart, label: 'Health', path: '/dashboard/health' },
-    { icon: Award, label: 'Achievements', path: '/dashboard/achievements' },
-    { icon: MapPin, label: 'Gym Locations', path: '/dashboard/locations' },
-  ];
-
   const handleLogout = async () => {
-    await logout();
-  };
+    try {
+      await logout();
+    } catch (error) {
+      console.error("Error logging out:", error);
+    }
+  }
 
-  const lowerItems = [
-    { icon: Settings, label: 'Settings', path: '/dashboard/settings' },
-    { icon: LogOut, label: 'Logout', path: '#', onClick: handleLogout },
-  ];
+  const links = [
+    {
+      name: "Dashboard",
+      href: "/dashboard",
+      icon: LayoutDashboard
+    },
+    {
+      name: "My Profile",
+      href: "/dashboard/profile",
+      icon: User
+    },
+    {
+      name: "Workouts",
+      href: "/dashboard/workouts",
+      icon: DumbellIcon
+    },
+    {
+      name: "Classes",
+      href: "/dashboard/classes",
+      icon: Users
+    },
+    {
+      name: "Schedule",
+      href: "/dashboard/schedule",
+      icon: CalendarIcon
+    },
+    {
+      name: "Progress",
+      href: "/dashboard/progress",
+      icon: LineChart
+    },
+    {
+      name: "Settings",
+      href: "/dashboard/settings",
+      icon: Settings
+    }
+  ]
 
   return (
-    <aside 
-      className={cn(
-        "bg-gym-darkblue text-white flex-shrink-0 flex flex-col transition-all duration-300 overflow-hidden",
-        isOpen ? "w-64" : "w-20",
-      )}
-    >
-      <div className="p-4 flex justify-center">
-        <Link to="/" className={cn("flex items-center", isOpen ? "justify-start" : "justify-center")}>
-          <div className="h-16 w-auto">
-            <img 
-              src="/lovable-uploads/01fa474e-e83a-48f4-9ffc-2047ca448aa7.png" 
-              alt="Uptown Gym Logo" 
-              className="h-full w-auto object-contain"
-            />
+    <div className="hidden border-r bg-gray-100/40 lg:block dark:bg-gray-800/40">
+      <div className="flex flex-col gap-2">
+        <div className="flex h-[60px] items-center px-6">
+          <Link to="/" className="flex items-center gap-2 font-semibold">
+            <img src="/lovable-uploads/01fa474e-e83a-48f4-9ffc-2047ca448aa7.png" alt="Uptown Gym" className="h-6 w-auto" />
+            <span className="font-bold">Member Portal</span>
+          </Link>
+        </div>
+        <Separator />
+        <ScrollArea className="flex-1 h-[calc(100vh-60px)]">
+          <div className="flex flex-col gap-2 p-6">
+            <nav className="grid gap-2 text-sm">
+              {links.map((link, i) => (
+                <Button
+                  key={i}
+                  variant={pathname === link.href ? "secondary" : "ghost"}
+                  size="sm"
+                  className={cn(
+                    "justify-start",
+                    pathname === link.href && "font-medium bg-gray-200 dark:bg-gray-700"
+                  )}
+                  asChild
+                >
+                  <Link to={link.href}>
+                    <link.icon className="mr-2 h-4 w-4" />
+                    {link.name}
+                  </Link>
+                </Button>
+              ))}
+              <Separator className="my-2" />
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                className="justify-start text-red-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20"
+                onClick={handleLogout}
+              >
+                <LogOut className="mr-2 h-4 w-4" />
+                Log out
+              </Button>
+            </nav>
           </div>
-        </Link>
+        </ScrollArea>
       </div>
+    </div>
+  )
+}
 
-      <div className="flex-1 flex flex-col justify-between py-6">
-        <nav className="space-y-1 px-3">
-          {sidebarItems.map((item) => (
-            <Link
-              key={item.path}
-              to={item.path}
-              className={cn(
-                "flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-gym-dark transition-colors",
-                location.pathname === item.path ? "bg-gym-dark text-gym-orange" : "text-gray-300",
-                !isOpen && "justify-center px-2"
-              )}
-            >
-              <item.icon size={22} />
-              {isOpen && <span>{item.label}</span>}
-            </Link>
-          ))}
-        </nav>
-
-        <nav className="space-y-1 px-3 mt-auto">
-          {lowerItems.map((item) => (
-            <Link
-              key={item.path}
-              to={item.path}
-              onClick={item.onClick}
-              className={cn(
-                "flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-gym-dark transition-colors",
-                location.pathname === item.path ? "bg-gym-dark text-gym-orange" : "text-gray-300",
-                !isOpen && "justify-center px-2"
-              )}
-            >
-              <item.icon size={22} />
-              {isOpen && <span>{item.label}</span>}
-            </Link>
-          ))}
-        </nav>
-      </div>
-    </aside>
-  );
-};
-
-export default CustomerSidebar;
+export default CustomerSidebar
