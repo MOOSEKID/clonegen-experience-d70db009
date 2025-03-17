@@ -1,13 +1,77 @@
 
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 import { useAuth } from '@/hooks/useAuth';
 import LoginActions from '@/components/auth/LoginActions';
+import { supabase } from '@/lib/supabase';
 
 const Login = () => {
   const { login, isAuthenticated, isAdmin, isLoading } = useAuth();
   const navigate = useNavigate();
+  const [authError, setAuthError] = useState<string | null>(null);
+  
+  // Force create admin user if it doesn't exist
+  useEffect(() => {
+    const createAdminIfNeeded = async () => {
+      try {
+        // Check if admin exists
+        const { data: adminUsers, error: searchError } = await supabase
+          .from('profiles')
+          .select('id')
+          .eq('email', 'admin@uptowngym.rw')
+          .eq('is_admin', true)
+          .maybeSingle();
+        
+        if (searchError) console.error('Error checking for admin:', searchError);
+        
+        // If admin doesn't exist and we're in development mode, create one
+        if (!adminUsers && process.env.NODE_ENV === 'development') {
+          console.log('No admin found, attempting to create default admin account');
+          
+          try {
+            // Check if the user exists in auth
+            const { data: { users }, error: authCheckError } = await supabase.auth.admin.listUsers();
+            
+            if (authCheckError) {
+              console.error('Error checking auth users:', authCheckError);
+              return;
+            }
+            
+            const existingAdmin = users?.find(user => user.email === 'admin@uptowngym.rw');
+            
+            if (!existingAdmin) {
+              // Create admin in auth
+              const { data: adminAuth, error: adminAuthError } = await supabase.auth.signUp({
+                email: 'admin@uptowngym.rw',
+                password: 'Admin123!',
+                options: {
+                  data: {
+                    full_name: 'System Administrator'
+                  }
+                }
+              });
+              
+              if (adminAuthError) {
+                console.error('Error creating admin auth account:', adminAuthError);
+                return;
+              }
+              
+              console.log('Default admin account created successfully');
+            } else {
+              console.log('Admin exists in auth but not in profiles - profile will be created automatically');
+            }
+          } catch (err) {
+            console.error('Error in admin creation:', err);
+          }
+        }
+      } catch (error) {
+        console.error('Error in createAdminIfNeeded:', error);
+      }
+    };
+
+    createAdminIfNeeded();
+  }, []);
   
   useEffect(() => {
     // Check if user is already authenticated and redirect accordingly
@@ -20,6 +84,7 @@ const Login = () => {
 
   const handleLogin = async (email: string, password: string) => {
     try {
+      setAuthError(null);
       console.log('Attempting login with:', email);
       const success = await login(email, password);
       
@@ -27,10 +92,12 @@ const Login = () => {
         toast.success('Login successful!');
         // Redirect will be handled by the useEffect
       } else {
+        setAuthError('Login failed. Please check your credentials.');
         toast.error('Login failed. Please check your credentials.');
       }
     } catch (error) {
       console.error('Login error:', error);
+      setAuthError('Login failed. Please check your credentials.');
       toast.error('Login failed. Please check your credentials.');
     }
   };
@@ -56,7 +123,7 @@ const Login = () => {
   return (
     <div className="min-h-screen flex items-center justify-center p-6 bg-gym-dark pt-20">
       <LoginActions 
-        loginError={null}
+        loginError={authError}
         isLoading={isLoading}
         fallbackMode={false}
         onLogin={handleLogin}

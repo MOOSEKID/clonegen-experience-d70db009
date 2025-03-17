@@ -4,6 +4,8 @@ import { Link } from 'react-router-dom';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import LoginForm from './LoginForm';
 import { Button } from '@/components/ui/button';
+import { AlertCircle } from 'lucide-react';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 
 interface LoginActionsProps {
   loginError: string | null;
@@ -33,9 +35,10 @@ const LoginActions = ({
       
       <CardContent className="p-6">
         {loginError && (
-          <div className="mb-4 p-3 text-sm bg-red-100 border border-red-300 text-red-700 rounded-md">
-            {loginError}
-          </div>
+          <Alert variant="destructive" className="mb-4">
+            <AlertCircle className="h-4 w-4" />
+            <AlertDescription>{loginError}</AlertDescription>
+          </Alert>
         )}
         
         <LoginForm 
@@ -52,6 +55,12 @@ const LoginActions = ({
           Don't have an account?{' '}
           <Link to="/register" className="text-gym-orange font-semibold hover:underline">
             Sign up
+          </Link>
+        </div>
+        
+        <div className="text-center text-sm text-gray-600">
+          <Link to="/forgot-password" className="text-gym-orange font-semibold hover:underline">
+            Forgot password?
           </Link>
         </div>
         
