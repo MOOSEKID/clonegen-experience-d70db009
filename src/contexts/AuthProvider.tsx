@@ -1,3 +1,4 @@
+
 import { ReactNode, useState, useEffect } from 'react';
 import { AuthContext } from './AuthContext';
 import { useAuthState } from '@/hooks/useAuthState';
@@ -53,48 +54,61 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       if (!existingAdmins || existingAdmins.length === 0) {
         console.log('No admin found, creating default admin account');
         
-        const { data: existingUser, error: existingUserError } = await supabase.auth.admin.getUserByEmail('admin@uptowngym.rw');
-        
-        if (existingUserError && existingUserError.message !== 'User not found') {
-          console.error('Error checking for existing admin user:', existingUserError);
-          return;
-        }
-        
-        if (!existingUser) {
-          const { data: authUser, error: authError } = await supabase.auth.admin.createUser({
-            email: 'admin@uptowngym.rw',
-            password: 'Admin123!',
-            email_confirm: true,
-            user_metadata: {
-              full_name: 'System Administrator'
+        // Checking for existing admin user - this API might differ based on Supabase version
+        try {
+          const { data: userList, error: userListError } = await supabase.auth.admin.listUsers({
+            page: 1,
+            perPage: 1,
+            filter: {
+              email: 'admin@uptowngym.rw'
             }
           });
           
-          if (authError) {
-            console.error('Error creating default admin user:', authError);
+          if (userListError) {
+            console.error('Error checking for existing admin user:', userListError);
             return;
           }
           
-          if (authUser && authUser.user) {
-            const { error: profileError } = await supabase
-              .from('profiles')
-              .insert([
-                {
-                  id: authUser.user.id,
-                  email: 'admin@uptowngym.rw',
-                  full_name: 'System Administrator',
-                  role: 'admin',
-                  is_admin: true,
-                  access_level: 'Full'
-                }
-              ]);
-              
-            if (profileError) {
-              console.error('Error creating default admin profile:', profileError);
-            } else {
-              console.log('Default admin account created successfully');
+          const existingUser = userList && userList.users && userList.users.length > 0 ? userList.users[0] : null;
+          
+          if (!existingUser) {
+            const { data: authUser, error: authError } = await supabase.auth.admin.createUser({
+              email: 'admin@uptowngym.rw',
+              password: 'Admin123!',
+              email_confirm: true,
+              user_metadata: {
+                full_name: 'System Administrator'
+              }
+            });
+            
+            if (authError) {
+              console.error('Error creating default admin user:', authError);
+              return;
+            }
+            
+            if (authUser && authUser.user) {
+              const { error: profileError } = await supabase
+                .from('profiles')
+                .insert([
+                  {
+                    id: authUser.user.id,
+                    email: 'admin@uptowngym.rw',
+                    full_name: 'System Administrator',
+                    role: 'admin',
+                    is_admin: true,
+                    access_level: 'Full'
+                  }
+                ]);
+                
+              if (profileError) {
+                console.error('Error creating default admin profile:', profileError);
+              } else {
+                console.log('Default admin account created successfully');
+              }
             }
           }
+        } catch (err) {
+          console.error('Error in admin user check:', err);
         }
       }
     } catch (error) {
@@ -375,7 +389,6 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
           ...profile
         });
         setIsAdmin(profile.is_admin || false);
-        setIsStaff(profile.is_staff || false);
       }
 
       toast.success('Profile updated successfully.');

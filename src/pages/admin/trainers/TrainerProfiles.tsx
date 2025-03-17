@@ -5,34 +5,30 @@ import { Plus } from 'lucide-react';
 import { toast } from 'sonner';
 import { TrainerProfilesGrid } from '@/components/admin/trainers/trainerprofiles/TrainerProfilesGrid';
 import { useTrainerProfiles } from '@/hooks/trainers/useTrainerProfiles';
-import { TrainerProfile as ComponentTrainerProfile } from '@/components/admin/trainers/profiles/TrainerProfileType';
+import { TrainerProfile } from '@/components/admin/trainers/profiles/TrainerProfileType';
 import TrainerAddDialog from '@/components/admin/trainers/profiles/TrainerAddDialog';
 import PageHeading from '@/components/ui/page-heading';
 
 const TrainerProfiles = () => {
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
-  const [selectedTrainer, setSelectedTrainer] = useState<ComponentTrainerProfile | null>(null);
+  const [selectedTrainer, setSelectedTrainer] = useState<TrainerProfile | null>(null);
   
   const {
     trainers,
     isLoading,
     error,
-    createTrainer,
+    addTrainer,
     updateTrainer,
-    deleteTrainer,
-    fetchTrainers
+    deleteTrainer
   } = useTrainerProfiles();
 
-  useEffect(() => {
-    fetchTrainers();
-  }, [fetchTrainers]);
-
-  const handleAddSubmit = async (trainerData: Omit<ComponentTrainerProfile, 'id'>) => {
+  const handleAddSubmit = async (trainerData: Omit<TrainerProfile, 'id'>) => {
     try {
-      await createTrainer({
+      await addTrainer({
         ...trainerData,
-        status: trainerData.status || 'active'
+        specialization: trainerData.specializations, // Adapt to the API format
+        status: trainerData.status || 'Active'
       });
       setIsAddDialogOpen(false);
       toast.success('Trainer profile created successfully');
@@ -42,9 +38,17 @@ const TrainerProfiles = () => {
     }
   };
 
-  const handleEditSubmit = async (trainerData: ComponentTrainerProfile) => {
+  const handleEditSubmit = async (trainerData: TrainerProfile) => {
     try {
-      await updateTrainer(trainerData);
+      await updateTrainer(trainerData.id, {
+        name: trainerData.name,
+        email: trainerData.email,
+        phone: trainerData.phone,
+        bio: trainerData.bio,
+        specialization: trainerData.specializations,
+        status: trainerData.status,
+        profile_picture: trainerData.profile_picture
+      });
       setIsEditDialogOpen(false);
       setSelectedTrainer(null);
       toast.success('Trainer profile updated successfully');
@@ -64,23 +68,42 @@ const TrainerProfiles = () => {
     }
   };
 
-  const handleEditClick = (trainer: ComponentTrainerProfile) => {
-    setSelectedTrainer(trainer);
-    setIsEditDialogOpen(true);
+  const handleEditClick = (trainerId: string) => {
+    const trainer = trainers.find(t => t.id === trainerId);
+    if (trainer) {
+      // Convert API format to component format
+      const componentTrainer: TrainerProfile = {
+        id: trainer.id,
+        name: trainer.name,
+        email: trainer.email,
+        specializations: trainer.specialization || [],
+        profile_picture: trainer.profile_picture,
+        status: (trainer.status?.toLowerCase() || 'active') as 'active' | 'inactive' | 'on leave',
+        bio: trainer.bio || '',
+        phone: trainer.phone || '',
+        certifications: []
+      };
+      setSelectedTrainer(componentTrainer);
+      setIsEditDialogOpen(true);
+    }
   };
 
-  // Convert trainer data between formats if needed
-  const adaptedTrainers: ComponentTrainerProfile[] = trainers.map(trainer => ({
-    id: trainer.id,
-    name: trainer.name,
-    email: trainer.email,
-    specializations: trainer.specializations || [],
-    profile_picture: trainer.profile_picture || trainer.profilepicture,
-    status: (trainer.status?.toLowerCase() || 'active') as 'active' | 'inactive' | 'on leave',
-    bio: trainer.bio || '',
-    phone: trainer.phone || '',
-    certifications: trainer.certifications || []
-  }));
+  // Default handlers for these operations - they would be implemented properly in a real app
+  const handleAddCertification = (trainerId: string) => {
+    console.log("Add certification for trainer", trainerId);
+  };
+
+  const handleDeleteCertification = (certificationId: string) => {
+    console.log("Delete certification", certificationId);
+  };
+
+  const handleAddAvailability = (trainerId: string) => {
+    console.log("Add availability for trainer", trainerId);
+  };
+
+  const handleDeleteAvailability = (availabilityId: string) => {
+    console.log("Delete availability", availabilityId);
+  };
 
   return (
     <div className="space-y-6">
@@ -101,10 +124,24 @@ const TrainerProfiles = () => {
       )}
 
       <TrainerProfilesGrid 
-        trainers={adaptedTrainers} 
+        trainers={trainers.map(trainer => ({
+          id: trainer.id,
+          name: trainer.name,
+          email: trainer.email,
+          specializations: trainer.specialization || [],
+          profile_picture: trainer.profile_picture,
+          status: (trainer.status?.toLowerCase() || 'active') as 'active' | 'inactive' | 'on leave',
+          bio: trainer.bio || '',
+          phone: trainer.phone || '',
+          certifications: []
+        }))} 
+        isLoading={isLoading}
         onEdit={handleEditClick}
         onDelete={handleDeleteTrainer}
-        isLoading={isLoading}
+        onAddCertification={handleAddCertification}
+        onDeleteCertification={handleDeleteCertification}
+        onAddAvailability={handleAddAvailability}
+        onDeleteAvailability={handleDeleteAvailability}
       />
 
       <TrainerAddDialog

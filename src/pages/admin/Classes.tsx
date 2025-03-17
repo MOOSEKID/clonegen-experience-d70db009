@@ -31,8 +31,15 @@ const AdminClasses = () => {
 
   console.log("Classes page rendering");
 
+  const fallbackUI = (
+    <div className="p-6 bg-red-50 border border-red-200 rounded-md">
+      <h3 className="text-lg font-medium text-red-800 mb-2">Something went wrong</h3>
+      <p className="text-red-600">There was an error loading the classes page. Please try again later.</p>
+    </div>
+  );
+
   return (
-    <ErrorBoundary>
+    <ErrorBoundary fallback={fallbackUI}>
       <div className="space-y-6">
         <ClassesHeader 
           onAddClass={() => setShowAddClassDialog(true)}

@@ -1,4 +1,5 @@
 
+import React from 'react';
 import { useSupabaseMembers } from '@/hooks/members/useSupabaseMembers';
 import MembersContainer from '@/components/admin/members/MembersContainer';
 
@@ -35,6 +36,12 @@ const AdminMembers = () => {
     handleSearch(value);
   };
 
+  // Create handler for items per page change
+  const handleItemsPerPageChange = (itemsPerPage: number) => {
+    console.log("Items per page changed:", itemsPerPage);
+    // Implementation would go here
+  };
+
   return (
     <MembersContainer
       members={members}
@@ -54,7 +61,7 @@ const AdminMembers = () => {
       toggleMemberSelection={toggleMemberSelection}
       selectAllMembers={() => selectAllMembers(filteredMembers)}
       handlePageChange={paginate}
-      onItemsPerPageChange={(itemsPerPage: number) => console.log("Items per page changed:", itemsPerPage)}
+      handleItemsPerPageChange={handleItemsPerPageChange}
       onViewProfile={(memberId) => console.log("View profile", memberId)}
       itemsPerPage={10}
       totalItems={members.length}
