@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
-import { useTrainerAttendance } from '@/hooks/trainers/useTrainerAttendance';
+import { useTrainerAttendance } from '@/hooks/trainers/attendance/useTrainerAttendance';
 import { format } from 'date-fns';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
