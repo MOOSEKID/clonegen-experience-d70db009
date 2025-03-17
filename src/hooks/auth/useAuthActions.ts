@@ -10,7 +10,7 @@ export const useAuthActions = (setIsLoading: (value: boolean) => void) => {
   const { login: loginWithPassword } = useLoginService();
   const { signUp: signUpWithPassword } = useSignUpService();
   const { logout: logoutUser } = useLogoutService();
-  const { resetPassword: resetPasswordForEmail, updatePassword: updateUserPassword } = usePasswordService();
+  const { resetPassword: requestPasswordReset, updatePassword: updateUserPassword } = usePasswordService();
 
   const login = async (email: string, password: string) => {
     try {
@@ -21,7 +21,7 @@ export const useAuthActions = (setIsLoading: (value: boolean) => void) => {
         toast.success('Logged in successfully');
         return true;
       } else {
-        toast.error(result.error || 'Login failed');
+        toast.error(result.message || 'Login failed');
         return false;
       }
     } catch (error) {
@@ -38,11 +38,11 @@ export const useAuthActions = (setIsLoading: (value: boolean) => void) => {
       setIsLoading(true);
       const result = await signUpWithPassword(email, password, name);
       
-      if (result.success) {
+      if (result) {
         toast.success('Account created successfully! Please check your email to confirm your account.');
         return true;
       } else {
-        toast.error(result.error || 'Signup failed');
+        toast.error('Signup failed');
         return false;
       }
     } catch (error) {
@@ -70,7 +70,7 @@ export const useAuthActions = (setIsLoading: (value: boolean) => void) => {
   const resetPassword = async (email: string) => {
     try {
       setIsLoading(true);
-      const result = await resetPasswordForEmail(email);
+      const result = await requestPasswordReset(email);
       
       if (result) {
         toast.success('Password reset email sent. Please check your inbox.');

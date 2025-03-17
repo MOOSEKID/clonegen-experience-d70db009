@@ -1,13 +1,10 @@
 
 import { useState, useEffect } from 'react';
-import { Outlet, useNavigate } from 'react-router-dom';
-import AdminSidebar from '@/components/admin/AdminSidebar';
-import AdminHeader from '@/components/admin/AdminHeader';
-import { toast } from 'sonner';
+import { Routes, Route, Navigate, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
+import { toast } from 'sonner';
 
 const AdminLayout = () => {
-  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [isLoading, setIsLoading] = useState(true);
   const { isAuthenticated, isAdmin } = useAuth();
   const navigate = useNavigate();
@@ -35,38 +32,33 @@ const AdminLayout = () => {
     };
 
     checkAuth();
-    
-    // Check authentication status periodically
-    const interval = setInterval(checkAuth, 600000); // 10 minutes
-    return () => clearInterval(interval);
   }, [navigate, isAuthenticated, isAdmin]);
-
-  const toggleSidebar = () => {
-    setIsSidebarOpen(!isSidebarOpen);
-  };
 
   if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-gym-orange"></div>
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
       </div>
     );
   }
 
   if (!isAuthenticated || !isAdmin) {
-    return null; // Redirect will happen in the useEffect
+    return <Navigate to="/login" />;
   }
 
   return (
     <div className="flex flex-col md:flex-row min-h-screen bg-gray-100">
-      <AdminSidebar isOpen={isSidebarOpen} />
+      {/* Admin sidebar would go here */}
       
       <div className="flex-1 flex flex-col">
-        <AdminHeader toggleSidebar={toggleSidebar} />
+        {/* Admin header would go here */}
         
         <main className="flex-1 p-4 md:p-6 overflow-auto">
           <div className="container mx-auto">
-            <Outlet />
+            <Routes>
+              <Route index element={<div>Admin Dashboard</div>} />
+              <Route path="*" element={<Navigate to="/admin" replace />} />
+            </Routes>
           </div>
         </main>
       </div>

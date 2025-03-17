@@ -1,103 +1,122 @@
 
-import { Building, Dumbbell, LucideIcon } from 'lucide-react';
-import { Button } from '../Button';
-import MobileNavItem from './MobileNavItem';
-import MobileDropdownSection from './MobileDropdownSection';
+import { Link } from 'react-router-dom';
+import { Button } from '@/components/ui/button';
+import { AuthUser } from '@/contexts/auth/types';
 
-interface NavItem {
-  label: string;
-  path: string;
-  icon?: LucideIcon;
-  isExternalLink?: boolean;
-  action?: () => void;
-}
-
-interface MobileMenuProps {
+export interface MobileMenuProps {
   isOpen: boolean;
-  navItems: NavItem[];
-  serviceItems: { label: string; path: string }[];
-  companyItems: { label: string; path: string }[];
-  dashboardItem: NavItem;
-  authItems: NavItem[];
-  isLoggedIn?: boolean;
+  onClose: () => void;
+  user: AuthUser | null;
+  onLogout: () => Promise<void>;
 }
 
-const MobileMenu = ({ 
-  isOpen, 
-  navItems, 
-  serviceItems, 
-  companyItems,
-  dashboardItem,
-  authItems, 
-  isLoggedIn = false 
-}: MobileMenuProps) => {
+const MobileMenu = ({ isOpen, onClose, user, onLogout }: MobileMenuProps) => {
+  const isLoggedIn = !!user;
+
   if (!isOpen) return null;
 
   return (
-    <div className="absolute top-full left-0 right-0 bg-gym-darkblue shadow-lg p-4 md:hidden animate-fade-in z-50">
-      <nav className="flex flex-col space-y-4">
-        {navItems.map((item) => (
-          <MobileNavItem 
-            key={item.path} 
-            path={item.path} 
-            icon={item.icon}
-            isExternalLink={item.isExternalLink}
-            action={item.action}
-          >
-            {item.label}
-          </MobileNavItem>
-        ))}
-        
-        <MobileDropdownSection 
-          title="Services" 
-          Icon={Dumbbell} 
-          items={serviceItems} 
-        />
-        
-        <MobileDropdownSection 
-          title="Company" 
-          Icon={Building} 
-          items={companyItems} 
-        />
-
-        {/* Dashboard item placed between Company dropdown and auth buttons */}
-        <MobileNavItem 
-          path={dashboardItem.path} 
-          icon={dashboardItem.icon}
-          action={dashboardItem.action}
-        >
-          {dashboardItem.label}
-        </MobileNavItem>
-        
-        <div className="flex gap-3 pt-3 border-t border-white/10">
-          {authItems.map((item) => (
-            item.action ? (
-              <Button 
-                key={item.path}
-                variant="outline" 
-                size="sm" 
-                className="flex-1 gap-2"
-                onClick={item.action}
-              >
-                {item.icon && <item.icon size={16} />}
-                {item.label}
-              </Button>
+    <div className="lg:hidden">
+      <div className="fixed inset-0 z-40 bg-black bg-opacity-25" onClick={onClose} />
+      
+      <div className="fixed inset-y-0 right-0 z-50 w-full max-w-xs bg-white shadow-xl">
+        <div className="flex flex-col h-full py-6 overflow-y-auto">
+          <div className="px-4 mb-8">
+            <Link
+              to="/"
+              onClick={onClose}
+              className="flex items-center"
+            >
+              <img
+                src="/lovable-uploads/01fa474e-e83a-48f4-9ffc-2047ca448aa7.png"
+                alt="Uptown Gym Logo"
+                className="h-8 w-auto"
+              />
+              <span className="ml-3 font-bold text-xl text-primary">
+                Uptown Gym
+              </span>
+            </Link>
+          </div>
+          
+          <div className="flex-1 px-4 space-y-1">
+            <Link
+              to="/"
+              onClick={onClose}
+              className="block py-2 text-base font-medium text-gray-900 hover:bg-gray-100 hover:text-gray-900 rounded-md px-3"
+            >
+              Home
+            </Link>
+            <Link
+              to="/classes"
+              onClick={onClose}
+              className="block py-2 text-base font-medium text-gray-900 hover:bg-gray-100 hover:text-gray-900 rounded-md px-3"
+            >
+              Classes
+            </Link>
+            <Link
+              to="/trainers"
+              onClick={onClose}
+              className="block py-2 text-base font-medium text-gray-900 hover:bg-gray-100 hover:text-gray-900 rounded-md px-3"
+            >
+              Trainers
+            </Link>
+            <Link
+              to="/about"
+              onClick={onClose}
+              className="block py-2 text-base font-medium text-gray-900 hover:bg-gray-100 hover:text-gray-900 rounded-md px-3"
+            >
+              About
+            </Link>
+            <Link
+              to="/contact"
+              onClick={onClose}
+              className="block py-2 text-base font-medium text-gray-900 hover:bg-gray-100 hover:text-gray-900 rounded-md px-3"
+            >
+              Contact
+            </Link>
+          </div>
+          
+          <div className="px-4 pt-4 border-t border-gray-200">
+            {user ? (
+              <div className="space-y-4">
+                <Link
+                  to={user.is_admin ? '/admin' : '/dashboard'}
+                  onClick={onClose}
+                  className="w-full"
+                >
+                  <Button className="w-full" variant="outline">
+                    {user.is_admin ? 'Admin Dashboard' : 'Dashboard'}
+                  </Button>
+                </Link>
+                <Button onClick={() => { onLogout(); onClose(); }} className="w-full" variant="ghost">
+                  Logout
+                </Button>
+              </div>
             ) : (
-              <Button 
-                key={item.path}
-                isLink 
-                href={item.path} 
-                variant="outline" 
-                size="sm" 
-                className="flex-1 gap-2"
-              >
-                {item.icon && <item.icon size={16} />}
-                {item.label}
-              </Button>
-            )
-          ))}
+              <div className="space-y-4">
+                <Link
+                  to="/login"
+                  onClick={onClose}
+                  className="w-full"
+                >
+                  <Button className="w-full" variant="outline">
+                    Login
+                  </Button>
+                </Link>
+                <Link
+                  to="/signup"
+                  onClick={onClose}
+                  className="w-full"
+                >
+                  <Button className="w-full">
+                    Sign Up
+                  </Button>
+                </Link>
+              </div>
+            )}
+          </div>
         </div>
-      </nav>
+      </div>
     </div>
   );
 };
