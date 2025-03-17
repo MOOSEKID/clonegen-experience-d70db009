@@ -20,6 +20,7 @@ const Signup = () => {
     } catch (error) {
       console.error('Error during signup:', error);
       toast.error(error instanceof Error ? error.message : 'Failed to create account');
+      throw error; // Re-throw to be handled by RegisterForm
     } finally {
       setIsLoading(false);
     }

@@ -4,6 +4,7 @@ import { Box } from 'lucide-react';
 import ElementProperties from './ElementProperties';
 import ContentEditorTools from './ContentEditorTools';
 import ElementsList from './ElementsList';
+import { ContentElement, ElementProperties as ElementPropsType, PageContentMapping } from '@/types/content.types';
 
 // Mock data for page content
 import { pageContentData } from '@/data/cmsData';
@@ -14,32 +15,13 @@ interface ContentEditorProps {
   className?: string;
 }
 
-// Type definitions for content elements
-export interface ContentElement {
-  id: string;
-  type: string;
-  content: string;
-  properties: ElementProperties;
-  alt?: string;
-  link?: string;
-}
-
-export interface ElementProperties {
-  align: string;
-  size: string;
-  style: string;
-  color: string;
-  padding: string;
-  [key: string]: any;
-}
-
 const ContentEditor = ({ selectedPage, onContentChange, className = '' }: ContentEditorProps) => {
   const [pageContent, setPageContent] = useState<ContentElement[]>([]);
   const [selectedElement, setSelectedElement] = useState<ContentElement | null>(null);
   const [isPreviewMode, setIsPreviewMode] = useState(false);
   
   useEffect(() => {
-    const content = (pageContentData as any)[selectedPage] || [];
+    const content = (pageContentData as PageContentMapping)[selectedPage] || [];
     setPageContent(content);
     setSelectedElement(null);
   }, [selectedPage]);
@@ -110,7 +92,7 @@ const ContentEditor = ({ selectedPage, onContentChange, className = '' }: Conten
     onContentChange();
   };
 
-  const handleUpdateProperties = (properties: ElementProperties) => {
+  const handleUpdateProperties = (properties: ElementPropsType) => {
     if (!selectedElement) return;
     
     const elementIndex = pageContent.findIndex(el => el.id === selectedElement.id);

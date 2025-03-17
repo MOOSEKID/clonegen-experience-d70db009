@@ -12,4 +12,15 @@ export interface UserProfile {
   email: string;
   created_at: string;
   updated_at: string;
+  
+  // Additional fields for better type compatibility
+  bio?: string;
+  phone?: string;
+  hire_date?: string;
+  profile_picture?: string;
+  specialization?: string[];
+  specializations?: string[];
+  experience_level?: string;
+  experience_years?: number;
+  name?: string;
 }

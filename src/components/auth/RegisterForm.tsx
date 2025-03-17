@@ -7,32 +7,49 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { useAuth } from '@/hooks/useAuth';
-import { useRegisterValidation } from '@/hooks/auth/useRegisterValidation';
 import TermsAgreement from '@/components/auth/TermsAgreement';
 
+// Update the props to include onSignUp or onSuccess
 interface RegisterFormProps {
+  onSignUp?: (email: string, password: string, fullName: string) => Promise<void>;
   onSuccess?: () => void;
+  isLoading?: boolean;
 }
 
-const RegisterForm = ({ onSuccess }: RegisterFormProps) => {
+const RegisterForm = ({ onSignUp, onSuccess, isLoading: propIsLoading }: RegisterFormProps) => {
   const [fullName, setFullName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
-  const [acceptTerms, setAcceptTerms] = useState(false);
+  const [accepted, setAccepted] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const { signUp } = useAuth();
   const navigate = useNavigate();
-  const { validateForm } = useRegisterValidation();
+
+  const validateForm = () => {
+    if (!fullName || !email || !password || !confirmPassword) {
+      setErrorMessage('Please fill in all fields');
+      return false;
+    }
+
+    if (password !== confirmPassword) {
+      setErrorMessage('Passwords do not match');
+      return false;
+    }
+
+    if (!accepted) {
+      setErrorMessage('You must accept the terms and conditions');
+      return false;
+    }
+
+    return true;
+  };
 
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    // Form validation
-    const validationError = validateForm(fullName, email, password, confirmPassword, acceptTerms);
-    if (validationError) {
-      setErrorMessage(validationError);
+    if (!validateForm()) {
       return;
     }
     
@@ -40,19 +57,22 @@ const RegisterForm = ({ onSuccess }: RegisterFormProps) => {
       setIsLoading(true);
       setErrorMessage('');
       
-      const success = await signUp(email, password, fullName);
+      if (onSignUp) {
+        await onSignUp(email, password, fullName);
+      } else {
+        await signUp(email, password, fullName);
+      }
       
-      if (success) {
-        // Redirect to login page with success message
+      // Success handling
+      if (onSuccess) {
+        onSuccess();
+      } else {
+        // If no onSuccess provided, navigate to login
         navigate('/login', { 
           state: { 
             message: 'Registration successful! Please check your email to confirm your account.' 
           } 
         });
-        
-        if (onSuccess) {
-          onSuccess();
-        }
       }
     } catch (error) {
       console.error('Registration error:', error);
@@ -61,6 +81,9 @@ const RegisterForm = ({ onSuccess }: RegisterFormProps) => {
       setIsLoading(false);
     }
   };
+
+  // Use the loading state from props if available, otherwise use local state
+  const loading = propIsLoading !== undefined ? propIsLoading : isLoading;
 
   return (
     <form onSubmit={handleRegister} className="space-y-4">
@@ -81,7 +104,7 @@ const RegisterForm = ({ onSuccess }: RegisterFormProps) => {
             className="pl-10"
             value={fullName}
             onChange={(e) => setFullName(e.target.value)}
-            disabled={isLoading}
+            disabled={loading}
           />
         </div>
       </div>
@@ -97,7 +120,7 @@ const RegisterForm = ({ onSuccess }: RegisterFormProps) => {
             className="pl-10"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            disabled={isLoading}
+            disabled={loading}
           />
         </div>
       </div>
@@ -113,7 +136,7 @@ const RegisterForm = ({ onSuccess }: RegisterFormProps) => {
             className="pl-10"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            disabled={isLoading}
+            disabled={loading}
           />
         </div>
         <p className="text-xs text-gray-500">
@@ -132,23 +155,23 @@ const RegisterForm = ({ onSuccess }: RegisterFormProps) => {
             className="pl-10"
             value={confirmPassword}
             onChange={(e) => setConfirmPassword(e.target.value)}
-            disabled={isLoading}
+            disabled={loading}
           />
         </div>
       </div>
       
       <TermsAgreement 
-        accepted={acceptTerms}
-        onChange={setAcceptTerms}
-        disabled={isLoading}
+        accepted={accepted}
+        onAcceptedChange={setAccepted}
+        disabled={loading}
       />
       
       <Button 
         type="submit" 
         className="w-full bg-gym-orange hover:bg-gym-orange/90" 
-        disabled={isLoading}
+        disabled={loading}
       >
-        {isLoading ? 'Creating account...' : 'Create Account'}
+        {loading ? 'Creating account...' : 'Create Account'}
       </Button>
     </form>
   );

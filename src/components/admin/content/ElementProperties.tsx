@@ -5,7 +5,7 @@ import ImageProperties from "./properties/ImageProperties";
 import VideoProperties from "./properties/VideoProperties";
 import ButtonProperties from "./properties/ButtonProperties";
 import SpacingProperties from "./properties/SpacingProperties";
-import { ContentElement, ElementProperties as ElementPropsType } from './ContentEditor';
+import { ContentElement, ElementProperties as ElementPropsType } from '@/types/content.types';
 
 interface ElementPropertiesProps {
   element: ContentElement;
@@ -15,7 +15,7 @@ interface ElementPropertiesProps {
 const ElementProperties = ({ element, onUpdate }: ElementPropertiesProps) => {
   const { type, properties = {} } = element;
   
-  const handleUpdate = (newProperties: ElementPropsType) => {
+  const handleUpdate = (newProperties: Partial<ElementPropsType>) => {
     onUpdate({ ...properties, ...newProperties });
   };
 

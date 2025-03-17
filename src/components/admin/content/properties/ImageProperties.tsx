@@ -4,12 +4,12 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogTrigger } from "@/components/ui/dialog";
-import { ElementProperties, ContentElement } from '../ContentEditor';
+import { ElementProperties, ContentElement } from '@/types/content.types';
 
 interface ImagePropertiesProps {
   element: ContentElement;
   properties: ElementProperties;
-  onUpdate: (properties: ElementProperties) => void;
+  onUpdate: (properties: Partial<ElementProperties>) => void;
 }
 
 const ImageProperties = ({ element, properties, onUpdate }: ImagePropertiesProps) => {
@@ -20,6 +20,16 @@ const ImageProperties = ({ element, properties, onUpdate }: ImagePropertiesProps
   const handleAlignChange = (value: string) => {
     onUpdate({ align: value });
   };
+
+  const handleContentChange = (value: string) => {
+    // We're updating the element content which is the image URL
+    onUpdate({ content: value } as any);
+  };
+
+  const handleAltChange = (value: string) => {
+    // We're updating the alt attribute
+    onUpdate({ alt: value } as any);
+  };
   
   return (
     <div className="space-y-4">
@@ -28,7 +38,7 @@ const ImageProperties = ({ element, properties, onUpdate }: ImagePropertiesProps
         <Input 
           type="text" 
           value={element.content || ''} 
-          onChange={(e) => onUpdate({ content: e.target.value })}
+          onChange={(e) => handleContentChange(e.target.value)}
           className="mt-1.5"
           placeholder="Enter image URL or select from media library"
         />
@@ -46,7 +56,7 @@ const ImageProperties = ({ element, properties, onUpdate }: ImagePropertiesProps
         <Input 
           type="text" 
           value={element.alt || ''} 
-          onChange={(e) => onUpdate({ alt: e.target.value })}
+          onChange={(e) => handleAltChange(e.target.value)}
           className="mt-1.5"
           placeholder="Describe the image for accessibility"
         />

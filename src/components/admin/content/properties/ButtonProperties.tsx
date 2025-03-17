@@ -2,11 +2,11 @@
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { ElementProperties } from '../ContentEditor';
+import { ElementProperties } from '@/types/content.types';
 
 interface ButtonPropertiesProps {
   properties: ElementProperties;
-  onUpdate: (properties: ElementProperties) => void;
+  onUpdate: (properties: Partial<ElementProperties>) => void;
 }
 
 const ButtonProperties = ({ properties, onUpdate }: ButtonPropertiesProps) => {

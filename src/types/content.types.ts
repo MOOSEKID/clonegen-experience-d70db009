@@ -20,6 +20,7 @@ export interface ContentElement {
   properties: ElementProperties;
   alt?: string;
   link?: string;
+  videoUrl?: string;
 }
 
 export interface ElementProperties {
@@ -28,5 +29,18 @@ export interface ElementProperties {
   style: string;
   color: string;
   padding: string;
-  [key: string]: any;
+  margin?: number;
+  borderRadius?: string;
+  videoUrl?: string;
+  [key: string]: any; // Allow additional properties
+}
+
+// Define a type for page content mapping
+export interface PageContentMapping {
+  [pageId: string]: ContentElement[];
+}
+
+// Define a type for section templates mapping
+export interface SectionTemplateMapping {
+  [pageId: string]: SectionTemplate[];
 }

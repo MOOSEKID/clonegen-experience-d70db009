@@ -1,160 +1,160 @@
 
 import { useState, useEffect } from 'react';
-import { componentSectionMap, getSectionPreviewData } from '@/utils/componentMapping';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Button } from "@/components/ui/button";
-import { Laptop, Smartphone, ExternalLink } from 'lucide-react';
+import { ChevronDown, ChevronUp, Plus, EyeOff, Copy } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { pageSectionsData } from '@/data/cmsData';
+import { SectionTemplate, SectionTemplateMapping } from '@/types/content.types';
 
 interface SitePreviewProps {
   selectedPage: string;
+  onAddSection: (sectionTemplate: SectionTemplate) => void;
+  onSettingsChange?: () => void;
 }
 
-const SitePreview = ({ selectedPage }: SitePreviewProps) => {
-  const [viewMode, setViewMode] = useState<'desktop' | 'mobile'>('desktop');
-  const [selectedSection, setSelectedSection] = useState<string | null>(null);
-  const [previewUrl, setPreviewUrl] = useState<string>('');
-
-  const pageSections = componentSectionMap[selectedPage] || [];
-
+const SitePreview = ({ selectedPage, onAddSection, onSettingsChange }: SitePreviewProps) => {
+  const [expanded, setExpanded] = useState<string[]>([]);
+  const [sections, setSections] = useState<SectionTemplate[]>([]);
+  
   useEffect(() => {
-    // Set the first section as selected by default if available
-    if (pageSections.length > 0 && !selectedSection) {
-      setSelectedSection(pageSections[0].id);
-    }
-    
-    // In a real application, this would generate an actual preview URL
-    setPreviewUrl(`/preview/${selectedPage}`);
-  }, [selectedPage, pageSections, selectedSection]);
+    // Type assertion to SectionTemplateMapping
+    const sectionData = (pageSectionsData as SectionTemplateMapping)[selectedPage] || [];
+    setSections(sectionData);
+  }, [selectedPage]);
 
-  const handleSectionChange = (sectionId: string) => {
-    setSelectedSection(sectionId);
-  };
-
-  const renderSectionPreview = () => {
-    if (!selectedSection) return null;
-    
-    // Get preview data for the selected section
-    const previewData = getSectionPreviewData(selectedPage, selectedSection);
-    
-    // Render a placeholder preview - in a real application, this would render actual components
-    return (
-      <div className="border rounded-lg p-4 bg-gray-50 min-h-[300px] overflow-hidden">
-        <div className="text-center text-gray-500">
-          <p className="mb-2">Preview of {selectedPage}/{selectedSection}</p>
-          <div className="aspect-video bg-white border shadow-sm rounded-md mx-auto max-w-xl flex items-center justify-center p-4">
-            <div className="space-y-4 w-full max-w-md">
-              {previewData.slice(0, 3).map((item, index) => (
-                <div key={index} className="space-y-2">
-                  {item.type === 'text' && (
-                    <div 
-                      className="p-2 border border-dashed border-gray-300 rounded" 
-                      style={{ 
-                        textAlign: item.properties?.align || 'left',
-                        fontWeight: item.properties?.style === 'bold' ? 'bold' : 'normal',
-                        fontStyle: item.properties?.style === 'italic' ? 'italic' : 'normal',
-                      }}
-                    >
-                      {item.content}
-                    </div>
-                  )}
-                  {item.type === 'image' && (
-                    <div className="p-2 border border-dashed border-gray-300 rounded">
-                      <img 
-                        src={item.content} 
-                        alt="Preview" 
-                        className="max-h-32 mx-auto" 
-                        style={{ 
-                          margin: item.properties?.align === 'center' ? '0 auto' : 
-                                 item.properties?.align === 'right' ? '0 0 0 auto' : '0' 
-                        }}
-                      />
-                    </div>
-                  )}
-                  {item.type === 'button' && (
-                    <div 
-                      className="p-2 border border-dashed border-gray-300 rounded"
-                      style={{ 
-                        textAlign: item.properties?.align || 'left',
-                      }}
-                    >
-                      <button className="bg-gym-orange text-white px-4 py-2 rounded">
-                        {item.content || 'Button'}
-                      </button>
-                    </div>
-                  )}
-                </div>
-              ))}
-              {previewData.length === 0 && (
-                <div className="text-center p-6">
-                  <p>No content elements for this section yet.</p>
-                  <p className="text-sm text-gray-400">Add elements in the content editor</p>
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
-      </div>
+  const toggleSection = (sectionId: string) => {
+    setExpanded(prev => 
+      prev.includes(sectionId)
+        ? prev.filter(id => id !== sectionId)
+        : [...prev, sectionId]
     );
   };
 
+  const handleAddSection = (template: SectionTemplate) => {
+    onAddSection(template);
+  };
+
   return (
-    <div className="space-y-4">
-      <div className="flex justify-between items-center">
-        <h3 className="text-lg font-medium">Website Preview</h3>
-        <div className="flex space-x-2">
-          <div className="border rounded-md flex">
-            <button 
-              className={`p-2 ${viewMode === 'desktop' ? 'bg-gray-100' : ''}`}
-              onClick={() => setViewMode('desktop')}
-              title="Desktop preview"
-            >
-              <Laptop size={16} />
-            </button>
-            <button
-              className={`p-2 ${viewMode === 'mobile' ? 'bg-gray-100' : ''}`}
-              onClick={() => setViewMode('mobile')}
-              title="Mobile preview"
-            >
-              <Smartphone size={16} />
-            </button>
-          </div>
-          <Button 
-            variant="outline" 
-            size="sm" 
-            className="flex items-center gap-1"
-            onClick={() => window.open(previewUrl, '_blank')}
-          >
-            <ExternalLink size={14} />
-            Full Preview
+    <div className="border rounded-md bg-white overflow-hidden">
+      <div className="bg-gray-50 px-4 py-3 border-b flex justify-between items-center">
+        <h3 className="font-medium text-sm">Page Sections</h3>
+        {onSettingsChange && (
+          <Button variant="outline" size="sm" onClick={onSettingsChange}>
+            Settings
           </Button>
-        </div>
+        )}
       </div>
       
-      <Tabs defaultValue={pageSections[0]?.id} value={selectedSection || ''}>
-        <TabsList className="w-full mb-4">
-          {pageSections.map(section => (
-            <TabsTrigger 
-              key={section.id} 
-              value={section.id}
-              onClick={() => handleSectionChange(section.id)}
-              className="flex-1"
+      <div className="p-4">
+        <ul className="space-y-2 mb-4">
+          {sections.map((item: SectionTemplate, index: number) => (
+            <li 
+              key={item.id} 
+              className="border rounded-md overflow-hidden"
             >
-              {section.name}
-            </TabsTrigger>
+              <div 
+                className="flex justify-between items-center px-3 py-2 bg-gray-50 cursor-pointer"
+                onClick={() => toggleSection(item.id)}
+              >
+                <span className="font-medium text-sm">{item.name}</span>
+                <div className="flex items-center space-x-2">
+                  <button
+                    className="p-1 hover:bg-gray-200 rounded"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      // Copy section logic would go here
+                      console.log('Copy section:', item.id);
+                    }}
+                  >
+                    <Copy size={14} />
+                  </button>
+                  <button
+                    className="p-1 hover:bg-gray-200 rounded"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      // Toggle visibility logic would go here
+                      console.log('Toggle visibility:', item.id);
+                    }}
+                  >
+                    <EyeOff size={14} />
+                  </button>
+                  {expanded.includes(item.id) ? (
+                    <ChevronUp size={16} />
+                  ) : (
+                    <ChevronDown size={16} />
+                  )}
+                </div>
+              </div>
+              
+              {expanded.includes(item.id) && (
+                <div className="p-3 text-sm">
+                  <p className="text-gray-600 mb-2">{item.description}</p>
+                  <div className="flex justify-end space-x-2 mt-3">
+                    <Button variant="outline" size="sm">
+                      Edit Section
+                    </Button>
+                    <Button 
+                      variant="destructive" 
+                      size="sm"
+                    >
+                      Remove
+                    </Button>
+                  </div>
+                </div>
+              )}
+            </li>
           ))}
-        </TabsList>
+        </ul>
         
-        {pageSections.map(section => (
-          <TabsContent key={section.id} value={section.id}>
-            <div className="space-y-4">
-              <p className="text-sm text-gray-500">{section.description}</p>
-              {renderSectionPreview()}
-            </div>
-          </TabsContent>
-        ))}
-      </Tabs>
+        <div className="mt-6">
+          <h4 className="font-medium text-sm mb-3">Add New Section</h4>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+            {getAvailableSectionTemplates(selectedPage).map((section: SectionTemplate) => (
+              <Button
+                key={section.id}
+                variant="outline"
+                size="sm"
+                className="justify-start"
+                onClick={() => handleAddSection(section)}
+              >
+                <Plus size={14} className="mr-2" />
+                {section.name}
+              </Button>
+            ))}
+          </div>
+        </div>
+      </div>
     </div>
   );
+};
+
+// Helper function to get available section templates
+const getAvailableSectionTemplates = (pageId: string): SectionTemplate[] => {
+  const commonSections: SectionTemplate[] = [
+    { id: 'header', name: 'Header Section', description: 'Page header with title and subtitle' },
+    { id: 'text', name: 'Text Section', description: 'Simple text content section' },
+    { id: 'image-text', name: 'Image with Text', description: 'Image with accompanying text' }
+  ];
+  
+  const pageSections: { [key: string]: SectionTemplate[] } = {
+    home: [
+      { id: 'hero', name: 'Hero Banner', description: 'Large hero section with background image' },
+      { id: 'features', name: 'Features Grid', description: 'Grid of feature cards' }
+    ],
+    'about-us': [
+      { id: 'team', name: 'Team Members', description: 'Team member profiles' },
+      { id: 'history', name: 'Company History', description: 'Timeline of company milestones' }
+    ],
+    services: [
+      { id: 'services-grid', name: 'Services Grid', description: 'Grid of available services' },
+      { id: 'pricing', name: 'Pricing Table', description: 'Service pricing information' }
+    ],
+    'contact-us': [
+      { id: 'contact-form', name: 'Contact Form', description: 'Form for customer inquiries' },
+      { id: 'map', name: 'Location Map', description: 'Map showing business location' }
+    ]
+  };
+  
+  return [...commonSections, ...(pageSections[pageId] || [])];
 };
 
 export default SitePreview;

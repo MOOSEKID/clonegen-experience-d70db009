@@ -2,11 +2,11 @@
 import { Label } from "@/components/ui/label";
 import { Slider } from "@/components/ui/slider";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { ElementProperties } from '../ContentEditor';
+import { ElementProperties } from '@/types/content.types';
 
 interface SpacingPropertiesProps {
   properties: ElementProperties;
-  onUpdate: (properties: ElementProperties) => void;
+  onUpdate: (properties: Partial<ElementProperties>) => void;
 }
 
 const SpacingProperties = ({ properties, onUpdate }: SpacingPropertiesProps) => {
@@ -18,8 +18,8 @@ const SpacingProperties = ({ properties, onUpdate }: SpacingPropertiesProps) => 
     onUpdate({ margin: value[0] });
   };
   
-  const handleBorderRadiusChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    onUpdate({ borderRadius: e.target.value });
+  const handleBorderRadiusChange = (value: number[]) => {
+    onUpdate({ borderRadius: value[0].toString() });
   };
   
   return (
@@ -61,10 +61,10 @@ const SpacingProperties = ({ properties, onUpdate }: SpacingPropertiesProps) => 
         <Label>Border Radius (px)</Label>
         <div className="pt-5">
           <Slider
-            defaultValue={[parseInt(properties.borderRadius) || 0]}
+            defaultValue={[parseInt(properties.borderRadius || '0')]}
             max={50}
             step={1}
-            onValueChange={(value) => onUpdate({ borderRadius: value[0].toString() })}
+            onValueChange={handleBorderRadiusChange}
           />
         </div>
         <div className="text-xs text-right mt-1 text-gray-500">

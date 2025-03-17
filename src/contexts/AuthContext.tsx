@@ -2,7 +2,7 @@
 import { createContext, useContext, useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
 import { toast } from 'sonner';
-import { AuthUser, CompleteUserProfile, StaffCategory, AccessLevel, Department, StaffStatus } from '@/types/auth.types';
+import { StaffCategory, AccessLevel, Department, StaffStatus } from '@/types/auth.types';
 
 export interface Profile {
   id: string;
@@ -43,9 +43,12 @@ export interface AuthContextType {
   isAdmin: boolean;
   isLoading: boolean;
   profile: Profile | null;
+  user: { id: string; email: string } | null;
   signIn: (email: string, password: string) => Promise<void>;
+  login: (email: string, password: string) => Promise<boolean>; // Adding alias
   signUp: (email: string, password: string, fullName: string) => Promise<void>;
   signOut: () => Promise<void>;
+  logout: () => Promise<void>; // Adding alias
 }
 
 export const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -55,6 +58,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [isAdmin, setIsAdmin] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [profile, setProfile] = useState<Profile | null>(null);
+  const [user, setUser] = useState<{ id: string; email: string } | null>(null);
 
   // Fetch profile data
   const fetchProfile = async (userId: string) => {
@@ -121,6 +125,10 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         
         if (session?.user) {
           setIsAuthenticated(true);
+          setUser({
+            id: session.user.id,
+            email: session.user.email || ''
+          });
           // Check if user is admin
           setIsAdmin(session.user.email === 'admin@uptowngym.rw');
           await fetchProfile(session.user.id);
@@ -139,12 +147,17 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
       if (event === 'SIGNED_IN' && session?.user) {
         setIsAuthenticated(true);
+        setUser({
+          id: session.user.id,
+          email: session.user.email || ''
+        });
         setIsAdmin(session.user.email === 'admin@uptowngym.rw');
         await fetchProfile(session.user.id);
       } else if (event === 'SIGNED_OUT') {
         setIsAuthenticated(false);
         setIsAdmin(false);
         setProfile(null);
+        setUser(null);
       }
     });
 
@@ -165,6 +178,10 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
       if (data.user) {
         setIsAuthenticated(true);
+        setUser({
+          id: data.user.id,
+          email: data.user.email || ''
+        });
         setIsAdmin(data.user.email === 'admin@uptowngym.rw');
         await fetchProfile(data.user.id);
         toast.success('Signed in successfully');
@@ -175,6 +192,17 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       throw error;
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  // Add login as an alias of signIn but returning boolean for UI feedback
+  const login = async (email: string, password: string): Promise<boolean> => {
+    try {
+      await signIn(email, password);
+      return true;
+    } catch (error) {
+      console.error('Login error:', error);
+      return false;
     }
   };
 
@@ -241,6 +269,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       setIsAuthenticated(false);
       setIsAdmin(false);
       setProfile(null);
+      setUser(null);
       toast.success('Signed out successfully');
     } catch (error) {
       console.error('Sign out error:', error);
@@ -251,15 +280,21 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     }
   };
 
+  // Add an alias for signOut called logout
+  const logout = signOut;
+
   return (
     <AuthContext.Provider value={{
       isAuthenticated,
       isAdmin,
       isLoading,
       profile,
+      user,
       signIn,
+      login, // Alias for signIn
       signUp,
-      signOut
+      signOut,
+      logout // Alias for signOut
     }}>
       {children}
     </AuthContext.Provider>

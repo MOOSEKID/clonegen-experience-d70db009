@@ -4,7 +4,7 @@ import TextElement from './elements/TextElement';
 import ImageElement from './elements/ImageElement';
 import VideoElement from './elements/VideoElement';
 import ButtonElement from './elements/ButtonElement';
-import { ContentElement } from './ContentEditor';
+import { ContentElement } from '@/types/content.types';
 
 interface EditableElementProps {
   element: ContentElement;
@@ -13,10 +13,10 @@ interface EditableElementProps {
 }
 
 const EditableElement = ({ element, isEditing, onUpdate }: EditableElementProps) => {
-  const [content, setContent] = useState(element.content);
+  const [contentValue, setContentValue] = useState(element.content);
 
   useEffect(() => {
-    setContent(element.content);
+    setContentValue(element.content);
   }, [element.content]);
 
   const renderElement = () => {

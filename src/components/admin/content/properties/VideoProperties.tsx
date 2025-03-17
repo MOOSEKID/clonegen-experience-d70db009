@@ -2,11 +2,11 @@
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { ElementProperties } from '../ContentEditor';
+import { ElementProperties } from '@/types/content.types';
 
 interface VideoPropertiesProps {
   properties: ElementProperties;
-  onUpdate: (properties: ElementProperties) => void;
+  onUpdate: (properties: Partial<ElementProperties>) => void;
 }
 
 const VideoProperties = ({ properties, onUpdate }: VideoPropertiesProps) => {
@@ -17,6 +17,10 @@ const VideoProperties = ({ properties, onUpdate }: VideoPropertiesProps) => {
   const handleAlignChange = (value: string) => {
     onUpdate({ align: value });
   };
+
+  const handleVideoUrlChange = (value: string) => {
+    onUpdate({ videoUrl: value });
+  };
   
   return (
     <div className="space-y-4">
@@ -25,7 +29,7 @@ const VideoProperties = ({ properties, onUpdate }: VideoPropertiesProps) => {
         <Input 
           type="text" 
           value={properties.videoUrl || ''} 
-          onChange={(e) => onUpdate({ videoUrl: e.target.value })}
+          onChange={(e) => handleVideoUrlChange(e.target.value)}
           className="mt-1.5"
           placeholder="YouTube or Vimeo URL"
         />
