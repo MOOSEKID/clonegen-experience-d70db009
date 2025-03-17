@@ -1,5 +1,8 @@
+
 import { Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
+import { useEffect, useState } from 'react';
+import { Skeleton } from '@/components/ui/skeleton';
 
 type StaffCategory = 'management' | 'training' | 'operations' | 'reception' | 'maintenance';
 type UserCategory = StaffCategory | 'customer';
@@ -16,8 +19,28 @@ export const RouteGuard = ({
   requiredAccess = 'limited',
   allowedCategories = []
 }: RouteGuardProps) => {
-  const { isAuthenticated, profile } = useAuth();
+  const { isAuthenticated, profile, isLoading } = useAuth();
   const location = useLocation();
+  const [isChecking, setIsChecking] = useState(true);
+
+  useEffect(() => {
+    // Add a small timeout to prevent immediate redirects that might cause UI freezes
+    const timer = setTimeout(() => {
+      setIsChecking(false);
+    }, 300);
+    
+    return () => clearTimeout(timer);
+  }, [isAuthenticated, profile]);
+
+  // Show loading state while checking authentication
+  if (isLoading || isChecking) {
+    return (
+      <div className="p-6 max-w-7xl mx-auto">
+        <Skeleton className="h-12 w-full mb-4" />
+        <Skeleton className="h-64 w-full" />
+      </div>
+    );
+  }
 
   if (!isAuthenticated || !profile) {
     // Save the attempted URL for redirecting after login

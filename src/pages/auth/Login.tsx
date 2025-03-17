@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { Mail, Lock, AlertCircle } from 'lucide-react';
@@ -8,11 +9,13 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from 'sonner';
+import { supabase } from '@/lib/supabase';
 
 const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
+  const [isCheckingAuth, setIsCheckingAuth] = useState(true);
   const { signIn, isAuthenticated, isAdmin, isLoading } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
@@ -24,13 +27,59 @@ const Login = () => {
   
   // Check if user is already authenticated
   useEffect(() => {
-    if (isAuthenticated) {
-      console.log('User authenticated, redirecting to:', from);
-      // Redirect based on saved path or user role
+    const checkSession = async () => {
+      try {
+        const { data, error } = await supabase.auth.getSession();
+        
+        if (error) {
+          console.error('Error checking session:', error);
+          setIsCheckingAuth(false);
+          return;
+        }
+        
+        if (data.session) {
+          console.log('Session found, user is authenticated');
+          
+          // Check if profile exists and is admin
+          const { data: profileData, error: profileError } = await supabase
+            .from('profiles')
+            .select('is_admin')
+            .eq('id', data.session.user.id)
+            .single();
+            
+          const isUserAdmin = profileError ? 
+            data.session.user.email === 'admin@uptowngym.rw' || data.session.user.email === 'admin@example.com' : 
+            profileData?.is_admin;
+            
+          // Redirect based on role
+          const basePath = import.meta.env.PROD ? '/clonegen-experience' : '';
+          const redirectPath = isUserAdmin ? 
+            `${basePath}/admin/trainers` : 
+            `${basePath}/dashboard`;
+            
+          console.log('Redirecting to:', redirectPath);
+          navigate(redirectPath, { replace: true });
+        } else {
+          setIsCheckingAuth(false);
+        }
+      } catch (error) {
+        console.error('Error in auth check:', error);
+        setIsCheckingAuth(false);
+      }
+    };
+    
+    checkSession();
+  }, [navigate]);
+
+  // Check if user becomes authenticated through context
+  useEffect(() => {
+    if (isAuthenticated && !isCheckingAuth) {
+      console.log('User authenticated through context, redirecting');
+      // Redirect based on user role
       const basePath = import.meta.env.PROD ? '/clonegen-experience' : '';
-      navigate(from || (isAdmin ? `${basePath}/admin/trainers` : `${basePath}/dashboard`), { replace: true });
+      navigate(isAdmin ? `${basePath}/admin/trainers` : `${basePath}/dashboard`, { replace: true });
     }
-  }, [isAuthenticated, isAdmin, navigate, from]);
+  }, [isAuthenticated, isAdmin, navigate, isCheckingAuth]);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -67,6 +116,7 @@ const Login = () => {
     try {
       setErrorMessage('');
       await signIn(email, password);
+      // Note: Redirection is handled by the useEffect watching isAuthenticated
     } catch (error) {
       console.error('Login error:', error);
       setErrorMessage(error instanceof Error ? error.message : 'Login failed');
@@ -80,12 +130,32 @@ const Login = () => {
       // Use the admin password from .env
       const adminPassword = import.meta.env.VITE_ADMIN_PASSWORD || 'admin@123';
       await signIn('admin@uptowngym.rw', adminPassword);
+      // Note: Redirection is handled by the useEffect watching isAuthenticated
     } catch (error) {
       console.error('Admin login error:', error);
       setErrorMessage(error instanceof Error ? error.message : 'Admin login failed');
       toast.error('Admin login failed. Please check your credentials.');
     }
   };
+
+  // Show loading state while checking authentication
+  if (isCheckingAuth || isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center p-6 bg-gym-dark pt-20">
+        <Card className="w-full max-w-md p-6 bg-gym-darkblue text-white border border-white/10">
+          <CardHeader className="space-y-1">
+            <CardTitle className="text-2xl font-bold text-center">Checking Authentication</CardTitle>
+            <CardDescription className="text-center text-white/70">
+              Please wait while we verify your session...
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4 flex justify-center">
+            <div className="h-8 w-8 rounded-full border-4 border-t-transparent border-gym-orange animate-spin"></div>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen flex items-center justify-center p-6 bg-gym-dark pt-20">
