@@ -28,6 +28,9 @@ export const useLoginService = () => {
       }
       
       if (data.user) {
+        // Check if this is one of our known admin emails
+        const isKnownAdmin = email === 'admin@example.com' || email === 'admin@uptowngym.rw';
+        
         // Get user role from profiles table
         const { data: profile, error: profileError } = await supabase
           .from('profiles')
@@ -45,9 +48,9 @@ export const useLoginService = () => {
               .insert([
                 { 
                   id: data.user.id,
-                  full_name: data.user.user_metadata?.full_name || '',
-                  role: 'member',
-                  is_admin: false
+                  full_name: data.user.user_metadata?.full_name || email,
+                  role: isKnownAdmin ? 'admin' : 'member',
+                  is_admin: isKnownAdmin
                 }
               ]);
               
@@ -55,10 +58,30 @@ export const useLoginService = () => {
               console.error('Error creating profile:', insertError);
             }
           }
+        } else if (isKnownAdmin && !profile.is_admin) {
+          // Update profile to set admin status for known admin emails
+          const { error: updateError } = await supabase
+            .from('profiles')
+            .update({
+              is_admin: true,
+              role: 'admin'
+            })
+            .eq('id', data.user.id);
+            
+          if (updateError) {
+            console.error('Error updating admin status:', updateError);
+          }
         }
         
-        const userRole = profile?.role || 'member';
-        const userIsAdmin = profile?.is_admin || false;
+        // Get the latest profile data after possible updates
+        const { data: updatedProfile } = await supabase
+          .from('profiles')
+          .select('role, is_admin')
+          .eq('id', data.user.id)
+          .single();
+        
+        const userRole = updatedProfile?.role || (isKnownAdmin ? 'admin' : 'member');
+        const userIsAdmin = updatedProfile?.is_admin || isKnownAdmin;
         
         toast.success('Login successful');
         
@@ -66,7 +89,7 @@ export const useLoginService = () => {
           success: true,
           user: {
             ...data.user,
-            email: data.user.email || '', // Ensure email is always provided
+            email: data.user.email || '', 
             role: userRole
           },
           isAdmin: userIsAdmin

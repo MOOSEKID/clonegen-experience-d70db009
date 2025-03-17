@@ -60,7 +60,8 @@ export const useTestUsers = () => {
           
           let existingUser = null;
           if (authData && authData.users) {
-            existingUser = authData.users.find(user => user.email === 'user@example.com');
+            // Use explicit type assertion
+            existingUser = authData.users.find((user: any) => user.email === 'user@example.com');
           }
           
           if (existingUser) {
