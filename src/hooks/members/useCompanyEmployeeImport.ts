@@ -20,7 +20,7 @@ export const useCompanyEmployeeImport = (
       .map(m => m.username as string);
   };
 
-  const importCompanyEmployees = (companyId: number, employees: Omit<Member, "id" | "startDate" | "endDate" | "lastCheckin">[]) => {
+  const importCompanyEmployees = (companyId: string, employees: Omit<Member, "id" | "startDate" | "endDate" | "lastCheckin">[]) => {
     const company = members.find(m => m.id === companyId);
     
     if (!company || company.membershipCategory !== "Company") {
@@ -28,13 +28,12 @@ export const useCompanyEmployeeImport = (
       return;
     }
     
-    const lastId = members.length > 0 ? Math.max(...members.map(m => m.id)) : 0;
     const today = new Date().toISOString().split('T')[0];
     
     // Get company end date to apply to all employees
     const companyEndDate = company.endDate;
     
-    const newEmployees = employees.map((employee, index) => {
+    const newEmployees = employees.map((employee) => {
       // Generate username and password for each employee
       let username = '';
       let tempPassword = '';
@@ -54,7 +53,7 @@ export const useCompanyEmployeeImport = (
       }
       
       return {
-        id: lastId + index + 1,
+        id: crypto.randomUUID(), // Generate UUID for client-side
         ...employee,
         linkedToCompany: true,
         linkedCompanyName: company.companyName || company.name,

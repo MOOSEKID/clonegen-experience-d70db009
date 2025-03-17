@@ -42,7 +42,7 @@ const BasicInfoFields = ({ control }: BasicInfoFieldsProps) => {
           <FormItem>
             <FormLabel className="flex items-center gap-2"><User size={16} /> Name</FormLabel>
             <FormControl>
-              <Input placeholder="John Doe" {...field} />
+              <Input placeholder="John Doe" {...field} value={field.value || ''} />
             </FormControl>
             <FormMessage />
           </FormItem>
@@ -55,7 +55,7 @@ const BasicInfoFields = ({ control }: BasicInfoFieldsProps) => {
           <FormItem>
             <FormLabel className="flex items-center gap-2"><Mail size={16} /> Email</FormLabel>
             <FormControl>
-              <Input placeholder="john.doe@example.com" {...field} />
+              <Input placeholder="john.doe@example.com" {...field} value={field.value || ''} />
             </FormControl>
             <FormMessage />
           </FormItem>
@@ -68,7 +68,7 @@ const BasicInfoFields = ({ control }: BasicInfoFieldsProps) => {
           <FormItem>
             <FormLabel className="flex items-center gap-2"><Phone size={16} /> Phone</FormLabel>
             <FormControl>
-              <Input placeholder="+250788123456" {...field} />
+              <Input placeholder="+250788123456" {...field} value={field.value || '+250'} />
             </FormControl>
             <FormMessage />
           </FormItem>
@@ -80,7 +80,11 @@ const BasicInfoFields = ({ control }: BasicInfoFieldsProps) => {
         render={({ field }) => (
           <FormItem>
             <FormLabel>Membership Type</FormLabel>
-            <Select onValueChange={field.onChange} defaultValue={field.value}>
+            <Select 
+              onValueChange={field.onChange} 
+              value={field.value || "Standard"}
+              defaultValue="Standard"
+            >
               <FormControl>
                 <SelectTrigger>
                   <SelectValue placeholder="Select membership type" />

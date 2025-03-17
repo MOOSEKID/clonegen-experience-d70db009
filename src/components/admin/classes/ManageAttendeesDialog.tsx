@@ -1,5 +1,5 @@
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -15,7 +15,7 @@ interface ManageAttendeesDialogProps {
   onOpenChange: (open: boolean) => void;
   classData: ClassType;
   onBookClass: (classId: number, member: MemberInfo) => void;
-  onCancelBooking: (classId: number, memberId: number) => void;
+  onCancelBooking: (classId: number, memberId: string) => void;
 }
 
 const ManageAttendeesDialog = ({ 
@@ -27,20 +27,42 @@ const ManageAttendeesDialog = ({
 }: ManageAttendeesDialogProps) => {
   const [activeTab, setActiveTab] = useState('enrolled');
   const [searchTerm, setSearchTerm] = useState('');
+  const [availableMembers, setAvailableMembers] = useState<MemberInfo[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
 
-  const handleAddMember = (member: MemberInfo) => {
-    onBookClass(classData.id, member);
+  // Fetch available members when dialog opens or search term changes
+  useEffect(() => {
+    if (open) {
+      const fetchMembers = async () => {
+        setIsLoading(true);
+        try {
+          const members = await getAvailableMembers(
+            classData.enrolledMembers,
+            classData.waitlistMembers,
+            searchTerm
+          );
+          setAvailableMembers(members);
+        } catch (error) {
+          console.error('Error fetching available members:', error);
+        } finally {
+          setIsLoading(false);
+        }
+      };
+      
+      fetchMembers();
+    }
+  }, [open, searchTerm, classData.enrolledMembers, classData.waitlistMembers]);
+
+  const handleAddMember = (memberId: string) => {
+    const member = availableMembers.find(m => m.id === memberId);
+    if (member) {
+      onBookClass(classData.id, member);
+    }
   };
 
-  const handleRemoveMember = (memberId: number) => {
+  const handleRemoveMember = (memberId: string) => {
     onCancelBooking(classData.id, memberId);
   };
-
-  const availableMembers = getAvailableMembers(
-    classData.enrolledMembers,
-    classData.waitlistMembers,
-    searchTerm
-  );
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -103,7 +125,11 @@ const ManageAttendeesDialog = ({
             </TabsContent>
             
             <TabsContent value="add">
-              {availableMembers.length === 0 ? (
+              {isLoading ? (
+                <div className="text-center py-6 text-gray-500">
+                  Loading available members...
+                </div>
+              ) : availableMembers.length === 0 ? (
                 <div className="text-center py-6 text-gray-500">
                   {searchTerm 
                     ? "No matching members found." 
@@ -113,10 +139,7 @@ const ManageAttendeesDialog = ({
                 <MemberList
                   members={availableMembers}
                   action="add"
-                  onAction={(memberId) => {
-                    const member = availableMembers.find(m => m.id === memberId);
-                    if (member) handleAddMember(member);
-                  }}
+                  onAction={handleAddMember}
                   emptyMessage="No available members found."
                   searchTerm=""
                   classIsFull={classData.enrolled >= classData.capacity}

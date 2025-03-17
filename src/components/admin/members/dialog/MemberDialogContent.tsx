@@ -1,4 +1,3 @@
-
 import React from "react";
 import { DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
@@ -28,7 +27,17 @@ interface MemberDialogContentProps {
 }
 
 const MemberDialogContent = ({ form, isSubmitting, onClose, onSubmit }: MemberDialogContentProps) => {
+  console.log("Rendering MemberDialogContent, isSubmitting:", isSubmitting);
   const membershipCategory = form.watch("membershipCategory");
+
+  const handleFormSubmit = (values: z.infer<typeof memberFormSchema>) => {
+    try {
+      console.log("Form submit handler called with values:", values);
+      onSubmit(values);
+    } catch (error) {
+      console.error("Error in form submit handler:", error);
+    }
+  };
 
   return (
     <>
@@ -40,8 +49,8 @@ const MemberDialogContent = ({ form, isSubmitting, onClose, onSubmit }: MemberDi
       </DialogHeader>
       
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-          {/* Membership Type Selection */}
+        <form onSubmit={form.handleSubmit(handleFormSubmit)} className="space-y-6">
+          {/* Membership Type Section */}
           <MembershipTypeSection control={form.control} />
           
           {/* Basic Information Section */}
@@ -79,7 +88,7 @@ const MemberDialogContent = ({ form, isSubmitting, onClose, onSubmit }: MemberDi
           </div>
 
           <DialogFooter>
-            <Button type="button" variant="outline" onClick={onClose}>
+            <Button type="button" variant="outline" onClick={onClose} disabled={isSubmitting}>
               Cancel
             </Button>
             <Button 
@@ -97,11 +106,7 @@ const MemberDialogContent = ({ form, isSubmitting, onClose, onSubmit }: MemberDi
 };
 
 // Membership Type Section Component
-interface SectionProps {
-  control: Control<z.infer<typeof memberFormSchema>>;
-}
-
-const MembershipTypeSection = ({ control }: SectionProps) => {
+const MembershipTypeSection = ({ control }: {control: Control<z.infer<typeof memberFormSchema>>}) => {
   return (
     <div className="space-y-4">
       <div className="bg-orange-50 p-3 rounded-md border border-orange-200">
@@ -117,7 +122,7 @@ const MembershipTypeSection = ({ control }: SectionProps) => {
 };
 
 // Basic Information Section Component
-const BasicInfoSection = ({ control }: SectionProps) => {
+const BasicInfoSection = ({ control }: {control: Control<z.infer<typeof memberFormSchema>>}) => {
   return (
     <div className="space-y-4">
       <h3 className="text-sm font-medium">Basic Information</h3>

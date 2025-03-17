@@ -23,7 +23,8 @@ const TrainerDropdownField = ({ control }: TrainerDropdownFieldProps) => {
           <FormLabel>Trainer Assigned</FormLabel>
           <Select 
             onValueChange={field.onChange} 
-            value={field.value || ""}
+            value={field.value || undefined}
+            defaultValue={undefined}
           >
             <FormControl>
               <SelectTrigger>
@@ -31,12 +32,12 @@ const TrainerDropdownField = ({ control }: TrainerDropdownFieldProps) => {
               </SelectTrigger>
             </FormControl>
             <SelectContent>
-              <SelectItem value="">None</SelectItem>
               {trainers.map((trainer) => (
                 <SelectItem key={trainer.id} value={trainer.name}>
                   {trainer.name} - {trainer.specialization}
                 </SelectItem>
               ))}
+              <SelectItem value="none">None</SelectItem>
             </SelectContent>
           </Select>
           <FormMessage />

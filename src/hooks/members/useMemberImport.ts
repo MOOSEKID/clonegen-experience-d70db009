@@ -18,9 +18,7 @@ export const useMemberImport = (
   };
 
   const importMembers = (importedMembers: Omit<Member, "id">[]) => {
-    const lastId = members.length > 0 ? Math.max(...members.map(m => m.id)) : 0;
-    
-    const newMembers = importedMembers.map((member, index) => {
+    const newMembers = importedMembers.map((member) => {
       const today = new Date().toISOString().split('T')[0];
       const nextYear = new Date();
       nextYear.setFullYear(nextYear.getFullYear() + 1);
@@ -33,7 +31,7 @@ export const useMemberImport = (
       }
       
       return {
-        id: lastId + index + 1,
+        id: crypto.randomUUID(), // Generate UUID for client-side
         name: member.name,
         email: member.email,
         phone: member.phone || "",

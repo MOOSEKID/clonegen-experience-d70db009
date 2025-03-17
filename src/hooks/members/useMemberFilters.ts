@@ -1,48 +1,91 @@
 
-import { useState } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Member } from '@/types/memberTypes';
 
-export const useMemberFilters = (members: Member[]) => {
+export const useMemberFilters = (initialMembers: Member[]) => {
+  const [members, setMembers] = useState<Member[]>(initialMembers);
   const [searchTerm, setSearchTerm] = useState('');
-  const [currentPage, setCurrentPage] = useState(1);
-  const [memberPerPage] = useState(5);
   const [filterType, setFilterType] = useState('all');
+  const [filteredMembers, setFilteredMembers] = useState<Member[]>(initialMembers);
+  const [currentPage, setCurrentPage] = useState(1);
+  const membersPerPage = 10;
 
-  const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setSearchTerm(e.target.value);
-    setCurrentPage(1);
+  // Calculate total pages based on filtered members
+  const totalPages = Math.ceil(filteredMembers.length / membersPerPage);
+
+  // Set all members - useful when fetching from API
+  const setAllMembers = (newMembers: Member[]) => {
+    setMembers(newMembers);
   };
 
-  const handleFilterChange = (filter: string) => {
-    setFilterType(filter);
-    setCurrentPage(1);
-  };
-
-  const filteredMembers = members.filter(member => {
-    const matchesSearch = 
-      member.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      member.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      member.phone.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      member.membershipType.toLowerCase().includes(searchTerm.toLowerCase());
+  // Filter members based on search term and filter type
+  useEffect(() => {
+    let result = [...members];
     
-    if (filterType === 'all') return matchesSearch;
-    if (filterType === 'active') return matchesSearch && member.status === 'Active';
-    if (filterType === 'inactive') return matchesSearch && member.status === 'Inactive';
-    if (filterType === 'premium') return matchesSearch && member.membershipType === 'Premium';
-    if (filterType === 'standard') return matchesSearch && member.membershipType === 'Standard';
-    if (filterType === 'basic') return matchesSearch && member.membershipType === 'Basic';
+    // Apply search filter
+    if (searchTerm) {
+      result = result.filter(member => 
+        member.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        member.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        (member.phone && member.phone.includes(searchTerm))
+      );
+    }
     
-    return matchesSearch;
-  });
+    // Apply status filter
+    if (filterType !== 'all') {
+      result = result.filter(member => {
+        switch (filterType) {
+          case 'active':
+            return member.status === 'Active';
+          case 'inactive':
+            return member.status === 'Inactive';
+          case 'pending':
+            return member.status === 'Pending';
+          case 'individual':
+            return member.membershipCategory === 'Individual';
+          case 'company':
+            return member.membershipCategory === 'Company';
+          default:
+            return true;
+        }
+      });
+    }
+    
+    setFilteredMembers(result);
+    setCurrentPage(1); // Reset to first page when filters change
+  }, [members, searchTerm, filterType]);
 
-  const indexOfLastMember = currentPage * memberPerPage;
-  const indexOfFirstMember = indexOfLastMember - memberPerPage;
+  // Get current members for pagination
+  const indexOfLastMember = currentPage * membersPerPage;
+  const indexOfFirstMember = indexOfLastMember - membersPerPage;
   const currentMembers = filteredMembers.slice(indexOfFirstMember, indexOfLastMember);
-  const totalPages = Math.ceil(filteredMembers.length / memberPerPage);
 
-  const paginate = (pageNumber: number) => setCurrentPage(pageNumber);
-  const nextPage = () => setCurrentPage(prev => Math.min(prev + 1, totalPages));
-  const prevPage = () => setCurrentPage(prev => Math.max(prev - 1, 1));
+  // Handle search input change
+  const handleSearch = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchTerm(e.target.value);
+  }, []);
+
+  // Handle filter change
+  const handleFilterChange = useCallback((filter: string) => {
+    setFilterType(filter);
+  }, []);
+
+  // Pagination handlers
+  const paginate = useCallback((pageNumber: number) => {
+    setCurrentPage(pageNumber);
+  }, []);
+
+  const nextPage = useCallback(() => {
+    if (currentPage < totalPages) {
+      setCurrentPage(prev => prev + 1);
+    }
+  }, [currentPage, totalPages]);
+
+  const prevPage = useCallback(() => {
+    if (currentPage > 1) {
+      setCurrentPage(prev => prev - 1);
+    }
+  }, [currentPage]);
 
   return {
     searchTerm,
@@ -56,5 +99,6 @@ export const useMemberFilters = (members: Member[]) => {
     paginate,
     nextPage,
     prevPage,
+    setAllMembers
   };
 };
