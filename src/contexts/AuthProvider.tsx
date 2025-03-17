@@ -64,9 +64,12 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
           let adminExists = false;
           
           if (userList && userList.users && userList.users.length > 0) {
-            adminExists = userList.users.some(user => 
-              user.email && user.email === 'admin@uptowngym.rw'
-            );
+            // Fix here: Make sure we properly access user properties with type safety
+            adminExists = userList.users.some(user => {
+              // Check if user exists and has an email property before accessing it
+              return user && typeof user === 'object' && 'email' in user && 
+                     user.email === 'admin@uptowngym.rw';
+            });
           }
           
           if (userListError) {
