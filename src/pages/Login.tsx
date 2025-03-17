@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
@@ -15,7 +14,7 @@ const Login = () => {
   useEffect(() => {
     const createAdminIfNeeded = async () => {
       try {
-        // Check if admin exists
+        // Check if admin exists in profiles
         const { data: adminUsers, error: searchError } = await supabase
           .from('profiles')
           .select('id')
@@ -29,41 +28,21 @@ const Login = () => {
         if (!adminUsers && process.env.NODE_ENV === 'development') {
           console.log('No admin found, attempting to create default admin account');
           
-          try {
-            // Check if the user exists in auth
-            const { data, error: authCheckError } = await supabase.auth.admin.listUsers();
-            
-            if (authCheckError) {
-              console.error('Error checking auth users:', authCheckError);
-              return;
-            }
-            
-            const users = data?.users || [];
-            const existingAdmin = users.find(user => user.email === 'admin@uptowngym.rw');
-            
-            if (!existingAdmin) {
-              // Create admin in auth
-              const { data: adminAuth, error: adminAuthError } = await supabase.auth.signUp({
-                email: 'admin@uptowngym.rw',
-                password: 'Admin123!',
-                options: {
-                  data: {
-                    full_name: 'System Administrator'
-                  }
-                }
-              });
-              
-              if (adminAuthError) {
-                console.error('Error creating admin auth account:', adminAuthError);
-                return;
+          // Create admin in auth
+          const { data: adminAuth, error: adminAuthError } = await supabase.auth.signUp({
+            email: 'admin@uptowngym.rw',
+            password: 'Admin123!',
+            options: {
+              data: {
+                full_name: 'System Administrator'
               }
-              
-              console.log('Default admin account created successfully');
-            } else {
-              console.log('Admin exists in auth but not in profiles - profile will be created automatically');
             }
-          } catch (err) {
-            console.error('Error in admin creation:', err);
+          });
+          
+          if (adminAuthError) {
+            console.error('Error creating admin auth account:', adminAuthError);
+          } else {
+            console.log('Default admin account created successfully');
           }
         }
       } catch (error) {
