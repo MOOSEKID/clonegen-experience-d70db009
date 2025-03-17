@@ -116,10 +116,12 @@ const Login = () => {
   };
 
   const handleAdminLogin = () => {
+    console.log('Admin login button clicked');
     handleLoginSubmit('admin@example.com', 'admin123');
   };
 
   const handleUserLogin = () => {
+    console.log('User login button clicked');
     handleLoginSubmit('user@example.com', 'user123');
   };
 
