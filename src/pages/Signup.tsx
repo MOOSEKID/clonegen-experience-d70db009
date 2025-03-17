@@ -1,10 +1,9 @@
 
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Button } from '@/components/ui/button';
+import { Button } from '@/components/Button';
 import { toast } from 'sonner';
 import { Eye, EyeOff } from 'lucide-react';
-import { useAuth } from '@/contexts/AuthContext';
 import {
   Card,
   CardContent,
@@ -13,7 +12,6 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Input } from '@/components/ui/input';
 
 const Signup = () => {
   const [name, setName] = useState('');
@@ -24,8 +22,6 @@ const Signup = () => {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
-  
-  const { signUp } = useAuth();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -45,20 +41,22 @@ const Signup = () => {
     }
     
     try {
-      // Create the account using Supabase
-      const { error } = await signUp(email, password, { name });
+      // In a real app, this would be an API call to create the user
+      // For now, we'll simulate a successful signup
+      localStorage.setItem('isLoggedIn', 'true');
+      localStorage.setItem('userEmail', email);
+      localStorage.setItem('userName', name);
       
-      if (!error) {
-        // Success message is already shown in the signUp function
-        
-        // Use a small timeout to ensure the toast appears before redirect
-        setTimeout(() => {
-          navigate('/dashboard');
-        }, 1500);
-      }
+      toast.success('Account created successfully!');
+      
+      // Use a small timeout to ensure the toast appears before redirect
+      setTimeout(() => {
+        setIsLoading(false);
+        navigate('/dashboard');
+      }, 500);
     } catch (error) {
       console.error('Signup error:', error);
-    } finally {
+      toast.error('Signup failed. Please try again.');
       setIsLoading(false);
     }
   };
@@ -85,7 +83,7 @@ const Signup = () => {
               <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">
                 Full Name
               </label>
-              <Input
+              <input
                 id="name"
                 type="text"
                 value={name}
@@ -99,7 +97,7 @@ const Signup = () => {
               <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
                 Email Address
               </label>
-              <Input
+              <input
                 id="email"
                 type="email"
                 value={email}
@@ -114,7 +112,7 @@ const Signup = () => {
                 Password
               </label>
               <div className="relative">
-                <Input
+                <input
                   id="password"
                   type={showPassword ? "text" : "password"}
                   value={password}
@@ -142,7 +140,7 @@ const Signup = () => {
                 Confirm Password
               </label>
               <div className="relative">
-                <Input
+                <input
                   id="confirmPassword"
                   type={showConfirmPassword ? "text" : "password"}
                   value={confirmPassword}
@@ -167,11 +165,7 @@ const Signup = () => {
           </CardContent>
           
           <CardFooter className="flex flex-col space-y-4">
-            <Button 
-              type="submit" 
-              className="w-full" 
-              disabled={isLoading}
-            >
+            <Button type="submit" className="w-full" disabled={isLoading}>
               {isLoading ? 'Creating account...' : 'Create Account'}
             </Button>
             

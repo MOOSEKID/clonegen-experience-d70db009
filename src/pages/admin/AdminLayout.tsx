@@ -4,33 +4,66 @@ import { Outlet, useNavigate } from 'react-router-dom';
 import AdminSidebar from '@/components/admin/AdminSidebar';
 import AdminHeader from '@/components/admin/AdminHeader';
 import { toast } from 'sonner';
-import { useAuth } from '@/contexts/AuthContext';
 
 const AdminLayout = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const navigate = useNavigate();
-  const { user, isAdmin, isLoading: authLoading } = useAuth();
 
   // Check admin authentication
   useEffect(() => {
-    if (!authLoading) {
-      if (!user) {
-        toast.error('You must be logged in to access this page');
-        navigate('/login');
-      } else if (!isAdmin) {
-        toast.error('You must be an administrator to access this page');
-        navigate('/dashboard');
+    const checkAuth = () => {
+      try {
+        // Get admin authentication status from localStorage and cookies
+        const isAdmin = localStorage.getItem('isAdmin') === 'true';
+        const sessionActive = document.cookie.includes('session_active=true');
+        const isAdminRole = document.cookie.includes('user_role=admin');
+        
+        console.log('Admin auth check:', { isAdmin, sessionActive, isAdminRole });
+        
+        if ((!isAdmin || !sessionActive) && !isAdminRole) {
+          console.log('Admin authentication failed, redirecting to login');
+          toast.error('You must be logged in as an administrator');
+          navigate('/login', { state: { from: '/admin' } });
+        } else {
+          // Ensure both storage mechanisms are synchronized
+          if (!isAdmin && isAdminRole) {
+            localStorage.setItem('isAdmin', 'true');
+          }
+          
+          if (!sessionActive) {
+            document.cookie = "session_active=true; path=/; max-age=2592000"; // 30 days
+          }
+          
+          if (!isAdminRole) {
+            document.cookie = "user_role=admin; path=/; max-age=2592000"; // 30 days
+          }
+          
+          setIsAuthenticated(true);
+          console.log('Admin authenticated successfully');
+        }
+      } catch (error) {
+        console.error('Authentication check error:', error);
+        toast.error('Authentication error. Please log in again.');
+        navigate('/login', { state: { from: '/admin' } });
+      } finally {
+        setIsLoading(false);
       }
-      setIsLoading(false);
-    }
-  }, [user, isAdmin, authLoading, navigate]);
+    };
+
+    checkAuth();
+    
+    // Recheck authentication every 5 minutes
+    const interval = setInterval(checkAuth, 300000);
+    return () => clearInterval(interval);
+  }, [navigate]);
 
   const toggleSidebar = () => {
     setIsSidebarOpen(!isSidebarOpen);
   };
 
-  if (isLoading || authLoading) {
+  if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-gym-orange"></div>
@@ -38,8 +71,8 @@ const AdminLayout = () => {
     );
   }
 
-  if (!user || !isAdmin) {
-    return null; // The navigate in useEffect will handle redirection
+  if (!isAuthenticated) {
+    return null; // Or a loading spinner
   }
 
   return (
