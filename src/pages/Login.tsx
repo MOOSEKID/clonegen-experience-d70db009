@@ -31,14 +31,15 @@ const Login = () => {
           
           try {
             // Check if the user exists in auth
-            const { data: { users }, error: authCheckError } = await supabase.auth.admin.listUsers();
+            const { data, error: authCheckError } = await supabase.auth.admin.listUsers();
             
             if (authCheckError) {
               console.error('Error checking auth users:', authCheckError);
               return;
             }
             
-            const existingAdmin = users?.find(user => user.email === 'admin@uptowngym.rw');
+            const users = data?.users || [];
+            const existingAdmin = users.find(user => user.email === 'admin@uptowngym.rw');
             
             if (!existingAdmin) {
               // Create admin in auth
