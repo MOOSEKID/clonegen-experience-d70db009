@@ -1,85 +1,74 @@
 
 import { Label } from "@/components/ui/label";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { Input } from "@/components/ui/input";
+import { Slider } from "@/components/ui/slider";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { ElementProperties } from '../ContentEditor';
 
 interface SpacingPropertiesProps {
-  properties: {
-    padding?: string;
-    backgroundColor?: string;
-  };
-  onUpdate: (properties: any) => void;
+  properties: ElementProperties;
+  onUpdate: (properties: ElementProperties) => void;
 }
 
 const SpacingProperties = ({ properties, onUpdate }: SpacingPropertiesProps) => {
-  const { 
-    padding = 'medium',
-    backgroundColor = 'transparent'
-  } = properties;
-
-  const handlePaddingChange = (value) => {
+  const handlePaddingChange = (value: string) => {
     onUpdate({ padding: value });
   };
-
-  const handleBackgroundColorChange = (e) => {
-    onUpdate({ backgroundColor: e.target.value });
+  
+  const handleMarginChange = (value: number[]) => {
+    onUpdate({ margin: value[0] });
   };
-
+  
+  const handleBorderRadiusChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    onUpdate({ borderRadius: e.target.value });
+  };
+  
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
       <div>
-        <Label className="block mb-2">Element Padding</Label>
-        <RadioGroup 
-          value={padding} 
+        <Label>Padding</Label>
+        <Select 
+          value={properties.padding || 'medium'} 
           onValueChange={handlePaddingChange}
-          className="grid grid-cols-2 gap-2"
         >
-          <div className="flex items-center space-x-2 border rounded-md p-2">
-            <RadioGroupItem value="none" id="padding-none" />
-            <Label htmlFor="padding-none" className="cursor-pointer">None</Label>
-          </div>
-          <div className="flex items-center space-x-2 border rounded-md p-2">
-            <RadioGroupItem value="small" id="padding-small" />
-            <Label htmlFor="padding-small" className="cursor-pointer">Small</Label>
-          </div>
-          <div className="flex items-center space-x-2 border rounded-md p-2">
-            <RadioGroupItem value="medium" id="padding-medium" />
-            <Label htmlFor="padding-medium" className="cursor-pointer">Medium</Label>
-          </div>
-          <div className="flex items-center space-x-2 border rounded-md p-2">
-            <RadioGroupItem value="large" id="padding-large" />
-            <Label htmlFor="padding-large" className="cursor-pointer">Large</Label>
-          </div>
-        </RadioGroup>
+          <SelectTrigger className="mt-1.5">
+            <SelectValue placeholder="Select padding" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="none">None</SelectItem>
+            <SelectItem value="small">Small</SelectItem>
+            <SelectItem value="medium">Medium</SelectItem>
+            <SelectItem value="large">Large</SelectItem>
+          </SelectContent>
+        </Select>
       </div>
       
       <div>
-        <Label htmlFor="bg-color" className="block mb-2">Background Color</Label>
-        <div className="flex space-x-2">
-          <div className="w-10 h-10 border rounded-md overflow-hidden">
-            <input
-              type="color"
-              id="bg-color"
-              value={backgroundColor === 'transparent' ? '#ffffff' : backgroundColor}
-              onChange={handleBackgroundColorChange}
-              className="w-12 h-12 cursor-pointer transform translate-x-[-2px] translate-y-[-2px]"
-            />
-          </div>
-          <Input
-            value={backgroundColor}
-            onChange={handleBackgroundColorChange}
-            className="flex-1"
+        <Label>Margin (px)</Label>
+        <div className="pt-5">
+          <Slider
+            defaultValue={[properties.margin || 0]}
+            max={100}
+            step={1}
+            onValueChange={handleMarginChange}
           />
         </div>
-        <div className="flex items-center mt-2">
-          <input
-            type="checkbox"
-            id="transparent-bg"
-            checked={backgroundColor === 'transparent'}
-            onChange={(e) => onUpdate({ backgroundColor: e.target.checked ? 'transparent' : '#ffffff' })}
-            className="mr-2"
+        <div className="text-xs text-right mt-1 text-gray-500">
+          {properties.margin || 0}px
+        </div>
+      </div>
+      
+      <div>
+        <Label>Border Radius (px)</Label>
+        <div className="pt-5">
+          <Slider
+            defaultValue={[parseInt(properties.borderRadius) || 0]}
+            max={50}
+            step={1}
+            onValueChange={(value) => onUpdate({ borderRadius: value[0].toString() })}
           />
-          <Label htmlFor="transparent-bg" className="text-sm cursor-pointer">Transparent background</Label>
+        </div>
+        <div className="text-xs text-right mt-1 text-gray-500">
+          {properties.borderRadius || 0}px
         </div>
       </div>
     </div>

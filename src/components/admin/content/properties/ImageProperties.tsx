@@ -1,60 +1,90 @@
 
 import { Label } from "@/components/ui/label";
-import { AlignLeft, AlignCenter, AlignRight } from 'lucide-react';
 import { Input } from "@/components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Button } from "@/components/ui/button";
+import { Dialog, DialogTrigger } from "@/components/ui/dialog";
+import { ElementProperties, ContentElement } from '../ContentEditor';
 
 interface ImagePropertiesProps {
-  element: any;
-  properties: {
-    align?: string;
-  };
-  onUpdate: (properties: any) => void;
+  element: ContentElement;
+  properties: ElementProperties;
+  onUpdate: (properties: ElementProperties) => void;
 }
 
 const ImageProperties = ({ element, properties, onUpdate }: ImagePropertiesProps) => {
-  const { align = 'left' } = properties;
-
-  const handleAlignChange = (value) => {
+  const handleSizeChange = (value: string) => {
+    onUpdate({ size: value });
+  };
+  
+  const handleAlignChange = (value: string) => {
     onUpdate({ align: value });
   };
-
+  
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
       <div>
-        <Label className="block mb-2">Image Alignment</Label>
-        <div className="flex border rounded-md overflow-hidden">
-          <button
-            className={`flex-1 p-2 flex justify-center items-center ${align === 'left' ? 'bg-gray-100' : 'bg-white'}`}
-            onClick={() => handleAlignChange('left')}
-          >
-            <AlignLeft size={16} />
-          </button>
-          <button
-            className={`flex-1 p-2 flex justify-center items-center ${align === 'center' ? 'bg-gray-100' : 'bg-white'}`}
-            onClick={() => handleAlignChange('center')}
-          >
-            <AlignCenter size={16} />
-          </button>
-          <button
-            className={`flex-1 p-2 flex justify-center items-center ${align === 'right' ? 'bg-gray-100' : 'bg-white'}`}
-            onClick={() => handleAlignChange('right')}
-          >
-            <AlignRight size={16} />
-          </button>
-        </div>
+        <Label>Image Source (URL)</Label>
+        <Input 
+          type="text" 
+          value={element.content || ''} 
+          onChange={(e) => onUpdate({ content: e.target.value })}
+          className="mt-1.5"
+          placeholder="Enter image URL or select from media library"
+        />
+        <Dialog>
+          <DialogTrigger asChild>
+            <Button variant="outline" size="sm" className="mt-2 w-full">
+              Select from Media Library
+            </Button>
+          </DialogTrigger>
+        </Dialog>
       </div>
       
       <div>
-        <Label htmlFor="alt-text" className="block mb-2">Alt Text (for accessibility)</Label>
-        <Input
-          id="alt-text"
-          value={element.alt || ''}
+        <Label>Alt Text</Label>
+        <Input 
+          type="text" 
+          value={element.alt || ''} 
           onChange={(e) => onUpdate({ alt: e.target.value })}
-          placeholder="Describe the image for screen readers"
+          className="mt-1.5"
+          placeholder="Describe the image for accessibility"
         />
-        <p className="text-xs text-gray-500 mt-1">
-          Helps with SEO and makes your site more accessible
-        </p>
+      </div>
+      
+      <div>
+        <Label>Size</Label>
+        <Select 
+          value={properties.size || 'medium'} 
+          onValueChange={handleSizeChange}
+        >
+          <SelectTrigger className="mt-1.5">
+            <SelectValue placeholder="Select size" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="small">Small</SelectItem>
+            <SelectItem value="medium">Medium</SelectItem>
+            <SelectItem value="large">Large</SelectItem>
+            <SelectItem value="full">Full Width</SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
+      
+      <div>
+        <Label>Alignment</Label>
+        <Select 
+          value={properties.align || 'left'} 
+          onValueChange={handleAlignChange}
+        >
+          <SelectTrigger className="mt-1.5">
+            <SelectValue placeholder="Select alignment" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="left">Left</SelectItem>
+            <SelectItem value="center">Center</SelectItem>
+            <SelectItem value="right">Right</SelectItem>
+          </SelectContent>
+        </Select>
       </div>
     </div>
   );

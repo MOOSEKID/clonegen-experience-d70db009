@@ -1,45 +1,79 @@
 
 import { Label } from "@/components/ui/label";
-import { AlignLeft, AlignCenter, AlignRight } from 'lucide-react';
+import { Input } from "@/components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { ElementProperties } from '../ContentEditor';
 
 interface ButtonPropertiesProps {
-  properties: {
-    align?: string;
-  };
-  onUpdate: (properties: any) => void;
+  properties: ElementProperties;
+  onUpdate: (properties: ElementProperties) => void;
 }
 
 const ButtonProperties = ({ properties, onUpdate }: ButtonPropertiesProps) => {
-  const { align = 'left' } = properties;
-
-  const handleAlignChange = (value) => {
+  const handleColorChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    onUpdate({ color: e.target.value });
+  };
+  
+  const handleSizeChange = (value: string) => {
+    onUpdate({ size: value });
+  };
+  
+  const handleAlignChange = (value: string) => {
     onUpdate({ align: value });
   };
-
+  
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
       <div>
-        <Label className="block mb-2">Button Alignment</Label>
-        <div className="flex border rounded-md overflow-hidden">
-          <button
-            className={`flex-1 p-2 flex justify-center items-center ${align === 'left' ? 'bg-gray-100' : 'bg-white'}`}
-            onClick={() => handleAlignChange('left')}
-          >
-            <AlignLeft size={16} />
-          </button>
-          <button
-            className={`flex-1 p-2 flex justify-center items-center ${align === 'center' ? 'bg-gray-100' : 'bg-white'}`}
-            onClick={() => handleAlignChange('center')}
-          >
-            <AlignCenter size={16} />
-          </button>
-          <button
-            className={`flex-1 p-2 flex justify-center items-center ${align === 'right' ? 'bg-gray-100' : 'bg-white'}`}
-            onClick={() => handleAlignChange('right')}
-          >
-            <AlignRight size={16} />
-          </button>
+        <Label>Button Color</Label>
+        <div className="flex mt-1.5">
+          <Input 
+            type="color" 
+            value={properties.color || '#000000'} 
+            onChange={handleColorChange}
+            className="w-12 h-8 p-1"
+          />
+          <Input 
+            type="text" 
+            value={properties.color || '#000000'} 
+            onChange={handleColorChange}
+            className="flex-1 ml-2"
+          />
         </div>
+      </div>
+      
+      <div>
+        <Label>Button Size</Label>
+        <Select 
+          value={properties.size || 'medium'} 
+          onValueChange={handleSizeChange}
+        >
+          <SelectTrigger className="mt-1.5">
+            <SelectValue placeholder="Select size" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="small">Small</SelectItem>
+            <SelectItem value="medium">Medium</SelectItem>
+            <SelectItem value="large">Large</SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
+      
+      <div>
+        <Label>Alignment</Label>
+        <Select 
+          value={properties.align || 'left'} 
+          onValueChange={handleAlignChange}
+        >
+          <SelectTrigger className="mt-1.5">
+            <SelectValue placeholder="Select alignment" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="left">Left</SelectItem>
+            <SelectItem value="center">Center</SelectItem>
+            <SelectItem value="right">Right</SelectItem>
+          </SelectContent>
+        </Select>
       </div>
     </div>
   );

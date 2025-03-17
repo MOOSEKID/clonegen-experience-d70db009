@@ -5,16 +5,17 @@ import ImageProperties from "./properties/ImageProperties";
 import VideoProperties from "./properties/VideoProperties";
 import ButtonProperties from "./properties/ButtonProperties";
 import SpacingProperties from "./properties/SpacingProperties";
+import { ContentElement, ElementProperties as ElementPropsType } from './ContentEditor';
 
 interface ElementPropertiesProps {
-  element: any;
-  onUpdate: (properties: any) => void;
+  element: ContentElement;
+  onUpdate: (properties: ElementPropsType) => void;
 }
 
 const ElementProperties = ({ element, onUpdate }: ElementPropertiesProps) => {
   const { type, properties = {} } = element;
   
-  const handleUpdate = (newProperties) => {
+  const handleUpdate = (newProperties: ElementPropsType) => {
     onUpdate({ ...properties, ...newProperties });
   };
 

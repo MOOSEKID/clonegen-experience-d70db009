@@ -1,6 +1,6 @@
 
 import { useState, useEffect } from 'react';
-import type { AuthUser } from '@/types/auth.types';
+import { AuthUser } from '@/types/auth.types';
 import useAuthStateChanges from './auth/useAuthStateChanges';
 import useInitialAuthCheck from './auth/useInitialAuthCheck';
 

@@ -1,144 +1,109 @@
 
 import { Label } from "@/components/ui/label";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { AlignLeft, AlignCenter, AlignRight, Bold, Italic, Type } from 'lucide-react';
 import { Input } from "@/components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { ElementProperties } from '../ContentEditor';
 
 interface TextPropertiesProps {
-  properties: {
-    align?: string;
-    size?: string;
-    style?: string;
-    color?: string;
-  };
-  onUpdate: (properties: any) => void;
+  properties: ElementProperties;
+  onUpdate: (properties: ElementProperties) => void;
 }
 
+// Size options mapping for UI display
+const sizeOptions = {
+  small: 'Small',
+  medium: 'Medium',
+  large: 'Large',
+  xlarge: 'X-Large',
+  '2xlarge': '2X-Large',
+  '3xlarge': '3X-Large',
+  '4xlarge': '4X-Large'
+};
+
+// Style options mapping for UI display
+const styleOptions = {
+  normal: 'Normal',
+  bold: 'Bold',
+  italic: 'Italic',
+  'bold-italic': 'Bold Italic'
+};
+
 const TextProperties = ({ properties, onUpdate }: TextPropertiesProps) => {
-  const { 
-    align = 'left', 
-    size = 'medium', 
-    style = 'normal', 
-    color = '#000000',
-  } = properties;
-
-  const handleAlignChange = (value) => {
-    onUpdate({ align: value });
-  };
-
-  const handleStyleChange = (value) => {
-    onUpdate({ style: value });
-  };
-
-  const handleSizeChange = (value) => {
+  const handleSizeChange = (value: string) => {
     onUpdate({ size: value });
   };
-
-  const handleColorChange = (e) => {
+  
+  const handleStyleChange = (value: string) => {
+    onUpdate({ style: value });
+  };
+  
+  const handleAlignChange = (value: string) => {
+    onUpdate({ align: value });
+  };
+  
+  const handleColorChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     onUpdate({ color: e.target.value });
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
       <div>
-        <Label className="block mb-2">Text Alignment</Label>
-        <div className="flex border rounded-md overflow-hidden">
-          <button
-            className={`flex-1 p-2 flex justify-center items-center ${align === 'left' ? 'bg-gray-100' : 'bg-white'}`}
-            onClick={() => handleAlignChange('left')}
-          >
-            <AlignLeft size={16} />
-          </button>
-          <button
-            className={`flex-1 p-2 flex justify-center items-center ${align === 'center' ? 'bg-gray-100' : 'bg-white'}`}
-            onClick={() => handleAlignChange('center')}
-          >
-            <AlignCenter size={16} />
-          </button>
-          <button
-            className={`flex-1 p-2 flex justify-center items-center ${align === 'right' ? 'bg-gray-100' : 'bg-white'}`}
-            onClick={() => handleAlignChange('right')}
-          >
-            <AlignRight size={16} />
-          </button>
-        </div>
+        <Label>Text Size</Label>
+        <Select value={properties.size || 'medium'} onValueChange={handleSizeChange}>
+          <SelectTrigger className="mt-1.5">
+            <SelectValue placeholder="Select size" />
+          </SelectTrigger>
+          <SelectContent>
+            {Object.entries(sizeOptions).map(([value, label]) => (
+              <SelectItem key={value} value={value}>{label}</SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
       </div>
       
       <div>
-        <Label className="block mb-2">Text Style</Label>
-        <div className="flex border rounded-md overflow-hidden">
-          <button
-            className={`flex-1 p-2 flex justify-center items-center ${style === 'normal' ? 'bg-gray-100' : 'bg-white'}`}
-            onClick={() => handleStyleChange('normal')}
-          >
-            <Type size={16} />
-          </button>
-          <button
-            className={`flex-1 p-2 flex justify-center items-center ${style === 'bold' ? 'bg-gray-100' : 'bg-white'}`}
-            onClick={() => handleStyleChange('bold')}
-          >
-            <Bold size={16} />
-          </button>
-          <button
-            className={`flex-1 p-2 flex justify-center items-center ${style === 'italic' ? 'bg-gray-100' : 'bg-white'}`}
-            onClick={() => handleStyleChange('italic')}
-          >
-            <Italic size={16} />
-          </button>
-          <button
-            className={`flex-1 p-2 flex justify-center items-center ${style === 'bold-italic' ? 'bg-gray-100' : 'bg-white'}`}
-            onClick={() => handleStyleChange('bold-italic')}
-          >
-            <div className="flex">
-              <Bold size={16} />
-              <Italic size={16} />
-            </div>
-          </button>
-        </div>
+        <Label>Text Style</Label>
+        <Select value={properties.style || 'normal'} onValueChange={handleStyleChange}>
+          <SelectTrigger className="mt-1.5">
+            <SelectValue placeholder="Select style" />
+          </SelectTrigger>
+          <SelectContent>
+            {Object.entries(styleOptions).map(([value, label]) => (
+              <SelectItem key={value} value={value}>{label}</SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
       </div>
       
       <div>
-        <Label className="block mb-2">Text Size</Label>
-        <RadioGroup 
-          value={size} 
-          onValueChange={handleSizeChange}
-          className="grid grid-cols-2 gap-2"
-        >
-          <div className="flex items-center space-x-2 border rounded-md p-2">
-            <RadioGroupItem value="small" id="size-small" />
-            <Label htmlFor="size-small" className="text-sm cursor-pointer">Small</Label>
-          </div>
-          <div className="flex items-center space-x-2 border rounded-md p-2">
-            <RadioGroupItem value="medium" id="size-medium" />
-            <Label htmlFor="size-medium" className="cursor-pointer">Medium</Label>
-          </div>
-          <div className="flex items-center space-x-2 border rounded-md p-2">
-            <RadioGroupItem value="large" id="size-large" />
-            <Label htmlFor="size-large" className="text-lg cursor-pointer">Large</Label>
-          </div>
-          <div className="flex items-center space-x-2 border rounded-md p-2">
-            <RadioGroupItem value="xlarge" id="size-xlarge" />
-            <Label htmlFor="size-xlarge" className="text-xl cursor-pointer">X-Large</Label>
-          </div>
-        </RadioGroup>
+        <Label>Alignment</Label>
+        <Select value={properties.align || 'left'} onValueChange={handleAlignChange}>
+          <SelectTrigger className="mt-1.5">
+            <SelectValue placeholder="Select alignment" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="left">Left</SelectItem>
+            <SelectItem value="center">Center</SelectItem>
+            <SelectItem value="right">Right</SelectItem>
+            <SelectItem value="justify">Justify</SelectItem>
+          </SelectContent>
+        </Select>
       </div>
       
       <div>
-        <Label htmlFor="text-color" className="block mb-2">Text Color</Label>
-        <div className="flex space-x-2">
-          <div className="w-10 h-10 border rounded-md overflow-hidden">
-            <input
-              type="color"
-              id="text-color"
-              value={color}
-              onChange={handleColorChange}
-              className="w-12 h-12 cursor-pointer transform translate-x-[-2px] translate-y-[-2px]"
-            />
-          </div>
-          <Input
-            value={color}
+        <Label>Text Color</Label>
+        <div className="flex mt-1.5">
+          <Input 
+            type="color" 
+            value={properties.color || '#000000'} 
             onChange={handleColorChange}
-            className="flex-1"
+            className="w-12 h-8 p-1"
+          />
+          <Input 
+            type="text" 
+            value={properties.color || '#000000'} 
+            onChange={handleColorChange}
+            className="flex-1 ml-2"
           />
         </div>
       </div>

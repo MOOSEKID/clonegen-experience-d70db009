@@ -4,7 +4,6 @@ import { Box } from 'lucide-react';
 import ElementProperties from './ElementProperties';
 import ContentEditorTools from './ContentEditorTools';
 import ElementsList from './ElementsList';
-import { toast } from "sonner";
 
 // Mock data for page content
 import { pageContentData } from '@/data/cmsData';
@@ -15,18 +14,37 @@ interface ContentEditorProps {
   className?: string;
 }
 
+// Type definitions for content elements
+export interface ContentElement {
+  id: string;
+  type: string;
+  content: string;
+  properties: ElementProperties;
+  alt?: string;
+  link?: string;
+}
+
+export interface ElementProperties {
+  align: string;
+  size: string;
+  style: string;
+  color: string;
+  padding: string;
+  [key: string]: any;
+}
+
 const ContentEditor = ({ selectedPage, onContentChange, className = '' }: ContentEditorProps) => {
-  const [pageContent, setPageContent] = useState<any[]>([]);
-  const [selectedElement, setSelectedElement] = useState<any>(null);
+  const [pageContent, setPageContent] = useState<ContentElement[]>([]);
+  const [selectedElement, setSelectedElement] = useState<ContentElement | null>(null);
   const [isPreviewMode, setIsPreviewMode] = useState(false);
   
   useEffect(() => {
-    const content = pageContentData[selectedPage] || [];
+    const content = (pageContentData as any)[selectedPage] || [];
     setPageContent(content);
     setSelectedElement(null);
   }, [selectedPage]);
 
-  const handleDragEnd = (result) => {
+  const handleDragEnd = (result: any) => {
     if (!result.destination) return;
     
     const items = Array.from(pageContent);
@@ -37,7 +55,7 @@ const ContentEditor = ({ selectedPage, onContentChange, className = '' }: Conten
     onContentChange();
   };
 
-  const handleDeleteElement = (index) => {
+  const handleDeleteElement = (index: number) => {
     const newContent = [...pageContent];
     newContent.splice(index, 1);
     setPageContent(newContent);
@@ -45,7 +63,7 @@ const ContentEditor = ({ selectedPage, onContentChange, className = '' }: Conten
     onContentChange();
   };
 
-  const handleDuplicateElement = (index) => {
+  const handleDuplicateElement = (index: number) => {
     const newContent = [...pageContent];
     const duplicatedElement = { ...newContent[index], id: `${newContent[index].type}-${Date.now()}` };
     newContent.splice(index + 1, 0, duplicatedElement);
@@ -53,7 +71,7 @@ const ContentEditor = ({ selectedPage, onContentChange, className = '' }: Conten
     onContentChange();
   };
 
-  const handleMoveElement = (index, direction) => {
+  const handleMoveElement = (index: number, direction: 'up' | 'down') => {
     if ((direction === 'up' && index === 0) || 
         (direction === 'down' && index === pageContent.length - 1)) {
       return;
@@ -66,8 +84,8 @@ const ContentEditor = ({ selectedPage, onContentChange, className = '' }: Conten
     onContentChange();
   };
 
-  const handleAddElement = (type) => {
-    const newElement = {
+  const handleAddElement = (type: string) => {
+    const newElement: ContentElement = {
       id: `${type}-${Date.now()}`,
       type,
       content: type === 'text' ? 'New Text Block' : '',
@@ -85,14 +103,14 @@ const ContentEditor = ({ selectedPage, onContentChange, className = '' }: Conten
     onContentChange();
   };
 
-  const handleUpdateElement = (element, index) => {
+  const handleUpdateElement = (element: ContentElement, index: number) => {
     const newContent = [...pageContent];
     newContent[index] = element;
     setPageContent(newContent);
     onContentChange();
   };
 
-  const handleUpdateProperties = (properties) => {
+  const handleUpdateProperties = (properties: ElementProperties) => {
     if (!selectedElement) return;
     
     const elementIndex = pageContent.findIndex(el => el.id === selectedElement.id);

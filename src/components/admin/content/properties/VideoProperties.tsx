@@ -1,82 +1,72 @@
 
 import { Label } from "@/components/ui/label";
-import { AlignLeft, AlignCenter, AlignRight } from 'lucide-react';
-import { Switch } from "@/components/ui/switch";
-import { Checkbox } from "@/components/ui/checkbox";
+import { Input } from "@/components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { ElementProperties } from '../ContentEditor';
 
 interface VideoPropertiesProps {
-  properties: {
-    align?: string;
-    autoplay?: boolean;
-    loop?: boolean;
-  };
-  onUpdate: (properties: any) => void;
+  properties: ElementProperties;
+  onUpdate: (properties: ElementProperties) => void;
 }
 
 const VideoProperties = ({ properties, onUpdate }: VideoPropertiesProps) => {
-  const { align = 'left', autoplay = false, loop = false } = properties;
-
-  const handleAlignChange = (value) => {
-    onUpdate({ ...properties, align: value });
+  const handleSizeChange = (value: string) => {
+    onUpdate({ size: value });
   };
-
-  const handleAutoplayChange = (checked: boolean) => {
-    onUpdate({ ...properties, autoplay: checked });
+  
+  const handleAlignChange = (value: string) => {
+    onUpdate({ align: value });
   };
-
-  const handleLoopChange = (checked: boolean) => {
-    onUpdate({ ...properties, loop: checked });
-  };
-
+  
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
       <div>
-        <Label className="block mb-2">Video Alignment</Label>
-        <div className="flex border rounded-md overflow-hidden">
-          <button
-            className={`flex-1 p-2 flex justify-center items-center ${align === 'left' ? 'bg-gray-100' : 'bg-white'}`}
-            onClick={() => handleAlignChange('left')}
-          >
-            <AlignLeft size={16} />
-          </button>
-          <button
-            className={`flex-1 p-2 flex justify-center items-center ${align === 'center' ? 'bg-gray-100' : 'bg-white'}`}
-            onClick={() => handleAlignChange('center')}
-          >
-            <AlignCenter size={16} />
-          </button>
-          <button
-            className={`flex-1 p-2 flex justify-center items-center ${align === 'right' ? 'bg-gray-100' : 'bg-white'}`}
-            onClick={() => handleAlignChange('right')}
-          >
-            <AlignRight size={16} />
-          </button>
-        </div>
+        <Label>Video URL</Label>
+        <Input 
+          type="text" 
+          value={properties.videoUrl || ''} 
+          onChange={(e) => onUpdate({ videoUrl: e.target.value })}
+          className="mt-1.5"
+          placeholder="YouTube or Vimeo URL"
+        />
+        <p className="text-xs text-gray-500 mt-1">
+          Supports YouTube and Vimeo videos
+        </p>
       </div>
-
-      <div className="space-y-4">
-        <div className="flex items-center justify-between">
-          <Label htmlFor="autoplay-toggle" className="cursor-pointer">Autoplay Video</Label>
-          <Switch 
-            id="autoplay-toggle"
-            checked={autoplay}
-            onCheckedChange={handleAutoplayChange}
-          />
-        </div>
-        
-        <div className="flex items-center space-x-2">
-          <Checkbox 
-            id="loop-checkbox" 
-            checked={loop}
-            onCheckedChange={handleLoopChange}
-          />
-          <Label 
-            htmlFor="loop-checkbox" 
-            className="text-sm cursor-pointer"
-          >
-            Loop video playback
-          </Label>
-        </div>
+      
+      <div>
+        <Label>Size</Label>
+        <Select 
+          value={properties.size || 'medium'} 
+          onValueChange={handleSizeChange}
+        >
+          <SelectTrigger className="mt-1.5">
+            <SelectValue placeholder="Select size" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="small">Small</SelectItem>
+            <SelectItem value="medium">Medium</SelectItem>
+            <SelectItem value="large">Large</SelectItem>
+            <SelectItem value="full">Full Width</SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
+      
+      <div>
+        <Label>Alignment</Label>
+        <Select 
+          value={properties.align || 'left'} 
+          onValueChange={handleAlignChange}
+        >
+          <SelectTrigger className="mt-1.5">
+            <SelectValue placeholder="Select alignment" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="left">Left</SelectItem>
+            <SelectItem value="center">Center</SelectItem>
+            <SelectItem value="right">Right</SelectItem>
+          </SelectContent>
+        </Select>
       </div>
     </div>
   );

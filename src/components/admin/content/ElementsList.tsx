@@ -3,17 +3,18 @@ import { DragDropContext, Droppable } from 'react-beautiful-dnd';
 import ElementItem from './ElementItem';
 import EmptyContentState from './EmptyContentState';
 import { AddElementButton } from './ContentEditorTools';
+import { ContentElement } from './ContentEditor';
 
 interface ElementsListProps {
-  pageContent: any[];
+  pageContent: ContentElement[];
   isPreviewMode: boolean;
-  selectedElement: any;
+  selectedElement: ContentElement | null;
   onDragEnd: (result: any) => void;
   onDeleteElement: (index: number) => void;
   onDuplicateElement: (index: number) => void;
   onMoveElement: (index: number, direction: 'up' | 'down') => void;
-  onSelectElement: (element: any) => void;
-  onUpdateElement: (element: any, index: number) => void;
+  onSelectElement: (element: ContentElement | null) => void;
+  onUpdateElement: (element: ContentElement, index: number) => void;
   onAddElement: (type: string) => void;
 }
 
@@ -37,7 +38,7 @@ const ElementsList = ({
     <>
       <DragDropContext onDragEnd={onDragEnd}>
         <Droppable droppableId="content-elements">
-          {(provided) => (
+          {(provided: any) => (
             <div
               {...provided.droppableProps}
               ref={provided.innerRef}

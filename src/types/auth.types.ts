@@ -1,5 +1,5 @@
-// Auth and Profile Types
-export type StaffCategory = 'management' | 'training' | 'operations' | 'reception' | 'maintenance';
+
+import { Session, User, UserAppMetadata } from '@supabase/supabase-js';
 
 export type UserRole =
   | 'admin'
@@ -10,117 +10,81 @@ export type UserRole =
   | 'senior_trainer'
   | 'trainer'
   | 'trainee_trainer'
-  | 'operations_supervisor'
-  | 'maintenance_supervisor'
+  | 'supervisor'
   | 'receptionist'
   | 'membership_coordinator'
   | 'nutritionist'
   | 'physiotherapist'
+  | 'maintenance_supervisor'
   | 'maintenance_staff'
   | 'cleaner'
-  | 'individual_client';
+  | 'individual_client'
+  | 'operations_supervisor'; // Added to match what's used in useTestUsers.ts
 
-export type TrainerSpecialization =
-  | 'general_fitness'
-  | 'strength_conditioning'
-  | 'cardio'
-  | 'yoga'
-  | 'pilates'
-  | 'crossfit'
-  | 'martial_arts'
-  | 'swimming'
-  | 'rehabilitation'
-  | 'nutrition';
-
-export type DepartmentType =
+export type StaffCategory =
   | 'management'
   | 'training'
   | 'operations'
-  | 'maintenance'
   | 'reception'
+  | 'maintenance'
+  | 'customer';
+
+export type AccessLevel =
+  | 'full'
+  | 'high'
+  | 'medium'
+  | 'basic'
+  | 'limited';
+
+export type Department =
+  | 'management'
+  | 'training'
+  | 'operations'
+  | 'reception'
+  | 'maintenance'
   | 'nutrition'
-  | 'rehabilitation';
+  | 'rehabilitation'
+  | 'customer_service';
 
-export type AccessLevel = 'full' | 'high' | 'medium' | 'basic' | 'limited';
+export type StaffStatus =
+  | 'active'
+  | 'inactive'
+  | 'on_leave'
+  | 'terminated';
 
-export type StaffStatus = 'active' | 'inactive' | 'on_leave' | 'terminated';
+// Auth user type that combines Supabase user and profile data
+export interface AuthUser {
+  id: string;
+  email: string | undefined;
+  full_name: string | null | undefined;
+  role: UserRole;
+  is_admin: boolean;
+  is_staff?: boolean;
+  app_metadata: UserAppMetadata;
+  aud: string;
+}
 
-export type WorkingHours = {
-  start: string;
-  end: string;
-  days: string[];
-};
-
-export type EmergencyContact = {
-  name: string;
-  relationship: string;
-  phone: string;
-  email: string;
-};
-
-export interface UserProfile {
+// Extended profile type to include optional user authentication info
+export interface CompleteUserProfile {
   id: string;
   email: string;
   full_name: string | null;
-  role: UserRole | null;
+  staff_category: StaffCategory | null;
+  role: string;
   is_admin: boolean;
   is_staff: boolean;
-  staff_category: StaffCategory | null;
-  department: DepartmentType | null;
   access_level: AccessLevel;
+  department: Department | null;
   status: StaffStatus;
-  specializations: TrainerSpecialization[] | null;
-  reporting_to: string | null;
-  shift_preference: string | null;
-  max_clients: number | null;
-  certifications: string[] | null;
-  primary_location: string | null;
-  secondary_locations: string[] | null;
-  working_hours: WorkingHours | null;
-  contact_email: string | null;
-  contact_phone: string | null;
-  emergency_contact: EmergencyContact | null;
-  last_login: string | null;
-  created_at: string | null;
-  updated_at: string | null;
+  // Any additional fields needed
 }
 
-// Helper functions for access control
-export const hasFullAccess = (profile: UserProfile): boolean => {
-  return profile.access_level === 'full';
-};
-
-export const hasHighAccess = (profile: UserProfile): boolean => {
-  return profile.access_level === 'high' || hasFullAccess(profile);
-};
-
-export const hasMediumAccess = (profile: UserProfile): boolean => {
-  return profile.access_level === 'medium' || hasHighAccess(profile);
-};
-
-export const hasBasicAccess = (profile: UserProfile): boolean => {
-  return profile.access_level === 'basic' || hasMediumAccess(profile);
-};
-
-// Email validation helpers
-export const isValidStaffEmail = (email: string): boolean => {
-  return email.endsWith('@uptowngym.rw');
-};
-
-export const isAdminEmail = (email: string): boolean => {
-  return email === 'admin@uptowngym.rw';
-};
-
-export const generateStaffEmail = (role: UserRole, fullName: string): string => {
-  if (role === 'admin') {
-    return 'admin@uptowngym.rw';
-  }
-
-  const formattedName = fullName
-    .toLowerCase()
-    .replace(/[^a-z0-9\s]/g, '')
-    .replace(/\s+/g, '.');
-
-  const rolePrefix = role.replace('_', '.');
-  return `${rolePrefix}.${formattedName}@uptowngym.rw`;
-};
+// Auth state interface for context provider
+export interface AuthState {
+  session: Session | null;
+  user: AuthUser | null;
+  profile: CompleteUserProfile | null;
+  isAuthenticated: boolean;
+  isAdmin: boolean;
+  isLoading: boolean;
+}

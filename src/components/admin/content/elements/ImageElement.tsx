@@ -1,67 +1,90 @@
 
-import { Dialog, DialogTrigger, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
-import { ImageIcon } from 'lucide-react';
-import SelectImageDialog from '../dialogs/SelectImageDialog';
+import { Dialog } from "@/components/ui/dialog";
+import { ContentElement, ElementProperties } from '../ContentEditor';
+
+// Mapping for padding classes
+const paddingClasses = {
+  none: '',
+  small: 'p-2',
+  medium: 'p-4',
+  large: 'p-6'
+};
 
 interface ImageElementProps {
-  element: any;
+  element: ContentElement;
   isEditing: boolean;
-  onUpdate: (element: any) => void;
+  onUpdate: (element: ContentElement) => void;
 }
 
 const ImageElement = ({ element, isEditing, onUpdate }: ImageElementProps) => {
-  const { properties = {} } = element;
-  const { align = 'left', padding = 'medium' } = properties;
+  const { content, properties, alt } = element;
   
-  // Determine padding class
-  const paddingClass = {
-    none: 'p-0',
-    small: 'p-2',
-    medium: 'p-4',
-    large: 'p-6',
-  }[padding] || 'p-4';
-
+  // Get padding class based on properties
+  const paddingClass = paddingClasses[properties.padding as keyof typeof paddingClasses] || paddingClasses.medium;
+  
+  // Size classes
+  const sizeClass = properties.size === 'small' 
+    ? 'max-w-xs' 
+    : properties.size === 'medium'
+      ? 'max-w-md'
+      : properties.size === 'large'
+        ? 'max-w-lg'
+        : 'w-full';
+        
+  // Alignment classes
+  const alignmentClass = properties.align === 'center' 
+    ? 'mx-auto' 
+    : properties.align === 'right' 
+      ? 'ml-auto' 
+      : '';
+    
+  // Handle URL change in edit mode
+  const handleUrlChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    onUpdate({
+      ...element,
+      content: e.target.value
+    });
+  };
+  
+  // Handle alt text change in edit mode
+  const handleAltChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    onUpdate({
+      ...element,
+      alt: e.target.value
+    });
+  };
+  
   return (
     <div className={paddingClass}>
-      {element.content ? (
-        <img 
-          src={element.content} 
-          alt={element.alt || "Image"} 
-          className="max-w-full h-auto rounded-md"
-          style={{ margin: align === 'center' ? '0 auto' : align === 'right' ? '0 0 0 auto' : '0' }}
-        />
-      ) : (
-        <div className="border-2 border-dashed border-gray-300 rounded-md p-8 text-center text-gray-500">
-          <ImageIcon className="mx-auto h-12 w-12 mb-2 opacity-50" />
-          <p>Select an image from the media library</p>
-          {isEditing && (
-            <Dialog>
-              <DialogTrigger asChild>
-                <Button size="sm" className="mt-4">
-                  Select Image
-                </Button>
-              </DialogTrigger>
-              <SelectImageDialog 
-                onSelect={(url) => onUpdate({ ...element, content: url })} 
-              />
-            </Dialog>
-          )}
-        </div>
-      )}
-      {isEditing && element.content && (
-        <div className="mt-2 flex justify-end space-x-2">
+      {isEditing ? (
+        <div className="space-y-2">
+          <input
+            type="text"
+            value={content}
+            onChange={handleUrlChange}
+            className="w-full p-2 border border-gray-300 rounded"
+            placeholder="Image URL"
+          />
+          <input
+            type="text"
+            value={alt || ''}
+            onChange={handleAltChange}
+            className="w-full p-2 border border-gray-300 rounded"
+            placeholder="Alt Text (for accessibility)"
+          />
           <Dialog>
-            <DialogTrigger asChild>
-              <Button variant="outline" size="sm">
-                Change Image
-              </Button>
-            </DialogTrigger>
-            <SelectImageDialog 
-              onSelect={(url) => onUpdate({ ...element, content: url })} 
-            />
+            {/* Media Library Dialog would go here */}
           </Dialog>
         </div>
+      ) : (
+        <img 
+          src={content || '/placeholder.svg'} 
+          alt={alt || 'Image'} 
+          className={`${sizeClass} ${alignmentClass} rounded`}
+          style={{
+            borderRadius: properties.borderRadius ? `${properties.borderRadius}px` : '0.25rem'
+          }}
+        />
       )}
     </div>
   );

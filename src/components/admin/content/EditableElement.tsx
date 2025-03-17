@@ -1,21 +1,22 @@
 
-import { useState, useRef, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import TextElement from './elements/TextElement';
 import ImageElement from './elements/ImageElement';
 import VideoElement from './elements/VideoElement';
 import ButtonElement from './elements/ButtonElement';
+import { ContentElement } from './ContentEditor';
 
 interface EditableElementProps {
-  element: any;
+  element: ContentElement;
   isEditing: boolean;
-  onUpdate: (element: any) => void;
+  onUpdate: (element: ContentElement) => void;
 }
 
 const EditableElement = ({ element, isEditing, onUpdate }: EditableElementProps) => {
-  const [contentValue, setContentValue] = useState(element.content);
+  const [content, setContent] = useState(element.content);
 
   useEffect(() => {
-    setContentValue(element.content);
+    setContent(element.content);
   }, [element.content]);
 
   const renderElement = () => {

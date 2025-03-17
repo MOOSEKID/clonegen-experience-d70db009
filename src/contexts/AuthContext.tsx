@@ -1,23 +1,25 @@
+
 import { createContext, useContext, useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
 import { toast } from 'sonner';
+import { AuthUser, CompleteUserProfile, StaffCategory, AccessLevel, Department, StaffStatus } from '@/types/auth.types';
 
 export interface Profile {
   id: string;
   email: string;
   full_name: string;
-  staff_category: 'management' | 'training' | 'operations' | 'reception' | 'maintenance' | 'customer' | null;
+  staff_category: StaffCategory | null;
   role: string | null;
   is_admin: boolean;
-  access_level: 'full' | 'high' | 'medium' | 'basic' | 'limited' | null;
-  department: string | null;
+  access_level: AccessLevel | null;
+  department: Department | null;
   specializations: string[] | null;
   reporting_to: string | null;
   shift_preference: string | null;
   max_clients: number | null;
   certifications: string[] | null;
   primary_location: string | null;
-  secondary_locations: string[] | null;
+  secondary_locations: string | null;
   working_hours: {
     start: string;
     end: string;
@@ -30,13 +32,13 @@ export interface Profile {
     phone: string;
     relationship: string;
   } | null;
-  status: 'active' | 'inactive' | 'on_leave' | 'terminated' | null;
+  status: StaffStatus | null;
   created_at: string | null;
   updated_at: string | null;
   last_login: string | null;
 }
 
-interface AuthContextType {
+export interface AuthContextType {
   isAuthenticated: boolean;
   isAdmin: boolean;
   isLoading: boolean;
@@ -46,7 +48,7 @@ interface AuthContextType {
   signOut: () => Promise<void>;
 }
 
-const AuthContext = createContext<AuthContextType | undefined>(undefined);
+export const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
