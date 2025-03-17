@@ -1,27 +1,5 @@
 import * as z from "zod";
 
-// Helper function to create conditional required validation
-const createConditionalCheck = (fieldName: string, category: 'Individual' | 'Company', errorMsg: string) => {
-  return (val: any, ctx: z.RefinementCtx) => {
-    // Get form data safely from context
-    const formData = ctx.path[0] === fieldName && ctx.path.length > 0 
-      ? (ctx as any).data 
-      : undefined;
-      
-    if (formData) {
-      const membershipCategory = formData.membershipCategory;
-      if (membershipCategory === category && !val) {
-        ctx.addIssue({
-          code: z.ZodIssueCode.custom,
-          message: errorMsg
-        });
-        return false;
-      }
-    }
-    return true;
-  };
-};
-
 export const memberFormSchema = z.object({
   // Membership Details
   membershipCategory: z.enum(['Individual', 'Company']).default('Individual'),
@@ -30,48 +8,57 @@ export const memberFormSchema = z.object({
   name: z.string().min(2, {
     message: "Name must be at least 2 characters.",
   }).optional()
-    .superRefine((val, ctx) => 
-      createConditionalCheck(
-        'name', 
-        'Individual', 
-        "Name is required for individual memberships."
-      )(val, ctx)
-    ),
+    .superRefine((val, ctx) => {
+      // Only required for Individual memberships
+      if (ctx.path[0] === 'name' && ctx.data?.membershipCategory === 'Individual' && !val) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: "Name is required for individual memberships."
+        });
+        return false;
+      }
+      return true;
+    }),
   
   email: z.string().email({
     message: "Invalid email address.",
   }).optional()
-    .superRefine((val, ctx) => 
-      createConditionalCheck(
-        'email', 
-        'Individual', 
-        "Email is required for individual memberships."
-      )(val, ctx)
-    ),
+    .superRefine((val, ctx) => {
+      // Only required for Individual memberships
+      if (ctx.path[0] === 'email' && ctx.data?.membershipCategory === 'Individual' && !val) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: "Email is required for individual memberships."
+        });
+        return false;
+      }
+      return true;
+    }),
   
   phone: z.string().min(9, {
     message: "Phone number must be at least 9 characters.",
   }).optional()
-    .superRefine((val, ctx) => 
-      createConditionalCheck(
-        'phone', 
-        'Individual', 
-        "Phone number is required for individual memberships."
-      )(val, ctx)
-    ),
+    .superRefine((val, ctx) => {
+      // Only required for Individual memberships
+      if (ctx.path[0] === 'phone' && ctx.data?.membershipCategory === 'Individual' && !val) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: "Phone number is required for individual memberships."
+        });
+        return false;
+      }
+      return true;
+    }),
   
   // Authentication fields
   generateUsername: z.boolean().default(true),
   username: z.string().optional()
     .superRefine((val, ctx) => {
-      if (ctx.path[0] === 'username' && ctx.path.length > 0) {
-        const formData = (ctx as any).data;
-        if (formData && formData.generateUsername === false && !val) {
-          ctx.addIssue({
-            code: z.ZodIssueCode.custom,
-            message: "Username is required when not auto-generating."
-          });
-        }
+      if (ctx.path[0] === 'username' && ctx.data?.generateUsername === false && !val) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: "Username is required when not auto-generating."
+        });
       }
       return true;
     }),
@@ -79,14 +66,11 @@ export const memberFormSchema = z.object({
   generateTemporaryPassword: z.boolean().default(true),
   temporaryPassword: z.string().optional()
     .superRefine((val, ctx) => {
-      if (ctx.path[0] === 'temporaryPassword' && ctx.path.length > 0) {
-        const formData = (ctx as any).data;
-        if (formData && formData.generateTemporaryPassword === false && !val) {
-          ctx.addIssue({
-            code: z.ZodIssueCode.custom,
-            message: "Password is required when not auto-generating."
-          });
-        }
+      if (ctx.path[0] === 'temporaryPassword' && ctx.data?.generateTemporaryPassword === false && !val) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: "Password is required when not auto-generating."
+        });
       }
       return true;
     }),
@@ -125,32 +109,44 @@ export const memberFormSchema = z.object({
   
   // Company Membership Fields
   companyName: z.string().optional()
-    .superRefine((val, ctx) => 
-      createConditionalCheck(
-        'companyName', 
-        'Company', 
-        "Company name is required for company memberships."
-      )(val, ctx)
-    ),
+    .superRefine((val, ctx) => {
+      // Required for Company memberships
+      if (ctx.path[0] === 'companyName' && ctx.data?.membershipCategory === 'Company' && !val) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: "Company name is required for company memberships."
+        });
+        return false;
+      }
+      return true;
+    }),
   
   companyContactPerson: z.string().optional(),
   companyEmail: z.string().email().optional()
-    .superRefine((val, ctx) => 
-      createConditionalCheck(
-        'companyEmail', 
-        'Company', 
-        "Company email is required for company memberships."
-      )(val, ctx)
-    ),
+    .superRefine((val, ctx) => {
+      // Required for Company memberships
+      if (ctx.path[0] === 'companyEmail' && ctx.data?.membershipCategory === 'Company' && !val) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: "Company email is required for company memberships."
+        });
+        return false;
+      }
+      return true;
+    }),
   
   companyPhone: z.string().optional()
-    .superRefine((val, ctx) => 
-      createConditionalCheck(
-        'companyPhone', 
-        'Company', 
-        "Company phone is required for company memberships."
-      )(val, ctx)
-    ),
+    .superRefine((val, ctx) => {
+      // Required for Company memberships
+      if (ctx.path[0] === 'companyPhone' && ctx.data?.membershipCategory === 'Company' && !val) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: "Company phone is required for company memberships."
+        });
+        return false;
+      }
+      return true;
+    }),
   
   companyAddress: z.string().optional(),
   companyTIN: z.string().optional(),

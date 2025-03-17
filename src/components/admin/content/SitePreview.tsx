@@ -1,98 +1,158 @@
 
-import { useState } from 'react';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { pageContentData } from '@/data/cmsData';
-import { PageContentMapping } from '@/types/content.types';
+import { useState, useEffect } from 'react';
+import { componentSectionMap, getSectionPreviewData } from '@/utils/componentMapping';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Button } from "@/components/ui/button";
+import { Laptop, Smartphone, ExternalLink } from 'lucide-react';
 
 interface SitePreviewProps {
   selectedPage: string;
-  onAddSection?: (page: string) => void;
 }
 
-const SitePreview = ({ selectedPage, onAddSection }: SitePreviewProps) => {
-  const [activeSection, setActiveSection] = useState<string | null>(null);
+const SitePreview = ({ selectedPage }: SitePreviewProps) => {
+  const [viewMode, setViewMode] = useState<'desktop' | 'mobile'>('desktop');
+  const [selectedSection, setSelectedSection] = useState<string | null>(null);
+  const [previewUrl, setPreviewUrl] = useState<string>('');
 
-  // Get content for the selected page
-  const contentData = pageContentData as PageContentMapping;
-  const pageContent = contentData[selectedPage] || [];
+  const pageSections = componentSectionMap[selectedPage] || [];
 
-  // Ensure page content is an array
-  const content = Array.isArray(pageContent) ? pageContent : [];
+  useEffect(() => {
+    // Set the first section as selected by default if available
+    if (pageSections.length > 0 && !selectedSection) {
+      setSelectedSection(pageSections[0].id);
+    }
+    
+    // In a real application, this would generate an actual preview URL
+    setPreviewUrl(`/preview/${selectedPage}`);
+  }, [selectedPage, pageSections, selectedSection]);
 
-  return (
-    <div className="site-preview h-[calc(100vh-13rem)] overflow-auto border border-gray-200 rounded-md">
-      <div className="p-2 bg-gray-50 border-b border-gray-200 flex items-center justify-between">
-        <h3 className="text-sm font-medium text-gray-700">Website Preview</h3>
-      </div>
-      
-      {content.length === 0 ? (
-        <div className="flex flex-col items-center justify-center h-full p-8 text-center">
-          <p className="text-muted-foreground mb-4">No content available for this page.</p>
-          {onAddSection && (
-            <button
-              onClick={() => onAddSection(selectedPage)}
-              className="px-4 py-2 bg-primary text-white rounded-md hover:bg-primary/90 transition-colors"
-            >
-              Add Content
-            </button>
-          )}
-        </div>
-      ) : (
-        <Tabs defaultValue="page" className="w-full">
-          <div className="px-4 pt-4 pb-2 border-b">
-            <TabsList>
-              <TabsTrigger value="page">Page View</TabsTrigger>
-              <TabsTrigger value="sections">Sections</TabsTrigger>
-            </TabsList>
-          </div>
-          
-          <TabsContent value="page" className="p-4">
-            <div className="space-y-8">
-              {content.map((item) => (
-                <div 
-                  key={item.id} 
-                  className="preview-section border border-gray-200 p-4 rounded-md"
-                >
-                  <h3 className="text-sm font-medium text-gray-700 mb-4 pb-2 border-b">
-                    {item.name}
-                  </h3>
-                  
-                  <div className="preview-content">
-                    {/* Content would be rendered here based on section type */}
-                    <p className="text-muted-foreground text-sm italic">
-                      {item.description}
-                    </p>
-                  </div>
+  const handleSectionChange = (sectionId: string) => {
+    setSelectedSection(sectionId);
+  };
+
+  const renderSectionPreview = () => {
+    if (!selectedSection) return null;
+    
+    // Get preview data for the selected section
+    const previewData = getSectionPreviewData(selectedPage, selectedSection);
+    
+    // Render a placeholder preview - in a real application, this would render actual components
+    return (
+      <div className="border rounded-lg p-4 bg-gray-50 min-h-[300px] overflow-hidden">
+        <div className="text-center text-gray-500">
+          <p className="mb-2">Preview of {selectedPage}/{selectedSection}</p>
+          <div className="aspect-video bg-white border shadow-sm rounded-md mx-auto max-w-xl flex items-center justify-center p-4">
+            <div className="space-y-4 w-full max-w-md">
+              {previewData.slice(0, 3).map((item, index) => (
+                <div key={index} className="space-y-2">
+                  {item.type === 'text' && (
+                    <div 
+                      className="p-2 border border-dashed border-gray-300 rounded" 
+                      style={{ 
+                        textAlign: item.properties?.align || 'left',
+                        fontWeight: item.properties?.style === 'bold' ? 'bold' : 'normal',
+                        fontStyle: item.properties?.style === 'italic' ? 'italic' : 'normal',
+                      }}
+                    >
+                      {item.content}
+                    </div>
+                  )}
+                  {item.type === 'image' && (
+                    <div className="p-2 border border-dashed border-gray-300 rounded">
+                      <img 
+                        src={item.content} 
+                        alt="Preview" 
+                        className="max-h-32 mx-auto" 
+                        style={{ 
+                          margin: item.properties?.align === 'center' ? '0 auto' : 
+                                 item.properties?.align === 'right' ? '0 0 0 auto' : '0' 
+                        }}
+                      />
+                    </div>
+                  )}
+                  {item.type === 'button' && (
+                    <div 
+                      className="p-2 border border-dashed border-gray-300 rounded"
+                      style={{ 
+                        textAlign: item.properties?.align || 'left',
+                      }}
+                    >
+                      <button className="bg-gym-orange text-white px-4 py-2 rounded">
+                        {item.content || 'Button'}
+                      </button>
+                    </div>
+                  )}
                 </div>
               ))}
+              {previewData.length === 0 && (
+                <div className="text-center p-6">
+                  <p>No content elements for this section yet.</p>
+                  <p className="text-sm text-gray-400">Add elements in the content editor</p>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
+  return (
+    <div className="space-y-4">
+      <div className="flex justify-between items-center">
+        <h3 className="text-lg font-medium">Website Preview</h3>
+        <div className="flex space-x-2">
+          <div className="border rounded-md flex">
+            <button 
+              className={`p-2 ${viewMode === 'desktop' ? 'bg-gray-100' : ''}`}
+              onClick={() => setViewMode('desktop')}
+              title="Desktop preview"
+            >
+              <Laptop size={16} />
+            </button>
+            <button
+              className={`p-2 ${viewMode === 'mobile' ? 'bg-gray-100' : ''}`}
+              onClick={() => setViewMode('mobile')}
+              title="Mobile preview"
+            >
+              <Smartphone size={16} />
+            </button>
+          </div>
+          <Button 
+            variant="outline" 
+            size="sm" 
+            className="flex items-center gap-1"
+            onClick={() => window.open(previewUrl, '_blank')}
+          >
+            <ExternalLink size={14} />
+            Full Preview
+          </Button>
+        </div>
+      </div>
+      
+      <Tabs defaultValue={pageSections[0]?.id} value={selectedSection || ''}>
+        <TabsList className="w-full mb-4">
+          {pageSections.map(section => (
+            <TabsTrigger 
+              key={section.id} 
+              value={section.id}
+              onClick={() => handleSectionChange(section.id)}
+              className="flex-1"
+            >
+              {section.name}
+            </TabsTrigger>
+          ))}
+        </TabsList>
+        
+        {pageSections.map(section => (
+          <TabsContent key={section.id} value={section.id}>
+            <div className="space-y-4">
+              <p className="text-sm text-gray-500">{section.description}</p>
+              {renderSectionPreview()}
             </div>
           </TabsContent>
-          
-          <TabsContent value="sections" className="divide-y">
-            {content.map((section) => (
-              <div 
-                key={section.id}
-                className={`p-4 cursor-pointer hover:bg-gray-50 ${activeSection === section.id ? 'bg-blue-50' : ''}`}
-                onClick={() => setActiveSection(section.id)}
-              >
-                <h4 className="font-medium">{section.name}</h4>
-                <p className="text-sm text-muted-foreground">{section.description}</p>
-              </div>
-            ))}
-            
-            {onAddSection && (
-              <div className="p-4">
-                <button
-                  onClick={() => onAddSection(selectedPage)}
-                  className="w-full py-2 border-2 border-dashed border-gray-300 rounded-md text-gray-500 hover:border-gray-400 hover:text-gray-700 transition-colors"
-                >
-                  + Add Section
-                </button>
-              </div>
-            )}
-          </TabsContent>
-        </Tabs>
-      )}
+        ))}
+      </Tabs>
     </div>
   );
 };

@@ -4,52 +4,45 @@ import { Outlet, useNavigate } from 'react-router-dom';
 import CustomerSidebar from '@/components/dashboard/CustomerSidebar';
 import CustomerHeader from '@/components/dashboard/CustomerHeader';
 import { toast } from 'sonner';
-import { useAuth } from '@/hooks/useAuth';
 
 const DashboardLayout = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
-  const { isAuthenticated, user } = useAuth();
   const navigate = useNavigate();
 
   // Check user authentication
   useEffect(() => {
-    console.log('DashboardLayout mounted, checking auth state:', { isAuthenticated });
-    
-    const checkAuth = async () => {
+    const checkAuth = () => {
       try {
-        setIsLoading(true);
+        // Get user authentication status from localStorage and cookies
+        const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
+        const sessionActive = document.cookie.includes('session_active=true');
         
-        if (!isAuthenticated) {
-          console.log('User not authenticated, redirecting to login from dashboard');
+        if (!isLoggedIn && !sessionActive) {
           toast.error('You must be logged in to access this page');
-          navigate('/login', { state: { from: '/dashboard' } });
+          navigate('/login');
         } else {
-          console.log('User is authenticated in dashboard:', user?.email);
+          // Ensure both storage mechanisms are synchronized
+          if (!isLoggedIn && sessionActive) {
+            localStorage.setItem('isLoggedIn', 'true');
+          }
+          
+          setIsAuthenticated(true);
+          // Refresh session cookie to maintain login state
+          document.cookie = "session_active=true; path=/; max-age=2592000"; // 30 days
         }
       } catch (error) {
-        console.error('Authentication check error in dashboard:', error);
+        console.error('Authentication check error:', error);
         toast.error('Authentication error. Please log in again.');
-        navigate('/login', { state: { from: '/dashboard' } });
+        navigate('/login');
       } finally {
         setIsLoading(false);
       }
     };
 
     checkAuth();
-    
-    // Check authentication status periodically
-    const interval = setInterval(() => {
-      console.log('Running periodic auth check in dashboard');
-      if (!isAuthenticated) {
-        console.log('User not authenticated in periodic check, redirecting to login');
-        clearInterval(interval);
-        navigate('/login', { state: { from: '/dashboard' } });
-      }
-    }, 300000); // 5 minutes
-    
-    return () => clearInterval(interval);
-  }, [navigate, isAuthenticated, user]);
+  }, [navigate]);
 
   const toggleSidebar = () => {
     setIsSidebarOpen(!isSidebarOpen);
@@ -64,7 +57,7 @@ const DashboardLayout = () => {
   }
 
   if (!isAuthenticated) {
-    return null; // Redirect will happen in the useEffect
+    return null; // The navigate in useEffect will handle redirection
   }
 
   return (

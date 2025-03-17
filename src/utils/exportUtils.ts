@@ -47,7 +47,6 @@ export type RevenueData = {
 export type ClassAttendanceData = {
   name: string;
   value: number;
-  capacity: number;  // Added capacity field for better data representation
 };
 
 // Define columns for CSV export
@@ -63,6 +62,5 @@ export const revenueColumns = [
 
 export const classAttendanceColumns = [
   { label: 'Class Type', key: 'name' },
-  { label: 'Attendance', key: 'value' },
-  { label: 'Capacity', key: 'capacity' }
+  { label: 'Attendance', key: 'value' }
 ];

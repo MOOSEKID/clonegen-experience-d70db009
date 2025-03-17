@@ -1,97 +1,82 @@
 
-import { useState } from 'react';
-import { Label } from '@/components/ui/label';
-import { Input } from '@/components/ui/input';
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
-import { ContentElement, ElementProperties } from '@/types/content.types';
+import { Label } from "@/components/ui/label";
+import { AlignLeft, AlignCenter, AlignRight } from 'lucide-react';
+import { Switch } from "@/components/ui/switch";
+import { Checkbox } from "@/components/ui/checkbox";
 
 interface VideoPropertiesProps {
-  element: ContentElement;
-  onUpdate: (properties: Partial<ElementProperties>) => void;
-  onElementUpdate: (element: ContentElement) => void;
+  properties: {
+    align?: string;
+    autoplay?: boolean;
+    loop?: boolean;
+  };
+  onUpdate: (properties: any) => void;
 }
 
-const VideoProperties = ({ element, onUpdate, onElementUpdate }: VideoPropertiesProps) => {
-  const [videoUrl, setVideoUrl] = useState(element.videoUrl || '');
-  
-  const handleSizeChange = (size: string) => {
-    onUpdate({ size });
+const VideoProperties = ({ properties, onUpdate }: VideoPropertiesProps) => {
+  const { align = 'left', autoplay = false, loop = false } = properties;
+
+  const handleAlignChange = (value) => {
+    onUpdate({ ...properties, align: value });
   };
 
-  const handleAlignChange = (align: string) => {
-    onUpdate({ align });
+  const handleAutoplayChange = (checked: boolean) => {
+    onUpdate({ ...properties, autoplay: checked });
   };
 
-  const handleVideoUrlChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const newUrl = e.target.value;
-    setVideoUrl(newUrl);
-    
-    // Update the element with the new video URL
-    const updatedElement = {
-      ...element,
-      videoUrl: newUrl
-    };
-    onElementUpdate(updatedElement);
+  const handleLoopChange = (checked: boolean) => {
+    onUpdate({ ...properties, loop: checked });
   };
 
   return (
-    <div className="space-y-4">
-      <div>
-        <Label htmlFor="video-url" className="block mb-2">Video URL</Label>
-        <Input
-          id="video-url"
-          value={videoUrl}
-          onChange={handleVideoUrlChange}
-          placeholder="Enter YouTube or Vimeo URL"
-        />
-      </div>
-
-      <div>
-        <Label className="block mb-2">Video Size</Label>
-        <RadioGroup
-          defaultValue={element.properties.size}
-          onValueChange={handleSizeChange}
-          className="flex flex-wrap gap-2"
-        >
-          <div className="flex items-center space-x-2">
-            <RadioGroupItem value="sm" id="size-sm" />
-            <Label htmlFor="size-sm">Small</Label>
-          </div>
-          <div className="flex items-center space-x-2">
-            <RadioGroupItem value="md" id="size-md" />
-            <Label htmlFor="size-md">Medium</Label>
-          </div>
-          <div className="flex items-center space-x-2">
-            <RadioGroupItem value="lg" id="size-lg" />
-            <Label htmlFor="size-lg">Large</Label>
-          </div>
-          <div className="flex items-center space-x-2">
-            <RadioGroupItem value="full" id="size-full" />
-            <Label htmlFor="size-full">Full Width</Label>
-          </div>
-        </RadioGroup>
-      </div>
-
+    <div className="space-y-6">
       <div>
         <Label className="block mb-2">Video Alignment</Label>
-        <RadioGroup
-          defaultValue={element.properties.align}
-          onValueChange={handleAlignChange}
-          className="flex flex-wrap gap-2"
-        >
-          <div className="flex items-center space-x-2">
-            <RadioGroupItem value="left" id="align-left" />
-            <Label htmlFor="align-left">Left</Label>
-          </div>
-          <div className="flex items-center space-x-2">
-            <RadioGroupItem value="center" id="align-center" />
-            <Label htmlFor="align-center">Center</Label>
-          </div>
-          <div className="flex items-center space-x-2">
-            <RadioGroupItem value="right" id="align-right" />
-            <Label htmlFor="align-right">Right</Label>
-          </div>
-        </RadioGroup>
+        <div className="flex border rounded-md overflow-hidden">
+          <button
+            className={`flex-1 p-2 flex justify-center items-center ${align === 'left' ? 'bg-gray-100' : 'bg-white'}`}
+            onClick={() => handleAlignChange('left')}
+          >
+            <AlignLeft size={16} />
+          </button>
+          <button
+            className={`flex-1 p-2 flex justify-center items-center ${align === 'center' ? 'bg-gray-100' : 'bg-white'}`}
+            onClick={() => handleAlignChange('center')}
+          >
+            <AlignCenter size={16} />
+          </button>
+          <button
+            className={`flex-1 p-2 flex justify-center items-center ${align === 'right' ? 'bg-gray-100' : 'bg-white'}`}
+            onClick={() => handleAlignChange('right')}
+          >
+            <AlignRight size={16} />
+          </button>
+        </div>
+      </div>
+
+      <div className="space-y-4">
+        <div className="flex items-center justify-between">
+          <Label htmlFor="autoplay-toggle" className="cursor-pointer">Autoplay Video</Label>
+          <Switch 
+            id="autoplay-toggle"
+            checked={autoplay}
+            onCheckedChange={handleAutoplayChange}
+          />
+        </div>
+        
+        <div className="flex items-center space-x-2">
+          <Checkbox 
+            id="loop-checkbox" 
+            checked={loop}
+            onCheckedChange={handleLoopChange}
+          />
+          <Label 
+            htmlFor="loop-checkbox" 
+            className="text-sm cursor-pointer"
+          >
+            Loop video playback
+          </Label>
+        </div>
       </div>
     </div>
   );

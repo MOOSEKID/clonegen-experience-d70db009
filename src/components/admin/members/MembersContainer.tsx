@@ -7,7 +7,6 @@ import MemberTable from './MemberTable';
 import MemberPagination from './MemberPagination';
 import AddMemberDialog from './AddMemberDialog';
 import ImportMembersDialog from './ImportMembersDialog';
-import { Skeleton } from '@/components/ui/skeleton';
 
 interface MembersContainerProps {
   members: Member[];
@@ -15,15 +14,14 @@ interface MembersContainerProps {
   currentMembers: Member[];
   currentPage: number;
   totalPages: number;
-  selectedMembers: string[]; // Keep as string[] since member IDs are UUIDs (strings)
+  selectedMembers: number[];
   searchTerm: string;
   filterType: string;
   isCreating?: boolean;
-  isLoading?: boolean;
   onSearchChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
-  onStatusChange: (memberId: string, newStatus: string) => void;
-  onDelete: (memberId: string) => void;
-  onToggleSelect: (memberId: string) => void;
+  onStatusChange: (memberId: number, newStatus: string) => void;
+  onDelete: (memberId: number) => void;
+  onToggleSelect: (memberId: number) => void;
   onSelectAll: () => void;
   onFilterChange: (filter: string) => void;
   onBulkAction: (action: string) => void;
@@ -44,7 +42,6 @@ const MembersContainer = ({
   searchTerm,
   filterType,
   isCreating = false,
-  isLoading = false,
   onSearchChange,
   onStatusChange,
   onDelete,
@@ -80,24 +77,16 @@ const MembersContainer = ({
           filterType={filterType}
         />
 
-        {isLoading ? (
-          <div className="p-6 space-y-4">
-            {[...Array(5)].map((_, index) => (
-              <Skeleton key={index} className="w-full h-16 rounded-md" />
-            ))}
-          </div>
-        ) : (
-          <MemberTable 
-            members={members}
-            filteredMembers={filteredMembers}
-            currentMembers={currentMembers}
-            selectedMembers={selectedMembers}
-            toggleMemberSelection={onToggleSelect}
-            selectAllMembers={onSelectAll}
-            handleStatusChange={onStatusChange}
-            handleDelete={onDelete}
-          />
-        )}
+        <MemberTable 
+          members={members}
+          filteredMembers={filteredMembers}
+          currentMembers={currentMembers}
+          selectedMembers={selectedMembers}
+          toggleMemberSelection={onToggleSelect}
+          selectAllMembers={onSelectAll}
+          handleStatusChange={onStatusChange}
+          handleDelete={onDelete}
+        />
 
         <MemberPagination 
           filteredCount={filteredMembers.length}

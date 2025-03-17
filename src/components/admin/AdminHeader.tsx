@@ -1,17 +1,8 @@
+
 import { useState } from 'react';
-import { Bell, Menu, Search, X, User, LogOut, Settings, UserCog } from 'lucide-react';
+import { Bell, Menu, Search, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { toast } from 'sonner';
 import AdminThemeToggle from './AdminThemeToggle';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { useNavigate } from 'react-router-dom';
 
 interface AdminHeaderProps {
   toggleSidebar: () => void;
@@ -19,9 +10,6 @@ interface AdminHeaderProps {
 
 const AdminHeader = ({ toggleSidebar }: AdminHeaderProps) => {
   const [showNotifications, setShowNotifications] = useState(false);
-  const navigate = useNavigate();
-  const userEmail = localStorage.getItem('userEmail') || 'admin@example.com';
-  const userName = localStorage.getItem('userName') || 'Admin User';
   
   // Mock notifications
   const notifications = [
@@ -30,18 +18,6 @@ const AdminHeader = ({ toggleSidebar }: AdminHeaderProps) => {
     { id: 3, message: 'New class booking: Yoga at 5 PM', time: '3 hours ago', read: true },
     { id: 4, message: 'Monthly report is ready', time: '1 day ago', read: true },
   ];
-
-  const handleLogout = () => {
-    localStorage.removeItem('isLoggedIn');
-    localStorage.removeItem('isAdmin');
-    localStorage.removeItem('userEmail');
-    localStorage.removeItem('userName');
-    document.cookie = "session_active=; path=/; max-age=0";
-    document.cookie = "user_role=; path=/; max-age=0";
-    console.log('Logged out successfully');
-    toast.success('Logged out successfully');
-    navigate('/login');
-  };
 
   return (
     <header className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 sticky top-0 z-30 flex h-16 items-center">
@@ -132,42 +108,12 @@ const AdminHeader = ({ toggleSidebar }: AdminHeaderProps) => {
             )}
           </div>
           
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="ghost" className="relative h-8 flex items-center gap-2 px-2">
-                <div className="h-8 w-8 rounded-full bg-gym-orange/20 flex items-center justify-center text-gym-orange font-medium">
-                  A
-                </div>
-                <span className="text-sm font-medium hidden md:inline-block">Admin</span>
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent className="w-56" align="end">
-              <DropdownMenuLabel>
-                <div className="flex flex-col">
-                  <p className="font-semibold">{userName}</p>
-                  <p className="text-xs text-muted-foreground mt-1">{userEmail}</p>
-                </div>
-              </DropdownMenuLabel>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem onClick={() => navigate('/admin/profile')}>
-                <User className="mr-2 h-4 w-4" />
-                <span>My Profile</span>
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => navigate('/admin/settings')}>
-                <Settings className="mr-2 h-4 w-4" />
-                <span>Settings</span>
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => navigate('/admin/users')}>
-                <UserCog className="mr-2 h-4 w-4" />
-                <span>User Management</span>
-              </DropdownMenuItem>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem onClick={handleLogout}>
-                <LogOut className="mr-2 h-4 w-4" />
-                <span>Log out</span>
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
+          <div className="flex items-center space-x-2">
+            <div className="h-8 w-8 rounded-full bg-gym-orange/20 flex items-center justify-center text-gym-orange font-medium">
+              A
+            </div>
+            <span className="text-sm font-medium hidden md:inline-block">Admin</span>
+          </div>
         </div>
       </div>
     </header>

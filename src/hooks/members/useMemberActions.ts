@@ -6,23 +6,23 @@ import { Member } from '@/types/memberTypes';
 export const useMemberActions = (
   members: Member[],
   setMembers: React.Dispatch<React.SetStateAction<Member[]>>,
-  selectedMembers: string[],
-  setSelectedMembers: React.Dispatch<React.SetStateAction<string[]>>
+  selectedMembers: number[],
+  setSelectedMembers: React.Dispatch<React.SetStateAction<number[]>>
 ) => {
-  const handleStatusChange = (memberId: string, newStatus: string) => {
+  const handleStatusChange = (memberId: number, newStatus: string) => {
     setMembers(members.map(member => 
       member.id === memberId ? { ...member, status: newStatus } : member
     ));
     toast.success(`Member status updated to ${newStatus}`);
   };
 
-  const handleDelete = (memberId: string) => {
+  const handleDelete = (memberId: number) => {
     setMembers(members.filter(member => member.id !== memberId));
     setSelectedMembers(selectedMembers.filter(id => id !== memberId));
     toast.success('Member deleted successfully');
   };
 
-  const toggleMemberSelection = (memberId: string) => {
+  const toggleMemberSelection = (memberId: number) => {
     setSelectedMembers(prevSelected => 
       prevSelected.includes(memberId)
         ? prevSelected.filter(id => id !== memberId)
@@ -34,7 +34,7 @@ export const useMemberActions = (
     if (selectedMembers.length === filteredMembers.length) {
       setSelectedMembers([]);
     } else {
-      setSelectedMembers(filteredMembers.map(member => member.id as string));
+      setSelectedMembers(filteredMembers.map(member => member.id));
     }
   };
 
@@ -46,16 +46,16 @@ export const useMemberActions = (
 
     if (action === 'activate') {
       setMembers(members.map(member => 
-        selectedMembers.includes(member.id as string) ? { ...member, status: 'Active' } : member
+        selectedMembers.includes(member.id) ? { ...member, status: 'Active' } : member
       ));
       toast.success(`${selectedMembers.length} members activated`);
     } else if (action === 'deactivate') {
       setMembers(members.map(member => 
-        selectedMembers.includes(member.id as string) ? { ...member, status: 'Inactive' } : member
+        selectedMembers.includes(member.id) ? { ...member, status: 'Inactive' } : member
       ));
       toast.success(`${selectedMembers.length} members deactivated`);
     } else if (action === 'delete') {
-      setMembers(members.filter(member => !selectedMembers.includes(member.id as string)));
+      setMembers(members.filter(member => !selectedMembers.includes(member.id)));
       setSelectedMembers([]);
       toast.success(`${selectedMembers.length} members deleted`);
     } else if (action === 'export') {

@@ -1,155 +1,146 @@
 
-import { useEffect, useState } from 'react';
-import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
-import { ContentElement, ElementProperties } from '@/types/content.types';
+import { Label } from "@/components/ui/label";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { AlignLeft, AlignCenter, AlignRight, Bold, Italic, Type } from 'lucide-react';
+import { Input } from "@/components/ui/input";
 
 interface TextPropertiesProps {
-  element: ContentElement;
-  onUpdate: (properties: Partial<ElementProperties>) => void;
+  properties: {
+    align?: string;
+    size?: string;
+    style?: string;
+    color?: string;
+  };
+  onUpdate: (properties: any) => void;
 }
 
-const TextProperties = ({ element, onUpdate }: TextPropertiesProps) => {
-  const [text, setText] = useState(element.content);
+const TextProperties = ({ properties, onUpdate }: TextPropertiesProps) => {
+  const { 
+    align = 'left', 
+    size = 'medium', 
+    style = 'normal', 
+    color = '#000000',
+  } = properties;
 
-  useEffect(() => {
-    setText(element.content);
-  }, [element.content]);
-
-  const handleTextChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    const newText = e.target.value;
-    setText(newText);
-    // This would typically update the content rather than properties
-    // but we're following the pattern of the existing code
+  const handleAlignChange = (value) => {
+    onUpdate({ align: value });
   };
 
-  const handleSizeChange = (size: string) => {
-    onUpdate({ size });
+  const handleStyleChange = (value) => {
+    onUpdate({ style: value });
   };
 
-  const handleStyleChange = (style: string) => {
-    onUpdate({ style });
+  const handleSizeChange = (value) => {
+    onUpdate({ size: value });
   };
 
-  const handleAlignChange = (align: string) => {
-    onUpdate({ align });
-  };
-
-  const handleColorChange = (color: string) => {
-    onUpdate({ color });
+  const handleColorChange = (e) => {
+    onUpdate({ color: e.target.value });
   };
 
   return (
-    <div className="space-y-4">
-      <div>
-        <Label htmlFor="text-content" className="block mb-2">Text Content</Label>
-        <Textarea
-          id="text-content"
-          value={text}
-          onChange={handleTextChange}
-          className="w-full min-h-[100px]"
-        />
-      </div>
-
-      <div>
-        <Label className="block mb-2">Text Size</Label>
-        <RadioGroup
-          defaultValue={element.properties.size}
-          onValueChange={handleSizeChange}
-          className="flex flex-wrap gap-2"
-        >
-          <div className="flex items-center space-x-2">
-            <RadioGroupItem value="sm" id="size-sm" />
-            <Label htmlFor="size-sm">Small</Label>
-          </div>
-          <div className="flex items-center space-x-2">
-            <RadioGroupItem value="md" id="size-md" />
-            <Label htmlFor="size-md">Medium</Label>
-          </div>
-          <div className="flex items-center space-x-2">
-            <RadioGroupItem value="lg" id="size-lg" />
-            <Label htmlFor="size-lg">Large</Label>
-          </div>
-          <div className="flex items-center space-x-2">
-            <RadioGroupItem value="xl" id="size-xl" />
-            <Label htmlFor="size-xl">Extra Large</Label>
-          </div>
-        </RadioGroup>
-      </div>
-
-      <div>
-        <Label className="block mb-2">Text Style</Label>
-        <RadioGroup
-          defaultValue={element.properties.style}
-          onValueChange={handleStyleChange}
-          className="flex flex-wrap gap-2"
-        >
-          <div className="flex items-center space-x-2">
-            <RadioGroupItem value="normal" id="style-normal" />
-            <Label htmlFor="style-normal">Normal</Label>
-          </div>
-          <div className="flex items-center space-x-2">
-            <RadioGroupItem value="bold" id="style-bold" />
-            <Label htmlFor="style-bold" className="font-bold">Bold</Label>
-          </div>
-          <div className="flex items-center space-x-2">
-            <RadioGroupItem value="italic" id="style-italic" />
-            <Label htmlFor="style-italic" className="italic">Italic</Label>
-          </div>
-          <div className="flex items-center space-x-2">
-            <RadioGroupItem value="underline" id="style-underline" />
-            <Label htmlFor="style-underline" className="underline">Underline</Label>
-          </div>
-        </RadioGroup>
-      </div>
-
+    <div className="space-y-6">
       <div>
         <Label className="block mb-2">Text Alignment</Label>
-        <RadioGroup
-          defaultValue={element.properties.align}
-          onValueChange={handleAlignChange}
-          className="flex flex-wrap gap-2"
+        <div className="flex border rounded-md overflow-hidden">
+          <button
+            className={`flex-1 p-2 flex justify-center items-center ${align === 'left' ? 'bg-gray-100' : 'bg-white'}`}
+            onClick={() => handleAlignChange('left')}
+          >
+            <AlignLeft size={16} />
+          </button>
+          <button
+            className={`flex-1 p-2 flex justify-center items-center ${align === 'center' ? 'bg-gray-100' : 'bg-white'}`}
+            onClick={() => handleAlignChange('center')}
+          >
+            <AlignCenter size={16} />
+          </button>
+          <button
+            className={`flex-1 p-2 flex justify-center items-center ${align === 'right' ? 'bg-gray-100' : 'bg-white'}`}
+            onClick={() => handleAlignChange('right')}
+          >
+            <AlignRight size={16} />
+          </button>
+        </div>
+      </div>
+      
+      <div>
+        <Label className="block mb-2">Text Style</Label>
+        <div className="flex border rounded-md overflow-hidden">
+          <button
+            className={`flex-1 p-2 flex justify-center items-center ${style === 'normal' ? 'bg-gray-100' : 'bg-white'}`}
+            onClick={() => handleStyleChange('normal')}
+          >
+            <Type size={16} />
+          </button>
+          <button
+            className={`flex-1 p-2 flex justify-center items-center ${style === 'bold' ? 'bg-gray-100' : 'bg-white'}`}
+            onClick={() => handleStyleChange('bold')}
+          >
+            <Bold size={16} />
+          </button>
+          <button
+            className={`flex-1 p-2 flex justify-center items-center ${style === 'italic' ? 'bg-gray-100' : 'bg-white'}`}
+            onClick={() => handleStyleChange('italic')}
+          >
+            <Italic size={16} />
+          </button>
+          <button
+            className={`flex-1 p-2 flex justify-center items-center ${style === 'bold-italic' ? 'bg-gray-100' : 'bg-white'}`}
+            onClick={() => handleStyleChange('bold-italic')}
+          >
+            <div className="flex">
+              <Bold size={16} />
+              <Italic size={16} />
+            </div>
+          </button>
+        </div>
+      </div>
+      
+      <div>
+        <Label className="block mb-2">Text Size</Label>
+        <RadioGroup 
+          value={size} 
+          onValueChange={handleSizeChange}
+          className="grid grid-cols-2 gap-2"
         >
-          <div className="flex items-center space-x-2">
-            <RadioGroupItem value="left" id="align-left" />
-            <Label htmlFor="align-left">Left</Label>
+          <div className="flex items-center space-x-2 border rounded-md p-2">
+            <RadioGroupItem value="small" id="size-small" />
+            <Label htmlFor="size-small" className="text-sm cursor-pointer">Small</Label>
           </div>
-          <div className="flex items-center space-x-2">
-            <RadioGroupItem value="center" id="align-center" />
-            <Label htmlFor="align-center">Center</Label>
+          <div className="flex items-center space-x-2 border rounded-md p-2">
+            <RadioGroupItem value="medium" id="size-medium" />
+            <Label htmlFor="size-medium" className="cursor-pointer">Medium</Label>
           </div>
-          <div className="flex items-center space-x-2">
-            <RadioGroupItem value="right" id="align-right" />
-            <Label htmlFor="align-right">Right</Label>
+          <div className="flex items-center space-x-2 border rounded-md p-2">
+            <RadioGroupItem value="large" id="size-large" />
+            <Label htmlFor="size-large" className="text-lg cursor-pointer">Large</Label>
+          </div>
+          <div className="flex items-center space-x-2 border rounded-md p-2">
+            <RadioGroupItem value="xlarge" id="size-xlarge" />
+            <Label htmlFor="size-xlarge" className="text-xl cursor-pointer">X-Large</Label>
           </div>
         </RadioGroup>
       </div>
-
+      
       <div>
-        <Label className="block mb-2">Text Color</Label>
-        <RadioGroup
-          defaultValue={element.properties.color}
-          onValueChange={handleColorChange}
-          className="flex flex-wrap gap-2"
-        >
-          <div className="flex items-center space-x-2">
-            <RadioGroupItem value="default" id="color-default" />
-            <Label htmlFor="color-default">Default</Label>
+        <Label htmlFor="text-color" className="block mb-2">Text Color</Label>
+        <div className="flex space-x-2">
+          <div className="w-10 h-10 border rounded-md overflow-hidden">
+            <input
+              type="color"
+              id="text-color"
+              value={color}
+              onChange={handleColorChange}
+              className="w-12 h-12 cursor-pointer transform translate-x-[-2px] translate-y-[-2px]"
+            />
           </div>
-          <div className="flex items-center space-x-2">
-            <RadioGroupItem value="primary" id="color-primary" />
-            <Label htmlFor="color-primary" className="text-primary">Primary</Label>
-          </div>
-          <div className="flex items-center space-x-2">
-            <RadioGroupItem value="secondary" id="color-secondary" />
-            <Label htmlFor="color-secondary" className="text-secondary">Secondary</Label>
-          </div>
-          <div className="flex items-center space-x-2">
-            <RadioGroupItem value="muted" id="color-muted" />
-            <Label htmlFor="color-muted" className="text-muted-foreground">Muted</Label>
-          </div>
-        </RadioGroup>
+          <Input
+            value={color}
+            onChange={handleColorChange}
+            className="flex-1"
+          />
+        </div>
       </div>
     </div>
   );

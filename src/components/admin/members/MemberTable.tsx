@@ -7,17 +7,28 @@ import {
 } from '@/components/ui/table';
 import MemberTableHeader from './MemberTableHeader';
 import MemberTableRow from './MemberTableRow';
-import { Member } from '@/types/memberTypes';
+
+interface Member {
+  id: number;
+  name: string;
+  email: string;
+  phone: string;
+  membershipType: string;
+  startDate: string;
+  endDate: string;
+  status: string;
+  lastCheckin: string;
+}
 
 interface MemberTableProps {
   members: Member[];
   filteredMembers: Member[];
   currentMembers: Member[];
-  selectedMembers: string[];
-  toggleMemberSelection: (memberId: string) => void;
+  selectedMembers: number[];
+  toggleMemberSelection: (memberId: number) => void;
   selectAllMembers: () => void;
-  handleStatusChange: (memberId: string, newStatus: string) => void;
-  handleDelete: (memberId: string) => void;
+  handleStatusChange: (memberId: number, newStatus: string) => void;
+  handleDelete: (memberId: number) => void;
 }
 
 const MemberTable = ({
@@ -44,9 +55,9 @@ const MemberTable = ({
           {currentMembers.length > 0 ? (
             currentMembers.map((member) => (
               <MemberTableRow
-                key={member.id as string}
+                key={member.id}
                 member={member}
-                isSelected={selectedMembers.includes(member.id as string)}
+                isSelected={selectedMembers.includes(member.id)}
                 onToggleSelect={toggleMemberSelection}
                 onStatusChange={handleStatusChange}
                 onDelete={handleDelete}

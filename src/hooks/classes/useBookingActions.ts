@@ -55,7 +55,7 @@ export const useBookingActions = ({
     }
   };
 
-  const cancelBooking = (classId: number, memberId: string) => {
+  const cancelBooking = (classId: number, memberId: number) => {
     setClasses(prevClasses => 
       prevClasses.map(c => {
         if (c.id === classId) {

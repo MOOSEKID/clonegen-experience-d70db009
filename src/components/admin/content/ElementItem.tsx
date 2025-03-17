@@ -1,76 +1,106 @@
 
-import { Draggable } from 'react-beautiful-dnd';
+import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
+import { 
+  Trash, 
+  GripVertical, 
+  Copy,
+  ArrowDown,
+  ArrowUp,
+} from 'lucide-react';
 import EditableElement from './EditableElement';
-import ElementActions from './ElementActions';
-import { ContentElement } from '@/types/content.types';
 
 interface ElementItemProps {
-  element: ContentElement;
+  element: any;
   index: number;
-  selectedElementId: string | null;
-  isEditing: boolean;
-  onSelect: (element: ContentElement) => void;
-  onDelete: (index: number) => void;
-  onDuplicate: (index: number) => void;
-  onMove: (index: number, direction: 'up' | 'down') => void;
-  onUpdate: (element: ContentElement, index: number) => void;
+  isPreviewMode: boolean;
+  selectedElement: any;
+  onDeleteElement: (index: number) => void;
+  onDuplicateElement: (index: number) => void;
+  onMoveElement: (index: number, direction: 'up' | 'down') => void;
+  onSelectElement: (element: any) => void;
+  onUpdateElement: (element: any, index: number) => void;
+  totalElements: number;
 }
 
-const ElementItem = ({
-  element,
-  index,
-  selectedElementId,
-  isEditing,
-  onSelect,
-  onDelete,
-  onDuplicate,
-  onMove,
-  onUpdate
+const ElementItem = ({ 
+  element, 
+  index, 
+  isPreviewMode, 
+  selectedElement, 
+  onDeleteElement, 
+  onDuplicateElement, 
+  onMoveElement, 
+  onSelectElement, 
+  onUpdateElement,
+  totalElements 
 }: ElementItemProps) => {
-  const isSelected = selectedElementId === element.id;
-  
-  const handleSelectElement = () => {
-    onSelect(element);
-  };
-  
-  const handleUpdateElement = (updatedElement: ContentElement) => {
-    onUpdate(updatedElement, index);
-  };
-
   return (
-    <Draggable draggableId={element.id} index={index}>
-      {(provided: any) => (
+    <Draggable 
+      key={element.id} 
+      draggableId={element.id} 
+      index={index}
+      isDragDisabled={isPreviewMode}
+    >
+      {(provided) => (
         <div
           ref={provided.innerRef}
           {...provided.draggableProps}
-          className={`relative mb-4 border ${isSelected ? 'border-blue-500 bg-blue-50' : 'border-gray-200'} rounded-md overflow-hidden`}
+          className={`border ${selectedElement?.id === element.id && !isPreviewMode ? 'border-gym-orange' : 'border-gray-200'} 
+            rounded-lg shadow-sm relative group ${isPreviewMode ? 'border-transparent shadow-none' : ''}`}
         >
-          <div
-            className="cursor-pointer"
-            onClick={handleSelectElement}
-          >
-            <div 
+          {!isPreviewMode && (
+            <div className="absolute -top-3 -right-3 flex space-x-1 opacity-0 group-hover:opacity-100 transition-opacity">
+              <button
+                onClick={() => onDeleteElement(index)}
+                className="bg-red-500 text-white rounded-full p-1 hover:bg-red-600 transition-colors"
+                title="Delete element"
+              >
+                <Trash size={14} />
+              </button>
+              <button
+                onClick={() => onDuplicateElement(index)}
+                className="bg-gray-500 text-white rounded-full p-1 hover:bg-gray-600 transition-colors"
+                title="Duplicate element"
+              >
+                <Copy size={14} />
+              </button>
+              <button
+                onClick={() => onMoveElement(index, 'up')}
+                className={`bg-gray-500 text-white rounded-full p-1 hover:bg-gray-600 transition-colors ${index === 0 ? 'opacity-50 cursor-not-allowed' : ''}`}
+                title="Move up"
+                disabled={index === 0}
+              >
+                <ArrowUp size={14} />
+              </button>
+              <button
+                onClick={() => onMoveElement(index, 'down')}
+                className={`bg-gray-500 text-white rounded-full p-1 hover:bg-gray-600 transition-colors ${index === totalElements - 1 ? 'opacity-50 cursor-not-allowed' : ''}`}
+                title="Move down"
+                disabled={index === totalElements - 1}
+              >
+                <ArrowDown size={14} />
+              </button>
+            </div>
+          )}
+          
+          {!isPreviewMode && (
+            <div
               {...provided.dragHandleProps}
-              className="px-3 py-2 bg-gray-50 border-b border-gray-200 flex justify-between items-center"
+              className="absolute top-2 left-2 cursor-grab text-gray-400 hover:text-gray-600 transition-colors"
             >
-              <span className="text-sm font-medium text-gray-700">
-                {element.type.charAt(0).toUpperCase() + element.type.slice(1)}
-              </span>
-              <ElementActions 
-                index={index}
-                onDelete={onDelete}
-                onDuplicate={onDuplicate}
-                onMoveUp={() => onMove(index, 'up')}
-                onMoveDown={() => onMove(index, 'down')}
-              />
+              <GripVertical size={16} />
             </div>
-            <div className="p-4">
-              <EditableElement
-                element={element}
-                isEditing={isEditing}
-                onUpdate={handleUpdateElement}
-              />
-            </div>
+          )}
+          
+          <div 
+            className={`p-6 pt-8 ${!isPreviewMode ? 'pl-10' : ''}`}
+            onClick={() => !isPreviewMode && onSelectElement(element)}
+          >
+            <EditableElement 
+              element={element} 
+              isEditing={!isPreviewMode} 
+              onUpdate={(updatedElement) => onUpdateElement(updatedElement, index)}
+            />
           </div>
         </div>
       )}

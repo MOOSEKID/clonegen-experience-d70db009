@@ -1,5 +1,5 @@
 
-import { useSupabaseMembers } from '@/hooks/members/useSupabaseMembers';
+import { useMembers } from '@/hooks/useMembers';
 import MembersContainer from '@/components/admin/members/MembersContainer';
 
 const AdminMembers = () => {
@@ -13,7 +13,6 @@ const AdminMembers = () => {
     totalPages,
     filterType,
     isCreating,
-    isLoading,
     handleSearch,
     handleStatusChange,
     handleDelete,
@@ -26,7 +25,7 @@ const AdminMembers = () => {
     paginate,
     nextPage,
     prevPage,
-  } = useSupabaseMembers();
+  } = useMembers();
 
   return (
     <MembersContainer
@@ -39,19 +38,18 @@ const AdminMembers = () => {
       searchTerm={searchTerm}
       filterType={filterType}
       isCreating={isCreating}
-      isLoading={isLoading}
       onSearchChange={handleSearch}
       onStatusChange={handleStatusChange}
       onDelete={handleDelete}
       onToggleSelect={toggleMemberSelection}
-      onSelectAll={() => selectAllMembers(filteredMembers)}
+      onSelectAll={selectAllMembers}
       onFilterChange={handleFilterChange}
-      onBulkAction={(action) => handleBulkAction(action, filteredMembers)}
+      onBulkAction={handleBulkAction}
+      onAddMember={addMember}
+      onImportMembers={importMembers}
       onPageChange={paginate}
       onPrevPage={prevPage}
       onNextPage={nextPage}
-      onAddMember={addMember}
-      onImportMembers={importMembers}
     />
   );
 };

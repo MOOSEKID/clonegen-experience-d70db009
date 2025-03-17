@@ -4,42 +4,47 @@ import { Outlet, useNavigate } from 'react-router-dom';
 import AdminSidebar from '@/components/admin/AdminSidebar';
 import AdminHeader from '@/components/admin/AdminHeader';
 import { toast } from 'sonner';
-import { useAuth } from '@/hooks/useAuth';
 
 const AdminLayout = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
-  const { isAuthenticated, isAdmin } = useAuth();
   const navigate = useNavigate();
 
   // Check admin authentication
   useEffect(() => {
-    const checkAuth = async () => {
+    const checkAuth = () => {
       try {
-        setIsLoading(true);
+        // Get admin authentication status from localStorage and cookies
+        const isAdmin = localStorage.getItem('isAdmin') === 'true';
+        const sessionActive = document.cookie.includes('session_active=true');
+        const isAdminRole = document.cookie.includes('user_role=admin');
         
-        if (!isAuthenticated || !isAdmin) {
-          console.log('Admin authentication failed, redirecting to login');
+        if ((!isAdmin || !sessionActive) && !isAdminRole) {
           toast.error('You must be logged in as an administrator');
-          navigate('/login', { state: { from: '/admin' } });
+          navigate('/login');
         } else {
-          console.log('Admin authenticated successfully');
+          // Ensure both storage mechanisms are synchronized
+          if (!isAdmin && isAdminRole) {
+            localStorage.setItem('isAdmin', 'true');
+          }
+          
+          setIsAuthenticated(true);
+          // Refresh session cookie to maintain login state
+          document.cookie = "session_active=true; path=/; max-age=2592000"; // 30 days
+          document.cookie = "user_role=admin; path=/; max-age=2592000"; // 30 days
         }
       } catch (error) {
         console.error('Authentication check error:', error);
         toast.error('Authentication error. Please log in again.');
-        navigate('/login', { state: { from: '/admin' } });
+        navigate('/login');
       } finally {
         setIsLoading(false);
       }
     };
 
     checkAuth();
-    
-    // Check authentication status periodically
-    const interval = setInterval(checkAuth, 600000); // 10 minutes
-    return () => clearInterval(interval);
-  }, [navigate, isAuthenticated, isAdmin]);
+  }, [navigate]);
 
   const toggleSidebar = () => {
     setIsSidebarOpen(!isSidebarOpen);
@@ -53,8 +58,8 @@ const AdminLayout = () => {
     );
   }
 
-  if (!isAuthenticated || !isAdmin) {
-    return null; // Redirect will happen in the useEffect
+  if (!isAuthenticated) {
+    return null; // Or a loading spinner
   }
 
   return (

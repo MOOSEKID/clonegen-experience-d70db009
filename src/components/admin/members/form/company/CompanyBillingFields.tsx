@@ -21,11 +21,7 @@ const CompanyBillingFields = ({ control }: CompanyBillingFieldsProps) => {
           render={({ field }) => (
             <FormItem>
               <FormLabel>Billing Cycle</FormLabel>
-              <Select 
-                onValueChange={field.onChange} 
-                value={field.value || undefined}
-                defaultValue={undefined}
-              >
+              <Select onValueChange={field.onChange} value={field.value}>
                 <FormControl>
                   <SelectTrigger>
                     <SelectValue placeholder="Select billing cycle" />
@@ -49,11 +45,7 @@ const CompanyBillingFields = ({ control }: CompanyBillingFieldsProps) => {
               <FormLabel className="flex items-center gap-2">
                 <CreditCard size={16} /> Payment Mode
               </FormLabel>
-              <Select 
-                onValueChange={field.onChange} 
-                value={field.value || undefined}
-                defaultValue={undefined}
-              >
+              <Select onValueChange={field.onChange} value={field.value}>
                 <FormControl>
                   <SelectTrigger>
                     <SelectValue placeholder="Select payment mode" />
@@ -78,11 +70,7 @@ const CompanyBillingFields = ({ control }: CompanyBillingFieldsProps) => {
             <FormLabel className="flex items-center gap-2">
               <FileText size={16} /> Subscription Model
             </FormLabel>
-            <Select 
-              onValueChange={field.onChange} 
-              value={field.value || undefined}
-              defaultValue={undefined}
-            >
+            <Select onValueChange={field.onChange} value={field.value}>
               <FormControl>
                 <SelectTrigger>
                   <SelectValue placeholder="Select subscription model" />
@@ -96,9 +84,7 @@ const CompanyBillingFields = ({ control }: CompanyBillingFieldsProps) => {
             <FormDescription>
               {field.value === "Per-Signature" 
                 ? "Company will be billed based on actual employee attendance" 
-                : field.value === "Fixed Fee"
-                  ? "Company will pay a fixed fee regardless of attendance"
-                  : "Select a subscription model"}
+                : "Company will pay a fixed fee regardless of attendance"}
             </FormDescription>
             <FormMessage />
           </FormItem>

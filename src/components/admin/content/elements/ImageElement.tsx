@@ -1,49 +1,68 @@
 
-import { ElementProperties } from '@/types/content.types';
+import { Dialog, DialogTrigger, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { ImageIcon } from 'lucide-react';
+import SelectImageDialog from '../dialogs/SelectImageDialog';
 
 interface ImageElementProps {
-  content: string;
-  properties: ElementProperties;
-  alt?: string;
+  element: any;
   isEditing: boolean;
+  onUpdate: (element: any) => void;
 }
 
-const ImageElement = ({ content, properties, alt, isEditing }: ImageElementProps) => {
-  const getSizeClass = () => {
-    switch (properties.size) {
-      case 'sm': return 'max-w-[200px]';
-      case 'md': return 'max-w-[400px]';
-      case 'lg': return 'max-w-[600px]';
-      case 'full': return 'w-full';
-      default: return 'max-w-[400px]';
-    }
-  };
-
-  const getAlignClass = () => {
-    switch (properties.align) {
-      case 'left': return 'mr-auto';
-      case 'center': return 'mx-auto';
-      case 'right': return 'ml-auto';
-      default: return 'mx-auto';
-    }
-  };
-
-  const getPaddingClass = () => {
-    switch (properties.padding) {
-      case 'sm': return 'p-2';
-      case 'md': return 'p-4';
-      case 'lg': return 'p-6';
-      default: return '';
-    }
-  };
+const ImageElement = ({ element, isEditing, onUpdate }: ImageElementProps) => {
+  const { properties = {} } = element;
+  const { align = 'left', padding = 'medium' } = properties;
+  
+  // Determine padding class
+  const paddingClass = {
+    none: 'p-0',
+    small: 'p-2',
+    medium: 'p-4',
+    large: 'p-6',
+  }[padding] || 'p-4';
 
   return (
-    <div className={`${getPaddingClass()}`}>
-      <img
-        src={content}
-        alt={alt || "Image"}
-        className={`${getSizeClass()} ${getAlignClass()} block object-contain ${isEditing ? 'border border-dashed border-gray-300' : ''}`}
-      />
+    <div className={paddingClass}>
+      {element.content ? (
+        <img 
+          src={element.content} 
+          alt={element.alt || "Image"} 
+          className="max-w-full h-auto rounded-md"
+          style={{ margin: align === 'center' ? '0 auto' : align === 'right' ? '0 0 0 auto' : '0' }}
+        />
+      ) : (
+        <div className="border-2 border-dashed border-gray-300 rounded-md p-8 text-center text-gray-500">
+          <ImageIcon className="mx-auto h-12 w-12 mb-2 opacity-50" />
+          <p>Select an image from the media library</p>
+          {isEditing && (
+            <Dialog>
+              <DialogTrigger asChild>
+                <Button size="sm" className="mt-4">
+                  Select Image
+                </Button>
+              </DialogTrigger>
+              <SelectImageDialog 
+                onSelect={(url) => onUpdate({ ...element, content: url })} 
+              />
+            </Dialog>
+          )}
+        </div>
+      )}
+      {isEditing && element.content && (
+        <div className="mt-2 flex justify-end space-x-2">
+          <Dialog>
+            <DialogTrigger asChild>
+              <Button variant="outline" size="sm">
+                Change Image
+              </Button>
+            </DialogTrigger>
+            <SelectImageDialog 
+              onSelect={(url) => onUpdate({ ...element, content: url })} 
+            />
+          </Dialog>
+        </div>
+      )}
     </div>
   );
 };

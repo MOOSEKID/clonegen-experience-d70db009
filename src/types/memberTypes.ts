@@ -1,6 +1,5 @@
-
 export interface Member {
-  id?: string; // UUID from Supabase
+  id: number;
   name: string;
   email: string;
   phone: string;
@@ -53,7 +52,6 @@ export interface Member {
   
   // Individual member linked to company
   linkedToCompany?: boolean;
-  linkedCompanyId?: string;
   linkedCompanyName?: string;
   
   // Company admin user setup
@@ -66,10 +64,6 @@ export interface Member {
     checkInTime: string;
     checkOutTime?: string;
   }>;
-  
-  // Timestamps
-  created_at?: string;
-  updated_at?: string;
 }
 
 // Need to add these types for form handling
@@ -83,8 +77,8 @@ export interface MemberFormAction {
 }
 
 export interface CompanyInvoice {
-  id: string;
-  companyId: string;
+  id: number;
+  companyId: number;
   invoiceNumber: string;
   issueDate: string;
   dueDate: string;
@@ -100,10 +94,10 @@ export interface CompanyInvoice {
 }
 
 export interface AttendanceRecord {
-  id: string;
-  memberId: string;
+  id: number;
+  memberId: number;
   memberName: string;
-  companyId?: string;
+  companyId?: number;
   companyName?: string;
   date: string;
   checkInTime: string;

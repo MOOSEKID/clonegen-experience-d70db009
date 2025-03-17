@@ -1,15 +1,19 @@
 
-// This file re-exports all member service functions from their individual files
-import { getAvailableMembers, fetchMembers } from './members/fetchMembers';
-import { addMember } from './members/createMember';
-import { updateMember, updateMemberStatus } from './members/updateMember';
-import { deleteMember } from './members/deleteMember';
+import { MemberInfo } from '@/types/classTypes';
+import { mockMembers } from '@/data/mockMembersData';
 
-export {
-  getAvailableMembers,
-  fetchMembers,
-  addMember,
-  updateMember,
-  updateMemberStatus,
-  deleteMember
+// Get members who are not enrolled or waitlisted in the class
+export const getAvailableMembers = (
+  enrolledMembers: MemberInfo[], 
+  waitlistMembers: MemberInfo[],
+  searchTerm: string = ''
+): MemberInfo[] => {
+  const enrolledIds = new Set(enrolledMembers.map(m => m.id));
+  const waitlistIds = new Set(waitlistMembers.map(m => m.id));
+  
+  return mockMembers.filter(member => 
+    !enrolledIds.has(member.id) && 
+    !waitlistIds.has(member.id) &&
+    member.name.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 };

@@ -1,6 +1,6 @@
 
 export interface MemberInfo {
-  id: string;
+  id: number;
   name: string;
   email: string;
 }
@@ -11,7 +11,6 @@ export interface ClassType {
   description: string;
   type: 'yoga' | 'hiit' | 'strength' | 'cardio' | 'pilates' | 'other';
   trainer: string;
-  trainerId?: string; // New field to store the trainer ID
   capacity: number;
   enrolled: number;
   enrolledMembers: MemberInfo[];
@@ -21,20 +20,5 @@ export interface ClassType {
   time: string;
   duration: number;
   room: string;
-  status: 'scheduled' | 'canceled' | 'full' | 'open';
-  // New fields
-  classLevel: 'Beginner' | 'Intermediate' | 'Advanced';
-  equipmentRequired: string[];
-  recurrence: boolean;
-  recurrenceDays: string[]; // New field for storing multiple recurrence days
-  classFees: number | null;
-  feeType: 'per_session' | 'package' | null;
-}
-
-export interface GymLocation {
-  id: string;
-  name: string;
-  type: 'room' | 'area';
-  capacity: number;
-  equipment: string[];
+  status: 'scheduled' | 'canceled' | 'full';
 }

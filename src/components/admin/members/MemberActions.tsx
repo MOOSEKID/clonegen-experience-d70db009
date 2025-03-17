@@ -12,10 +12,10 @@ import {
 import { Button } from '@/components/ui/button';
 
 interface MemberActionsProps {
-  memberId: string;
+  memberId: number;
   status: string;
-  onStatusChange: (id: string, status: string) => void;
-  onDelete: (id: string) => void;
+  onStatusChange: (id: number, status: string) => void;
+  onDelete: (id: number) => void;
 }
 
 const MemberActions = ({ memberId, status, onStatusChange, onDelete }: MemberActionsProps) => {

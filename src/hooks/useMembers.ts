@@ -10,7 +10,7 @@ export type { Member } from '@/types/memberTypes';
 
 export const useMembers = () => {
   const [members, setMembers] = useState<Member[]>(mockMembers);
-  const [selectedMembers, setSelectedMembers] = useState<string[]>([]);
+  const [selectedMembers, setSelectedMembers] = useState<number[]>([]);
 
   const {
     handleStatusChange,

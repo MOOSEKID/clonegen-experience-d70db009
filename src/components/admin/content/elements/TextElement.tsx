@@ -1,73 +1,143 @@
 
-import { ElementProperties } from '@/types/content.types';
+import { useState, useRef, useEffect } from 'react';
+import { Button } from "@/components/ui/button";
+import { Pencil, Link } from 'lucide-react';
+import { Dialog, DialogTrigger } from "@/components/ui/dialog";
+import LinkDialog from '../dialogs/LinkDialog';
 
 interface TextElementProps {
-  content: string;
-  properties: ElementProperties;
+  element: any;
   isEditing: boolean;
-  onChange?: (content: string) => void;
+  onUpdate: (element: any) => void;
 }
 
-const TextElement = ({ content, properties, isEditing, onChange }: TextElementProps) => {
-  const getSizeClass = () => {
-    switch (properties.size) {
-      case 'sm': return 'text-sm';
-      case 'lg': return 'text-lg';
-      case 'xl': return 'text-xl';
-      default: return 'text-base';
+const TextElement = ({ element, isEditing, onUpdate }: TextElementProps) => {
+  const [isEditingContent, setIsEditingContent] = useState(false);
+  const [contentValue, setContentValue] = useState(element.content);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+  useEffect(() => {
+    setContentValue(element.content);
+  }, [element.content]);
+
+  useEffect(() => {
+    if (isEditingContent && textareaRef.current) {
+      textareaRef.current.focus();
+      textareaRef.current.select();
     }
+  }, [isEditingContent]);
+
+  const handleSaveContent = () => {
+    onUpdate({
+      ...element,
+      content: contentValue
+    });
+    setIsEditingContent(false);
   };
 
-  const getStyleClass = () => {
-    switch (properties.style) {
-      case 'bold': return 'font-bold';
-      case 'italic': return 'italic';
-      case 'underline': return 'underline';
-      default: return '';
-    }
+  const handleApplyLink = (url: string, text: string) => {
+    onUpdate({
+      ...element,
+      content: text,
+      link: url
+    });
   };
 
-  const getAlignClass = () => {
-    switch (properties.align) {
-      case 'left': return 'text-left';
-      case 'center': return 'text-center';
-      case 'right': return 'text-right';
-      default: return 'text-left';
-    }
+  const { properties = {} } = element;
+  const { align = 'left', size = 'medium', style = 'normal', color = '#000000', padding = 'medium' } = properties;
+
+  // Determine text size class
+  const sizeClass = {
+    small: 'text-sm',
+    medium: 'text-base',
+    large: 'text-lg',
+    xlarge: 'text-xl',
+    '2xlarge': 'text-2xl',
+    '3xlarge': 'text-3xl',
+    '4xlarge': 'text-4xl',
+  }[size] || 'text-base';
+
+  // Determine text style class
+  const styleClass = {
+    normal: 'font-normal',
+    bold: 'font-bold',
+    italic: 'italic',
+    'bold-italic': 'font-bold italic',
+  }[style] || 'font-normal';
+
+  // Determine padding class
+  const paddingClass = {
+    none: 'p-0',
+    small: 'p-2',
+    medium: 'p-4',
+    large: 'p-6',
+  }[padding] || 'p-4';
+
+  // Common styles based on properties
+  const commonStyles = {
+    textAlign: align,
+    color,
   };
 
-  const getColorClass = () => {
-    switch (properties.color) {
-      case 'primary': return 'text-primary';
-      case 'secondary': return 'text-secondary';
-      case 'muted': return 'text-muted-foreground';
-      default: return '';
-    }
-  };
-
-  const getPaddingClass = () => {
-    switch (properties.padding) {
-      case 'sm': return 'p-2';
-      case 'md': return 'p-4';
-      case 'lg': return 'p-6';
-      default: return '';
-    }
-  };
-
-  const handleChange = (e: React.ChangeEvent<HTMLDivElement>) => {
-    if (onChange && isEditing) {
-      onChange(e.currentTarget.textContent || '');
-    }
-  };
-
+  if (isEditing && isEditingContent) {
+    return (
+      <div>
+        <textarea
+          ref={textareaRef}
+          value={contentValue}
+          onChange={(e) => setContentValue(e.target.value)}
+          className="w-full min-h-[100px] p-2 border border-gray-300 rounded-md"
+        />
+        <div className="mt-2 flex justify-end space-x-2">
+          <Button 
+            variant="outline" 
+            size="sm" 
+            onClick={() => setIsEditingContent(false)}
+          >
+            Cancel
+          </Button>
+          <Button 
+            size="sm" 
+            onClick={handleSaveContent}
+          >
+            Save
+          </Button>
+        </div>
+      </div>
+    );
+  }
+  
   return (
-    <div
-      className={`${getSizeClass()} ${getStyleClass()} ${getAlignClass()} ${getColorClass()} ${getPaddingClass()}`}
-      contentEditable={isEditing}
-      suppressContentEditableWarning={true}
-      onBlur={handleChange}
-      dangerouslySetInnerHTML={{ __html: content }}
-    ></div>
+    <div>
+      <p 
+        className={`${sizeClass} ${styleClass} ${paddingClass}`} 
+        style={commonStyles}
+        onClick={() => isEditing && setIsEditingContent(true)}
+      >
+        {element.content}
+      </p>
+      {isEditing && !isEditingContent && (
+        <div className="mt-2 flex justify-end space-x-2">
+          <Button 
+            variant="outline" 
+            size="sm" 
+            onClick={() => setIsEditingContent(true)}
+          >
+            <Pencil className="h-3 w-3 mr-1" />
+            Edit Text
+          </Button>
+          <Dialog>
+            <DialogTrigger asChild>
+              <Button variant="outline" size="sm">
+                <Link className="h-3 w-3 mr-1" />
+                Add Link
+              </Button>
+            </DialogTrigger>
+            <LinkDialog element={element} onApply={handleApplyLink} />
+          </Dialog>
+        </div>
+      )}
+    </div>
   );
 };
 

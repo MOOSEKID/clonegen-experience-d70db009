@@ -28,6 +28,7 @@ export const useMemberCreation = (
     setIsCreating(true);
     
     try {
+      const newId = members.length > 0 ? Math.max(...members.map(m => m.id)) + 1 : 1;
       const today = new Date().toISOString().split('T')[0];
       
       // Calculate end date based on membership plan or billing cycle
@@ -69,7 +70,7 @@ export const useMemberCreation = (
       } = memberData;
       
       const newMember: Member = {
-        id: crypto.randomUUID(), // Generate UUID for client-side
+        id: newId,
         ...cleanedMemberData,
         startDate: today,
         endDate: endDate.toISOString().split('T')[0],

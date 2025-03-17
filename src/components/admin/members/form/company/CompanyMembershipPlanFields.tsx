@@ -23,11 +23,7 @@ const CompanyMembershipPlanFields = ({ control }: CompanyMembershipPlanFieldsPro
             <FormLabel className="flex items-center gap-2">
               <Briefcase size={16} /> Company Plan
             </FormLabel>
-            <Select 
-              onValueChange={field.onChange} 
-              value={field.value || undefined}
-              defaultValue={undefined}
-            >
+            <Select onValueChange={field.onChange} value={field.value}>
               <FormControl>
                 <SelectTrigger>
                   <SelectValue placeholder="Select company plan" />

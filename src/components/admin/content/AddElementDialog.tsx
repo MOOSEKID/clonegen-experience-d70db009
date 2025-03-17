@@ -1,11 +1,14 @@
 
-import { Type, Image as ImageIcon, Video, Box } from 'lucide-react';
+import { Plus, Type, Image as ImageIcon, Video, Box } from 'lucide-react';
 import { 
+  Dialog, 
   DialogContent, 
   DialogDescription, 
   DialogHeader, 
   DialogTitle,
+  DialogTrigger
 } from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
 
 interface AddElementDialogProps {
   onAddElement: (type: string) => void;

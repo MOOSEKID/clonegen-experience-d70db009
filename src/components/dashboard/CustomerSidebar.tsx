@@ -1,19 +1,7 @@
 
 import { Link, useLocation } from 'react-router-dom';
-import {
-  Dumbbell,
-  Calendar,
-  ClipboardList,
-  Bell,
-  Settings,
-  LogOut,
-  Home,
-  DumbbellIcon,
-  Award,
-  CreditCard
-} from 'lucide-react';
-import { useAuth } from '@/hooks/useAuth';
-import { useState } from 'react';
+import { Home, BarChart2, Calendar, Dumbbell, Heart, Award, MapPin, Settings, LogOut } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
 interface CustomerSidebarProps {
   isOpen: boolean;
@@ -21,168 +9,81 @@ interface CustomerSidebarProps {
 
 const CustomerSidebar = ({ isOpen }: CustomerSidebarProps) => {
   const location = useLocation();
-  const { logout, user } = useAuth();
-  const [isCollapsed, setIsCollapsed] = useState(false);
+  
+  const sidebarItems = [
+    { icon: Home, label: 'Dashboard', path: '/dashboard' },
+    { icon: Dumbbell, label: 'Workouts', path: '/dashboard/workouts' },
+    { icon: BarChart2, label: 'Progress', path: '/dashboard/progress' },
+    { icon: Calendar, label: 'Schedule', path: '/dashboard/schedule' },
+    { icon: Heart, label: 'Health', path: '/dashboard/health' },
+    { icon: Award, label: 'Achievements', path: '/dashboard/achievements' },
+    { icon: MapPin, label: 'Gym Locations', path: '/dashboard/locations' },
+  ];
 
-  const handleLogout = async () => {
-    try {
-      await logout();
-    } catch (error) {
-      console.error('Logout failed:', error);
-    }
-  };
-
-  const isActive = (path: string) => {
-    return location.pathname === path || location.pathname.startsWith(`${path}/`);
-  };
+  const lowerItems = [
+    { icon: Settings, label: 'Settings', path: '/dashboard/settings' },
+    { icon: LogOut, label: 'Logout', path: '/login', onClick: () => {
+      localStorage.removeItem('isLoggedIn');
+      localStorage.removeItem('userEmail');
+    }},
+  ];
 
   return (
-    <div
-      className={`bg-gym-darkblue text-white w-full md:w-64 flex-shrink-0 transition-all duration-300 ease-in-out overflow-y-auto
-        ${isOpen ? 'block' : 'hidden md:block md:w-20'} ${isCollapsed ? 'md:w-20' : ''}`}
+    <aside 
+      className={cn(
+        "bg-gym-darkblue text-white flex-shrink-0 flex flex-col transition-all duration-300 overflow-hidden",
+        isOpen ? "w-64" : "w-20",
+      )}
     >
-      <div className="p-4 flex flex-col h-full">
-        <div className="mb-8 flex items-center justify-center">
-          <Link to="/" className="text-2xl font-bold text-gym-orange">
-            {isOpen && !isCollapsed ? 'Uptown Gym' : 'UG'}
-          </Link>
-        </div>
+      <div className="p-4 flex justify-center">
+        <Link to="/" className={cn("flex items-center", isOpen ? "justify-start" : "justify-center")}>
+          <div className="h-16 w-auto">
+            <img 
+              src="/lovable-uploads/01fa474e-e83a-48f4-9ffc-2047ca448aa7.png" 
+              alt="Uptown Gym Logo" 
+              className="h-full w-auto object-contain"
+            />
+          </div>
+        </Link>
+      </div>
 
-        <nav className="flex-1">
-          <ul className="space-y-2">
-            <li>
-              <Link
-                to="/dashboard"
-                className={`flex items-center p-3 rounded-md transition-colors ${
-                  isActive('/dashboard')
-                    ? 'bg-gym-orange text-white'
-                    : 'text-white/70 hover:bg-white/10'
-                }`}
-              >
-                <Home size={20} />
-                {(isOpen && !isCollapsed) && <span className="ml-3">Dashboard</span>}
-              </Link>
-            </li>
-            <li>
-              <Link
-                to="/dashboard/workouts"
-                className={`flex items-center p-3 rounded-md transition-colors ${
-                  isActive('/dashboard/workouts')
-                    ? 'bg-gym-orange text-white'
-                    : 'text-white/70 hover:bg-white/10'
-                }`}
-              >
-                <DumbbellIcon size={20} />
-                {(isOpen && !isCollapsed) && <span className="ml-3">Workouts</span>}
-              </Link>
-            </li>
-            <li>
-              <Link
-                to="/dashboard/classes"
-                className={`flex items-center p-3 rounded-md transition-colors ${
-                  isActive('/dashboard/classes')
-                    ? 'bg-gym-orange text-white'
-                    : 'text-white/70 hover:bg-white/10'
-                }`}
-              >
-                <Calendar size={20} />
-                {(isOpen && !isCollapsed) && <span className="ml-3">Classes</span>}
-              </Link>
-            </li>
-            <li>
-              <Link
-                to="/dashboard/progress"
-                className={`flex items-center p-3 rounded-md transition-colors ${
-                  isActive('/dashboard/progress')
-                    ? 'bg-gym-orange text-white'
-                    : 'text-white/70 hover:bg-white/10'
-                }`}
-              >
-                <Award size={20} />
-                {(isOpen && !isCollapsed) && <span className="ml-3">Progress</span>}
-              </Link>
-            </li>
-            <li>
-              <Link
-                to="/dashboard/nutrition"
-                className={`flex items-center p-3 rounded-md transition-colors ${
-                  isActive('/dashboard/nutrition')
-                    ? 'bg-gym-orange text-white'
-                    : 'text-white/70 hover:bg-white/10'
-                }`}
-              >
-                <ClipboardList size={20} />
-                {(isOpen && !isCollapsed) && <span className="ml-3">Nutrition</span>}
-              </Link>
-            </li>
-            <li>
-              <Link
-                to="/dashboard/billing"
-                className={`flex items-center p-3 rounded-md transition-colors ${
-                  isActive('/dashboard/billing')
-                    ? 'bg-gym-orange text-white'
-                    : 'text-white/70 hover:bg-white/10'
-                }`}
-              >
-                <CreditCard size={20} />
-                {(isOpen && !isCollapsed) && <span className="ml-3">Billing</span>}
-              </Link>
-            </li>
-            <li>
-              <Link
-                to="/dashboard/notifications"
-                className={`flex items-center p-3 rounded-md transition-colors ${
-                  isActive('/dashboard/notifications')
-                    ? 'bg-gym-orange text-white'
-                    : 'text-white/70 hover:bg-white/10'
-                }`}
-              >
-                <Bell size={20} />
-                {(isOpen && !isCollapsed) && <span className="ml-3">Notifications</span>}
-              </Link>
-            </li>
-          </ul>
+      <div className="flex-1 flex flex-col justify-between py-6">
+        <nav className="space-y-1 px-3">
+          {sidebarItems.map((item) => (
+            <Link
+              key={item.path}
+              to={item.path}
+              className={cn(
+                "flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-gym-dark transition-colors",
+                location.pathname === item.path ? "bg-gym-dark text-gym-orange" : "text-gray-300",
+                !isOpen && "justify-center px-2"
+              )}
+            >
+              <item.icon size={22} />
+              {isOpen && <span>{item.label}</span>}
+            </Link>
+          ))}
         </nav>
 
-        <div className="mt-auto pt-4 border-t border-white/10">
-          <ul className="space-y-2">
-            <li>
-              <Link
-                to="/dashboard/settings"
-                className={`flex items-center p-3 rounded-md transition-colors ${
-                  isActive('/dashboard/settings')
-                    ? 'bg-gym-orange text-white'
-                    : 'text-white/70 hover:bg-white/10'
-                }`}
-              >
-                <Settings size={20} />
-                {(isOpen && !isCollapsed) && <span className="ml-3">Settings</span>}
-              </Link>
-            </li>
-            <li>
-              <button
-                onClick={handleLogout}
-                className="w-full flex items-center p-3 rounded-md transition-colors text-white/70 hover:bg-white/10"
-              >
-                <LogOut size={20} />
-                {(isOpen && !isCollapsed) && <span className="ml-3">Logout</span>}
-              </button>
-            </li>
-          </ul>
-          
-          {isOpen && !isCollapsed && user && (
-            <div className="mt-4 pt-4 border-t border-white/10">
-              <div className="text-white/50 text-xs">
-                Signed in as:
-              </div>
-              <div className="text-sm font-medium text-white truncate">
-                {user.full_name || user.email}
-              </div>
-            </div>
-          )}
-        </div>
+        <nav className="space-y-1 px-3 mt-auto">
+          {lowerItems.map((item) => (
+            <Link
+              key={item.path}
+              to={item.path}
+              onClick={item.onClick}
+              className={cn(
+                "flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-gym-dark transition-colors",
+                location.pathname === item.path ? "bg-gym-dark text-gym-orange" : "text-gray-300",
+                !isOpen && "justify-center px-2"
+              )}
+            >
+              <item.icon size={22} />
+              {isOpen && <span>{item.label}</span>}
+            </Link>
+          ))}
+        </nav>
       </div>
-    </div>
+    </aside>
   );
 };
 

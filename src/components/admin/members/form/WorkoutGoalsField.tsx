@@ -18,11 +18,7 @@ const WorkoutGoalsField = ({ control }: WorkoutGoalsFieldProps) => {
       render={({ field }) => (
         <FormItem>
           <FormLabel>Workout Goals</FormLabel>
-          <Select 
-            onValueChange={field.onChange} 
-            value={field.value || undefined} 
-            defaultValue={undefined}
-          >
+          <Select onValueChange={field.onChange} value={field.value}>
             <FormControl>
               <SelectTrigger>
                 <SelectValue placeholder="Select workout goal" />

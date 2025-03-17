@@ -2,7 +2,7 @@
 import { Button } from '@/components/ui/button';
 
 interface MemberBulkActionsProps {
-  selectedMembers: string[]; // Changed from string[] to maintain consistency
+  selectedMembers: number[];
   onBulkAction: (action: string) => void;
 }
 

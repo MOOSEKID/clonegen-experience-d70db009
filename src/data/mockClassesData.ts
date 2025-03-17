@@ -18,14 +18,7 @@ export const mockClasses: ClassType[] = [
     time: '08:00',
     duration: 60,
     room: 'Studio 1',
-    status: 'scheduled',
-    // Added the new required fields
-    classLevel: 'Beginner',
-    equipmentRequired: ['yoga_mat'],
-    recurrence: true,
-    recurrenceDays: ['Monday', 'Wednesday', 'Friday'],
-    classFees: 15,
-    feeType: 'per_session'
+    status: 'scheduled'
   },
   {
     id: 2,
@@ -42,14 +35,7 @@ export const mockClasses: ClassType[] = [
     time: '17:30',
     duration: 45,
     room: 'Training Area',
-    status: 'full',
-    // Added the new required fields
-    classLevel: 'Advanced',
-    equipmentRequired: ['dumbbells', 'kettlebells', 'jump_rope'],
-    recurrence: true,
-    recurrenceDays: ['Tuesday', 'Thursday'],
-    classFees: 20,
-    feeType: 'per_session'
+    status: 'full'
   },
   {
     id: 3,
@@ -66,14 +52,7 @@ export const mockClasses: ClassType[] = [
     time: '19:00',
     duration: 60,
     room: 'Weights Room',
-    status: 'scheduled',
-    // Added the new required fields
-    classLevel: 'Intermediate',
-    equipmentRequired: ['dumbbells', 'kettlebells'],
-    recurrence: true,
-    recurrenceDays: ['Monday', 'Wednesday', 'Friday'],
-    classFees: 25,
-    feeType: 'per_session'
+    status: 'scheduled'
   },
   {
     id: 4,
@@ -90,14 +69,7 @@ export const mockClasses: ClassType[] = [
     time: '18:00',
     duration: 60,
     room: 'Studio 2',
-    status: 'scheduled',
-    // Added the new required fields
-    classLevel: 'Beginner',
-    equipmentRequired: ['none'],
-    recurrence: true,
-    recurrenceDays: ['Tuesday', 'Thursday'],
-    classFees: 15,
-    feeType: 'per_session'
+    status: 'scheduled'
   },
   {
     id: 5,
@@ -114,14 +86,7 @@ export const mockClasses: ClassType[] = [
     time: '12:00',
     duration: 45,
     room: 'Studio 1',
-    status: 'scheduled',
-    // Added the new required fields
-    classLevel: 'Intermediate',
-    equipmentRequired: ['yoga_mat', 'resistance_bands'],
-    recurrence: false,
-    recurrenceDays: [],
-    classFees: 18,
-    feeType: 'per_session'
+    status: 'scheduled'
   },
   {
     id: 6,
@@ -138,14 +103,7 @@ export const mockClasses: ClassType[] = [
     time: '10:00',
     duration: 60,
     room: 'Studio 1',
-    status: 'scheduled',
-    // Added the new required fields
-    classLevel: 'Beginner',
-    equipmentRequired: ['yoga_mat'],
-    recurrence: false,
-    recurrenceDays: [],
-    classFees: 15,
-    feeType: 'per_session'
+    status: 'scheduled'
   },
   {
     id: 7,
@@ -162,13 +120,6 @@ export const mockClasses: ClassType[] = [
     time: '19:30',
     duration: 45,
     room: 'Training Area',
-    status: 'scheduled',
-    // Added the new required fields
-    classLevel: 'Advanced',
-    equipmentRequired: ['dumbbells', 'kettlebells', 'jump_rope', 'boxing_gloves'],
-    recurrence: true,
-    recurrenceDays: ['Monday', 'Wednesday'],
-    classFees: 25,
-    feeType: 'per_session'
+    status: 'scheduled'
   },
 ];

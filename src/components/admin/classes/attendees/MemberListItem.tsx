@@ -7,7 +7,7 @@ import { X, Plus } from 'lucide-react';
 interface MemberListItemProps {
   member: MemberInfo;
   action: 'add' | 'remove';
-  onAction: (memberId: string) => void;
+  onAction: (memberId: number) => void;
   waitlistPosition?: number;
   classIsFull?: boolean;
 }

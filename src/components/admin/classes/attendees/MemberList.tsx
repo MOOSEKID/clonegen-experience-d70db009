@@ -5,7 +5,7 @@ import MemberListItem from './MemberListItem';
 interface MemberListProps {
   members: MemberInfo[];
   action: 'add' | 'remove';
-  onAction: (memberId: string) => void;
+  onAction: (memberId: number) => void;
   emptyMessage: string;
   searchTerm: string;
   isWaitlist?: boolean;

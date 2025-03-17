@@ -87,7 +87,6 @@ export const useFormState = (isOpen: boolean) => {
   // Reset form when dialog opens
   useEffect(() => {
     if (isOpen) {
-      console.log("Form reset triggered due to dialog open state change");
       form.reset();
     }
   }, [isOpen, form]);

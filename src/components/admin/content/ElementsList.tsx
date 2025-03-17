@@ -3,18 +3,17 @@ import { DragDropContext, Droppable } from 'react-beautiful-dnd';
 import ElementItem from './ElementItem';
 import EmptyContentState from './EmptyContentState';
 import { AddElementButton } from './ContentEditorTools';
-import { ContentElement } from '@/types/content.types';
 
 interface ElementsListProps {
-  pageContent: ContentElement[];
+  pageContent: any[];
   isPreviewMode: boolean;
-  selectedElement: ContentElement | null;
+  selectedElement: any;
   onDragEnd: (result: any) => void;
   onDeleteElement: (index: number) => void;
   onDuplicateElement: (index: number) => void;
   onMoveElement: (index: number, direction: 'up' | 'down') => void;
-  onSelectElement: (element: ContentElement | null) => void;
-  onUpdateElement: (element: ContentElement, index: number) => void;
+  onSelectElement: (element: any) => void;
+  onUpdateElement: (element: any, index: number) => void;
   onAddElement: (type: string) => void;
 }
 
@@ -38,7 +37,7 @@ const ElementsList = ({
     <>
       <DragDropContext onDragEnd={onDragEnd}>
         <Droppable droppableId="content-elements">
-          {(provided: any) => (
+          {(provided) => (
             <div
               {...provided.droppableProps}
               ref={provided.innerRef}
@@ -49,13 +48,14 @@ const ElementsList = ({
                   key={element.id}
                   element={element}
                   index={index}
-                  selectedElementId={selectedElement?.id || null}
-                  isEditing={!isPreviewMode}
-                  onSelect={onSelectElement}
-                  onDelete={onDeleteElement}
-                  onDuplicate={onDuplicateElement}
-                  onMove={onMoveElement}
-                  onUpdate={onUpdateElement}
+                  isPreviewMode={isPreviewMode}
+                  selectedElement={selectedElement}
+                  onDeleteElement={onDeleteElement}
+                  onDuplicateElement={onDuplicateElement}
+                  onMoveElement={onMoveElement}
+                  onSelectElement={onSelectElement}
+                  onUpdateElement={onUpdateElement}
+                  totalElements={pageContent.length}
                 />
               ))}
               {provided.placeholder}

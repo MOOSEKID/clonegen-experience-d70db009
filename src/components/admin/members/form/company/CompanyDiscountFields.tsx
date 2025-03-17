@@ -27,8 +27,7 @@ const CompanyDiscountFields = ({ control }: CompanyDiscountFieldsProps) => {
               </FormLabel>
               <Select 
                 onValueChange={field.onChange} 
-                value={field.value || undefined}
-                defaultValue={undefined}
+                value={field.value}
               >
                 <FormControl>
                   <SelectTrigger>
