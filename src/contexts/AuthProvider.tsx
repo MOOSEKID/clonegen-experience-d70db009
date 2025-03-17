@@ -67,8 +67,9 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
             // Fix here: Make sure we properly access user properties with type safety
             adminExists = userList.users.some(user => {
               // Check if user exists and has an email property before accessing it
-              return user && typeof user === 'object' && 'email' in user && 
-                     user.email === 'admin@uptowngym.rw';
+              return user && typeof user === 'object' && 
+                    'email' in user && user.email !== null && 
+                    user.email === 'admin@uptowngym.rw';
             });
           }
           

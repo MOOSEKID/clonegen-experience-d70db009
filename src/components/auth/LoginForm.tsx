@@ -10,9 +10,11 @@ interface LoginFormProps {
   onLogin: (email: string, password: string) => Promise<void>;
   isLoading: boolean;
   fallbackMode?: boolean;
+  onAdminLogin?: () => void;
+  onUserLogin?: () => void;
 }
 
-const LoginForm = ({ onLogin, isLoading, fallbackMode }: LoginFormProps) => {
+const LoginForm = ({ onLogin, isLoading, fallbackMode, onAdminLogin, onUserLogin }: LoginFormProps) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -128,6 +130,34 @@ const LoginForm = ({ onLogin, isLoading, fallbackMode }: LoginFormProps) => {
       >
         {isLoading ? 'Signing in...' : 'Log in'}
       </Button>
+      
+      {/* Quick login buttons for testing */}
+      {(onAdminLogin || onUserLogin) && (
+        <div className="grid grid-cols-2 gap-2 mt-4">
+          {onAdminLogin && (
+            <Button 
+              type="button" 
+              variant="outline"
+              onClick={onAdminLogin}
+              disabled={isLoading}
+              className="text-sm"
+            >
+              Admin Login
+            </Button>
+          )}
+          {onUserLogin && (
+            <Button 
+              type="button"
+              variant="outline" 
+              onClick={onUserLogin}
+              disabled={isLoading}
+              className="text-sm"
+            >
+              User Login
+            </Button>
+          )}
+        </div>
+      )}
       
       {fallbackMode && (
         <p className="text-xs text-amber-400 text-center mt-2">

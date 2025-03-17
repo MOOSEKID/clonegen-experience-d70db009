@@ -1,32 +1,61 @@
 
-import useSupabaseConnectionCheck from '@/hooks/auth/useSupabaseConnectionCheck';
-import useAuthLoginLogic from '@/hooks/auth/useAuthLoginLogic';
+import { useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { toast } from 'sonner';
+import { useAuth } from '@/hooks/useAuth';
 import LoginActions from '@/components/auth/LoginActions';
 
 const Login = () => {
-  // Check Supabase connection and set fallback mode if needed
-  const { fallbackMode } = useSupabaseConnectionCheck();
+  const { login, isAuthenticated, isAdmin, isLoading } = useAuth();
+  const navigate = useNavigate();
   
-  // Get authentication logic
-  const {
-    loginError,
-    isLoading,
-    handleLoginSubmit,
-    handleAdminLogin,
-    handleUserLogin,
-    handleResetAuth
-  } = useAuthLoginLogic({ fallbackMode });
+  useEffect(() => {
+    // Check if user is already authenticated and redirect accordingly
+    if (isAuthenticated && !isLoading) {
+      const redirectPath = isAdmin ? '/admin' : '/dashboard';
+      navigate(redirectPath, { replace: true });
+    }
+  }, [isAuthenticated, isAdmin, isLoading, navigate]);
+
+  const handleLogin = async (email: string, password: string) => {
+    try {
+      const success = await login(email, password);
+      
+      if (success) {
+        // Redirect will be handled by the useEffect
+        toast.success('Login successful!');
+      }
+    } catch (error) {
+      console.error('Login error:', error);
+      toast.error('Login failed. Please check your credentials.');
+    }
+  };
+
+  const handleAdminLogin = async () => {
+    await handleLogin('admin@uptowngym.rw', 'Admin123!');
+  };
+
+  const handleUserLogin = async () => {
+    await handleLogin('user@example.com', 'user123');
+  };
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center p-6 bg-gym-dark pt-20">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-gym-orange"></div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen flex items-center justify-center p-6 bg-gym-dark pt-20">
       <LoginActions 
-        loginError={loginError}
+        loginError={null}
         isLoading={isLoading}
-        fallbackMode={fallbackMode}
-        onLogin={handleLoginSubmit}
+        fallbackMode={false}
+        onLogin={handleLogin}
         onAdminLogin={handleAdminLogin}
         onUserLogin={handleUserLogin}
-        onResetAuth={handleResetAuth}
       />
     </div>
   );
