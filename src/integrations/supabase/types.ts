@@ -9,7 +9,311 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      [_ in never]: never
+      class_enrollments: {
+        Row: {
+          attendance_date: string | null
+          attended: boolean | null
+          class_id: string | null
+          enrolled_at: string | null
+          id: string
+          member_id: string | null
+          status: string | null
+        }
+        Insert: {
+          attendance_date?: string | null
+          attended?: boolean | null
+          class_id?: string | null
+          enrolled_at?: string | null
+          id?: string
+          member_id?: string | null
+          status?: string | null
+        }
+        Update: {
+          attendance_date?: string | null
+          attended?: boolean | null
+          class_id?: string | null
+          enrolled_at?: string | null
+          id?: string
+          member_id?: string | null
+          status?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "class_enrollments_class_id_fkey"
+            columns: ["class_id"]
+            isOneToOne: false
+            referencedRelation: "classes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "class_enrollments_member_id_fkey"
+            columns: ["member_id"]
+            isOneToOne: false
+            referencedRelation: "members"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      classes: {
+        Row: {
+          capacity: number | null
+          class_type: string | null
+          created_at: string | null
+          day_of_week: string | null
+          description: string | null
+          difficulty_level: string | null
+          duration: number | null
+          end_time: string | null
+          equipment_required: string[] | null
+          id: string
+          location: string | null
+          name: string
+          recurring: boolean | null
+          start_time: string | null
+          status: string | null
+          trainer_id: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          capacity?: number | null
+          class_type?: string | null
+          created_at?: string | null
+          day_of_week?: string | null
+          description?: string | null
+          difficulty_level?: string | null
+          duration?: number | null
+          end_time?: string | null
+          equipment_required?: string[] | null
+          id?: string
+          location?: string | null
+          name: string
+          recurring?: boolean | null
+          start_time?: string | null
+          status?: string | null
+          trainer_id?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          capacity?: number | null
+          class_type?: string | null
+          created_at?: string | null
+          day_of_week?: string | null
+          description?: string | null
+          difficulty_level?: string | null
+          duration?: number | null
+          end_time?: string | null
+          equipment_required?: string[] | null
+          id?: string
+          location?: string | null
+          name?: string
+          recurring?: boolean | null
+          start_time?: string | null
+          status?: string | null
+          trainer_id?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "classes_trainer_id_fkey"
+            columns: ["trainer_id"]
+            isOneToOne: false
+            referencedRelation: "trainers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      members: {
+        Row: {
+          accountenabled: boolean | null
+          address: string | null
+          created_at: string | null
+          dateofbirth: string | null
+          discountsused: string | null
+          email: string | null
+          emergencycontact: string | null
+          enddate: string | null
+          fingerprintid: string | null
+          gender: string | null
+          id: string
+          lastcheckin: string | null
+          lastlogin: string | null
+          linkedcompanyid: string | null
+          linkedtocompany: boolean | null
+          medicalconditions: string | null
+          membershipcategory: string | null
+          membershipplan: string | null
+          membershiptype: string | null
+          name: string
+          nfccardid: string | null
+          notes: string | null
+          passwordresetrequired: boolean | null
+          paymentstatus: string | null
+          phone: string | null
+          preferredworkouttime: string[] | null
+          profilepicture: string | null
+          startdate: string | null
+          status: string | null
+          trainerassigned: string | null
+          updated_at: string | null
+          username: string | null
+          workoutgoals: string | null
+        }
+        Insert: {
+          accountenabled?: boolean | null
+          address?: string | null
+          created_at?: string | null
+          dateofbirth?: string | null
+          discountsused?: string | null
+          email?: string | null
+          emergencycontact?: string | null
+          enddate?: string | null
+          fingerprintid?: string | null
+          gender?: string | null
+          id?: string
+          lastcheckin?: string | null
+          lastlogin?: string | null
+          linkedcompanyid?: string | null
+          linkedtocompany?: boolean | null
+          medicalconditions?: string | null
+          membershipcategory?: string | null
+          membershipplan?: string | null
+          membershiptype?: string | null
+          name: string
+          nfccardid?: string | null
+          notes?: string | null
+          passwordresetrequired?: boolean | null
+          paymentstatus?: string | null
+          phone?: string | null
+          preferredworkouttime?: string[] | null
+          profilepicture?: string | null
+          startdate?: string | null
+          status?: string | null
+          trainerassigned?: string | null
+          updated_at?: string | null
+          username?: string | null
+          workoutgoals?: string | null
+        }
+        Update: {
+          accountenabled?: boolean | null
+          address?: string | null
+          created_at?: string | null
+          dateofbirth?: string | null
+          discountsused?: string | null
+          email?: string | null
+          emergencycontact?: string | null
+          enddate?: string | null
+          fingerprintid?: string | null
+          gender?: string | null
+          id?: string
+          lastcheckin?: string | null
+          lastlogin?: string | null
+          linkedcompanyid?: string | null
+          linkedtocompany?: boolean | null
+          medicalconditions?: string | null
+          membershipcategory?: string | null
+          membershipplan?: string | null
+          membershiptype?: string | null
+          name?: string
+          nfccardid?: string | null
+          notes?: string | null
+          passwordresetrequired?: boolean | null
+          paymentstatus?: string | null
+          phone?: string | null
+          preferredworkouttime?: string[] | null
+          profilepicture?: string | null
+          startdate?: string | null
+          status?: string | null
+          trainerassigned?: string | null
+          updated_at?: string | null
+          username?: string | null
+          workoutgoals?: string | null
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          avatar_url: string | null
+          created_at: string | null
+          email: string | null
+          full_name: string | null
+          id: string
+          is_admin: boolean | null
+          role: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          avatar_url?: string | null
+          created_at?: string | null
+          email?: string | null
+          full_name?: string | null
+          id: string
+          is_admin?: boolean | null
+          role?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          avatar_url?: string | null
+          created_at?: string | null
+          email?: string | null
+          full_name?: string | null
+          id?: string
+          is_admin?: boolean | null
+          role?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      trainers: {
+        Row: {
+          availability: Json | null
+          bio: string | null
+          certifications: string[] | null
+          created_at: string | null
+          email: string | null
+          hiredate: string | null
+          hourlyrate: number | null
+          id: string
+          name: string
+          phone: string | null
+          profilepicture: string | null
+          specialization: string[] | null
+          status: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          availability?: Json | null
+          bio?: string | null
+          certifications?: string[] | null
+          created_at?: string | null
+          email?: string | null
+          hiredate?: string | null
+          hourlyrate?: number | null
+          id?: string
+          name: string
+          phone?: string | null
+          profilepicture?: string | null
+          specialization?: string[] | null
+          status?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          availability?: Json | null
+          bio?: string | null
+          certifications?: string[] | null
+          created_at?: string | null
+          email?: string | null
+          hiredate?: string | null
+          hourlyrate?: number | null
+          id?: string
+          name?: string
+          phone?: string | null
+          profilepicture?: string | null
+          specialization?: string[] | null
+          status?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never

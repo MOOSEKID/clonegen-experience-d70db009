@@ -1,33 +1,30 @@
 
-import React from 'react';
-import { Checkbox } from '@/components/ui/checkbox';
-import { Link } from 'react-router-dom';
-
 interface TermsAgreementProps {
   accepted: boolean;
-  onChange: (checked: boolean) => void;
+  onChange: (accepted: boolean) => void;
   disabled?: boolean;
 }
 
-const TermsAgreement: React.FC<TermsAgreementProps> = ({ accepted, onChange, disabled = false }) => {
+const TermsAgreement = ({ accepted, onChange, disabled }: TermsAgreementProps) => {
   return (
-    <div className="flex items-start space-x-2 mt-4">
-      <Checkbox 
+    <div className="flex items-center">
+      <input
         id="terms"
+        type="checkbox"
+        className="h-4 w-4 rounded border-white/20 bg-gym-dark text-gym-orange focus:ring-gym-orange"
         checked={accepted}
-        onCheckedChange={onChange}
-        className="mt-1"
+        onChange={(e) => onChange(e.target.checked)}
         disabled={disabled}
       />
-      <label htmlFor="terms" className="text-sm text-gray-600">
-        I agree to the{' '}
-        <Link to="/terms" className="text-gym-orange hover:underline">
+      <label htmlFor="terms" className="ml-2 block text-sm text-white/70">
+        I agree to the{" "}
+        <a href="/terms" className="text-gym-orange hover:underline">
           Terms of Service
-        </Link>{' '}
-        and{' '}
-        <Link to="/privacy" className="text-gym-orange hover:underline">
+        </a>{" "}
+        and{" "}
+        <a href="/privacy" className="text-gym-orange hover:underline">
           Privacy Policy
-        </Link>
+        </a>
       </label>
     </div>
   );
