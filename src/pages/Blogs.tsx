@@ -1,5 +1,5 @@
+
 import { useEffect } from 'react';
-import { CalendarDays, User, ArrowRight } from 'lucide-react';
 import { Button } from '@/components/Button';
 
 const Blogs = () => {
@@ -8,98 +8,81 @@ const Blogs = () => {
     window.scrollTo(0, 0);
   }, []);
 
-  const blogs = [
+  const blogPosts = [
     {
-      title: 'The Benefits of High-Intensity Interval Training',
-      author: 'Alex Johnson',
-      date: 'June 15, 2023',
-      excerpt: 'Discover how HIIT can transform your fitness routine and maximize results in minimal time.',
-      image: 'https://images.unsplash.com/photo-1538805060514-97d9cc17730c?q=80&w=2574&auto=format&fit=crop'
+      id: 1,
+      title: 'The Ultimate Guide to HIIT Workouts',
+      excerpt: 'Learn how High-Intensity Interval Training can transform your fitness routine in just 20 minutes a day.',
+      author: 'Sarah Johnson',
+      date: 'May 15, 2023',
+      category: 'Fitness',
+      imageUrl: '/lovable-uploads/ec104137-606c-4a99-a2c7-ed0a38667c39.png'
     },
     {
+      id: 2,
       title: 'Nutrition Tips for Muscle Building',
-      author: 'Sarah Miller',
-      date: 'July 3, 2023',
-      excerpt: 'Learn about the essential nutrients and meal timing strategies to optimize muscle growth and recovery.',
-      image: 'https://images.unsplash.com/photo-1615641646288-cbafe8357ecb?q=80&w=2661&auto=format&fit=crop'
+      excerpt: 'Discover the best foods and meal timing strategies to maximize your muscle growth and recovery.',
+      author: 'Michael Chen',
+      date: 'April 28, 2023',
+      category: 'Nutrition',
+      imageUrl: '/lovable-uploads/01fa474e-e83a-48f4-9ffc-2047ca448aa7.png'
     },
     {
-      title: 'Mindfulness and Fitness: The Perfect Combination',
-      author: 'Maya Patel',
-      date: 'July 28, 2023',
-      excerpt: 'Explore how incorporating mindfulness into your workouts can enhance performance and overall wellbeing.',
-      image: 'https://images.unsplash.com/photo-1593164842264-990881bd9237?q=80&w=2787&auto=format&fit=crop'
+      id: 3,
+      title: 'Yoga for Stress Relief: 5 Key Poses',
+      excerpt: 'Incorporate these simple yoga poses into your daily routine to reduce stress and improve mental clarity.',
+      author: 'Aisha Patel',
+      date: 'April 10, 2023',
+      category: 'Wellness',
+      imageUrl: '/lovable-uploads/7dcb1541-09e5-4dc0-afbf-e868d229ff1c.png'
     },
     {
-      title: "Beginner's Guide to Strength Training",
-      author: 'David Park',
-      date: 'August 12, 2023',
-      excerpt: 'Everything you need to know to start a safe and effective strength training program from scratch.',
-      image: 'https://images.unsplash.com/photo-1517836357463-d25dfeac3438?q=80&w=2670&auto=format&fit=crop'
-    },
-    {
-      title: 'Recovery Strategies for Athletes',
-      author: 'James Wilson',
-      date: 'September 5, 2023',
-      excerpt: 'Advanced recovery techniques to help you bounce back faster and prevent injuries.',
-      image: 'https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?q=80&w=2070&auto=format&fit=crop'
-    },
-    {
-      title: 'Swimming Benefits for All Ages',
-      author: 'Michael Torres',
-      date: 'September 20, 2023',
-      excerpt: 'Why swimming is one of the best full-body workouts for people of all fitness levels and ages.',
-      image: 'https://images.unsplash.com/photo-1600965962102-9d260a71890d?q=80&w=2070&auto=format&fit=crop'
+      id: 4,
+      title: 'The Science Behind Effective Warm-ups',
+      excerpt: 'Learn why proper warm-ups are crucial for performance and how to design the perfect pre-workout routine.',
+      author: 'Thomas Rodriguez',
+      date: 'March 22, 2023',
+      category: 'Training',
+      imageUrl: '/lovable-uploads/50d3d473-1f3f-40d6-b895-c64a2e29ca1d.png'
     }
   ];
 
   return (
     <main className="pt-24 min-h-screen bg-gray-50">
       <div className="container-custom py-16">
-        <h1 className="text-4xl font-bold mb-8 text-gym-dark">Fitness Blog</h1>
+        <h1 className="text-4xl font-bold mb-2 text-gym-dark">Fitness Blog</h1>
+        <p className="text-lg text-gray-600 mb-12">Expert advice, tips, and insights for your fitness journey</p>
         
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {blogs.map((blog, index) => (
-            <div 
-              key={index}
-              className="bg-white rounded-lg shadow-md overflow-hidden transition-all duration-300 hover:shadow-xl"
-            >
-              <div className="h-48 overflow-hidden">
-                <img 
-                  src={blog.image} 
-                  alt={blog.title} 
-                  className="w-full h-full object-cover transition-transform duration-500 hover:scale-110"
-                />
-              </div>
+          {blogPosts.map((post) => (
+            <div key={post.id} className="bg-white rounded-lg overflow-hidden shadow-md hover:shadow-lg transition-shadow">
+              <img 
+                src={post.imageUrl} 
+                alt={post.title} 
+                className="w-full h-48 object-cover"
+              />
               <div className="p-6">
-                <div className="flex items-center text-sm text-gray-500 mb-3">
-                  <div className="flex items-center mr-4">
-                    <User size={14} className="mr-1" />
-                    <span>{blog.author}</span>
-                  </div>
-                  <div className="flex items-center">
-                    <CalendarDays size={14} className="mr-1" />
-                    <span>{blog.date}</span>
-                  </div>
+                <div className="flex items-center mb-2">
+                  <span className="text-xs font-semibold text-white bg-gym-orange px-2 py-1 rounded-full">{post.category}</span>
+                  <span className="text-xs text-gray-500 ml-2">{post.date}</span>
                 </div>
-                <h3 className="text-xl font-bold mb-2 text-gym-dark hover:text-gym-orange transition-colors duration-300">
-                  <a href="#">{blog.title}</a>
-                </h3>
-                <p className="text-gray-700 mb-4">{blog.excerpt}</p>
-                <a 
-                  href="#" 
-                  className="inline-flex items-center text-gym-orange font-medium hover:underline group"
-                >
-                  Read More 
-                  <ArrowRight size={16} className="ml-1 group-hover:translate-x-1 transition-transform duration-300" />
-                </a>
+                <h3 className="text-xl font-bold mb-2 text-gym-dark">{post.title}</h3>
+                <p className="text-gray-600 mb-4">{post.excerpt}</p>
+                <div className="flex items-center justify-between">
+                  <span className="text-sm text-gray-500">By {post.author}</span>
+                  <Button variant="link" className="text-gym-orange">
+                    Read More
+                  </Button>
+                </div>
               </div>
             </div>
           ))}
         </div>
         
         <div className="flex justify-center mt-12">
-          <Button>Load More Articles</Button>
+          <Button>
+            View All Articles
+          </Button>
         </div>
       </div>
     </main>

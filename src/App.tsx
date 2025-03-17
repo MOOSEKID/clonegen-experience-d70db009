@@ -21,6 +21,18 @@ import AdminDashboard from '@/pages/admin/AdminDashboard';
 import PrivateRoute from '@/components/auth/PrivateRoute';
 import Index from '@/pages/Index';
 import NotFound from '@/components/NotFound';
+import Membership from '@/pages/Membership';
+import Classes from '@/pages/Classes';
+import Blogs from '@/pages/Blogs';
+import Shop from '@/pages/Shop';
+import Services from '@/pages/Services';
+import FitnessFacilities from '@/pages/FitnessFacilities';
+import YouthPrograms from '@/pages/YouthPrograms';
+import SpaWellness from '@/pages/SpaWellness';
+import AboutUs from '@/pages/AboutUs';
+import ContactUs from '@/pages/ContactUs';
+import Timetable from '@/pages/Timetable';
+import OpeningTimes from '@/pages/OpeningTimes';
 
 // Custom error fallback component to show when there's an error
 const ErrorFallback = () => {
@@ -58,6 +70,24 @@ function App() {
                   <Route path="/register" element={<Register />} />
                   <Route path="/forgot-password" element={<ForgotPassword />} />
                   <Route path="/reset-password" element={<ResetPassword />} />
+                  
+                  {/* Main navigation routes */}
+                  <Route path="/membership" element={<Membership />} />
+                  <Route path="/classes" element={<Classes />} />
+                  <Route path="/blogs" element={<Blogs />} />
+                  <Route path="/shop" element={<Shop />} />
+                  
+                  {/* Services dropdown routes */}
+                  <Route path="/services" element={<Services />} />
+                  <Route path="/facilities" element={<FitnessFacilities />} />
+                  <Route path="/youth-programs" element={<YouthPrograms />} />
+                  <Route path="/spa-wellness" element={<SpaWellness />} />
+                  
+                  {/* Company dropdown routes */}
+                  <Route path="/about-us" element={<AboutUs />} />
+                  <Route path="/contact-us" element={<ContactUs />} />
+                  <Route path="/timetable" element={<Timetable />} />
+                  <Route path="/opening-times" element={<OpeningTimes />} />
                   
                   {/* Protected routes */}
                   <Route path="/dashboard/*" element={
