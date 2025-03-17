@@ -1,75 +1,159 @@
 
-import { Link } from 'react-router-dom';
-import { Button } from '@/components/ui/button';
-import { AuthUser } from '@/contexts/auth/types';
+import { Link, useLocation } from 'react-router-dom';
+import { cn } from '@/lib/utils';
+import HeaderDropdown from './HeaderDropdown';
+import { Button } from '../Button';
+import { LucideIcon } from 'lucide-react';
 
-export interface DesktopNavProps {
-  user: AuthUser | null;
-  onLogout: () => Promise<void>;
+interface NavItem {
+  label: string;
+  path: string;
+  icon?: LucideIcon;
+  action?: () => void;
+  isExternalLink?: boolean;
 }
 
-const DesktopNav = ({ user, onLogout }: DesktopNavProps) => {
-  const isLoggedIn = !!user;
+interface DesktopNavProps {
+  navItems: NavItem[];
+  serviceItems: { label: string; path: string }[];
+  companyItems: { label: string; path: string }[];
+  dashboardItem: NavItem;
+  authItems: NavItem[];
+  isServicesDropdownOpen: boolean;
+  setIsServicesDropdownOpen: React.Dispatch<React.SetStateAction<boolean>>;
+  isCompanyDropdownOpen: boolean;
+  setIsCompanyDropdownOpen: React.Dispatch<React.SetStateAction<boolean>>;
+  isLoggedIn?: boolean;
+}
+
+const DesktopNav = ({ 
+  navItems, 
+  serviceItems, 
+  companyItems,
+  dashboardItem,
+  authItems,
+  isServicesDropdownOpen,
+  setIsServicesDropdownOpen,
+  isCompanyDropdownOpen,
+  setIsCompanyDropdownOpen,
+  isLoggedIn = false
+}: DesktopNavProps) => {
+  const location = useLocation();
+
+  const isActive = (path: string) => {
+    return location.pathname === path || location.pathname.startsWith(path + '/');
+  };
+
+  const isServiceActive = () => {
+    return serviceItems.some(item => isActive(item.path));
+  };
+
+  const isCompanyActive = () => {
+    return companyItems.some(item => isActive(item.path));
+  };
 
   return (
-    <nav className="hidden lg:flex items-center space-x-8">
-      <div className="space-x-6">
-        <Link
-          to="/"
-          className="text-gray-700 hover:text-gray-900 transition-colors"
-        >
-          Home
-        </Link>
-        <Link
-          to="/classes"
-          className="text-gray-700 hover:text-gray-900 transition-colors"
-        >
-          Classes
-        </Link>
-        <Link
-          to="/trainers"
-          className="text-gray-700 hover:text-gray-900 transition-colors"
-        >
-          Trainers
-        </Link>
-        <Link
-          to="/about"
-          className="text-gray-700 hover:text-gray-900 transition-colors"
-        >
-          About
-        </Link>
-        <Link
-          to="/contact"
-          className="text-gray-700 hover:text-gray-900 transition-colors"
-        >
-          Contact
-        </Link>
-      </div>
+    <>
+      <nav className="hidden md:flex items-center space-x-8">
+        {navItems.map((item) => (
+          item.action ? (
+            <button
+              key={item.path}
+              onClick={item.action}
+              className={cn(
+                'nav-link text-white/90 hover:text-white flex items-center gap-1',
+                isActive(item.path) ? 'active' : ''
+              )}
+            >
+              {item.icon && <item.icon size={18} />}
+              {item.label}
+            </button>
+          ) : (
+            <Link
+              key={item.path}
+              to={item.path}
+              className={cn(
+                'nav-link text-white/90 hover:text-white flex items-center gap-1',
+                isActive(item.path) ? 'active' : ''
+              )}
+            >
+              {item.icon && <item.icon size={18} />}
+              {item.label}
+            </Link>
+          )
+        ))}
 
-      <div className="flex items-center space-x-4">
-        {user ? (
-          <>
-            <Link to={user.is_admin ? '/admin' : '/dashboard'}>
-              <Button variant="outline">
-                {user.is_admin ? 'Admin Dashboard' : 'Dashboard'}
-              </Button>
-            </Link>
-            <Button variant="ghost" onClick={onLogout}>
-              Logout
-            </Button>
-          </>
+        <HeaderDropdown
+          title="Services"
+          items={serviceItems}
+          isActive={isServiceActive()}
+          isOpenState={[isServicesDropdownOpen, setIsServicesDropdownOpen]}
+          className="services-dropdown"
+        />
+
+        <HeaderDropdown
+          title="Company"
+          items={companyItems}
+          isActive={isCompanyActive()}
+          isOpenState={[isCompanyDropdownOpen, setIsCompanyDropdownOpen]}
+          className="company-dropdown"
+        />
+
+        {/* Dashboard button/link - now positioned between Company dropdown and auth items */}
+        {dashboardItem.action ? (
+          <button
+            onClick={dashboardItem.action}
+            className={cn(
+              'nav-link text-white/90 hover:text-white flex items-center gap-1',
+              isActive(dashboardItem.path) ? 'active' : ''
+            )}
+          >
+            {dashboardItem.icon && <dashboardItem.icon size={18} />}
+            {dashboardItem.label}
+          </button>
         ) : (
-          <>
-            <Link to="/login">
-              <Button variant="outline">Login</Button>
-            </Link>
-            <Link to="/signup">
-              <Button>Sign Up</Button>
-            </Link>
-          </>
+          <Link
+            to={dashboardItem.path}
+            className={cn(
+              'nav-link text-white/90 hover:text-white flex items-center gap-1',
+              isActive(dashboardItem.path) ? 'active' : ''
+            )}
+          >
+            {dashboardItem.icon && <dashboardItem.icon size={18} />}
+            {dashboardItem.label}
+          </Link>
         )}
+      </nav>
+
+      <div className="hidden md:flex items-center space-x-4">
+        {authItems.map((item) => (
+          item.action ? (
+            <Button 
+              key={item.path}
+              variant="outline" 
+              size="sm" 
+              onClick={item.action}
+              className="flex items-center gap-1"
+            >
+              {item.icon && <item.icon size={16} />}
+              {item.label}
+            </Button>
+          ) : (
+            <Button 
+              key={item.path}
+              isLink 
+              href={item.path} 
+              variant="outline" 
+              size="sm"
+              className="flex items-center gap-1"
+            >
+              {item.icon && <item.icon size={16} />}
+              {item.label}
+            </Button>
+          )
+        ))}
       </div>
-    </nav>
+    </>
   );
 };
 

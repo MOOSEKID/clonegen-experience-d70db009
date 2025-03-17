@@ -1,55 +1,59 @@
 
-import { useAuth } from '@/hooks/useAuth';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { useState, useEffect } from 'react';
+import { Card } from '@/components/ui/card';
+import WorkoutOverview from '@/components/dashboard/WorkoutOverview';
+import FitnessGoals from '@/components/dashboard/FitnessGoals';
+import WorkoutStats from '@/components/dashboard/WorkoutStats';
+import CalendarView from '@/components/dashboard/CalendarView';
+import UpcomingEvents from '@/components/dashboard/UpcomingEvents';
 
 const Dashboard = () => {
-  const { user, profile } = useAuth();
+  const [greeting, setGreeting] = useState('');
+  const [userName, setUserName] = useState('');
+
+  useEffect(() => {
+    // Set greeting based on time of day
+    const hour = new Date().getHours();
+    if (hour < 12) setGreeting('Good Morning!');
+    else if (hour < 18) setGreeting('Good Afternoon!');
+    else setGreeting('Good Evening!');
+
+    // Get user name from localStorage
+    const name = localStorage.getItem('userName') || 'Member';
+    setUserName(name);
+  }, []);
 
   return (
-    <div className="container mx-auto p-6">
-      <h1 className="text-3xl font-bold mb-6">Welcome, {profile?.full_name || user?.full_name || 'Member'}</h1>
-      
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-lg">Upcoming Classes</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p>You have no upcoming classes scheduled</p>
-          </CardContent>
-        </Card>
-        
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-lg">Recent Workouts</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p>No recent workouts recorded</p>
-          </CardContent>
-        </Card>
-        
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-lg">Membership</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p>Your membership is active</p>
-          </CardContent>
-        </Card>
+    <div className="space-y-6">
+      <div className="flex flex-col md:flex-row md:justify-between md:items-center">
+        <div>
+          <h2 className="text-xl text-white/80">{greeting}</h2>
+          <h1 className="text-3xl font-bold text-white flex items-center gap-2">
+            Welcome Back, <span className="bg-gym-orange/20 text-gym-orange px-3 py-1 rounded-full">{userName}</span>
+          </h1>
+        </div>
       </div>
-      
-      <div className="bg-white rounded-lg shadow p-6">
-        <h2 className="text-xl font-semibold mb-4">Quick Actions</h2>
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-          <button className="p-4 bg-primary/10 text-primary rounded-lg text-left hover:bg-primary/20 transition-colors">
-            Book a Class
-          </button>
-          <button className="p-4 bg-primary/10 text-primary rounded-lg text-left hover:bg-primary/20 transition-colors">
-            Log a Workout
-          </button>
-          <button className="p-4 bg-primary/10 text-primary rounded-lg text-left hover:bg-primary/20 transition-colors">
-            View Progress
-          </button>
+
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="lg:col-span-2 space-y-6">
+          {/* Workout Banner */}
+          <WorkoutOverview />
+          
+          {/* Today's Workout and Stats Section */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <WorkoutStats />
+          </div>
+          
+          {/* Fitness Goals */}
+          <FitnessGoals />
+        </div>
+        
+        <div className="space-y-6">
+          {/* Schedule/Calendar */}
+          <CalendarView />
+          
+          {/* Upcoming Events */}
+          <UpcomingEvents />
         </div>
       </div>
     </div>

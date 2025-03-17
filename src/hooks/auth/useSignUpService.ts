@@ -1,6 +1,6 @@
 
 import { toast } from 'sonner';
-import { supabase } from '@/lib/supabase';
+import { supabase } from '@/integrations/supabase/client';
 
 /**
  * Hook that provides signup functionality
@@ -31,17 +31,15 @@ export const useSignUpService = () => {
         // Create a profile entry for the new user
         const { error: profileError } = await supabase
           .from('profiles')
-          .insert({
-            id: data.user.id,
-            email: data.user.email,
-            full_name: fullName,
-            role: 'member',
-            is_admin: false,
-            access_level: 'limited',
-            status: 'active',
-            created_at: new Date().toISOString(),
-            updated_at: new Date().toISOString()
-          });
+          .insert([
+            { 
+              id: data.user.id,
+              email: data.user.email,
+              full_name: fullName,
+              role: 'member',
+              is_admin: false
+            }
+          ]);
           
         if (profileError) {
           console.error('Error creating user profile:', profileError);

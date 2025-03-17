@@ -1,52 +1,58 @@
 
-import { supabase } from '@/lib/supabase';
 import { toast } from 'sonner';
+import { supabase } from '@/integrations/supabase/client';
 
+/**
+ * Hook that provides password management functionality
+ */
 export const usePasswordService = () => {
-  const resetPassword = async (email: string): Promise<boolean> => {
+  /**
+   * Request a password reset for the given email
+   */
+  const requestPasswordReset = async (email: string): Promise<boolean> => {
     try {
       const { error } = await supabase.auth.resetPasswordForEmail(email, {
         redirectTo: `${window.location.origin}/reset-password`,
       });
       
       if (error) {
-        console.error('Error resetting password:', error.message);
-        toast.error('Failed to send password reset email');
+        console.error('Password reset request error:', error);
+        toast.error(error.message);
         return false;
       }
       
-      toast.success('Password reset email sent');
+      toast.success('Password reset link has been sent to your email');
       return true;
     } catch (error) {
-      console.error('Unexpected error in resetPassword:', error);
-      toast.error('An unexpected error occurred');
+      console.error('Error in requestPasswordReset:', error);
+      toast.error(error instanceof Error ? error.message : 'Failed to send password reset link');
       return false;
     }
   };
-
-  const updatePassword = async (password: string): Promise<boolean> => {
+  
+  /**
+   * Updates the password for the currently logged in user
+   */
+  const updatePassword = async (newPassword: string): Promise<boolean> => {
     try {
       const { error } = await supabase.auth.updateUser({
-        password,
+        password: newPassword
       });
       
       if (error) {
-        console.error('Error updating password:', error.message);
-        toast.error('Failed to update password');
+        console.error('Update password error:', error);
+        toast.error(error.message);
         return false;
       }
       
       toast.success('Password updated successfully');
       return true;
     } catch (error) {
-      console.error('Unexpected error in updatePassword:', error);
-      toast.error('An unexpected error occurred');
+      console.error('Error in updatePassword:', error);
+      toast.error(error instanceof Error ? error.message : 'Failed to update password');
       return false;
     }
   };
 
-  return {
-    resetPassword,
-    updatePassword
-  };
+  return { requestPasswordReset, updatePassword };
 };
