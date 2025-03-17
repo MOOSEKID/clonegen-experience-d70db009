@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { useNavigate, Link, Outlet } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
@@ -140,11 +141,11 @@ const AdminDashboard = () => {
             <Separator className="my-4" />
             <div className="flex items-center">
               <Avatar className="h-10 w-10">
-                <AvatarImage src={user?.avatar_url || undefined} />
+                <AvatarImage src={user?.user_metadata?.avatar_url || undefined} />
                 <AvatarFallback>{user?.email?.charAt(0).toUpperCase() || 'A'}</AvatarFallback>
               </Avatar>
               <div className="ml-3">
-                <p className="text-sm font-medium">{user?.full_name || user?.email}</p>
+                <p className="text-sm font-medium">{user?.user_metadata?.full_name || user?.email}</p>
                 <p className="text-xs text-gray-400">Admin</p>
               </div>
             </div>
@@ -219,4 +220,3 @@ const AdminDashboard = () => {
 };
 
 export default AdminDashboard;
-

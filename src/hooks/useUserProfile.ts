@@ -59,7 +59,10 @@ export const useUserProfile = () => {
                 full_name: user.user_metadata.full_name || user.email,
                 username: null,
                 role: 'member',
-                is_admin: false
+                is_admin: false,
+                contact_number: null,
+                preferred_workout_time: null,
+                gym_location: null
               }])
               .select('*')
               .single();
@@ -72,10 +75,7 @@ export const useUserProfile = () => {
             // Convert to UserProfile format
             setUserProfile({
               ...newProfile,
-              email: user.email,
-              contact_number: null,
-              preferred_workout_time: null,
-              gym_location: null
+              email: user.email
             } as UserProfile);
           } else {
             throw new Error('Failed to fetch user profile');
@@ -126,7 +126,10 @@ export const useUserProfile = () => {
                   full_name: session.user.user_metadata.full_name || session.user.email,
                   username: null,
                   role: 'member',
-                  is_admin: false
+                  is_admin: false,
+                  contact_number: null,
+                  preferred_workout_time: null,
+                  gym_location: null
                 }])
                 .select('*')
                 .single();
@@ -135,14 +138,11 @@ export const useUserProfile = () => {
                 // Convert to UserProfile format
                 setUserProfile({
                   ...newProfile,
-                  email: session.user.email,
-                  contact_number: null,
-                  preferred_workout_time: null,
-                  gym_location: null
+                  email: session.user.email
                 } as UserProfile);
               }
             } else if (!error) {
-              // Convert to UserProfile format
+              // Convert to UserProfile format with default values for missing fields
               setUserProfile({
                 ...profile,
                 email: session.user.email,
