@@ -18,7 +18,7 @@ export type UserRole =
   | 'maintenance_supervisor'
   | 'maintenance_staff'
   | 'client'
-  | 'member'; // Added 'member' to support existing code
+  | 'member'; // Required for compatibility with existing code
 
 export type TrainerSpecialization = 
   | 'Strength Training'
@@ -76,10 +76,10 @@ export interface AuthUser {
   created_at: string;
   updated_at: string;
   last_login?: string;
-  user_metadata?: any; // Added for backward compatibility
-  avatar_url?: string; // Added for profile pictures
-  bio?: string; // Added for user bio
-  app_metadata?: any; // Added for Supabase compatibility
+  user_metadata?: any; // For compatbility with Supabase auth
+  avatar_url?: string; // For profile pictures
+  bio?: string; // For user bio
+  app_metadata?: any; // For compatibility with Supabase auth
 }
 
 export interface AuthContextType {

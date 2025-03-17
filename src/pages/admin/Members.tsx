@@ -49,8 +49,8 @@ const AdminMembers = () => {
       handleSearchChange={handleSearchChange}
       handleStatusChange={handleStatusChange}
       handleDelete={handleDelete}
-      onStatusFilterChange={handleFilterChange}
-      onMembershipFilterChange={handleFilterChange}
+      handleStatusFilterChange={handleFilterChange}
+      handleMembershipFilterChange={handleFilterChange}
       toggleMemberSelection={toggleMemberSelection}
       selectAllMembers={() => selectAllMembers(filteredMembers)}
       handlePageChange={paginate}

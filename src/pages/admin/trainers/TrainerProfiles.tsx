@@ -1,147 +1,130 @@
 
-import React, { useState } from 'react';
-import { useTrainerProfiles } from '@/hooks/trainers/useTrainerProfiles';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Plus } from 'lucide-react';
-import { Separator } from '@/components/ui/separator';
-
+import { toast } from 'sonner';
 import { TrainerProfilesGrid } from '@/components/admin/trainers/trainerprofiles/TrainerProfilesGrid';
-import TrainerDialogs from '@/components/admin/trainers/profiles/TrainerDialogs';
+import { useTrainerProfiles } from '@/hooks/trainers/useTrainerProfiles';
+import { TrainerProfile as ComponentTrainerProfile } from '@/components/admin/trainers/profiles/TrainerProfileType';
+import TrainerAddDialog from '@/components/admin/trainers/profiles/TrainerAddDialog';
+import PageHeading from '@/components/ui/page-heading';
 
 const TrainerProfiles = () => {
+  const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const [selectedTrainer, setSelectedTrainer] = useState<ComponentTrainerProfile | null>(null);
+  
   const {
     trainers,
     isLoading,
-    addTrainer,
+    error,
+    createTrainer,
     updateTrainer,
     deleteTrainer,
-    addCertification,
-    deleteCertification,
-    addAvailability,
-    deleteAvailability
+    fetchTrainers
   } = useTrainerProfiles();
 
-  const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
-  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
-  const [isCertDialogOpen, setIsCertDialogOpen] = useState(false);
-  const [isAvailDialogOpen, setIsAvailDialogOpen] = useState(false);
-  const [selectedTrainer, setSelectedTrainer] = useState<string | null>(null);
-  const [activeTab, setActiveTab] = useState('all');
+  useEffect(() => {
+    fetchTrainers();
+  }, [fetchTrainers]);
 
-  // Filter trainers based on active tab
-  const filteredTrainers = trainers.filter((trainer) => {
-    if (activeTab === 'all') return true;
-    return trainer.status?.toLowerCase() === activeTab;
-  });
-
-  // Get the selected trainer object
-  const getSelectedTrainer = () => {
-    return trainers.find((trainer) => trainer.id === selectedTrainer) || null;
+  const handleAddSubmit = async (trainerData: Omit<ComponentTrainerProfile, 'id'>) => {
+    try {
+      await createTrainer({
+        ...trainerData,
+        status: trainerData.status || 'active'
+      });
+      setIsAddDialogOpen(false);
+      toast.success('Trainer profile created successfully');
+    } catch (error) {
+      console.error('Error creating trainer profile:', error);
+      toast.error('Failed to create trainer profile');
+    }
   };
 
-  const handleAddTrainer = () => {
-    setIsAddDialogOpen(true);
+  const handleEditSubmit = async (trainerData: ComponentTrainerProfile) => {
+    try {
+      await updateTrainer(trainerData);
+      setIsEditDialogOpen(false);
+      setSelectedTrainer(null);
+      toast.success('Trainer profile updated successfully');
+    } catch (error) {
+      console.error('Error updating trainer profile:', error);
+      toast.error('Failed to update trainer profile');
+    }
   };
 
-  const handleEditTrainer = (trainerId: string) => {
-    setSelectedTrainer(trainerId);
+  const handleDeleteTrainer = async (trainerId: string) => {
+    try {
+      await deleteTrainer(trainerId);
+      toast.success('Trainer profile deleted successfully');
+    } catch (error) {
+      console.error('Error deleting trainer profile:', error);
+      toast.error('Failed to delete trainer profile');
+    }
+  };
+
+  const handleEditClick = (trainer: ComponentTrainerProfile) => {
+    setSelectedTrainer(trainer);
     setIsEditDialogOpen(true);
   };
 
-  const handleAddCertification = (trainerId: string) => {
-    setSelectedTrainer(trainerId);
-    setIsCertDialogOpen(true);
-  };
-
-  const handleAddAvailability = (trainerId: string) => {
-    setSelectedTrainer(trainerId);
-    setIsAvailDialogOpen(true);
-  };
-
-  const handleAddTrainerSubmit = async (data: any) => {
-    await addTrainer(data);
-    setIsAddDialogOpen(false);
-  };
-
-  const handleUpdateTrainerSubmit = async (id: string, data: any) => {
-    await updateTrainer(id, data);
-    setIsEditDialogOpen(false);
-  };
-
-  const handleDeleteTrainerSubmit = async (id: string) => {
-    await deleteTrainer(id);
-  };
-
-  const handleAddCertificationSubmit = async (data: any) => {
-    await addCertification(data);
-    setIsCertDialogOpen(false);
-  };
-
-  const handleDeleteCertificationSubmit = async (id: string) => {
-    await deleteCertification(id);
-  };
-
-  const handleAddAvailabilitySubmit = async (data: any) => {
-    await addAvailability(data);
-    setIsAvailDialogOpen(false);
-  };
-
-  const handleDeleteAvailabilitySubmit = async (id: string) => {
-    await deleteAvailability(id);
-  };
+  // Convert trainer data between formats if needed
+  const adaptedTrainers: ComponentTrainerProfile[] = trainers.map(trainer => ({
+    id: trainer.id,
+    name: trainer.name,
+    email: trainer.email,
+    specializations: trainer.specializations || [],
+    profile_picture: trainer.profile_picture || trainer.profilepicture,
+    status: (trainer.status?.toLowerCase() || 'active') as 'active' | 'inactive' | 'on leave',
+    bio: trainer.bio || '',
+    phone: trainer.phone || '',
+    certifications: trainer.certifications || []
+  }));
 
   return (
-    <div className="container mx-auto p-6">
-      <div className="flex justify-between items-center mb-6">
-        <div>
-          <h1 className="text-3xl font-bold text-gray-800">Trainer Profiles</h1>
-          <p className="text-gray-500">Manage your gym's trainers, specializations and availability</p>
-        </div>
-        <Button onClick={handleAddTrainer} className="bg-gym-orange hover:bg-opacity-90">
-          <Plus className="mr-1 h-4 w-4" />
-          Add Trainer
+    <div className="space-y-6">
+      <div className="flex justify-between items-center">
+        <PageHeading 
+          title="Trainer Profiles" 
+          description="Manage all trainer profiles and information"
+        />
+        <Button onClick={() => setIsAddDialogOpen(true)}>
+          <Plus className="mr-2 h-4 w-4" /> Add Trainer
         </Button>
       </div>
-      
-      <Tabs defaultValue="all" value={activeTab} onValueChange={setActiveTab}>
-        <TabsList className="grid grid-cols-4 mb-6">
-          <TabsTrigger value="all">All Trainers</TabsTrigger>
-          <TabsTrigger value="active">Active</TabsTrigger>
-          <TabsTrigger value="inactive">Inactive</TabsTrigger>
-          <TabsTrigger value="on leave">On Leave</TabsTrigger>
-        </TabsList>
-        
-        <TabsContent value={activeTab} className="space-y-4 mt-4">
-          <TrainerProfilesGrid
-            trainers={filteredTrainers}
-            isLoading={isLoading}
-            onEdit={handleEditTrainer}
-            onDelete={handleDeleteTrainerSubmit}
-            onAddCertification={handleAddCertification}
-            onDeleteCertification={handleDeleteCertificationSubmit}
-            onAddAvailability={handleAddAvailability}
-            onDeleteAvailability={handleDeleteAvailabilitySubmit}
-          />
-        </TabsContent>
-      </Tabs>
-      
-      <TrainerDialogs
-        isAddDialogOpen={isAddDialogOpen}
-        setIsAddDialogOpen={setIsAddDialogOpen}
-        isEditDialogOpen={isEditDialogOpen}
-        setIsEditDialogOpen={setIsEditDialogOpen}
-        isCertDialogOpen={isCertDialogOpen}
-        setIsCertDialogOpen={setIsCertDialogOpen}
-        isAvailDialogOpen={isAvailDialogOpen}
-        setIsAvailDialogOpen={setIsAvailDialogOpen}
-        selectedTrainer={selectedTrainer}
-        selectedTrainerData={getSelectedTrainer()}
-        onAddTrainerSubmit={handleAddTrainerSubmit}
-        onUpdateTrainerSubmit={handleUpdateTrainerSubmit}
-        onAddCertificationSubmit={handleAddCertificationSubmit}
-        onAddAvailabilitySubmit={handleAddAvailabilitySubmit}
+
+      {error && (
+        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
+          {error instanceof Error ? error.message : 'Error loading trainer profiles'}
+        </div>
+      )}
+
+      <TrainerProfilesGrid 
+        trainers={adaptedTrainers} 
+        onEdit={handleEditClick}
+        onDelete={handleDeleteTrainer}
+        isLoading={isLoading}
       />
+
+      <TrainerAddDialog
+        isOpen={isAddDialogOpen}
+        onClose={() => setIsAddDialogOpen(false)}
+        onSubmit={handleAddSubmit}
+      />
+
+      {selectedTrainer && (
+        <TrainerAddDialog
+          isOpen={isEditDialogOpen}
+          onClose={() => {
+            setIsEditDialogOpen(false);
+            setSelectedTrainer(null);
+          }}
+          onSubmit={handleEditSubmit}
+          initialData={selectedTrainer}
+          isEdit
+        />
+      )}
     </div>
   );
 };

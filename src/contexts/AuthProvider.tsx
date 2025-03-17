@@ -1,7 +1,3 @@
-
-// This fix only addresses the specific issue with access_level
-// In a wider refactoring, this file should be broken down
-
 import { ReactNode, useState, useEffect } from 'react';
 import { AuthContext } from './AuthContext';
 import { useAuthState } from '@/hooks/useAuthState';
@@ -17,17 +13,15 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   const { 
     user, 
     isAdmin,
-    isStaff,
     isLoading, 
     isAuthenticated,
     setUser,
     setIsAdmin,
-    setIsStaff,
     setIsAuthenticated,
     setIsLoading
   } = useAuthState();
 
-  const fetchUserProfile = async (userId: string): Promise<AuthUser | null> => {
+  const fetchUserProfile = async (userId: string): Promise<Partial<AuthUser> | null> => {
     try {
       const { data, error } = await supabase
         .from('profiles')
@@ -36,16 +30,83 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         .single();
 
       if (error) throw error;
-      return data as AuthUser;
+      return data as Partial<AuthUser>;
     } catch (error) {
       console.error('Error fetching user profile:', error);
       return null;
     }
   };
 
+  const createDefaultAdminIfNeeded = async () => {
+    try {
+      const { data: existingAdmins, error: checkError } = await supabase
+        .from('profiles')
+        .select('id')
+        .eq('is_admin', true)
+        .limit(1);
+
+      if (checkError) {
+        console.error('Error checking for admins:', checkError);
+        return;
+      }
+
+      if (!existingAdmins || existingAdmins.length === 0) {
+        console.log('No admin found, creating default admin account');
+        
+        const { data: existingUser, error: existingUserError } = await supabase.auth.admin.getUserByEmail('admin@uptowngym.rw');
+        
+        if (existingUserError && existingUserError.message !== 'User not found') {
+          console.error('Error checking for existing admin user:', existingUserError);
+          return;
+        }
+        
+        if (!existingUser) {
+          const { data: authUser, error: authError } = await supabase.auth.admin.createUser({
+            email: 'admin@uptowngym.rw',
+            password: 'Admin123!',
+            email_confirm: true,
+            user_metadata: {
+              full_name: 'System Administrator'
+            }
+          });
+          
+          if (authError) {
+            console.error('Error creating default admin user:', authError);
+            return;
+          }
+          
+          if (authUser && authUser.user) {
+            const { error: profileError } = await supabase
+              .from('profiles')
+              .insert([
+                {
+                  id: authUser.user.id,
+                  email: 'admin@uptowngym.rw',
+                  full_name: 'System Administrator',
+                  role: 'admin',
+                  is_admin: true,
+                  access_level: 'Full'
+                }
+              ]);
+              
+            if (profileError) {
+              console.error('Error creating default admin profile:', profileError);
+            } else {
+              console.log('Default admin account created successfully');
+            }
+          }
+        }
+      }
+    } catch (error) {
+      console.error('Error in createDefaultAdminIfNeeded:', error);
+    }
+  };
+
   useEffect(() => {
     const setupAuthListener = async () => {
       try {
+        await createDefaultAdminIfNeeded();
+        
         const { data: { session } } = await supabase.auth.getSession();
         
         if (session) {
@@ -54,34 +115,55 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
           
           if (profile) {
             setUser({
-              ...session.user,
-              ...profile,
+              id: session.user.id,
               email: session.user.email || '',
+              full_name: profile.full_name || session.user.user_metadata?.full_name || '',
+              role: profile.role || 'member',
+              is_admin: profile.is_admin || false,
+              is_staff: profile.is_staff || false,
+              status: profile.status || 'Active',
+              access_level: profile.access_level || 'Basic',
+              created_at: profile.created_at || new Date().toISOString(),
+              updated_at: profile.updated_at || new Date().toISOString(),
+              user_metadata: session.user.user_metadata,
+              avatar_url: profile.avatar_url
             });
             setIsAdmin(profile.is_admin || false);
-            setIsStaff(profile.is_staff || false);
             setIsAuthenticated(true);
           } else {
-            const defaultProfile = {
+            const isKnownAdmin = session.user.email === 'admin@uptowngym.rw';
+            
+            setUser({
               id: session.user.id,
               email: session.user.email || '',
               full_name: session.user.user_metadata?.full_name || session.user.email || '',
-              role: 'client' as UserRole,
-              is_admin: session.user.email === 'admin@example.com',
+              role: isKnownAdmin ? 'admin' : 'member',
+              is_admin: isKnownAdmin,
               is_staff: false,
-              status: 'Active' as const,
-              access_level: 'Basic' as AccessLevel,
+              status: 'Active',
+              access_level: 'Basic',
               created_at: new Date().toISOString(),
-              updated_at: new Date().toISOString()
-            };
-            
-            setUser({
-              ...session.user,
-              ...defaultProfile
+              updated_at: new Date().toISOString(),
+              user_metadata: session.user.user_metadata
             });
-            setIsAdmin(defaultProfile.is_admin);
-            setIsStaff(defaultProfile.is_staff);
+            setIsAdmin(isKnownAdmin);
             setIsAuthenticated(true);
+            
+            const { error: profileError } = await supabase
+              .from('profiles')
+              .insert([
+                { 
+                  id: session.user.id,
+                  email: session.user.email,
+                  full_name: session.user.user_metadata?.full_name || session.user.email,
+                  role: isKnownAdmin ? 'admin' : 'member',
+                  is_admin: isKnownAdmin
+                }
+              ]);
+              
+            if (profileError && profileError.code !== '23505') {
+              console.error('Error creating profile during auth setup:', profileError);
+            }
           }
         }
         
@@ -97,38 +179,60 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
                 
                 if (profile) {
                   setUser({
-                    ...session.user,
-                    ...profile,
+                    id: session.user.id,
                     email: session.user.email || '',
+                    full_name: profile.full_name || session.user.user_metadata?.full_name || '',
+                    role: profile.role || 'member',
+                    is_admin: profile.is_admin || false,
+                    is_staff: profile.is_staff || false,
+                    status: profile.status || 'Active',
+                    access_level: profile.access_level || 'Basic',
+                    created_at: profile.created_at || new Date().toISOString(),
+                    updated_at: profile.updated_at || new Date().toISOString(),
+                    user_metadata: session.user.user_metadata,
+                    avatar_url: profile.avatar_url
                   });
                   setIsAdmin(profile.is_admin || false);
-                  setIsStaff(profile.is_staff || false);
                   setIsAuthenticated(true);
                 } else {
-                  const isKnownAdmin = session.user.email === 'admin@example.com';
+                  const isKnownAdmin = session.user.email === 'admin@uptowngym.rw';
                   
                   setUser({
-                    ...session.user,
                     id: session.user.id,
                     email: session.user.email || '',
                     full_name: session.user.user_metadata?.full_name || session.user.email || '',
-                    role: isKnownAdmin ? 'admin' : 'client' as UserRole,
+                    role: isKnownAdmin ? 'admin' : 'member',
                     is_admin: isKnownAdmin,
                     is_staff: false,
-                    status: 'Active' as const,
-                    access_level: 'Basic' as AccessLevel,
+                    status: 'Active',
+                    access_level: 'Basic',
                     created_at: new Date().toISOString(),
-                    updated_at: new Date().toISOString()
+                    updated_at: new Date().toISOString(),
+                    user_metadata: session.user.user_metadata
                   });
                   setIsAdmin(isKnownAdmin);
-                  setIsStaff(false);
                   setIsAuthenticated(true);
+                  
+                  const { error: profileError } = await supabase
+                    .from('profiles')
+                    .insert([
+                      { 
+                        id: session.user.id,
+                        email: session.user.email,
+                        full_name: session.user.user_metadata?.full_name || session.user.email,
+                        role: isKnownAdmin ? 'admin' : 'member',
+                        is_admin: isKnownAdmin
+                      }
+                    ]);
+                    
+                  if (profileError && profileError.code !== '23505') {
+                    console.error('Error creating profile on sign in:', profileError);
+                  }
                 }
               }
             } else if (event === 'SIGNED_OUT') {
               setUser(null);
               setIsAdmin(false);
-              setIsStaff(false);
               setIsAuthenticated(false);
             }
           }
@@ -144,7 +248,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     };
 
     setupAuthListener();
-  }, [setUser, setIsAdmin, setIsStaff, setIsAuthenticated, setIsLoading]);
+  }, [setUser, setIsAdmin, setIsAuthenticated, setIsLoading]);
 
   const login = async (email: string, password: string): Promise<boolean> => {
     try {
@@ -286,7 +390,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   const value: AuthContextType = {
     user,
     isAdmin,
-    isStaff,
+    isStaff: user?.is_staff || false,
     isLoading,
     isAuthenticated,
     login,

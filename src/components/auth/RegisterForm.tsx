@@ -9,6 +9,7 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { useAuth } from '@/hooks/useAuth';
 import { useRegisterValidation } from '@/hooks/auth/useRegisterValidation';
 import TermsAgreement from '@/components/auth/TermsAgreement';
+import { toast } from 'sonner';
 
 interface RegisterFormProps {
   onSuccess?: () => void;
@@ -43,6 +44,8 @@ const RegisterForm = ({ onSuccess }: RegisterFormProps) => {
       const success = await signUp(email, password, fullName);
       
       if (success) {
+        toast.success('Registration successful! Please check your email to confirm your account.');
+        
         // Redirect to login page with success message
         navigate('/login', { 
           state: { 
