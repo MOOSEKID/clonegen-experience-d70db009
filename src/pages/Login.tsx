@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { Card } from '@/components/ui/card';
@@ -18,6 +17,7 @@ const TEST_CREDENTIALS = {
 const Login = () => {
   const [loginError, setLoginError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [fallbackMode, setFallbackMode] = useState(false); // New state to track fallback mode
   const navigate = useNavigate();
   const location = useLocation();
   const { login, isAuthenticated, isAdmin } = useAuth();
@@ -29,48 +29,89 @@ const Login = () => {
     // Clear any previous errors
     setLoginError(null);
     
+    // Check if Supabase is reachable
+    const checkSupabaseConnection = async () => {
+      try {
+        console.log('Checking Supabase connection...');
+        const { data, error } = await supabase.from('profiles').select('count').limit(1);
+        
+        if (error) {
+          console.error('Supabase connection error:', error);
+          setFallbackMode(true);
+          console.log('Using fallback authentication mode');
+        } else {
+          console.log('Supabase connection successful');
+          setFallbackMode(false);
+        }
+      } catch (error) {
+        console.error('Failed to connect to Supabase:', error);
+        setFallbackMode(true);
+        console.log('Using fallback authentication mode due to connection error');
+      }
+    };
+    
+    checkSupabaseConnection();
+    
     const checkAuthStatus = async () => {
       try {
         console.log('Checking authentication status in Login page');
         
-        // Get the session directly from Supabase
-        const { data: { session }, error } = await supabase.auth.getSession();
-        
-        if (error) {
-          console.error("Error checking authentication status:", error);
-          return;
+        // If in fallback mode, check localStorage for fallback auth
+        if (fallbackMode) {
+          const fallbackAuth = localStorage.getItem('fallbackAuth');
+          if (fallbackAuth) {
+            const authData = JSON.parse(fallbackAuth);
+            const targetPath = authData.isAdmin ? '/admin' : '/dashboard';
+            console.log('Fallback auth found, redirecting to:', targetPath);
+            navigate(targetPath, { replace: true });
+            return;
+          }
         }
         
-        if (session) {
-          console.log('User is authenticated via Supabase, redirecting');
+        // Otherwise check Supabase session
+        try {
+          // Get the session directly from Supabase
+          const { data: { session }, error } = await supabase.auth.getSession();
           
-          // Check if user is admin by querying the profiles table
-          const { data: profileData, error: profileError } = await supabase
-            .from('profiles')
-            .select('is_admin, role')
-            .eq('id', session.user.id)
-            .single();
-            
-          if (profileError) {
-            console.error("Error fetching profile:", profileError);
-            // Continue with redirect to dashboard as fallback
-            navigate('/dashboard', { replace: true });
+          if (error) {
+            console.error("Error checking authentication status:", error);
             return;
           }
           
-          // Check if it's one of our admin users
-          const userEmail = session.user.email;
-          let userIsAdmin = profileData?.is_admin || false;
-          
-          // Explicitly check for the admin email addresses
-          if (userEmail === 'admin@example.com' || userEmail === 'admin@uptowngym.rw') {
-            userIsAdmin = true;
+          if (session) {
+            console.log('User is authenticated via Supabase, redirecting');
+            
+            // Check if user is admin by querying the profiles table
+            const { data: profileData, error: profileError } = await supabase
+              .from('profiles')
+              .select('is_admin, role')
+              .eq('id', session.user.id)
+              .single();
+              
+            if (profileError) {
+              console.error("Error fetching profile:", profileError);
+              // Continue with redirect to dashboard as fallback
+              navigate('/dashboard', { replace: true });
+              return;
+            }
+            
+            // Check if it's one of our admin users
+            const userEmail = session.user.email;
+            let userIsAdmin = profileData?.is_admin || false;
+            
+            // Explicitly check for the admin email addresses
+            if (userEmail === 'admin@example.com' || userEmail === 'admin@uptowngym.rw') {
+              userIsAdmin = true;
+            }
+            
+            const redirectPath = userIsAdmin ? '/admin' : '/dashboard';
+            
+            // Force navigation with replace to prevent back button from returning to login
+            navigate(redirectPath, { replace: true });
           }
-          
-          const redirectPath = userIsAdmin ? '/admin' : '/dashboard';
-          
-          // Force navigation with replace to prevent back button from returning to login
-          navigate(redirectPath, { replace: true });
+        } catch (error) {
+          console.error("Error in Supabase authentication check:", error);
+          setFallbackMode(true);
         }
       } catch (error) {
         console.error("Error in authentication check:", error);
@@ -85,7 +126,7 @@ const Login = () => {
       // Force navigation with replace to prevent back button from returning to login
       navigate(isAdmin ? '/admin' : '/dashboard', { replace: true });
     }
-  }, [isAuthenticated, isAdmin, navigate]);
+  }, [isAuthenticated, isAdmin, navigate, fallbackMode]);
 
   const handleLoginSubmit = async (email: string, password: string) => {
     setIsLoading(true);
@@ -94,7 +135,37 @@ const Login = () => {
     try {
       console.log('Attempting login with:', email);
       
-      // Try to login with Supabase
+      // If in fallback mode or if Supabase connection fails, use test accounts directly
+      if (fallbackMode) {
+        console.log('Using fallback login method');
+        const testAccount = TEST_CREDENTIALS[email as keyof typeof TEST_CREDENTIALS];
+        
+        if (testAccount && testAccount.password === password) {
+          console.log('Test account login successful');
+          
+          // Store fallback auth in localStorage
+          localStorage.setItem('fallbackAuth', JSON.stringify({
+            email: email,
+            isAdmin: testAccount.isAdmin,
+            timestamp: new Date().toISOString()
+          }));
+          
+          // Simulate redirect based on admin status
+          const targetPath = testAccount.isAdmin ? '/admin' : '/dashboard';
+          console.log('Redirecting to:', targetPath);
+          navigate(targetPath, { replace: true });
+          toast.success('Login successful! (Using fallback mode)');
+        } else {
+          console.log('Fallback login failed - invalid credentials');
+          setLoginError('Login failed. Please check your credentials.');
+          toast.error('Login failed. Please check your credentials.');
+        }
+        
+        setIsLoading(false);
+        return;
+      }
+      
+      // Try to login with Supabase if not in fallback mode
       let success = false;
       
       try {
@@ -105,18 +176,26 @@ const Login = () => {
         // If Supabase is unreachable, use fallback for test accounts
         if (supabaseError.message?.includes('Failed to fetch')) {
           console.log('Supabase unreachable, trying fallback login');
+          setFallbackMode(true);
           
           // Check if this is a test account
           const testAccount = TEST_CREDENTIALS[email as keyof typeof TEST_CREDENTIALS];
           if (testAccount && testAccount.password === password) {
             console.log('Test account login successful');
-            success = true;
+            
+            // Store fallback auth in localStorage
+            localStorage.setItem('fallbackAuth', JSON.stringify({
+              email: email,
+              isAdmin: testAccount.isAdmin,
+              timestamp: new Date().toISOString()
+            }));
             
             // Simulate redirect based on admin status
             const targetPath = testAccount.isAdmin ? '/admin' : '/dashboard';
             console.log('Redirecting to:', targetPath);
             navigate(targetPath, { replace: true });
             toast.success('Login successful! (Using fallback mode)');
+            setIsLoading(false);
             return;
           }
         }
@@ -124,6 +203,7 @@ const Login = () => {
         // If it's not a test account or the password is wrong, show error
         setLoginError('Login failed. Please check your credentials.');
         toast.error('Login failed. Please check your credentials.');
+        setIsLoading(false);
         return;
       }
       
@@ -163,6 +243,32 @@ const Login = () => {
     handleLoginSubmit('user@example.com', 'user123');
   };
 
+  const handleResetAuth = () => {
+    console.log('Resetting authentication state');
+    // Clear any localStorage fallback auth
+    localStorage.removeItem('fallbackAuth');
+    
+    // Clear Supabase session
+    supabase.auth.signOut().catch(error => {
+      console.error('Error signing out from Supabase:', error);
+    });
+    
+    // Clear local storage items that might be used for auth
+    localStorage.removeItem('isLoggedIn');
+    localStorage.removeItem('isAdmin');
+    localStorage.removeItem('userEmail');
+    localStorage.removeItem('userName');
+    
+    // Clear cookies
+    document.cookie = "session_active=; path=/; max-age=0";
+    document.cookie = "user_role=; path=/; max-age=0";
+    
+    toast.success('Authentication has been reset');
+    
+    // Refresh the page to clear any in-memory auth state
+    setTimeout(() => window.location.reload(), 1000);
+  };
+
   return (
     <div className="min-h-screen flex items-center justify-center p-6 bg-gym-dark pt-20">
       <Card className="w-full max-w-md p-6 bg-gym-darkblue text-white border border-white/10">
@@ -184,6 +290,17 @@ const Login = () => {
           <a href="/signup" className="text-gym-orange hover:underline">
             Sign up
           </a>
+        </div>
+        
+        {/* Reset Authentication button */}
+        <div className="mt-4 text-center">
+          <button
+            type="button"
+            onClick={handleResetAuth}
+            className="text-xs text-gym-orange hover:underline"
+          >
+            Reset Authentication
+          </button>
         </div>
       </Card>
     </div>
