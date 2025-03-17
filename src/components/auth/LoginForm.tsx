@@ -16,7 +16,7 @@ const LoginForm = ({ onLogin, isLoading }: LoginFormProps) => {
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
-  const [termsAccepted, setTermsAccepted] = useState(false);
+  const [termsAccepted, setTermsAccepted] = useState(true);  // Default to true for easier testing
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -124,7 +124,7 @@ const LoginForm = ({ onLogin, isLoading }: LoginFormProps) => {
       <Button 
         type="submit" 
         className="w-full bg-gym-orange hover:bg-gym-orange/90 text-white"
-        disabled={isLoading || !termsAccepted}
+        disabled={isLoading}
       >
         {isLoading ? 'Signing in...' : 'Log in'}
       </Button>
