@@ -2,7 +2,7 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { Toaster } from 'sonner';
 import { AuthProvider } from '@/contexts/AuthContext';
-import Login from '@/pages/auth/Login';
+import Login from '@/pages/Login';
 import Register from '@/pages/auth/Register';
 import ForgotPassword from '@/pages/auth/ForgotPassword';
 import ResetPassword from '@/pages/auth/ResetPassword';
@@ -13,7 +13,7 @@ import StaffDashboard from '@/pages/staff/StaffDashboard';
 import AdminDashboard from '@/pages/admin/AdminDashboard';
 import PrivateRoute from '@/components/auth/PrivateRoute';
 import { ThemeProvider } from '@/components/theme/theme-provider';
-import ErrorBoundary from '@/components/ui/error-boundary';
+import { ErrorBoundary } from '@/components/ui/error-boundary';
 import Index from '@/pages/Index';
 
 function App() {

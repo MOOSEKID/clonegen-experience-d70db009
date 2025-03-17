@@ -9,9 +9,10 @@ import TermsAgreement from '@/components/auth/TermsAgreement';
 interface LoginFormProps {
   onLogin: (email: string, password: string) => Promise<void>;
   isLoading: boolean;
+  fallbackMode?: boolean;
 }
 
-const LoginForm = ({ onLogin, isLoading }: LoginFormProps) => {
+const LoginForm = ({ onLogin, isLoading, fallbackMode }: LoginFormProps) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -127,6 +128,12 @@ const LoginForm = ({ onLogin, isLoading }: LoginFormProps) => {
       >
         {isLoading ? 'Signing in...' : 'Log in'}
       </Button>
+      
+      {fallbackMode && (
+        <p className="text-xs text-amber-400 text-center mt-2">
+          ⚠️ Running in test authentication mode
+        </p>
+      )}
     </form>
   );
 };
