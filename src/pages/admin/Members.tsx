@@ -28,6 +28,8 @@ const AdminMembers = () => {
     prevPage,
   } = useSupabaseMembers();
 
+  console.log("AdminMembers rendered, isCreating:", isCreating);
+
   return (
     <MembersContainer
       members={members}

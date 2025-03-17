@@ -23,6 +23,7 @@ export const useAddMemberForm = (
   // Reset form errors when dialog opens
   useEffect(() => {
     if (isOpen) {
+      console.log("Dialog opened - clearing form errors");
       form.clearErrors();
     }
   }, [isOpen, form]);
