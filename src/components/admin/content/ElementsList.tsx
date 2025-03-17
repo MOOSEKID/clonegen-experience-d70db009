@@ -3,7 +3,7 @@ import { DragDropContext, Droppable } from 'react-beautiful-dnd';
 import ElementItem from './ElementItem';
 import EmptyContentState from './EmptyContentState';
 import { AddElementButton } from './ContentEditorTools';
-import { ContentElement } from './ContentEditor';
+import { ContentElement } from '@/types/content.types';
 
 interface ElementsListProps {
   pageContent: ContentElement[];
@@ -49,14 +49,13 @@ const ElementsList = ({
                   key={element.id}
                   element={element}
                   index={index}
-                  isPreviewMode={isPreviewMode}
-                  selectedElement={selectedElement}
-                  onDeleteElement={onDeleteElement}
-                  onDuplicateElement={onDuplicateElement}
-                  onMoveElement={onMoveElement}
-                  onSelectElement={onSelectElement}
-                  onUpdateElement={onUpdateElement}
-                  totalElements={pageContent.length}
+                  selectedElementId={selectedElement?.id || null}
+                  isEditing={!isPreviewMode}
+                  onSelect={onSelectElement}
+                  onDelete={onDeleteElement}
+                  onDuplicate={onDuplicateElement}
+                  onMove={onMoveElement}
+                  onUpdate={onUpdateElement}
                 />
               ))}
               {provided.placeholder}

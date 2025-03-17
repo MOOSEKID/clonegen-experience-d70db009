@@ -58,8 +58,8 @@ const ElementItem = ({
               </span>
               <ElementActions 
                 index={index}
-                onDelete={() => onDelete(index)}
-                onDuplicate={() => onDuplicate(index)}
+                onDelete={onDelete}
+                onDuplicate={onDuplicate}
                 onMoveUp={() => onMove(index, 'up')}
                 onMoveDown={() => onMove(index, 'down')}
               />
