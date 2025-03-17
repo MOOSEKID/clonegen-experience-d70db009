@@ -18,6 +18,7 @@ const QuickLogin = ({ onAdminLogin, onUserLogin, isLoading }: QuickLoginProps) =
       
       <div className="grid grid-cols-2 gap-4">
         <Button 
+          type="button"
           variant="outline" 
           className="w-full" 
           onClick={onAdminLogin}
@@ -27,6 +28,7 @@ const QuickLogin = ({ onAdminLogin, onUserLogin, isLoading }: QuickLoginProps) =
         </Button>
         
         <Button 
+          type="button"
           variant="outline" 
           className="w-full" 
           onClick={onUserLogin}
