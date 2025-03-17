@@ -25,6 +25,8 @@ const Login = () => {
     
     const checkAuthStatus = async () => {
       try {
+        console.log('Checking authentication status in Login page');
+        
         // Get the session directly from Supabase
         const { data: { session }, error } = await supabase.auth.getSession();
         

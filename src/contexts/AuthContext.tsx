@@ -6,7 +6,6 @@ import { useLoginService } from '@/hooks/auth/useLoginService';
 import { useSignUpService } from '@/hooks/auth/useSignUpService';
 import { useLogoutService } from '@/hooks/auth/useLogoutService';
 import { usePasswordService } from '@/hooks/auth/usePasswordService';
-import { useTestUsers } from '@/hooks/auth/useTestUsers';
 import { authStorageService } from '@/services/authStorageService';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
@@ -30,9 +29,6 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     setIsAuthenticated 
   } = useAuthState();
 
-  // Initialize test users
-  useTestUsers();
-
   // Get authentication service hooks
   const { login: loginService } = useLoginService();
   const { signUp: signUpService } = useSignUpService();
@@ -45,20 +41,28 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     
     // Initial session check
     const checkCurrentSession = async () => {
-      const { data: { session }, error } = await supabase.auth.getSession();
-      if (error) {
-        console.error('Error checking current session:', error);
-        return;
-      }
-      
-      if (session) {
-        handleSessionUpdate(session);
-      } else {
-        // No session, ensure auth state is cleared
-        setUser(null);
-        setIsAdmin(false);
-        setIsAuthenticated(false);
-        authStorageService.setAuthData(false, false, '', '');
+      try {
+        console.log("Checking current session in AuthContext");
+        const { data: { session }, error } = await supabase.auth.getSession();
+        
+        if (error) {
+          console.error('Error checking current session:', error);
+          return;
+        }
+        
+        if (session) {
+          console.log("Session found, user is authenticated:", session.user.email);
+          handleSessionUpdate(session);
+        } else {
+          // No session, ensure auth state is cleared
+          console.log("No session found, clearing auth state");
+          setUser(null);
+          setIsAdmin(false);
+          setIsAuthenticated(false);
+          authStorageService.setAuthData(false, false, '', '');
+        }
+      } catch (error) {
+        console.error("Error checking current session:", error);
       }
     };
     
@@ -72,6 +76,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         
         if (event === 'SIGNED_IN' && session) {
           // Handle signed in event
+          console.log("User signed in:", session.user.email);
           await handleSessionUpdate(session);
         } else if (event === 'SIGNED_OUT') {
           console.log('User signed out, clearing auth state');
@@ -98,7 +103,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
    */
   const handleSessionUpdate = async (session: any) => {
     // Additional setup after sign-in or session found
-    console.log('Session established', session);
+    console.log('Session established', session.user.email);
     
     // Get user profile to check if admin
     try {
@@ -115,14 +120,18 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         if (error.code === 'PGRST116') {
           console.log('Profile not found, creating profile...');
           
+          // Check if it's a known admin email
+          const isKnownAdmin = session.user.email === 'admin@example.com' || 
+                              session.user.email === 'admin@uptowngym.rw';
+          
           const { error: insertError } = await supabase
             .from('profiles')
             .insert([
               { 
                 id: session.user.id,
                 full_name: session.user.user_metadata?.full_name || session.user.email || 'User',
-                role: 'member',
-                is_admin: session.user.email === 'admin@example.com'
+                role: isKnownAdmin ? 'admin' : 'member',
+                is_admin: isKnownAdmin
               }
             ]);
             
@@ -135,15 +144,15 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
             setUser({
               ...session.user,
               email: session.user.email || '',
-              role: 'member'
+              role: isKnownAdmin ? 'admin' : 'member'
             });
             
-            setIsAdmin(session.user.email === 'admin@example.com');
+            setIsAdmin(isKnownAdmin);
             setIsAuthenticated(true);
             
             authStorageService.setAuthData(
               true, 
-              session.user.email === 'admin@example.com', 
+              isKnownAdmin, 
               session.user.email || '', 
               session.user.user_metadata?.full_name || session.user.email || ''
             );
@@ -156,18 +165,42 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         const userRole = profile?.role || 'member';
         const userIsAdmin = profile?.is_admin || false;
         
+        // Also check for known admin emails
+        const isKnownAdmin = session.user.email === 'admin@example.com' || 
+                            session.user.email === 'admin@uptowngym.rw';
+        
+        const finalIsAdmin = userIsAdmin || isKnownAdmin;
+        
+        // Update profile if it's a known admin but not marked as such
+        if (isKnownAdmin && !userIsAdmin) {
+          console.log('Updating admin status for known admin email');
+          const { error: updateError } = await supabase
+            .from('profiles')
+            .update({
+              is_admin: true,
+              role: 'admin'
+            })
+            .eq('id', session.user.id);
+            
+          if (updateError) {
+            console.error('Error updating admin status:', updateError);
+          } else {
+            console.log('Admin status updated successfully');
+          }
+        }
+        
         setUser({
           ...session.user,
           email: session.user.email || '',
-          role: userRole
+          role: finalIsAdmin ? 'admin' : userRole
         });
         
-        setIsAdmin(userIsAdmin);
+        setIsAdmin(finalIsAdmin);
         setIsAuthenticated(true);
         
         authStorageService.setAuthData(
           true, 
-          userIsAdmin, 
+          finalIsAdmin, 
           session.user.email || '', 
           session.user.user_metadata?.full_name || profile?.full_name || session.user.email || ''
         );

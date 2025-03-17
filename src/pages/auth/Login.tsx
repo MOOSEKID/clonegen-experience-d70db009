@@ -9,10 +9,12 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from 'sonner';
+import TermsAgreement from '@/components/auth/TermsAgreement';
 
 const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [termsAccepted, setTermsAccepted] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const { login, isAuthenticated, isAdmin } = useAuth();
@@ -25,6 +27,7 @@ const Login = () => {
   // Check if user is already authenticated
   useEffect(() => {
     if (isAuthenticated) {
+      console.log('User already authenticated, redirecting to:', isAdmin ? '/admin' : '/dashboard');
       // Redirect based on user role
       navigate(isAdmin ? '/admin' : '/dashboard');
     }
@@ -38,16 +41,24 @@ const Login = () => {
       return;
     }
     
+    if (!termsAccepted) {
+      setErrorMessage('Please accept the terms and conditions');
+      return;
+    }
+    
     try {
       setIsLoading(true);
       setErrorMessage('');
       
+      console.log('Attempting login with email:', email);
       const success = await login(email, password);
       
       if (success) {
         toast.success('Login successful');
         // Navigation will be handled by the useEffect
         console.log('Login successful, redirection will happen through useEffect');
+      } else {
+        setErrorMessage('Invalid email or password');
       }
     } catch (error) {
       console.error('Login error:', error);
@@ -61,17 +72,45 @@ const Login = () => {
     try {
       setIsLoading(true);
       setErrorMessage('');
+      setTermsAccepted(true);
       
+      console.log('Attempting admin login with default credentials');
       const success = await login('admin@example.com', 'admin123');
       
       if (success) {
         toast.success('Admin login successful');
         // Navigation is handled in login function
         console.log('Admin login successful');
+      } else {
+        setErrorMessage('Admin login failed. Please try again.');
       }
     } catch (error) {
       console.error('Admin login error:', error);
       setErrorMessage(error instanceof Error ? error.message : 'Admin login failed');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleUserLogin = async () => {
+    try {
+      setIsLoading(true);
+      setErrorMessage('');
+      setTermsAccepted(true);
+      
+      console.log('Attempting user login with default credentials');
+      const success = await login('user@example.com', 'user123');
+      
+      if (success) {
+        toast.success('User login successful');
+        // Navigation is handled in login function
+        console.log('User login successful');
+      } else {
+        setErrorMessage('User login failed. Please try again.');
+      }
+    } catch (error) {
+      console.error('User login error:', error);
+      setErrorMessage(error instanceof Error ? error.message : 'User login failed');
     } finally {
       setIsLoading(false);
     }
@@ -133,10 +172,17 @@ const Login = () => {
                 />
               </div>
             </div>
+            
+            <TermsAgreement 
+              accepted={termsAccepted}
+              onChange={setTermsAccepted}
+              disabled={isLoading}
+            />
+            
             <Button 
               type="submit" 
               className="w-full bg-gym-orange hover:bg-gym-orange/90" 
-              disabled={isLoading}
+              disabled={isLoading || !termsAccepted}
             >
               {isLoading ? 'Signing in...' : 'Sign In'}
             </Button>
@@ -148,14 +194,25 @@ const Login = () => {
             <div className="flex-grow h-0.5 bg-gray-200"></div>
           </div>
           
-          <Button 
-            variant="outline" 
-            className="w-full" 
-            onClick={handleAdminLogin}
-            disabled={isLoading}
-          >
-            Admin Login (admin@example.com)
-          </Button>
+          <div className="grid grid-cols-2 gap-4">
+            <Button 
+              variant="outline" 
+              className="w-full" 
+              onClick={handleAdminLogin}
+              disabled={isLoading}
+            >
+              Admin Login
+            </Button>
+            
+            <Button 
+              variant="outline" 
+              className="w-full" 
+              onClick={handleUserLogin}
+              disabled={isLoading}
+            >
+              User Login
+            </Button>
+          </div>
         </CardContent>
         <CardFooter className="flex flex-col space-y-4">
           <div className="text-center text-sm">

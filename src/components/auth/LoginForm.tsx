@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Eye, EyeOff } from 'lucide-react';
 import { toast } from 'sonner';
-import { useAuth } from '@/hooks/useAuth';
+import TermsAgreement from '@/components/auth/TermsAgreement';
 
 interface LoginFormProps {
   onLogin: (email: string, password: string) => Promise<void>;
@@ -16,6 +16,7 @@ const LoginForm = ({ onLogin, isLoading }: LoginFormProps) => {
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
+  const [termsAccepted, setTermsAccepted] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -23,6 +24,11 @@ const LoginForm = ({ onLogin, isLoading }: LoginFormProps) => {
     // Email validation
     if (!email || !password) {
       toast.error('Please enter both email and password');
+      return;
+    }
+    
+    if (!termsAccepted) {
+      toast.error('Please accept the terms and conditions');
       return;
     }
     
@@ -82,6 +88,12 @@ const LoginForm = ({ onLogin, isLoading }: LoginFormProps) => {
         </div>
       </div>
       
+      <TermsAgreement 
+        accepted={termsAccepted}
+        onChange={setTermsAccepted}
+        disabled={isLoading}
+      />
+      
       <div className="flex items-center justify-between">
         <div className="flex items-center">
           <input
@@ -98,7 +110,7 @@ const LoginForm = ({ onLogin, isLoading }: LoginFormProps) => {
         </div>
         
         <div className="text-sm">
-          <a href="#" className="text-gym-orange hover:underline">
+          <a href="/forgot-password" className="text-gym-orange hover:underline">
             Forgot password?
           </a>
         </div>
@@ -107,7 +119,7 @@ const LoginForm = ({ onLogin, isLoading }: LoginFormProps) => {
       <Button 
         type="submit" 
         className="w-full bg-gym-orange hover:bg-gym-orange/90 text-white"
-        disabled={isLoading}
+        disabled={isLoading || !termsAccepted}
       >
         {isLoading ? 'Signing in...' : 'Log in'}
       </Button>
