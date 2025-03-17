@@ -1,6 +1,6 @@
 
-import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -13,11 +13,25 @@ import { Eye, EyeOff } from 'lucide-react';
 const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [termsAccepted, setTermsAccepted] = useState(false);
+  const [termsAccepted, setTermsAccepted] = useState(true); // Default to true for easier testing
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const { login } = useAuth();
+  
+  const { login, isAuthenticated, isAdmin } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
+  
+  // Get the pathname from the location state, defaulting to dashboard or admin
+  const from = location.state?.from || '/dashboard';
+
+  // Redirect if already authenticated
+  useEffect(() => {
+    if (isAuthenticated) {
+      const redirectPath = isAdmin ? '/admin' : '/dashboard';
+      console.log('Already authenticated, redirecting to:', redirectPath);
+      navigate(redirectPath, { replace: true });
+    }
+  }, [isAuthenticated, isAdmin, navigate]);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -38,7 +52,7 @@ const Login = () => {
       
       if (success) {
         toast.success('Login successful');
-        navigate('/dashboard');
+        // The redirection will happen automatically in the useEffect
       } else {
         toast.error('Invalid email or password');
       }
@@ -59,7 +73,7 @@ const Login = () => {
       
       if (success) {
         toast.success('Admin login successful');
-        navigate('/admin');
+        // The redirection will happen automatically in the useEffect
       } else {
         toast.error('Admin login failed. Please try again.');
       }
@@ -80,7 +94,7 @@ const Login = () => {
       
       if (success) {
         toast.success('User login successful');
-        navigate('/dashboard');
+        // The redirection will happen automatically in the useEffect
       } else {
         toast.error('User login failed. Please try again.');
       }
@@ -170,7 +184,7 @@ const Login = () => {
                 </Label>
               </div>
               
-              <a href="#" className="text-sm text-gym-orange hover:underline">
+              <a href="/forgot-password" className="text-sm text-gym-orange hover:underline">
                 Forgot password?
               </a>
             </div>

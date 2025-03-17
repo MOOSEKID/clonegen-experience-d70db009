@@ -1,8 +1,9 @@
 
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { Home, BarChart2, Calendar, Dumbbell, Heart, Award, MapPin, Settings, LogOut } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/hooks/useAuth';
+import { toast } from 'sonner';
 
 interface CustomerSidebarProps {
   isOpen: boolean;
@@ -10,6 +11,7 @@ interface CustomerSidebarProps {
 
 const CustomerSidebar = ({ isOpen }: CustomerSidebarProps) => {
   const location = useLocation();
+  const navigate = useNavigate();
   const { logout } = useAuth();
   
   const sidebarItems = [
@@ -23,7 +25,15 @@ const CustomerSidebar = ({ isOpen }: CustomerSidebarProps) => {
   ];
 
   const handleLogout = async () => {
-    await logout();
+    try {
+      const success = await logout();
+      if (success) {
+        navigate('/', { replace: true });
+      }
+    } catch (error) {
+      console.error('Error during logout:', error);
+      toast.error('Failed to logout. Please try again.');
+    }
   };
 
   const lowerItems = [

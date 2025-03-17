@@ -1,9 +1,10 @@
-import { ReactNode, useEffect } from 'react';
+
+import { ReactNode, useState, useEffect } from 'react';
 import { AuthContext } from './AuthContext';
 import { useAuthState } from '@/hooks/useAuthState';
 import { AuthContextType, AuthUser, UserRole } from '@/types/auth.types';
 import { supabase } from '@/lib/supabase';
-import { toast } from 'react-hot-toast';
+import { toast } from 'sonner';
 
 interface AuthProviderProps {
   children: ReactNode;
@@ -13,12 +14,10 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   const { 
     user, 
     isAdmin,
-    isStaff,
     isLoading, 
     isAuthenticated,
     setUser,
     setIsAdmin,
-    setIsStaff,
     setIsAuthenticated,
     setIsLoading
   } = useAuthState();
@@ -41,46 +40,96 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   };
 
   // Handle session changes
-  const handleSessionChange = async (userId: string | undefined) => {
-    if (!userId) {
-      setUser(null);
-      setIsAdmin(false);
-      setIsStaff(false);
-      setIsAuthenticated(false);
-      return;
-    }
-
-    const profile = await fetchUserProfile(userId);
-    if (profile) {
-      setUser(profile);
-      setIsAdmin(profile.is_admin);
-      setIsStaff(profile.is_staff);
-      setIsAuthenticated(true);
-    }
-  };
-
-  // Initialize auth state
   useEffect(() => {
-    const initializeAuth = async () => {
-      try {
-        setIsLoading(true);
-        const { data: { session } } = await supabase.auth.getSession();
-        await handleSessionChange(session?.user?.id);
-      } finally {
-        setIsLoading(false);
+    const setupAuthListener = async () => {
+      // First get the initial session
+      const { data: { session } } = await supabase.auth.getSession();
+      
+      if (session) {
+        console.log('Initial session found:', session.user.email);
+        const profile = await fetchUserProfile(session.user.id);
+        
+        if (profile) {
+          setUser({
+            ...session.user,
+            ...profile,
+            email: session.user.email || '',
+          });
+          setIsAdmin(profile.is_admin || false);
+          setIsAuthenticated(true);
+        } else {
+          // Create default profile if none exists
+          const defaultProfile = {
+            id: session.user.id,
+            email: session.user.email || '',
+            full_name: session.user.user_metadata?.full_name || session.user.email || '',
+            role: 'client' as UserRole,
+            is_admin: session.user.email === 'admin@example.com',
+            is_staff: false,
+            status: 'Active' as const
+          };
+          
+          setUser({
+            ...session.user,
+            ...defaultProfile
+          });
+          setIsAdmin(defaultProfile.is_admin);
+          setIsAuthenticated(true);
+        }
       }
+      
+      setIsLoading(false);
+      
+      // Setup listener for auth changes
+      const { data: { subscription } } = supabase.auth.onAuthStateChange(
+        async (event, session) => {
+          console.log('Auth state changed:', event, session?.user?.email);
+          
+          if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
+            if (session) {
+              const profile = await fetchUserProfile(session.user.id);
+              
+              if (profile) {
+                setUser({
+                  ...session.user,
+                  ...profile,
+                  email: session.user.email || '',
+                });
+                setIsAdmin(profile.is_admin || false);
+                setIsAuthenticated(true);
+              } else {
+                // Handle case with no profile
+                const isKnownAdmin = session.user.email === 'admin@example.com';
+                
+                setUser({
+                  ...session.user,
+                  id: session.user.id,
+                  email: session.user.email || '',
+                  full_name: session.user.user_metadata?.full_name || session.user.email || '',
+                  role: isKnownAdmin ? 'admin' : 'client' as UserRole,
+                  is_admin: isKnownAdmin,
+                  is_staff: false,
+                  status: 'Active' as const
+                });
+                setIsAdmin(isKnownAdmin);
+                setIsAuthenticated(true);
+              }
+            }
+          } else if (event === 'SIGNED_OUT') {
+            setUser(null);
+            setIsAdmin(false);
+            setIsAuthenticated(false);
+          }
+        }
+      );
+
+      return () => {
+        subscription.unsubscribe();
+      };
     };
 
-    initializeAuth();
-
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event, session) => {
-        await handleSessionChange(session?.user?.id);
-      }
-    );
-
-    return () => subscription.unsubscribe();
-  }, []);
+    setupAuthListener();
+  }, [setUser, setIsAdmin, setIsAuthenticated, setIsLoading]);
 
   const login = async (email: string, password: string): Promise<boolean> => {
     try {
@@ -90,10 +139,8 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       });
 
       if (error) throw error;
-
-      const profile = await fetchUserProfile(data.user.id);
-      if (!profile) throw new Error('Profile not found');
-
+      
+      // Login is successful, the useEffect with onAuthStateChange will handle updating the state
       return true;
     } catch (error) {
       console.error('Login error:', error);
@@ -132,11 +179,13 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
             full_name: fullName,
             role,
             status: 'Active',
+            is_admin: email === 'admin@example.com'
           },
         ]);
 
       if (profileError) throw profileError;
-
+      
+      toast.success('Account created! Please verify your email to continue.');
       return true;
     } catch (error) {
       console.error('Signup error:', error);
@@ -149,6 +198,9 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     try {
       const { error } = await supabase.auth.signOut();
       if (error) throw error;
+      
+      // State will be cleared by the onAuthStateChange listener
+      toast.success('Successfully logged out');
       return true;
     } catch (error) {
       console.error('Logout error:', error);
@@ -159,7 +211,10 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
 
   const requestPasswordReset = async (email: string): Promise<boolean> => {
     try {
-      const { error } = await supabase.auth.resetPasswordForEmail(email);
+      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: `${window.location.origin}/reset-password`,
+      });
+      
       if (error) throw error;
       toast.success('Password reset instructions sent to your email.');
       return true;
@@ -199,9 +254,11 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       // Refresh user profile
       const profile = await fetchUserProfile(user.id);
       if (profile) {
-        setUser(profile);
-        setIsAdmin(profile.is_admin);
-        setIsStaff(profile.is_staff);
+        setUser({
+          ...user,
+          ...profile
+        });
+        setIsAdmin(profile.is_admin || false);
       }
 
       toast.success('Profile updated successfully.');
@@ -216,7 +273,6 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   const value: AuthContextType = {
     user,
     isAdmin,
-    isStaff,
     isLoading,
     isAuthenticated,
     login,
