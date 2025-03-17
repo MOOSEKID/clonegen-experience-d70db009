@@ -1,17 +1,27 @@
 
-import { Copy, ArrowUp, ArrowDown, Trash2 } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { Trash2, Copy, ChevronUp, ChevronDown } from 'lucide-react';
+import { 
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '@/components/ui/tooltip';
 
 interface ElementActionsProps {
   index: number;
   onDelete: (index: number) => void;
   onDuplicate: (index: number) => void;
-  onMoveUp: (index: number) => void;
-  onMoveDown: (index: number) => void;
+  onMoveUp: () => void;
+  onMoveDown: () => void;
 }
 
-const ElementActions = ({ index, onDelete, onDuplicate, onMoveUp, onMoveDown }: ElementActionsProps) => {
+const ElementActions = ({ 
+  index, 
+  onDelete, 
+  onDuplicate, 
+  onMoveUp, 
+  onMoveDown 
+}: ElementActionsProps) => {
   const handleDelete = (e: React.MouseEvent) => {
     e.stopPropagation();
     onDelete(index);
@@ -24,62 +34,70 @@ const ElementActions = ({ index, onDelete, onDuplicate, onMoveUp, onMoveDown }: 
 
   const handleMoveUp = (e: React.MouseEvent) => {
     e.stopPropagation();
-    onMoveUp(index);
+    onMoveUp();
   };
 
   const handleMoveDown = (e: React.MouseEvent) => {
     e.stopPropagation();
-    onMoveDown(index);
+    onMoveDown();
   };
 
   return (
-    <div className="flex items-center space-x-1" onClick={e => e.stopPropagation()}>
-      <TooltipProvider>
+    <TooltipProvider>
+      <div className="flex space-x-2 text-gray-500">
         <Tooltip>
           <TooltipTrigger asChild>
-            <Button variant="ghost" size="sm" className="h-7 w-7 p-0" onClick={handleMoveUp}>
-              <ArrowUp className="h-4 w-4 text-gray-500" />
-            </Button>
+            <button 
+              onClick={handleMoveUp}
+              className="p-1 hover:bg-gray-100 rounded-md"
+              aria-label="Move Up"
+            >
+              <ChevronUp size={16} />
+            </button>
           </TooltipTrigger>
-          <TooltipContent>
-            <p>Move Up</p>
-          </TooltipContent>
+          <TooltipContent>Move Up</TooltipContent>
         </Tooltip>
-
+        
         <Tooltip>
           <TooltipTrigger asChild>
-            <Button variant="ghost" size="sm" className="h-7 w-7 p-0" onClick={handleMoveDown}>
-              <ArrowDown className="h-4 w-4 text-gray-500" />
-            </Button>
+            <button 
+              onClick={handleMoveDown}
+              className="p-1 hover:bg-gray-100 rounded-md"
+              aria-label="Move Down"
+            >
+              <ChevronDown size={16} />
+            </button>
           </TooltipTrigger>
-          <TooltipContent>
-            <p>Move Down</p>
-          </TooltipContent>
+          <TooltipContent>Move Down</TooltipContent>
         </Tooltip>
-
+        
         <Tooltip>
           <TooltipTrigger asChild>
-            <Button variant="ghost" size="sm" className="h-7 w-7 p-0" onClick={handleDuplicate}>
-              <Copy className="h-4 w-4 text-gray-500" />
-            </Button>
+            <button 
+              onClick={handleDuplicate}
+              className="p-1 hover:bg-gray-100 rounded-md"
+              aria-label="Duplicate"
+            >
+              <Copy size={16} />
+            </button>
           </TooltipTrigger>
-          <TooltipContent>
-            <p>Duplicate</p>
-          </TooltipContent>
+          <TooltipContent>Duplicate</TooltipContent>
         </Tooltip>
-
+        
         <Tooltip>
           <TooltipTrigger asChild>
-            <Button variant="ghost" size="sm" className="h-7 w-7 p-0 hover:bg-red-50 hover:text-red-500" onClick={handleDelete}>
-              <Trash2 className="h-4 w-4 text-gray-500 hover:text-red-500" />
-            </Button>
+            <button 
+              onClick={handleDelete}
+              className="p-1 hover:bg-gray-100 rounded-md text-red-500"
+              aria-label="Delete"
+            >
+              <Trash2 size={16} />
+            </button>
           </TooltipTrigger>
-          <TooltipContent>
-            <p>Delete</p>
-          </TooltipContent>
+          <TooltipContent>Delete</TooltipContent>
         </Tooltip>
-      </TooltipProvider>
-    </div>
+      </div>
+    </TooltipProvider>
   );
 };
 

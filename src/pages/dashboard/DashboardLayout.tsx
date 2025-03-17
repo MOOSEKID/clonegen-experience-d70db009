@@ -9,7 +9,7 @@ import { useAuth } from '@/hooks/useAuth';
 const DashboardLayout = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [isLoading, setIsLoading] = useState(true);
-  const { isAuthenticated, user } = useAuth();
+  const { isAuthenticated, user, profile } = useAuth();
   const navigate = useNavigate();
 
   // Check user authentication

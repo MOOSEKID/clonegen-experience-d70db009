@@ -92,19 +92,11 @@ const ContentEditor = ({ selectedPage, onContentChange, className = '' }: Conten
     onContentChange();
   };
 
-  const handleUpdateProperties = (properties: ElementPropsType) => {
+  const handleUpdateProperties = (updatedElement: ContentElement) => {
     if (!selectedElement) return;
     
     const elementIndex = pageContent.findIndex(el => el.id === selectedElement.id);
     if (elementIndex === -1) return;
-    
-    const updatedElement = {
-      ...selectedElement,
-      properties: {
-        ...selectedElement.properties,
-        ...properties
-      }
-    };
     
     const newContent = [...pageContent];
     newContent[elementIndex] = updatedElement;

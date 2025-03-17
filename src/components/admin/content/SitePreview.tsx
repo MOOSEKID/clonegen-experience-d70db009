@@ -2,6 +2,7 @@
 import { useState } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { pageContentData } from '@/data/cmsData';
+import { PageContentMapping } from '@/types/content.types';
 
 interface SitePreviewProps {
   selectedPage: string;
@@ -12,7 +13,8 @@ const SitePreview = ({ selectedPage, onAddSection }: SitePreviewProps) => {
   const [activeSection, setActiveSection] = useState<string | null>(null);
 
   // Get content for the selected page
-  const pageContent = pageContentData[selectedPage] || [];
+  const contentData = pageContentData as PageContentMapping;
+  const pageContent = contentData[selectedPage] || [];
 
   // Ensure page content is an array
   const content = Array.isArray(pageContent) ? pageContent : [];
@@ -46,7 +48,7 @@ const SitePreview = ({ selectedPage, onAddSection }: SitePreviewProps) => {
           
           <TabsContent value="page" className="p-4">
             <div className="space-y-8">
-              {content.map((item, index) => (
+              {content.map((item) => (
                 <div 
                   key={item.id} 
                   className="preview-section border border-gray-200 p-4 rounded-md"

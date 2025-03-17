@@ -1,10 +1,11 @@
 
 import { useEffect } from "react";
-import { useLocation, Link } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { Button } from "@/components/Button";
 
 const NotFound = () => {
   const location = useLocation();
+  const navigate = useNavigate();
 
   useEffect(() => {
     console.error(
@@ -22,7 +23,7 @@ const NotFound = () => {
           The page you are looking for might have been removed, had its name changed,
           or is temporarily unavailable.
         </p>
-        <Button isLink href="/" size="lg">
+        <Button isLink href="/" size="lg" onClick={() => navigate('/')}>
           Return to Home
         </Button>
       </div>
