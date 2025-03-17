@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useTrainerProfiles, TrainerProfile } from '@/hooks/trainers/useTrainerProfiles';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -6,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Plus } from 'lucide-react';
 import { Separator } from '@/components/ui/separator';
 
-import TrainerProfilesGrid from '@/components/admin/trainers/profiles/TrainerProfilesGrid';
+import TrainerProfilesGrid from '@/components/admin/trainers/trainerprofiles/TrainerProfilesGrid';
 import TrainerDialogs from '@/components/admin/trainers/profiles/TrainerDialogs';
 
 const TrainerProfiles = () => {
