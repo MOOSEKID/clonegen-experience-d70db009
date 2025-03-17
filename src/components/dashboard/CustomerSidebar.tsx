@@ -2,6 +2,7 @@
 import { Link, useLocation } from 'react-router-dom';
 import { Home, BarChart2, Calendar, Dumbbell, Heart, Award, MapPin, Settings, LogOut } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { useAuth } from '@/hooks/useAuth';
 
 interface CustomerSidebarProps {
   isOpen: boolean;
@@ -9,6 +10,7 @@ interface CustomerSidebarProps {
 
 const CustomerSidebar = ({ isOpen }: CustomerSidebarProps) => {
   const location = useLocation();
+  const { logout } = useAuth();
   
   const sidebarItems = [
     { icon: Home, label: 'Dashboard', path: '/dashboard' },
@@ -20,12 +22,13 @@ const CustomerSidebar = ({ isOpen }: CustomerSidebarProps) => {
     { icon: MapPin, label: 'Gym Locations', path: '/dashboard/locations' },
   ];
 
+  const handleLogout = async () => {
+    await logout();
+  };
+
   const lowerItems = [
     { icon: Settings, label: 'Settings', path: '/dashboard/settings' },
-    { icon: LogOut, label: 'Logout', path: '/login', onClick: () => {
-      localStorage.removeItem('isLoggedIn');
-      localStorage.removeItem('userEmail');
-    }},
+    { icon: LogOut, label: 'Logout', path: '#', onClick: handleLogout },
   ];
 
   return (

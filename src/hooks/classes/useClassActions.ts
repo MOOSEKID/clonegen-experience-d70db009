@@ -1,28 +1,22 @@
 
-import { ClassType, MemberInfo } from '@/types/classTypes';
-import { useClassManagement } from './useClassManagement';
-import { useBookingActions } from './useBookingActions';
+import { useState } from 'react';
+import { ClassType } from '@/types/classTypes';
+import { useClassCrud } from './useClassCrud';
+import { useBookingManagement } from './useBookingManagement';
 import { useNotifications } from './useNotifications';
 
-export const useClassActions = (initialClasses: ClassType[]) => {
-  const { notificationsEnabled, sendNotification } = useNotifications();
+export const useClassActions = (initialClasses: ClassType[] = []) => {
+  const [classes, setClasses] = useState<ClassType[]>(initialClasses);
+  const { notificationsEnabled, toggleNotifications, sendNotification } = useNotifications();
   
-  const { 
-    classes, 
-    setClasses, 
-    addClass, 
-    updateClass, 
-    deleteClass 
-  } = useClassManagement({ 
-    notificationsEnabled, 
-    sendNotification 
+  const { addClass, updateClass, deleteClass } = useClassCrud(classes, setClasses, {
+    notificationsEnabled,
+    sendNotification
   });
   
-  const { bookClass, cancelBooking } = useBookingActions({ 
-    classes, 
-    setClasses, 
-    notificationsEnabled, 
-    sendNotification 
+  const { bookClass, cancelBooking } = useBookingManagement(classes, setClasses, {
+    notificationsEnabled,
+    sendNotification
   });
 
   return {
@@ -33,6 +27,7 @@ export const useClassActions = (initialClasses: ClassType[]) => {
     deleteClass,
     bookClass,
     cancelBooking,
-    notificationsEnabled
+    notificationsEnabled,
+    toggleNotifications
   };
 };

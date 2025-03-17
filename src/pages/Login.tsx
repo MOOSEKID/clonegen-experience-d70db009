@@ -6,66 +6,51 @@ import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { toast } from 'sonner';
 import { Eye, EyeOff } from 'lucide-react';
-
-// Demo user data - in a real app, this would come from a database
-const DEMO_USERS = [
-  { email: 'admin@example.com', password: 'admin123', isAdmin: true, name: 'Admin User' },
-  { email: 'user@example.com', password: 'user123', isAdmin: false, name: 'Regular User' },
-  { email: 'john@example.com', password: 'john123', isAdmin: false, name: 'John Doe' },
-  { email: 'jane@example.com', password: 'jane123', isAdmin: false, name: 'Jane Smith' },
-  { email: 'test@example.com', password: 'test123', isAdmin: false, name: 'Test User' }
-];
+import { useAuth } from '@/hooks/useAuth';
 
 const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
+  const { login, isAuthenticated, isAdmin } = useAuth();
   const from = location.state?.from || '/dashboard';
 
   useEffect(() => {
     // Check if user is already logged in
-    const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true' || document.cookie.includes('session_active=true');
-    if (isLoggedIn) {
-      const isAdmin = localStorage.getItem('isAdmin') === 'true' || document.cookie.includes('user_role=admin');
+    if (isAuthenticated) {
+      // Redirect based on user role
       navigate(isAdmin ? '/admin' : '/dashboard');
     }
-  }, [navigate]);
+  }, [navigate, isAuthenticated, isAdmin]);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setIsLoading(true);
     
-    // Find user in demo data
-    const user = DEMO_USERS.find(user => user.email === email && user.password === password);
-    
-    if (user) {
-      // Set login status in localStorage
-      localStorage.setItem('isLoggedIn', 'true');
-      localStorage.setItem('isAdmin', user.isAdmin ? 'true' : 'false');
-      localStorage.setItem('userEmail', email);
-      localStorage.setItem('userName', user.name);
-      
-      // Set cookies with expiry (30 days)
-      const expiryDate = new Date();
-      expiryDate.setDate(expiryDate.getDate() + 30);
-      document.cookie = `session_active=true; path=/; expires=${expiryDate.toUTCString()}`;
-      document.cookie = `user_role=${user.isAdmin ? 'admin' : 'user'}; path=/; expires=${expiryDate.toUTCString()}`;
-      
-      toast.success('Login successful! Redirecting...');
-      
-      // Navigate based on user role
-      navigate(user.isAdmin ? '/admin' : from);
-    } else {
-      // Provide more helpful error message
-      if (email === '' || password === '') {
+    try {
+      // Email validation
+      if (!email || !password) {
         toast.error('Please enter both email and password');
-      } else if (DEMO_USERS.some(user => user.email === email)) {
-        toast.error('Incorrect password. Please try again.');
-      } else {
-        toast.error('Invalid credentials. For demo, try: user@example.com / user123');
+        setIsLoading(false);
+        return;
       }
+      
+      const success = await login(email, password);
+      
+      if (success) {
+        // Navigate after successful login
+        // The destination will be determined by isAdmin in the useEffect
+        console.log('Login successful! Redirecting...');
+      }
+    } catch (error) {
+      console.error('Login error:', error);
+      toast.error(error instanceof Error ? error.message : 'Login failed');
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -79,6 +64,10 @@ const Login = () => {
         <div className="mb-6 text-center">
           <h1 className="text-3xl font-bold mb-2">Welcome Back</h1>
           <p className="text-white/70">Log in to access your account</p>
+          <div className="mt-4 p-3 bg-gym-orange/10 rounded-md border border-gym-orange/20">
+            <p className="text-sm font-medium text-gym-orange">Admin Login: admin@example.com / admin123</p>
+            <p className="text-sm text-white/70 mt-1">User Login: user@example.com / user123</p>
+          </div>
         </div>
         
         <form onSubmit={handleSubmit} className="space-y-4">
@@ -92,6 +81,7 @@ const Login = () => {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder="Enter your email"
+              disabled={isLoading}
               required
               className="bg-gym-dark border-white/20 text-white placeholder:text-white/50"
             />
@@ -108,6 +98,7 @@ const Login = () => {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="Enter your password"
+                disabled={isLoading}
                 required
                 className="bg-gym-dark border-white/20 text-white placeholder:text-white/50 pr-10"
               />
@@ -116,6 +107,7 @@ const Login = () => {
                 className="absolute right-3 top-1/2 -translate-y-1/2 text-white/70 hover:text-white focus:outline-none"
                 onClick={togglePasswordVisibility}
                 aria-label={showPassword ? "Hide password" : "Show password"}
+                disabled={isLoading}
               >
                 {showPassword ? (
                   <EyeOff size={18} />
@@ -134,6 +126,7 @@ const Login = () => {
                 className="h-4 w-4 rounded border-white/20 bg-gym-dark text-gym-orange focus:ring-gym-orange"
                 checked={rememberMe}
                 onChange={(e) => setRememberMe(e.target.checked)}
+                disabled={isLoading}
               />
               <label htmlFor="remember-me" className="ml-2 block text-sm text-white/70">
                 Remember me
@@ -147,8 +140,12 @@ const Login = () => {
             </div>
           </div>
           
-          <Button type="submit" className="w-full bg-gym-orange hover:bg-gym-orange/90 text-white">
-            Log in
+          <Button 
+            type="submit" 
+            className="w-full bg-gym-orange hover:bg-gym-orange/90 text-white"
+            disabled={isLoading}
+          >
+            {isLoading ? 'Signing in...' : 'Log in'}
           </Button>
         </form>
         

@@ -10,11 +10,6 @@ export * from '@/types/classTypes';
 
 export const useClassesData = () => {
   const [isLoading, setIsLoading] = useState(true);
-  const { 
-    notificationsEnabled, 
-    toggleNotifications, 
-    sendNotification 
-  } = useNotifications();
   
   const {
     classes,
@@ -23,7 +18,9 @@ export const useClassesData = () => {
     updateClass,
     deleteClass,
     bookClass,
-    cancelBooking
+    cancelBooking,
+    notificationsEnabled,
+    toggleNotifications
   } = useClassActions([]);
 
   const {
@@ -60,6 +57,6 @@ export const useClassesData = () => {
     cancelBooking,
     toggleNotifications,
     notificationsEnabled,
-    sendNotification
+    sendNotification: useNotifications().sendNotification
   };
 };

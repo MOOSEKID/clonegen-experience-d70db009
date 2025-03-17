@@ -2,16 +2,17 @@ import { useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 import { Menu, X, ShoppingBag, User, LayoutDashboard } from 'lucide-react';
+import { toast } from 'sonner';
 import DesktopNav from './header/DesktopNav';
 import MobileMenu from './header/MobileMenu';
+import { useAuth } from '@/hooks/useAuth';
 
 const Header = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isCompanyDropdownOpen, setIsCompanyDropdownOpen] = useState(false);
   const [isServicesDropdownOpen, setIsServicesDropdownOpen] = useState(false);
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [isAdmin, setIsAdmin] = useState(false);
+  const { isAuthenticated, isAdmin, logout } = useAuth();
   const location = useLocation();
   const navigate = useNavigate();
 
@@ -27,29 +28,6 @@ const Header = () => {
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
-
-  useEffect(() => {
-    const checkAuth = () => {
-      const loggedIn = localStorage.getItem('isLoggedIn') === 'true' || document.cookie.includes('session_active=true');
-      const admin = localStorage.getItem('isAdmin') === 'true' || document.cookie.includes('user_role=admin');
-      
-      if (loggedIn && localStorage.getItem('isLoggedIn') !== 'true') {
-        localStorage.setItem('isLoggedIn', 'true');
-      }
-      
-      if (admin && localStorage.getItem('isAdmin') !== 'true') {
-        localStorage.setItem('isAdmin', 'true');
-      }
-      
-      setIsLoggedIn(loggedIn);
-      setIsAdmin(admin);
-    };
-    
-    checkAuth();
-    
-    const interval = setInterval(checkAuth, 2000);
-    return () => clearInterval(interval);
-  }, [location.pathname]);
 
   useEffect(() => {
     setIsMenuOpen(false);
@@ -73,11 +51,18 @@ const Header = () => {
   }, [isCompanyDropdownOpen, isServicesDropdownOpen]);
 
   const handleDashboardClick = () => {
-    if (!isLoggedIn) {
+    if (!isAuthenticated) {
       navigate('/login', { state: { from: '/dashboard' } });
       return;
     }
     navigate(isAdmin ? '/admin' : '/dashboard');
+  };
+
+  const handleLogout = async () => {
+    const success = await logout();
+    if (success) {
+      navigate('/login');
+    }
   };
 
   const navItems = [
@@ -109,21 +94,13 @@ const Header = () => {
     action: handleDashboardClick
   };
   
-  const authItems = isLoggedIn 
+  const authItems = isAuthenticated 
     ? [
         {
           label: 'Logout',
-          path: '/logout',
+          path: '#',
           icon: User,
-          action: () => {
-            localStorage.removeItem('isLoggedIn');
-            localStorage.removeItem('isAdmin');
-            localStorage.removeItem('userEmail');
-            localStorage.removeItem('userName');
-            document.cookie = "session_active=; path=/; max-age=0";
-            document.cookie = "user_role=; path=/; max-age=0";
-            window.location.href = '/login';
-          }
+          action: handleLogout
         }
       ]
     : [
@@ -162,7 +139,7 @@ const Header = () => {
           setIsServicesDropdownOpen={setIsServicesDropdownOpen}
           isCompanyDropdownOpen={isCompanyDropdownOpen}
           setIsCompanyDropdownOpen={setIsCompanyDropdownOpen}
-          isLoggedIn={isLoggedIn}
+          isLoggedIn={isAuthenticated}
         />
 
         <button
@@ -180,7 +157,7 @@ const Header = () => {
           companyItems={companyItems}
           dashboardItem={dashboardItem}
           authItems={authItems}
-          isLoggedIn={isLoggedIn}
+          isLoggedIn={isAuthenticated}
         />
       </div>
     </header>
