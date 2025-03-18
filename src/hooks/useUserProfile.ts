@@ -3,7 +3,8 @@ import { UserProfile, UserProfileUpdate } from '@/types/userProfile.types';
 import useFetchUserProfile from './profile/useFetchUserProfile';
 import useUpdateUserProfile from './profile/useUpdateUserProfile';
 
-export { UserProfile, UserProfileUpdate } from '@/types/userProfile.types';
+// Use 'export type' syntax for re-exporting types
+export type { UserProfile, UserProfileUpdate } from '@/types/userProfile.types';
 
 export const useUserProfile = () => {
   const { 
