@@ -41,9 +41,13 @@ export interface AuthUser {
 export interface AuthContextType {
   user: AuthUser | null;
   isAdmin: boolean;
+  isStaff: boolean;
   isAuthenticated: boolean;
   isLoading: boolean;
   login: (email: string, password: string) => Promise<boolean>;
   signUp: (email: string, password: string, fullName: string) => Promise<boolean>;
   logout: () => Promise<void>;
+  requestPasswordReset?: (email: string) => Promise<boolean>;
+  updatePassword?: (newPassword: string) => Promise<boolean>;
+  updateProfile?: (data: Partial<AuthUser>) => Promise<boolean>;
 }

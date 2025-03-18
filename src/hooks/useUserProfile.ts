@@ -76,23 +76,26 @@ export const useUserProfile = () => {
               throw new Error('Failed to create user profile');
             }
             
-            // Convert to UserProfile format with type assertion
-            setUserProfile({
+            // Ensure the profile has a bio field
+            const profileWithBio = {
               ...newProfile,
+              bio: null,
               email: user.email
-            } as UserProfile);
+            } as UserProfile;
+            
+            setUserProfile(profileWithBio);
           } else {
             throw new Error('Failed to fetch user profile');
           }
         } else {
-          // Add email from auth user to profile data
-          const profileWithEmail = {
+          // Add email from auth user to profile data and ensure bio exists
+          const profileWithEmailAndBio = {
             ...profileData,
             bio: profileData.bio || null, // Ensure bio exists
             email: user.email
           } as UserProfile;
           
-          setUserProfile(profileWithEmail);
+          setUserProfile(profileWithEmailAndBio);
         }
       } catch (err) {
         console.error('Error in useUserProfile:', err);
@@ -138,19 +141,24 @@ export const useUserProfile = () => {
                 .single();
                 
               if (!createError) {
-                // Convert to UserProfile format with explicit type assertion
-                setUserProfile({
+                // Add bio field and ensure it exists
+                const profileWithBio = {
                   ...newProfile,
+                  bio: null,
                   email: session.user.email
-                } as UserProfile);
+                } as UserProfile;
+                
+                setUserProfile(profileWithBio);
               }
             } else if (!error) {
               // Ensure bio exists in the profile
-              setUserProfile({
+              const profileWithBio = {
                 ...profile,
                 bio: profile.bio || null,
                 email: session.user.email
-              } as UserProfile);
+              } as UserProfile;
+              
+              setUserProfile(profileWithBio);
             }
           }
         } else if (event === 'SIGNED_OUT') {
@@ -186,11 +194,13 @@ export const useUserProfile = () => {
       }
       
       // Ensure bio exists in the updated profile
-      setUserProfile({
+      const updatedProfileWithBio = {
         ...data,
         bio: data.bio || null,
         email: userProfile.email
-      } as UserProfile);
+      } as UserProfile;
+      
+      setUserProfile(updatedProfileWithBio);
       
       return data;
     } catch (err) {
