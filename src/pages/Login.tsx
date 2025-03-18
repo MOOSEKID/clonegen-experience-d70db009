@@ -1,57 +1,33 @@
+
 import { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { toast } from 'sonner';
 import { useAuth } from '@/hooks/useAuth';
 import LoginActions from '@/components/auth/LoginActions';
-import { supabase } from '@/lib/supabase';
+
+// Define the location state type
+interface LocationState {
+  from?: string;
+  message?: string;
+}
 
 const Login = () => {
   const { login, isAuthenticated, isAdmin, isLoading } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
   const [authError, setAuthError] = useState<string | null>(null);
   
-  // Force create admin user if it doesn't exist
+  // Get state from location (if redirected from another page)
+  const state = location.state as LocationState | null;
+  const from = state?.from || '/dashboard';
+  const message = state?.message;
+  
+  // Show toast if there's a message in the location state
   useEffect(() => {
-    const createAdminIfNeeded = async () => {
-      try {
-        // Check if admin exists in profiles
-        const { data: adminUsers, error: searchError } = await supabase
-          .from('profiles')
-          .select('id')
-          .eq('email', 'admin@uptowngym.rw')
-          .eq('is_admin', true)
-          .maybeSingle();
-        
-        if (searchError) console.error('Error checking for admin:', searchError);
-        
-        // If admin doesn't exist and we're in development mode, create one
-        if (!adminUsers && process.env.NODE_ENV === 'development') {
-          console.log('No admin found, attempting to create default admin account');
-          
-          // Create admin in auth
-          const { data: adminAuth, error: adminAuthError } = await supabase.auth.signUp({
-            email: 'admin@uptowngym.rw',
-            password: 'Admin123!',
-            options: {
-              data: {
-                full_name: 'System Administrator'
-              }
-            }
-          });
-          
-          if (adminAuthError) {
-            console.error('Error creating admin auth account:', adminAuthError);
-          } else {
-            console.log('Default admin account created successfully');
-          }
-        }
-      } catch (error) {
-        console.error('Error in createAdminIfNeeded:', error);
-      }
-    };
-
-    createAdminIfNeeded();
-  }, []);
+    if (message) {
+      toast.info(message);
+    }
+  }, [message]);
   
   useEffect(() => {
     // Check if user is already authenticated and redirect accordingly

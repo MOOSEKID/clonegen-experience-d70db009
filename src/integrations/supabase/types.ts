@@ -405,6 +405,7 @@ export type Database = {
           gym_location: string | null
           id: string
           is_admin: boolean | null
+          is_staff: boolean | null
           preferred_workout_time: string | null
           role: string | null
           updated_at: string | null
@@ -419,6 +420,7 @@ export type Database = {
           gym_location?: string | null
           id: string
           is_admin?: boolean | null
+          is_staff?: boolean | null
           preferred_workout_time?: string | null
           role?: string | null
           updated_at?: string | null
@@ -433,6 +435,7 @@ export type Database = {
           gym_location?: string | null
           id?: string
           is_admin?: boolean | null
+          is_staff?: boolean | null
           preferred_workout_time?: string | null
           role?: string | null
           updated_at?: string | null
