@@ -44,12 +44,27 @@ export const fetchSessions = async (trainerId?: string, clientId?: string) => {
 
 export const createSession = async (sessionData: ClientSessionInput) => {
   try {
+    // Calculate end time based on duration
+    const sessionDateTime = new Date(`${sessionData.session_date}T00:00:00`);
+    const startTime = sessionData.start_time || '09:00'; // Default to 9 AM if not provided
+    const durationInHours = (sessionData.duration || 60) / 60; // Convert minutes to hours
+    
+    // Parse startTime (assuming format "HH:MM")
+    const [startHours, startMinutes] = startTime.split(':').map(Number);
+    
+    // Calculate end time by adding duration
+    const endHours = startHours + Math.floor(durationInHours);
+    const endMinutes = startMinutes + Math.floor((durationInHours % 1) * 60);
+    const endTime = `${String(endHours).padStart(2, '0')}:${String(endMinutes).padStart(2, '0')}`;
+    
     const { data, error } = await supabase
       .from('client_sessions')
       .insert({
         trainer_id: sessionData.trainer_id,
         client_id: sessionData.client_id,
         session_date: sessionData.session_date,
+        start_time: startTime,
+        end_time: endTime,
         duration: sessionData.duration,
         status: sessionData.status || 'scheduled',
         notes: sessionData.notes || null,
@@ -70,9 +85,21 @@ export const createSession = async (sessionData: ClientSessionInput) => {
 
 export const updateSession = async (id: string, sessionData: Partial<ClientSessionInput>) => {
   try {
+    // Build update object
+    const updateData: any = { ...sessionData };
+    
+    // If we're updating duration, recalculate end_time if start_time is available
+    if (sessionData.duration && sessionData.start_time) {
+      const durationInHours = sessionData.duration / 60;
+      const [startHours, startMinutes] = sessionData.start_time.split(':').map(Number);
+      const endHours = startHours + Math.floor(durationInHours);
+      const endMinutes = startMinutes + Math.floor((durationInHours % 1) * 60);
+      updateData.end_time = `${String(endHours).padStart(2, '0')}:${String(endMinutes).padStart(2, '0')}`;
+    }
+    
     const { data, error } = await supabase
       .from('client_sessions')
-      .update(sessionData)
+      .update(updateData)
       .eq('id', id)
       .select()
       .single();

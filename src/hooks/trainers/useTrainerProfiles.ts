@@ -8,10 +8,10 @@ export interface TrainerProfile {
   email: string;
   phone?: string;
   bio?: string;
-  profile_picture?: string;
+  profilepicture?: string;
   specialization: string[];
   status?: string;
-  hire_date?: string;
+  hiredate?: string;
   experience_years?: number;
   experience_level?: string;
   stripe_account_id?: string;
@@ -71,17 +71,14 @@ export const useTrainerProfiles = () => {
                 
               if (availError) console.error('Error fetching availability:', availError);
               
-              const profile_picture = trainer.profile_picture || trainer.profilepicture || null;
-              const hire_date = trainer.hire_date || trainer.hiredate || new Date().toISOString().split('T')[0];
-                
               return {
                 ...trainer,
-                profile_picture,
-                hire_date,
+                profilepicture: trainer.profilepicture || null,
+                hiredate: trainer.hiredate || new Date().toISOString().split('T')[0],
                 certifications: certifications || [],
                 availability: availability || [],
-                experience_years: trainer.experience_years || null,
-                experience_level: trainer.experience_level || null
+                experience_years: 0,
+                experience_level: 'Beginner'
               } as TrainerProfile;
             })
           );

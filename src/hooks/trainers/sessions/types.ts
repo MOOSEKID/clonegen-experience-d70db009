@@ -4,6 +4,8 @@ export interface ClientSession {
   trainer_id: string;
   client_id: string;
   session_date: string;
+  start_time: string;
+  end_time: string;
   duration: number;
   status: 'scheduled' | 'completed' | 'canceled' | 'no-show';
   notes: string | null;
@@ -19,6 +21,8 @@ export interface ClientSessionInput {
   trainer_id: string;
   client_id: string;
   session_date: string;
+  start_time?: string;
+  end_time?: string;
   duration: number;
   status?: 'scheduled' | 'completed' | 'canceled' | 'no-show';
   notes?: string;
