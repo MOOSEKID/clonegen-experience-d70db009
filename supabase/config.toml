@@ -1,1 +1,7 @@
+
 project_id = "uldnqunqeibvocxsbkhb"
+
+# Uncomment these lines if you need to customize the Supabase configuration
+# [auth]
+# site_url = "https://your-frontend-url.com"
+# additional_redirect_urls = ["https://your-frontend-url.com/*"]
