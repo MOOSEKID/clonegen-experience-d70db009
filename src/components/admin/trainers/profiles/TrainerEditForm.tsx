@@ -3,7 +3,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { Form } from "@/components/ui/form";
-import { TrainerProfile } from "@/hooks/trainers/useTrainerProfiles";
+import { TrainerProfile } from "@/hooks/trainers/types";
 import TrainerBasicInfoFields from "./form/TrainerBasicInfoFields";
 import TrainerSpecializationsField from "./form/TrainerSpecializationsField";
 import TrainerBioField from "./form/TrainerBioField";
