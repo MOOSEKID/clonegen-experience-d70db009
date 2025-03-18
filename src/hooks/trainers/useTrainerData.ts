@@ -44,8 +44,9 @@ export const useTrainerData = () => {
                 hiredate: trainer.hiredate || new Date().toISOString().split('T')[0],
                 certifications: certifications || [],
                 availability: availability || [],
-                experience_years: trainer.experience_years || 0,
-                experience_level: trainer.experience_level || 'Beginner'
+                // Use type assertion to safely access potentially missing properties
+                experience_years: (trainer as any).experience_years || 0,
+                experience_level: (trainer as any).experience_level || 'Beginner'
               } as TrainerProfile;
             })
           );
