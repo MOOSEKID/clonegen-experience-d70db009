@@ -10,7 +10,7 @@ export interface UserProfile {
   preferred_workout_time: string | null;
   gym_location: string | null;
   avatar_url: string | null;
-  bio?: string | null; // Make bio optional
+  bio: string | null; // Bio is now properly defined as nullable
   role: string;
   is_admin: boolean;
   is_staff: boolean;
@@ -67,7 +67,7 @@ export const useUserProfile = () => {
                 role: 'member',
                 is_admin: false,
                 avatar_url: null,
-                bio: null, // Add bio field explicitly
+                bio: null, // Set bio to null explicitly
               }])
               .select()
               .single();
@@ -77,10 +77,10 @@ export const useUserProfile = () => {
               throw new Error('Failed to create user profile');
             }
             
-            // Add email and ensure bio exists
+            // Create complete profile with all required fields
             const completeProfile: UserProfile = {
               ...newProfile,
-              bio: null,
+              bio: newProfile.bio || null,
               email: user.email,
               is_staff: newProfile.is_staff || false,
               created_at: newProfile.created_at || new Date().toISOString(),
@@ -92,10 +92,10 @@ export const useUserProfile = () => {
             throw new Error('Failed to fetch user profile');
           }
         } else {
-          // Add email from auth user to profile data and ensure bio exists
+          // Create complete profile with all required fields
           const completeProfile: UserProfile = {
             ...profileData,
-            bio: profileData.bio || null,
+            bio: profileData.bio || null, // Ensure bio exists, default to null
             email: user.email,
             is_staff: profileData.is_staff || false,
             created_at: profileData.created_at || new Date().toISOString(),
@@ -142,16 +142,16 @@ export const useUserProfile = () => {
                   role: 'member',
                   is_admin: false,
                   avatar_url: null,
-                  bio: null, // Add bio field explicitly
+                  bio: null, // Set bio to null explicitly
                 }])
                 .select()
                 .single();
                 
               if (!createError && newProfile) {
-                // Create complete profile with required fields
+                // Create complete profile with all required fields
                 const completeProfile: UserProfile = {
                   ...newProfile,
-                  bio: null,
+                  bio: newProfile.bio || null, // Ensure bio exists, default to null
                   email: session.user.email,
                   is_staff: newProfile.is_staff || false,
                   created_at: newProfile.created_at || new Date().toISOString(),
@@ -161,10 +161,10 @@ export const useUserProfile = () => {
                 setUserProfile(completeProfile);
               }
             } else if (!error && profile) {
-              // Create complete profile with required fields
+              // Create complete profile with all required fields
               const completeProfile: UserProfile = {
                 ...profile,
-                bio: profile.bio || null,
+                bio: profile.bio || null, // Ensure bio exists, default to null
                 email: session.user.email,
                 is_staff: profile.is_staff || false,
                 created_at: profile.created_at || new Date().toISOString(),
@@ -206,10 +206,10 @@ export const useUserProfile = () => {
         throw new Error('Failed to update user profile');
       }
       
-      // Create complete profile with required fields
+      // Create complete profile with all required fields
       const completeProfile: UserProfile = {
         ...data,
-        bio: data.bio || null,
+        bio: data.bio || null, // Ensure bio exists, default to null
         email: userProfile.email,
         is_staff: data.is_staff || false,
         created_at: data.created_at || userProfile.created_at,
