@@ -35,6 +35,8 @@ export const generateMockSessions = (trainerId?: string, clientId?: string): Cli
       trainer_id: defaultTrainerId,
       client_id: defaultClientId,
       session_date: sessionDate.toISOString(),
+      start_time: "09:00",
+      end_time: "10:00",
       duration: 60,
       status,
       notes: status === 'completed' ? "Great progress today" : null,

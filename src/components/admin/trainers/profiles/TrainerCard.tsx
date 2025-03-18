@@ -51,7 +51,7 @@ const TrainerCard: React.FC<TrainerCardProps> = ({
           name={trainer.name}
           email={trainer.email}
           phone={trainer.phone}
-          profilePicture={trainer.profile_picture}
+          profilePicture={trainer.profilepicture}
         />
       </CardHeader>
 
@@ -64,7 +64,7 @@ const TrainerCard: React.FC<TrainerCardProps> = ({
           <CalendarIcon className="h-4 w-4 mr-2" />
           <span className="text-muted-foreground">Hire Date:</span>
           <span className="ml-1 font-medium">
-            {trainer.hire_date ? format(new Date(trainer.hire_date), 'MMM d, yyyy') : 'Not specified'}
+            {trainer.hiredate ? format(new Date(trainer.hiredate), 'MMM d, yyyy') : 'Not specified'}
           </span>
         </div>
 

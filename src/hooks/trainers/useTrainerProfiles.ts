@@ -124,10 +124,10 @@ export const useTrainerProfiles = () => {
           email: trainer.email,
           phone: trainer.phone || null,
           bio: trainer.bio || null,
-          profile_picture: trainer.profile_picture || null,
+          profilepicture: trainer.profilepicture || null,
           specialization: trainer.specialization || [],
           status: trainer.status || 'Active',
-          hire_date: trainer.hire_date || new Date().toISOString().split('T')[0],
+          hiredate: trainer.hiredate || new Date().toISOString().split('T')[0],
           experience_years: trainer.experience_years || null,
           experience_level: trainer.experience_level || null
         })

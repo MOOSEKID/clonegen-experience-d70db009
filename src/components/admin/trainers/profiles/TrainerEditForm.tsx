@@ -16,8 +16,8 @@ const trainerFormSchema = z.object({
   bio: z.string().optional(),
   status: z.string(),
   specialization: z.array(z.string()).optional(),
-  hire_date: z.string().optional(),
-  profile_picture: z.string().optional(),
+  hiredate: z.string().optional(),
+  profilepicture: z.string().optional(),
 });
 
 export type TrainerFormValues = z.infer<typeof trainerFormSchema>;
@@ -38,8 +38,8 @@ const TrainerEditForm = ({ trainer, onSubmit, onCancel }: TrainerEditFormProps) 
       bio: trainer.bio || "",
       status: trainer.status || "Active",
       specialization: trainer.specialization || [],
-      hire_date: trainer.hire_date || new Date().toISOString().split('T')[0],
-      profile_picture: trainer.profile_picture || "",
+      hiredate: trainer.hiredate || new Date().toISOString().split('T')[0],
+      profilepicture: trainer.profilepicture || "",
     },
   });
 

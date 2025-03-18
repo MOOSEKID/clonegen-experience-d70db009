@@ -80,7 +80,7 @@ const TrainerBasicInfoFields: React.FC<TrainerBasicInfoFieldsProps> = ({ form })
 
       <FormField
         control={form.control}
-        name="hire_date"
+        name="hiredate"
         render={({ field }) => (
           <FormItem>
             <FormLabel>Hire Date</FormLabel>
@@ -94,7 +94,7 @@ const TrainerBasicInfoFields: React.FC<TrainerBasicInfoFieldsProps> = ({ form })
 
       <FormField
         control={form.control}
-        name="profile_picture"
+        name="profilepicture"
         render={({ field }) => (
           <FormItem>
             <FormLabel>Profile Picture URL</FormLabel>
