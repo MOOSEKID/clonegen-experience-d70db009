@@ -1,5 +1,4 @@
-
-import { BrowserRouter as Router, Routes, Route, useNavigate } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { Toaster } from 'sonner';
 import { AuthProvider } from '@/contexts/AuthProvider';
 import { ThemeProvider } from '@/components/theme/theme-provider';
@@ -33,10 +32,8 @@ import ContactUs from '@/pages/ContactUs';
 import Timetable from '@/pages/Timetable';
 import OpeningTimes from '@/pages/OpeningTimes';
 
-// Custom error fallback component to show when there's an error
-const ErrorFallback = () => {
-  const navigate = useNavigate();
-  
+// Custom error fallback component that doesn't use hooks directly
+const ErrorFallbackComponent = () => {
   return (
     <ErrorMessage
       title="Something went wrong"
@@ -47,7 +44,7 @@ const ErrorFallback = () => {
       }}
       secondaryAction={{
         label: "Go to homepage",
-        onClick: () => navigate('/')
+        onClick: () => window.location.href = '/'
       }}
     />
   );
@@ -57,7 +54,7 @@ function App() {
   console.log("App component rendering");
   
   return (
-    <ErrorBoundary fallback={<ErrorFallback />}>
+    <ErrorBoundary fallback={<ErrorFallbackComponent />}>
       <ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
         <AuthProvider>
           <Router>

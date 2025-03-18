@@ -1,4 +1,5 @@
 
+import React from 'react';
 import { Link } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 
@@ -10,7 +11,20 @@ interface MobileNavItemProps {
   onClick?: (e: React.MouseEvent) => void;
 }
 
-const MobileNavItem = ({ label, path, isActive, icon: Icon, onClick }: MobileNavItemProps) => {
+const MobileNavItem: React.FC<MobileNavItemProps> = ({ 
+  label, 
+  path, 
+  isActive, 
+  icon: Icon, 
+  onClick 
+}) => {
+  const handleClick = (e: React.MouseEvent) => {
+    if (onClick) {
+      onClick(e);
+    }
+    console.log(`Navigation to: ${path}`);
+  };
+
   return (
     <Link
       to={path}
@@ -20,7 +34,7 @@ const MobileNavItem = ({ label, path, isActive, icon: Icon, onClick }: MobileNav
           ? "bg-gym-dark text-white"
           : "text-white/80 hover:bg-gym-dark hover:text-white"
       )}
-      onClick={onClick}
+      onClick={handleClick}
     >
       <div className="flex items-center">
         {Icon && <Icon className="mr-2" size={20} />}
