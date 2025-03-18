@@ -1,64 +1,31 @@
 
-import { ReactNode } from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { cn } from '@/lib/utils';
-import { LucideIcon } from 'lucide-react';
 
 interface MobileNavItemProps {
+  label: string;
   path: string;
-  children: ReactNode;
-  icon?: LucideIcon;
-  isExternalLink?: boolean;
-  action?: () => void;
+  isActive?: boolean;
+  icon?: React.ElementType;
+  onClick?: (e: React.MouseEvent) => void;
 }
 
-const MobileNavItem = ({ path, children, icon: Icon, isExternalLink = false, action }: MobileNavItemProps) => {
-  const location = useLocation();
-  
-  const isActive = (path: string) => {
-    return location.pathname === path || location.pathname.startsWith(path + '/');
-  };
-
-  if (action) {
-    return (
-      <button
-        onClick={action}
-        className={cn(
-          'nav-link text-white flex items-center gap-2 w-full text-left',
-          isActive(path) ? 'active' : ''
-        )}
-      >
-        {Icon && <Icon size={18} />}
-        {children}
-      </button>
-    );
-  }
-
-  if (isExternalLink) {
-    return (
-      <a
-        href={path}
-        className={cn(
-          'nav-link text-white flex items-center gap-2',
-          isActive(path) ? 'active' : ''
-        )}
-      >
-        {Icon && <Icon size={18} />}
-        {children}
-      </a>
-    );
-  }
-
+const MobileNavItem = ({ label, path, isActive, icon: Icon, onClick }: MobileNavItemProps) => {
   return (
     <Link
       to={path}
       className={cn(
-        'nav-link text-white flex items-center gap-2',
-        isActive(path) ? 'active' : ''
+        "block px-3 py-2 rounded-md text-base font-medium",
+        isActive
+          ? "bg-gym-dark text-white"
+          : "text-white/80 hover:bg-gym-dark hover:text-white"
       )}
+      onClick={onClick}
     >
-      {Icon && <Icon size={18} />}
-      {children}
+      <div className="flex items-center">
+        {Icon && <Icon className="mr-2" size={20} />}
+        {label}
+      </div>
     </Link>
   );
 };

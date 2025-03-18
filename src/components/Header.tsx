@@ -1,5 +1,6 @@
+
 import { useState, useEffect } from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 import { Menu, X, ShoppingBag, User, LayoutDashboard } from 'lucide-react';
 import { toast } from 'sonner';
@@ -14,6 +15,7 @@ const Header = () => {
   const [isServicesDropdownOpen, setIsServicesDropdownOpen] = useState(false);
   const { isAuthenticated, isAdmin, logout } = useAuth();
   const location = useLocation();
+  const navigate = useNavigate();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -52,6 +54,14 @@ const Header = () => {
   const handleLogout = async () => {
     await logout();
     toast.success('Logged out successfully');
+    // Ensure we navigate to home after logout
+    navigate('/');
+  };
+
+  // Adding console logs to debug navigation
+  const handleNavigation = (path: string) => {
+    console.log(`Navigating to: ${path}`);
+    navigate(path);
   };
 
   const navItems = [
@@ -99,6 +109,8 @@ const Header = () => {
         }
       ];
 
+  console.log("Current path:", location.pathname);
+
   return (
     <header 
       className={cn(
@@ -128,6 +140,7 @@ const Header = () => {
           isCompanyDropdownOpen={isCompanyDropdownOpen}
           setIsCompanyDropdownOpen={setIsCompanyDropdownOpen}
           isLoggedIn={isAuthenticated}
+          onNavigation={handleNavigation}
         />
 
         <button
@@ -146,6 +159,7 @@ const Header = () => {
           dashboardItem={dashboardItem}
           authItems={authItems}
           isLoggedIn={isAuthenticated}
+          onNavigation={handleNavigation}
         />
       </div>
     </header>
@@ -153,4 +167,3 @@ const Header = () => {
 };
 
 export default Header;
-

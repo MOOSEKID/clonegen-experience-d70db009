@@ -1,10 +1,10 @@
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+
+import { BrowserRouter as Router, Routes, Route, useNavigate } from 'react-router-dom';
 import { Toaster } from 'sonner';
 import { AuthProvider } from '@/contexts/AuthProvider';
 import { ThemeProvider } from '@/components/theme/theme-provider';
 import { ErrorBoundary } from '@/components/ui/error-boundary';
 import { ErrorMessage } from '@/components/ErrorMessage';
-import { useNavigate } from 'react-router-dom';
 import Header from '@/components/Header';
 
 // Page imports
@@ -54,6 +54,8 @@ const ErrorFallback = () => {
 };
 
 function App() {
+  console.log("App component rendering");
+  
   return (
     <ErrorBoundary fallback={<ErrorFallback />}>
       <ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
@@ -61,7 +63,7 @@ function App() {
           <Router>
             <div className="min-h-screen flex flex-col">
               <Header />
-              <div className="flex-1">
+              <div className="flex-1 pt-16 md:pt-20"> {/* Added padding top to account for fixed header */}
                 <Routes>
                   {/* Public routes */}
                   <Route path="/" element={<Index />} />
@@ -86,22 +88,130 @@ function App() {
                   <Route path="/reset-password" element={<ResetPassword />} />
                   
                   {/* Main navigation routes */}
-                  <Route path="/membership" element={<Membership />} />
-                  <Route path="/classes" element={<Classes />} />
-                  <Route path="/blogs" element={<Blogs />} />
-                  <Route path="/shop" element={<Shop />} />
+                  <Route path="/membership" element={
+                    <ErrorBoundary fallback={<div className="p-8 text-center">
+                      <h2 className="text-2xl font-bold mb-4">Failed to load Membership page</h2>
+                      <button onClick={() => window.location.reload()} className="px-4 py-2 bg-gym-orange text-white rounded">
+                        Reload
+                      </button>
+                    </div>}>
+                      <Membership />
+                    </ErrorBoundary>
+                  } />
+                  <Route path="/classes" element={
+                    <ErrorBoundary fallback={<div className="p-8 text-center">
+                      <h2 className="text-2xl font-bold mb-4">Failed to load Classes page</h2>
+                      <button onClick={() => window.location.reload()} className="px-4 py-2 bg-gym-orange text-white rounded">
+                        Reload
+                      </button>
+                    </div>}>
+                      <Classes />
+                    </ErrorBoundary>
+                  } />
+                  <Route path="/blogs" element={
+                    <ErrorBoundary fallback={<div className="p-8 text-center">
+                      <h2 className="text-2xl font-bold mb-4">Failed to load Blogs page</h2>
+                      <button onClick={() => window.location.reload()} className="px-4 py-2 bg-gym-orange text-white rounded">
+                        Reload
+                      </button>
+                    </div>}>
+                      <Blogs />
+                    </ErrorBoundary>
+                  } />
+                  <Route path="/shop" element={
+                    <ErrorBoundary fallback={<div className="p-8 text-center">
+                      <h2 className="text-2xl font-bold mb-4">Failed to load Shop page</h2>
+                      <button onClick={() => window.location.reload()} className="px-4 py-2 bg-gym-orange text-white rounded">
+                        Reload
+                      </button>
+                    </div>}>
+                      <Shop />
+                    </ErrorBoundary>
+                  } />
                   
                   {/* Services dropdown routes */}
-                  <Route path="/services" element={<Services />} />
-                  <Route path="/facilities" element={<FitnessFacilities />} />
-                  <Route path="/youth-programs" element={<YouthPrograms />} />
-                  <Route path="/spa-wellness" element={<SpaWellness />} />
+                  <Route path="/services" element={
+                    <ErrorBoundary fallback={<div className="p-8 text-center">
+                      <h2 className="text-2xl font-bold mb-4">Failed to load Services page</h2>
+                      <button onClick={() => window.location.reload()} className="px-4 py-2 bg-gym-orange text-white rounded">
+                        Reload
+                      </button>
+                    </div>}>
+                      <Services />
+                    </ErrorBoundary>
+                  } />
+                  <Route path="/facilities" element={
+                    <ErrorBoundary fallback={<div className="p-8 text-center">
+                      <h2 className="text-2xl font-bold mb-4">Failed to load Facilities page</h2>
+                      <button onClick={() => window.location.reload()} className="px-4 py-2 bg-gym-orange text-white rounded">
+                        Reload
+                      </button>
+                    </div>}>
+                      <FitnessFacilities />
+                    </ErrorBoundary>
+                  } />
+                  <Route path="/youth-programs" element={
+                    <ErrorBoundary fallback={<div className="p-8 text-center">
+                      <h2 className="text-2xl font-bold mb-4">Failed to load Youth Programs page</h2>
+                      <button onClick={() => window.location.reload()} className="px-4 py-2 bg-gym-orange text-white rounded">
+                        Reload
+                      </button>
+                    </div>}>
+                      <YouthPrograms />
+                    </ErrorBoundary>
+                  } />
+                  <Route path="/spa-wellness" element={
+                    <ErrorBoundary fallback={<div className="p-8 text-center">
+                      <h2 className="text-2xl font-bold mb-4">Failed to load Spa & Wellness page</h2>
+                      <button onClick={() => window.location.reload()} className="px-4 py-2 bg-gym-orange text-white rounded">
+                        Reload
+                      </button>
+                    </div>}>
+                      <SpaWellness />
+                    </ErrorBoundary>
+                  } />
                   
                   {/* Company dropdown routes */}
-                  <Route path="/about-us" element={<AboutUs />} />
-                  <Route path="/contact-us" element={<ContactUs />} />
-                  <Route path="/timetable" element={<Timetable />} />
-                  <Route path="/opening-times" element={<OpeningTimes />} />
+                  <Route path="/about-us" element={
+                    <ErrorBoundary fallback={<div className="p-8 text-center">
+                      <h2 className="text-2xl font-bold mb-4">Failed to load About Us page</h2>
+                      <button onClick={() => window.location.reload()} className="px-4 py-2 bg-gym-orange text-white rounded">
+                        Reload
+                      </button>
+                    </div>}>
+                      <AboutUs />
+                    </ErrorBoundary>
+                  } />
+                  <Route path="/contact-us" element={
+                    <ErrorBoundary fallback={<div className="p-8 text-center">
+                      <h2 className="text-2xl font-bold mb-4">Failed to load Contact Us page</h2>
+                      <button onClick={() => window.location.reload()} className="px-4 py-2 bg-gym-orange text-white rounded">
+                        Reload
+                      </button>
+                    </div>}>
+                      <ContactUs />
+                    </ErrorBoundary>
+                  } />
+                  <Route path="/timetable" element={
+                    <ErrorBoundary fallback={<div className="p-8 text-center">
+                      <h2 className="text-2xl font-bold mb-4">Failed to load Timetable page</h2>
+                      <button onClick={() => window.location.reload()} className="px-4 py-2 bg-gym-orange text-white rounded">
+                        Reload
+                      </button>
+                    </div>}>
+                      <Timetable />
+                    </ErrorBoundary>
+                  } />
+                  <Route path="/opening-times" element={
+                    <ErrorBoundary fallback={<div className="p-8 text-center">
+                      <h2 className="text-2xl font-bold mb-4">Failed to load Opening Times page</h2>
+                      <button onClick={() => window.location.reload()} className="px-4 py-2 bg-gym-orange text-white rounded">
+                        Reload
+                      </button>
+                    </div>}>
+                      <OpeningTimes />
+                    </ErrorBoundary>
+                  } />
                   
                   {/* Protected routes */}
                   <Route path="/dashboard/*" element={
