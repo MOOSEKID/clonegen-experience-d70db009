@@ -1,6 +1,7 @@
 
 import React from 'react';
 import { useLocation } from 'react-router-dom';
+import { Progress } from '@/components/ui/progress';
 
 interface PagePlaceholderProps {
   title?: string;
@@ -18,9 +19,7 @@ const PagePlaceholder: React.FC<PagePlaceholderProps> = ({ title }) => {
         <p className="text-white/80 mb-8">
           This page is currently under development. Our team is working on creating amazing content and features for you.
         </p>
-        <div className="w-full bg-gray-700 h-2 rounded-full overflow-hidden">
-          <div className="bg-gym-orange h-full rounded-full w-3/4"></div>
-        </div>
+        <Progress value={75} className="h-2 bg-gray-700" />
         <p className="text-white/60 mt-2 text-sm">Coming soon...</p>
         
         <div className="mt-12 grid gap-6 md:grid-cols-2">
