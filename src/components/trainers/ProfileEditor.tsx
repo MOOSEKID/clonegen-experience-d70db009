@@ -25,7 +25,7 @@ const ProfileEditor = () => {
         full_name: userProfile.full_name || '',
         bio: userProfile.bio || '',
         contact_number: userProfile.contact_number || '',
-        specialization: []
+        specialization: userProfile.specialization || []
       });
     }
   }, [userProfile]);
