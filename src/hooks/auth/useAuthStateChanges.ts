@@ -1,7 +1,7 @@
 
-import { useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import type { AuthUser, UserRole, AccessLevel } from '@/types/auth.types';
+import type { AuthUser } from '@/types/auth.types';
 import { authStorageService } from '@/services/authStorageService';
 
 type AuthStateChangeCallbacks = {
@@ -30,20 +30,13 @@ export const useAuthStateChanges = (callbacks: AuthStateChangeCallbacks) => {
               .eq('id', session.user.id)
               .single();
               
-            const userRole = (profile?.role || 'member') as UserRole;
+            const userRole = profile?.role || 'member';
             const userIsAdmin = profile?.is_admin || false;
             
             setUser({
               ...session.user,
               email: session.user.email || '', // Ensure email is always provided
-              role: userRole,
-              full_name: session.user.user_metadata?.full_name || '',
-              is_admin: userIsAdmin,
-              is_staff: false,
-              status: 'Active',
-              access_level: 'Basic' as AccessLevel,
-              created_at: new Date().toISOString(),
-              updated_at: new Date().toISOString()
+              role: userRole
             });
             
             setIsAdmin(userIsAdmin);

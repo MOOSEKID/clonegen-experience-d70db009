@@ -4,42 +4,29 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Eye, EyeOff } from 'lucide-react';
 import { toast } from 'sonner';
-import TermsAgreement from '@/components/auth/TermsAgreement';
+import { useAuth } from '@/hooks/useAuth';
 
 interface LoginFormProps {
   onLogin: (email: string, password: string) => Promise<void>;
   isLoading: boolean;
-  fallbackMode?: boolean;
-  onAdminLogin?: () => void;
-  onUserLogin?: () => void;
 }
 
-const LoginForm = ({ onLogin, isLoading, fallbackMode, onAdminLogin, onUserLogin }: LoginFormProps) => {
+const LoginForm = ({ onLogin, isLoading }: LoginFormProps) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
-  const [termsAccepted, setTermsAccepted] = useState(true);  // Default to true for easier testing
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
+    // Email validation
     if (!email || !password) {
       toast.error('Please enter both email and password');
       return;
     }
     
-    if (!termsAccepted) {
-      toast.error('Please accept the terms and conditions');
-      return;
-    }
-    
-    try {
-      console.log('Form submitted with email:', email);
-      await onLogin(email, password);
-    } catch (error) {
-      console.error('Error in form submission:', error);
-    }
+    await onLogin(email, password);
   };
 
   const togglePasswordVisibility = () => {
@@ -95,12 +82,6 @@ const LoginForm = ({ onLogin, isLoading, fallbackMode, onAdminLogin, onUserLogin
         </div>
       </div>
       
-      <TermsAgreement 
-        accepted={termsAccepted}
-        onChange={setTermsAccepted}
-        disabled={isLoading}
-      />
-      
       <div className="flex items-center justify-between">
         <div className="flex items-center">
           <input
@@ -117,7 +98,7 @@ const LoginForm = ({ onLogin, isLoading, fallbackMode, onAdminLogin, onUserLogin
         </div>
         
         <div className="text-sm">
-          <a href="/forgot-password" className="text-gym-orange hover:underline">
+          <a href="#" className="text-gym-orange hover:underline">
             Forgot password?
           </a>
         </div>
@@ -130,40 +111,6 @@ const LoginForm = ({ onLogin, isLoading, fallbackMode, onAdminLogin, onUserLogin
       >
         {isLoading ? 'Signing in...' : 'Log in'}
       </Button>
-      
-      {/* Quick login buttons for testing */}
-      {(onAdminLogin || onUserLogin) && (
-        <div className="grid grid-cols-2 gap-2 mt-4">
-          {onAdminLogin && (
-            <Button 
-              type="button" 
-              variant="outline"
-              onClick={onAdminLogin}
-              disabled={isLoading}
-              className="text-sm"
-            >
-              Admin Login
-            </Button>
-          )}
-          {onUserLogin && (
-            <Button 
-              type="button"
-              variant="outline" 
-              onClick={onUserLogin}
-              disabled={isLoading}
-              className="text-sm"
-            >
-              User Login
-            </Button>
-          )}
-        </div>
-      )}
-      
-      {fallbackMode && (
-        <p className="text-xs text-amber-400 text-center mt-2">
-          ⚠️ Running in test authentication mode
-        </p>
-      )}
     </form>
   );
 };

@@ -1,9 +1,10 @@
 
-import { supabase, getTable } from '@/integrations/supabase/client';
+import { supabase } from '@/integrations/supabase/client';
 import { ClientAssignment } from './types';
 
 export const fetchAssignments = async (trainerId?: string, clientId?: string) => {
-  let query = getTable('trainer_client_assignments')
+  let query = supabase
+    .from('trainer_client_assignments')
     .select(`
       *,
       trainers:trainer_id(name),
@@ -28,6 +29,7 @@ export const fetchAssignments = async (trainerId?: string, clientId?: string) =>
       ...assignment,
       client_name: assignment.members?.name,
       trainer_name: assignment.trainers?.name,
+      // Ensure status is one of the valid types
       status: (assignment.status as 'active' | 'paused' | 'ended') || 'active'
     })) as ClientAssignment[];
   }
@@ -37,7 +39,8 @@ export const fetchAssignments = async (trainerId?: string, clientId?: string) =>
 
 export const createAssignment = async (trainerId: string, clientId: string) => {
   // Check if assignment already exists
-  const { data: existingAssignment } = await getTable('trainer_client_assignments')
+  const { data: existingAssignment } = await supabase
+    .from('trainer_client_assignments')
     .select('*')
     .eq('trainer_id', trainerId)
     .eq('client_id', clientId)
@@ -46,7 +49,8 @@ export const createAssignment = async (trainerId: string, clientId: string) => {
   if (existingAssignment) {
     // If already exists but not active, reactivate it
     if (existingAssignment.status !== 'active') {
-      const { data, error } = await getTable('trainer_client_assignments')
+      const { data, error } = await supabase
+        .from('trainer_client_assignments')
         .update({ status: 'active', assignment_date: new Date().toISOString() })
         .eq('id', existingAssignment.id)
         .select()
@@ -62,7 +66,8 @@ export const createAssignment = async (trainerId: string, clientId: string) => {
   }
   
   // Create new assignment
-  const { data, error } = await getTable('trainer_client_assignments')
+  const { data, error } = await supabase
+    .from('trainer_client_assignments')
     .insert({
       trainer_id: trainerId,
       client_id: clientId,
@@ -78,7 +83,8 @@ export const createAssignment = async (trainerId: string, clientId: string) => {
 };
 
 export const updateAssignmentStatus = async (id: string, status: 'active' | 'paused' | 'ended') => {
-  const { data, error } = await getTable('trainer_client_assignments')
+  const { data, error } = await supabase
+    .from('trainer_client_assignments')
     .update({ status })
     .eq('id', id)
     .select()

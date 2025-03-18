@@ -1,32 +1,34 @@
 
 import { Link, useLocation } from 'react-router-dom';
-import { ChevronDown } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import HeaderDropdown from './HeaderDropdown';
+import { Button } from '../Button';
+import { LucideIcon } from 'lucide-react';
 
 interface NavItem {
   label: string;
   path: string;
-  icon?: React.ElementType;
+  icon?: LucideIcon;
   action?: () => void;
+  isExternalLink?: boolean;
 }
 
 interface DesktopNavProps {
   navItems: NavItem[];
-  serviceItems: NavItem[];
-  companyItems: NavItem[];
+  serviceItems: { label: string; path: string }[];
+  companyItems: { label: string; path: string }[];
   dashboardItem: NavItem;
   authItems: NavItem[];
   isServicesDropdownOpen: boolean;
-  setIsServicesDropdownOpen: (isOpen: boolean) => void;
+  setIsServicesDropdownOpen: React.Dispatch<React.SetStateAction<boolean>>;
   isCompanyDropdownOpen: boolean;
-  setIsCompanyDropdownOpen: (isOpen: boolean) => void;
-  isLoggedIn: boolean;
-  onNavigation?: (path: string) => void;
+  setIsCompanyDropdownOpen: React.Dispatch<React.SetStateAction<boolean>>;
+  isLoggedIn?: boolean;
 }
 
-const DesktopNav = ({
-  navItems,
-  serviceItems,
+const DesktopNav = ({ 
+  navItems, 
+  serviceItems, 
   companyItems,
   dashboardItem,
   authItems,
@@ -34,157 +36,124 @@ const DesktopNav = ({
   setIsServicesDropdownOpen,
   isCompanyDropdownOpen,
   setIsCompanyDropdownOpen,
-  isLoggedIn,
-  onNavigation
+  isLoggedIn = false
 }: DesktopNavProps) => {
   const location = useLocation();
-  
+
   const isActive = (path: string) => {
-    return location.pathname === path;
+    return location.pathname === path || location.pathname.startsWith(path + '/');
   };
-  
-  const handleClick = (item: NavItem, e: React.MouseEvent) => {
-    if (item.action) {
-      e.preventDefault();
-      item.action();
-    } else if (onNavigation && item.path !== '#') {
-      e.preventDefault();
-      onNavigation(item.path);
-    }
+
+  const isServiceActive = () => {
+    return serviceItems.some(item => isActive(item.path));
+  };
+
+  const isCompanyActive = () => {
+    return companyItems.some(item => isActive(item.path));
   };
 
   return (
-    <nav className="hidden md:flex items-center space-x-1">
-      {navItems.map((item) => (
-        <Link
-          key={item.label}
-          to={item.path}
-          className={cn(
-            "px-3 py-2 rounded-md text-sm font-medium transition-colors",
-            isActive(item.path)
-              ? "text-white bg-gym-darkblue/50"
-              : "text-white/80 hover:text-white hover:bg-gym-dark/50"
-          )}
-          onClick={(e) => handleClick(item, e)}
-        >
-          <div className="flex items-center space-x-1">
-            {item.icon && <item.icon size={16} />}
-            <span>{item.label}</span>
-          </div>
-        </Link>
-      ))}
-      
-      {/* Services Dropdown */}
-      <div className="relative services-dropdown">
-        <button
-          className={cn(
-            "px-3 py-2 rounded-md text-sm font-medium transition-colors flex items-center space-x-1",
-            isActive('/services') || serviceItems.some(item => isActive(item.path))
-              ? "text-white bg-gym-darkblue/50"
-              : "text-white/80 hover:text-white hover:bg-gym-dark/50"
-          )}
-          onClick={() => setIsServicesDropdownOpen(!isServicesDropdownOpen)}
-        >
-          <span>Services</span>
-          <ChevronDown size={16} className={cn(isServicesDropdownOpen ? "transform rotate-180" : "")} />
-        </button>
-        
-        {isServicesDropdownOpen && (
-          <div className="absolute left-0 mt-2 w-48 rounded-md shadow-lg bg-gym-darkblue ring-1 ring-black ring-opacity-5 z-10">
-            <div className="py-1">
-              {serviceItems.map((item) => (
-                <Link
-                  key={item.label}
-                  to={item.path}
-                  className={cn(
-                    "block px-4 py-2 text-sm text-white/80 hover:bg-gym-dark/50 hover:text-white",
-                    isActive(item.path) && "bg-gym-dark/30 text-white"
-                  )}
-                  onClick={(e) => handleClick(item, e)}
-                >
-                  {item.label}
-                </Link>
-              ))}
-            </div>
-          </div>
+    <>
+      <nav className="hidden md:flex items-center space-x-8">
+        {navItems.map((item) => (
+          item.action ? (
+            <button
+              key={item.path}
+              onClick={item.action}
+              className={cn(
+                'nav-link text-white/90 hover:text-white flex items-center gap-1',
+                isActive(item.path) ? 'active' : ''
+              )}
+            >
+              {item.icon && <item.icon size={18} />}
+              {item.label}
+            </button>
+          ) : (
+            <Link
+              key={item.path}
+              to={item.path}
+              className={cn(
+                'nav-link text-white/90 hover:text-white flex items-center gap-1',
+                isActive(item.path) ? 'active' : ''
+              )}
+            >
+              {item.icon && <item.icon size={18} />}
+              {item.label}
+            </Link>
+          )
+        ))}
+
+        <HeaderDropdown
+          title="Services"
+          items={serviceItems}
+          isActive={isServiceActive()}
+          isOpenState={[isServicesDropdownOpen, setIsServicesDropdownOpen]}
+          className="services-dropdown"
+        />
+
+        <HeaderDropdown
+          title="Company"
+          items={companyItems}
+          isActive={isCompanyActive()}
+          isOpenState={[isCompanyDropdownOpen, setIsCompanyDropdownOpen]}
+          className="company-dropdown"
+        />
+
+        {/* Dashboard button/link - now positioned between Company dropdown and auth items */}
+        {dashboardItem.action ? (
+          <button
+            onClick={dashboardItem.action}
+            className={cn(
+              'nav-link text-white/90 hover:text-white flex items-center gap-1',
+              isActive(dashboardItem.path) ? 'active' : ''
+            )}
+          >
+            {dashboardItem.icon && <dashboardItem.icon size={18} />}
+            {dashboardItem.label}
+          </button>
+        ) : (
+          <Link
+            to={dashboardItem.path}
+            className={cn(
+              'nav-link text-white/90 hover:text-white flex items-center gap-1',
+              isActive(dashboardItem.path) ? 'active' : ''
+            )}
+          >
+            {dashboardItem.icon && <dashboardItem.icon size={18} />}
+            {dashboardItem.label}
+          </Link>
         )}
+      </nav>
+
+      <div className="hidden md:flex items-center space-x-4">
+        {authItems.map((item) => (
+          item.action ? (
+            <Button 
+              key={item.path}
+              variant="outline" 
+              size="sm" 
+              onClick={item.action}
+              className="flex items-center gap-1"
+            >
+              {item.icon && <item.icon size={16} />}
+              {item.label}
+            </Button>
+          ) : (
+            <Button 
+              key={item.path}
+              isLink 
+              href={item.path} 
+              variant="outline" 
+              size="sm"
+              className="flex items-center gap-1"
+            >
+              {item.icon && <item.icon size={16} />}
+              {item.label}
+            </Button>
+          )
+        ))}
       </div>
-      
-      {/* Company Dropdown */}
-      <div className="relative company-dropdown">
-        <button
-          className={cn(
-            "px-3 py-2 rounded-md text-sm font-medium transition-colors flex items-center space-x-1",
-            isActive('/about-us') || companyItems.some(item => isActive(item.path))
-              ? "text-white bg-gym-darkblue/50"
-              : "text-white/80 hover:text-white hover:bg-gym-dark/50"
-          )}
-          onClick={() => setIsCompanyDropdownOpen(!isCompanyDropdownOpen)}
-        >
-          <span>Company</span>
-          <ChevronDown size={16} className={cn(isCompanyDropdownOpen ? "transform rotate-180" : "")} />
-        </button>
-        
-        {isCompanyDropdownOpen && (
-          <div className="absolute left-0 mt-2 w-48 rounded-md shadow-lg bg-gym-darkblue ring-1 ring-black ring-opacity-5 z-10">
-            <div className="py-1">
-              {companyItems.map((item) => (
-                <Link
-                  key={item.label}
-                  to={item.path}
-                  className={cn(
-                    "block px-4 py-2 text-sm text-white/80 hover:bg-gym-dark/50 hover:text-white",
-                    isActive(item.path) && "bg-gym-dark/30 text-white"
-                  )}
-                  onClick={(e) => handleClick(item, e)}
-                >
-                  {item.label}
-                </Link>
-              ))}
-            </div>
-          </div>
-        )}
-      </div>
-      
-      {/* Dashboard link (if logged in) */}
-      {isLoggedIn && (
-        <Link
-          to={dashboardItem.path}
-          className={cn(
-            "px-3 py-2 rounded-md text-sm font-medium transition-colors",
-            isActive(dashboardItem.path)
-              ? "text-white bg-gym-darkblue/50"
-              : "text-white/80 hover:text-white hover:bg-gym-dark/50"
-          )}
-          onClick={(e) => handleClick(dashboardItem, e)}
-        >
-          <div className="flex items-center space-x-1">
-            {dashboardItem.icon && <dashboardItem.icon size={16} />}
-            <span>{dashboardItem.label}</span>
-          </div>
-        </Link>
-      )}
-      
-      {/* Auth items (Login/Logout) */}
-      {authItems.map((item) => (
-        <Link
-          key={item.label}
-          to={item.path}
-          className={cn(
-            "px-3 py-2 rounded-md text-sm font-medium transition-colors",
-            isActive(item.path)
-              ? "text-white bg-gym-darkblue/50"
-              : "text-white/80 hover:text-white hover:bg-gym-dark/50"
-          )}
-          onClick={(e) => handleClick(item, e)}
-        >
-          <div className="flex items-center space-x-1">
-            {item.icon && <item.icon size={16} />}
-            <span>{item.label}</span>
-          </div>
-        </Link>
-      ))}
-    </nav>
+    </>
   );
 };
 

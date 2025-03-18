@@ -1,110 +1,126 @@
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
+import { Member, MemberFormAction } from '@/types/memberTypes';
+import MemberHeader from './MemberHeader';
+import MembersToolbar from './MembersToolbar';
 import MemberTable from './MemberTable';
 import MemberPagination from './MemberPagination';
-import MemberSearch from './MemberSearch';
-import MemberFilters from './MemberFilters';
-import { Member } from '@/types/memberTypes';
+import AddMemberDialog from './AddMemberDialog';
+import ImportMembersDialog from './ImportMembersDialog';
+import { Skeleton } from '@/components/ui/skeleton';
 
 interface MembersContainerProps {
   members: Member[];
   filteredMembers: Member[];
   currentMembers: Member[];
-  selectedMembers: string[];
-  toggleMemberSelection: (memberId: string) => void;
-  selectAllMembers: () => void;
-  handleStatusChange: (memberId: string, newStatus: string) => void;
-  handleDelete: (memberId: string) => void;
-  onViewProfile: (memberId: string) => void;
   currentPage: number;
-  membersPerPage: number;
   totalPages: number;
-  handlePageChange: (page: number) => void;
-  handleItemsPerPageChange: (itemsPerPage: number) => void;
+  selectedMembers: string[]; // Keep as string[] since member IDs are UUIDs (strings)
   searchTerm: string;
-  handleSearchChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
-  statusFilter: string;
-  membershipFilter: string;
-  handleStatusFilterChange: (status: string) => void;
-  handleMembershipFilterChange: (membership: string) => void;
-  totalItems: number;
+  filterType: string;
+  isCreating?: boolean;
+  isLoading?: boolean;
+  onSearchChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  onStatusChange: (memberId: string, newStatus: string) => void;
+  onDelete: (memberId: string) => void;
+  onToggleSelect: (memberId: string) => void;
+  onSelectAll: () => void;
+  onFilterChange: (filter: string) => void;
+  onBulkAction: (action: string) => void;
+  onPageChange: (page: number) => void;
+  onPrevPage: () => void;
+  onNextPage: () => void;
+  onAddMember: (member: Omit<Member, "id" | "startDate" | "endDate" | "lastCheckin"> & MemberFormAction) => Promise<boolean> | boolean;
+  onImportMembers: (members: Omit<Member, "id">[]) => void;
 }
 
 const MembersContainer = ({
   members,
   filteredMembers,
   currentMembers,
-  selectedMembers,
-  toggleMemberSelection,
-  selectAllMembers,
-  handleStatusChange,
-  handleDelete,
-  onViewProfile,
   currentPage,
-  membersPerPage,
   totalPages,
-  handlePageChange,
-  handleItemsPerPageChange,
+  selectedMembers,
   searchTerm,
-  handleSearchChange,
-  statusFilter,
-  membershipFilter,
-  handleStatusFilterChange,
-  handleMembershipFilterChange,
-  totalItems
+  filterType,
+  isCreating = false,
+  isLoading = false,
+  onSearchChange,
+  onStatusChange,
+  onDelete,
+  onToggleSelect,
+  onSelectAll,
+  onFilterChange,
+  onBulkAction,
+  onPageChange,
+  onPrevPage,
+  onNextPage,
+  onAddMember,
+  onImportMembers
 }: MembersContainerProps) => {
-  // Responsive state
-  const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
-
-  // Set up resize listener
-  useEffect(() => {
-    const handleResize = () => {
-      setIsMobile(window.innerWidth < 768);
-    };
-
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
-  }, []);
-
+  const [isAddMemberOpen, setIsAddMemberOpen] = useState(false);
+  const [isImportOpen, setIsImportOpen] = useState(false);
+  
   return (
-    <div className="space-y-4">
-      <div className="flex flex-col md:flex-row gap-4 mb-4">
-        <div className="flex-1">
-          <MemberSearch 
-            searchTerm={searchTerm}
-            onSearchChange={handleSearchChange}
-          />
-        </div>
-        <div className="flex flex-col md:flex-row gap-2">
-          <MemberFilters
-            statusFilter={statusFilter}
-            membershipFilter={membershipFilter}
-            onStatusFilterChange={handleStatusFilterChange}
-            onMembershipFilterChange={handleMembershipFilterChange}
+    <div className="space-y-6">
+      <MemberHeader 
+        selectedCount={selectedMembers.length} 
+        onAddMember={() => setIsAddMemberOpen(true)}
+        onImport={() => setIsImportOpen(true)}
+        members={members}
+      />
+      
+      <div className="bg-white rounded-lg border border-gray-200 shadow-sm">
+        <MembersToolbar 
+          searchTerm={searchTerm}
+          onSearchChange={onSearchChange}
+          selectedMembers={selectedMembers}
+          onFilterChange={onFilterChange}
+          onBulkAction={onBulkAction}
+          filterType={filterType}
+        />
+
+        {isLoading ? (
+          <div className="p-6 space-y-4">
+            {[...Array(5)].map((_, index) => (
+              <Skeleton key={index} className="w-full h-16 rounded-md" />
+            ))}
+          </div>
+        ) : (
+          <MemberTable 
+            members={members}
+            filteredMembers={filteredMembers}
+            currentMembers={currentMembers}
             selectedMembers={selectedMembers}
+            toggleMemberSelection={onToggleSelect}
+            selectAllMembers={onSelectAll}
+            handleStatusChange={onStatusChange}
+            handleDelete={onDelete}
           />
-        </div>
+        )}
+
+        <MemberPagination 
+          filteredCount={filteredMembers.length}
+          totalCount={members.length}
+          currentPage={currentPage}
+          totalPages={totalPages}
+          onPageChange={onPageChange}
+          onPrevPage={onPrevPage}
+          onNextPage={onNextPage}
+        />
       </div>
 
-      <MemberTable
-        members={members}
-        filteredMembers={filteredMembers}
-        currentMembers={currentMembers}
-        selectedMembers={selectedMembers}
-        toggleMemberSelection={toggleMemberSelection}
-        selectAllMembers={selectAllMembers}
-        handleStatusChange={handleStatusChange}
-        handleDelete={handleDelete}
-        onViewProfile={onViewProfile}
+      <AddMemberDialog 
+        isOpen={isAddMemberOpen}
+        onClose={() => setIsAddMemberOpen(false)}
+        onAddMember={onAddMember}
+        isCreating={isCreating}
       />
 
-      <MemberPagination
-        currentPage={currentPage}
-        totalPages={totalPages}
-        itemsPerPage={membersPerPage}
-        totalItems={totalItems}
-        onPageChange={handlePageChange}
-        onItemsPerPageChange={handleItemsPerPageChange}
+      <ImportMembersDialog
+        isOpen={isImportOpen}
+        onClose={() => setIsImportOpen(false)}
+        onImportMembers={onImportMembers}
       />
     </div>
   );

@@ -1,9 +1,10 @@
+
 import { Card, CardContent, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { StarRating } from './StarRating';
 import { Flag, MessageSquare, AlertTriangle } from 'lucide-react';
 import { format } from 'date-fns';
-import { TrainerRating } from '@/hooks/trainers/ratings/types';
+import { TrainerRating } from '@/hooks/trainers/useTrainerRatings';
 
 interface RatingCardProps {
   rating: TrainerRating;

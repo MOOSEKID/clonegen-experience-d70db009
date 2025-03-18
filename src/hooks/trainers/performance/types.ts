@@ -11,31 +11,37 @@ export interface PerformanceMetrics {
   monthly_goal_progress: number;
   class_fill_rate: number;
   total_hours: number;
+  trainerName?: string;
   
-  // Legacy fields
-  averageRating: number;
-  totalClasses: number;
-  averageAttendance: number;
-  clientRetentionRate: number;
-  monthlySessions: MonthlySession[];
-  completionRate: number;
-  assignedClients: number;
-  retentionRate: number;
-  satisfactionScore: number;
-  activeClients: number;
-  monthlyGrowth: number;
-}
-
-export interface MonthlySession {
-  month: string;
-  sessions: number;
+  // Additional properties needed by the components
+  averageRating?: number;
+  totalClasses?: number;
+  averageAttendance?: number;
+  clientRetentionRate?: number;
+  monthlySessions?: Array<{ month: string; count: number }>;
+  completionRate?: number;
+  assignedClients?: number;
+  retentionRate?: number;
+  satisfactionScore?: number;
+  activeClients?: number;
+  monthlyGrowth?: number;
 }
 
 export interface ClassAttendance {
-  classId: string;
-  className: string;
-  date: string;
-  capacity: number;
-  attendees: number;
-  fillRate: number;
+  class_name: string;
+  class_date: string;
+  enrolled_count: number;
+  attended_count: number;
+  attendance_rate: number;
+}
+
+export interface TrainerPerformanceSummary {
+  trainerId: string;
+  trainerName: string;
+  metrics: PerformanceMetrics;
+  trendData: {
+    clientGrowth: number[];
+    classRatings: number[];
+    retention: number[];
+  };
 }

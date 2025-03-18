@@ -1,7 +1,8 @@
+
 import { StarRating } from './StarRating';
 import { Progress } from '@/components/ui/progress';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { RatingSummary } from '@/hooks/trainers/ratings/types';
+import { RatingSummary } from '@/hooks/trainers/useTrainerRatings';
 
 interface RatingsSummaryProps {
   trainerName: string;
@@ -11,18 +12,20 @@ interface RatingsSummaryProps {
 const RatingsSummary = ({ trainerName, summary }: RatingsSummaryProps) => {
   const { averageRating, totalRatings, ratingDistribution } = summary;
   
+  // Calculate percentages for each star rating
   const getPercentage = (count: number) => {
     if (totalRatings === 0) return 0;
     return (count / totalRatings) * 100;
   };
   
+  // Format the distribution
   const formattedDistribution = Object.entries(ratingDistribution)
     .map(([rating, count]) => ({
       rating: Number(rating),
       count,
       percentage: getPercentage(count)
     }))
-    .sort((a, b) => b.rating - a.rating);
+    .sort((a, b) => b.rating - a.rating); // Sort in descending order (5 stars first)
   
   return (
     <Card>
@@ -31,6 +34,7 @@ const RatingsSummary = ({ trainerName, summary }: RatingsSummaryProps) => {
       </CardHeader>
       <CardContent>
         <div className="flex flex-col md:flex-row justify-between gap-6">
+          {/* Average rating and count */}
           <div className="text-center md:text-left flex-shrink-0">
             <div className="text-4xl font-bold mb-1">
               {averageRating > 0 ? averageRating.toFixed(1) : '—'}
@@ -42,6 +46,8 @@ const RatingsSummary = ({ trainerName, summary }: RatingsSummaryProps) => {
               Based on {totalRatings} {totalRatings === 1 ? 'rating' : 'ratings'}
             </div>
           </div>
+          
+          {/* Rating distribution */}
           <div className="flex-grow space-y-3">
             {formattedDistribution.map(({ rating, count, percentage }) => (
               <div key={rating} className="flex items-center gap-3">

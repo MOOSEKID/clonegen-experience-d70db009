@@ -1,46 +1,40 @@
 
 import { useState, useEffect } from 'react';
-import { getTable } from '@/integrations/supabase/client';
-
-export interface GymLocation {
-  id: string;
-  name: string;
-  type: 'room' | 'area';
-  capacity: number;
-  equipment: string[];
-  created_at: string;
-  updated_at: string;
-}
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
+import { GymLocation } from '@/types/classTypes';
 
 export const useGymLocations = () => {
   const [locations, setLocations] = useState<GymLocation[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<Error | null>(null);
 
   useEffect(() => {
     const fetchLocations = async () => {
-      setIsLoading(true);
       try {
-        const { data, error } = await getTable('gym_locations')
+        setIsLoading(true);
+        const { data, error } = await supabase
+          .from('gym_locations')
           .select('*')
           .order('name');
 
-        if (error) throw error;
+        if (error) {
+          throw error;
+        }
 
-        const typedLocations: GymLocation[] = (data || []).map((location: any) => ({
-          id: location.id,
-          name: location.name,
-          type: location.type as 'room' | 'area',
-          capacity: location.capacity || 0,
-          equipment: location.equipment || [],
-          created_at: location.created_at,
-          updated_at: location.updated_at
-        }));
-        
+        // Map and validate the type field to ensure it's compatible with our GymLocation type
+        const typedLocations: GymLocation[] = data?.map(item => ({
+          id: item.id,
+          name: item.name,
+          // Ensure type is either 'room' or 'area'
+          type: (item.type === 'room' || item.type === 'area') ? item.type : 'room',
+          capacity: item.capacity || 0,
+          equipment: item.equipment || []
+        })) || [];
+
         setLocations(typedLocations);
-      } catch (err) {
-        console.error('Error fetching gym locations:', err);
-        setError(err instanceof Error ? err : new Error('Failed to fetch gym locations'));
+      } catch (error) {
+        console.error('Error fetching gym locations:', error);
+        toast.error('Failed to load gym locations');
       } finally {
         setIsLoading(false);
       }
@@ -49,12 +43,5 @@ export const useGymLocations = () => {
     fetchLocations();
   }, []);
 
-  return {
-    locations,
-    isLoading,
-    error,
-    getRooms: () => locations.filter(l => l.type === 'room'),
-    getAreas: () => locations.filter(l => l.type === 'area'),
-    getById: (id: string) => locations.find(l => l.id === id)
-  };
+  return { locations, isLoading };
 };

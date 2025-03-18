@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { cn } from '@/lib/utils';
@@ -51,17 +50,19 @@ const Header = () => {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, [isCompanyDropdownOpen, isServicesDropdownOpen]);
 
-  const handleLogout = async () => {
-    await logout();
-    toast.success('Logged out successfully');
-    // Ensure we navigate to home after logout
-    navigate('/');
+  const handleDashboardClick = () => {
+    if (!isAuthenticated) {
+      navigate('/login', { state: { from: '/dashboard' } });
+      return;
+    }
+    navigate(isAdmin ? '/admin' : '/dashboard');
   };
 
-  // Adding console logs to debug navigation
-  const handleNavigation = (path: string) => {
-    console.log(`Navigating to: ${path}`);
-    navigate(path);
+  const handleLogout = async () => {
+    const success = await logout();
+    if (success) {
+      navigate('/login');
+    }
   };
 
   const navItems = [
@@ -74,9 +75,9 @@ const Header = () => {
 
   const serviceItems = [
     { label: 'All Services', path: '/services' },
-    { label: 'Fitness Facilities', path: '/facilities' },
-    { label: 'Youth Programs', path: '/youth-programs' },
-    { label: 'Spa & Wellness', path: '/spa-wellness' },
+    { label: 'Fitness Facilities', path: '/services/fitness-facilities' },
+    { label: 'Youth Programs', path: '/services/youth-programs' },
+    { label: 'Spa & Wellness', path: '/services/spa-wellness' },
   ];
 
   const companyItems = [
@@ -90,6 +91,7 @@ const Header = () => {
     label: 'Dashboard', 
     path: isAdmin ? '/admin' : '/dashboard', 
     icon: LayoutDashboard,
+    action: handleDashboardClick
   };
   
   const authItems = isAuthenticated 
@@ -109,8 +111,6 @@ const Header = () => {
         }
       ];
 
-  console.log("Current path:", location.pathname);
-
   return (
     <header 
       className={cn(
@@ -118,7 +118,7 @@ const Header = () => {
         isScrolled ? 'bg-gym-darkblue shadow-lg py-2' : 'bg-gym-dark/90 backdrop-blur-md py-4'
       )}
     >
-      <div className="container-custom mx-auto px-4 flex items-center justify-between">
+      <div className="container-custom flex items-center justify-between">
         <Link to="/" className="flex items-center space-x-2">
           <div className="h-12 w-auto">
             <img 
@@ -140,7 +140,6 @@ const Header = () => {
           isCompanyDropdownOpen={isCompanyDropdownOpen}
           setIsCompanyDropdownOpen={setIsCompanyDropdownOpen}
           isLoggedIn={isAuthenticated}
-          onNavigation={handleNavigation}
         />
 
         <button
@@ -159,7 +158,6 @@ const Header = () => {
           dashboardItem={dashboardItem}
           authItems={authItems}
           isLoggedIn={isAuthenticated}
-          onNavigation={handleNavigation}
         />
       </div>
     </header>

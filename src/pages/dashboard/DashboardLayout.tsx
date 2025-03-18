@@ -9,7 +9,7 @@ import { useAuth } from '@/hooks/useAuth';
 const DashboardLayout = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [isLoading, setIsLoading] = useState(true);
-  const { isAuthenticated, user, isAdmin } = useAuth();
+  const { isAuthenticated, user } = useAuth();
   const navigate = useNavigate();
 
   // Check user authentication
@@ -24,10 +24,6 @@ const DashboardLayout = () => {
           console.log('User not authenticated, redirecting to login from dashboard');
           toast.error('You must be logged in to access this page');
           navigate('/login', { state: { from: '/dashboard' } });
-        } else if (isAdmin) {
-          // If admin user is trying to access regular dashboard, redirect to admin dashboard
-          console.log('Admin user accessing regular dashboard, redirecting to admin dashboard');
-          navigate('/admin', { replace: true });
         } else {
           console.log('User is authenticated in dashboard:', user?.email);
         }
@@ -41,7 +37,19 @@ const DashboardLayout = () => {
     };
 
     checkAuth();
-  }, [navigate, isAuthenticated, user, isAdmin]);
+    
+    // Check authentication status periodically
+    const interval = setInterval(() => {
+      console.log('Running periodic auth check in dashboard');
+      if (!isAuthenticated) {
+        console.log('User not authenticated in periodic check, redirecting to login');
+        clearInterval(interval);
+        navigate('/login', { state: { from: '/dashboard' } });
+      }
+    }, 300000); // 5 minutes
+    
+    return () => clearInterval(interval);
+  }, [navigate, isAuthenticated, user]);
 
   const toggleSidebar = () => {
     setIsSidebarOpen(!isSidebarOpen);

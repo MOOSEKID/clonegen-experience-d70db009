@@ -13,6 +13,7 @@ export const useSupabaseMembers = () => {
   const [isCreating, setIsCreating] = useState(false);
   const [error, setError] = useState<Error | null>(null);
 
+  // Use the member filters hook to handle filtering, pagination, etc.
   const {
     searchTerm,
     filterType,
@@ -20,7 +21,7 @@ export const useSupabaseMembers = () => {
     currentMembers,
     currentPage,
     totalPages,
-    handleSearch: handleFilterSearch,
+    handleSearch,
     handleFilterChange,
     paginate,
     nextPage,
@@ -28,6 +29,7 @@ export const useSupabaseMembers = () => {
     setAllMembers
   } = useMemberFilters(members);
 
+  // Update the member filters when members change
   useEffect(() => {
     console.log("useSupabaseMembers effect: members changed", members.length);
     if (members.length > 0) {
@@ -35,6 +37,7 @@ export const useSupabaseMembers = () => {
     }
   }, [members, setAllMembers]);
 
+  // Toggle member selection
   const toggleMemberSelection = useCallback((memberId: string) => {
     setSelectedMembers(prev => 
       prev.includes(memberId)
@@ -43,6 +46,7 @@ export const useSupabaseMembers = () => {
     );
   }, []);
 
+  // Select all members
   const selectAllMembers = useCallback((filteredMembers: Member[]) => {
     if (selectedMembers.length === filteredMembers.length) {
       setSelectedMembers([]);
@@ -51,6 +55,7 @@ export const useSupabaseMembers = () => {
     }
   }, [selectedMembers]);
 
+  // Change member status
   const handleStatusChange = useCallback((memberId: string, newStatus: string) => {
     setMembers(prevMembers => 
       prevMembers.map(member => 
@@ -60,12 +65,14 @@ export const useSupabaseMembers = () => {
     toast.success(`Member status updated to ${newStatus}`);
   }, [setMembers]);
 
+  // Delete member
   const handleDelete = useCallback((memberId: string) => {
     setMembers(prevMembers => prevMembers.filter(member => member.id !== memberId));
     setSelectedMembers(prev => prev.filter(id => id !== memberId));
     toast.success('Member deleted successfully');
   }, [setMembers]);
 
+  // Bulk action on members
   const handleBulkAction = useCallback((action: string, filteredMembers: Member[]) => {
     if (selectedMembers.length === 0) {
       toast.error('No members selected');
@@ -110,18 +117,21 @@ export const useSupabaseMembers = () => {
     }
   }, [selectedMembers, setMembers]);
 
+  // Add member
   const addMember = useCallback(async (memberData: Omit<Member, "id" | "startDate" | "endDate" | "lastCheckin"> & MemberFormAction): Promise<boolean> => {
     console.log("useSupabaseMembers.addMember called with data:", memberData);
     try {
       setIsCreating(true);
       setError(null);
       
+      // Create a simulated delay to mimic API call
       await new Promise(resolve => setTimeout(resolve, 500));
       
       const today = new Date().toISOString().split('T')[0];
       const nextYear = new Date();
       nextYear.setFullYear(nextYear.getFullYear() + 1);
       
+      // Create new member with generated ID
       const newMember: Member = {
         id: uuidv4(),
         name: memberData.name || '',
@@ -132,6 +142,7 @@ export const useSupabaseMembers = () => {
         endDate: nextYear.toISOString().split('T')[0],
         status: 'Active',
         lastCheckin: today,
+        // Add any other fields needed
         membershipCategory: memberData.membershipCategory,
         membershipPlan: memberData.membershipPlan,
         companyName: memberData.companyName,
@@ -139,6 +150,7 @@ export const useSupabaseMembers = () => {
       
       console.log("Created new member:", newMember);
       
+      // Update state with new member
       setMembers(prevMembers => {
         console.log("Updating members state, current count:", prevMembers.length);
         return [...prevMembers, newMember];
@@ -156,6 +168,7 @@ export const useSupabaseMembers = () => {
     }
   }, [setMembers]);
 
+  // Import members
   const importMembers = useCallback((importedMembers: Omit<Member, "id">[]) => {
     const newMembers = importedMembers.map(member => ({
       ...member,
@@ -165,11 +178,6 @@ export const useSupabaseMembers = () => {
     setMembers(prevMembers => [...prevMembers, ...newMembers]);
     toast.success(`${newMembers.length} members imported successfully`);
   }, [setMembers]);
-
-  const handleSearchChange = useCallback((searchText: React.ChangeEvent<HTMLInputElement>) => {
-    console.log("Searching for:", searchText.target.value);
-    handleFilterSearch(searchText.target.value);
-  }, [handleFilterSearch]);
 
   return {
     members,
@@ -183,8 +191,7 @@ export const useSupabaseMembers = () => {
     isCreating,
     isLoading,
     error,
-    handleSearch: handleFilterSearch,
-    handleSearchChange,
+    handleSearch,
     handleStatusChange,
     handleDelete,
     handleFilterChange,

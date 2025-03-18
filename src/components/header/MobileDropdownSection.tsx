@@ -1,59 +1,54 @@
 
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
-import { ChevronDown } from 'lucide-react';
+import { Link, useLocation } from 'react-router-dom';
+import { LucideIcon, ChevronDown, ChevronRight } from 'lucide-react';
 import { cn } from '@/lib/utils';
-
-interface NavItem {
-  label: string;
-  path: string;
-  icon?: React.ElementType;
-  action?: () => void;
-}
 
 interface MobileDropdownSectionProps {
   title: string;
-  items: NavItem[];
-  onItemClick?: (item: NavItem, e: React.MouseEvent) => void;
+  Icon: LucideIcon;
+  items: { label: string; path: string }[];
 }
 
-const MobileDropdownSection = ({ title, items, onItemClick }: MobileDropdownSectionProps) => {
+const MobileDropdownSection = ({ title, Icon, items }: MobileDropdownSectionProps) => {
+  const location = useLocation();
   const [isOpen, setIsOpen] = useState(false);
   
+  const isActive = (path: string) => {
+    return location.pathname === path || location.pathname.startsWith(path + '/');
+  };
+
   const toggleDropdown = () => {
     setIsOpen(!isOpen);
   };
-  
-  const handleItemClick = (item: NavItem, e: React.MouseEvent) => {
-    if (onItemClick) {
-      onItemClick(item, e);
-    }
-  };
 
   return (
-    <div className="py-1">
-      <button
-        className="w-full flex justify-between items-center px-3 py-2 text-base font-medium text-white/80 hover:bg-gym-dark hover:text-white rounded-md"
+    <div className="py-2 border-t border-white/10">
+      <button 
         onClick={toggleDropdown}
+        className="flex items-center justify-between w-full text-white/90 hover:text-white transition-colors"
       >
-        <span>{title}</span>
-        <ChevronDown 
-          size={20} 
-          className={cn(
-            "transition-transform duration-200",
-            isOpen ? "transform rotate-180" : ""
-          )} 
-        />
+        <div className="flex items-center">
+          <Icon size={16} className="mr-2" />
+          <span className="font-medium">{title}</span>
+        </div>
+        {isOpen ? (
+          <ChevronDown size={18} className="text-white/70" />
+        ) : (
+          <ChevronRight size={18} className="text-white/70" />
+        )}
       </button>
       
       {isOpen && (
-        <div className="pl-4 space-y-1 mt-1">
+        <div className="space-y-3 pl-6 mt-2 animate-fade-in">
           {items.map((item) => (
             <Link
-              key={item.label}
+              key={item.path}
               to={item.path}
-              className="block px-3 py-2 text-sm text-white/70 hover:bg-gym-dark hover:text-white rounded-md"
-              onClick={(e) => handleItemClick(item, e)}
+              className={cn(
+                'block text-white/80 hover:text-white transition-colors',
+                isActive(item.path) ? 'text-white font-medium' : ''
+              )}
             >
               {item.label}
             </Link>

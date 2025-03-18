@@ -3,12 +3,11 @@ import { Filter } from 'lucide-react';
 import MemberSearch from './MemberSearch';
 import MemberBulkActions from './MemberBulkActions';
 import { Button } from '@/components/ui/button';
-import React from 'react';
 
 interface MembersToolbarProps {
   searchTerm: string;
   onSearchChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
-  selectedMembers: string[];
+  selectedMembers: string[]; // Changed from number[] to string[]
   onFilterChange: (filter: string) => void;
   onBulkAction: (action: string) => void;
   filterType: string;

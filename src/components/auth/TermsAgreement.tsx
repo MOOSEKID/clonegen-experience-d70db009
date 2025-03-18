@@ -1,44 +1,34 @@
 
+import React from 'react';
 import { Checkbox } from '@/components/ui/checkbox';
-import { Label } from '@/components/ui/label';
+import { Link } from 'react-router-dom';
 
 interface TermsAgreementProps {
   accepted: boolean;
-  onChange: (value: boolean) => void;
+  onChange: (checked: boolean) => void;
   disabled?: boolean;
 }
 
-const TermsAgreement = ({ accepted, onChange, disabled = false }: TermsAgreementProps) => {
+const TermsAgreement: React.FC<TermsAgreementProps> = ({ accepted, onChange, disabled = false }) => {
   return (
-    <div className="flex items-center space-x-2">
+    <div className="flex items-start space-x-2 mt-4">
       <Checkbox 
-        id="terms" 
-        checked={accepted} 
-        onCheckedChange={(checked) => onChange(checked === true)} 
-        disabled={disabled} 
-        className="data-[state=checked]:bg-gym-orange"
+        id="terms"
+        checked={accepted}
+        onCheckedChange={onChange}
+        className="mt-1"
+        disabled={disabled}
       />
-      <Label 
-        htmlFor="terms" 
-        className="text-sm text-muted-foreground cursor-pointer"
-      >
+      <label htmlFor="terms" className="text-sm text-gray-600">
         I agree to the{' '}
-        <a 
-          href="/terms" 
-          className="text-gym-orange hover:underline" 
-          onClick={(e) => e.stopPropagation()}
-        >
-          terms of service
-        </a>
-        {' '}and{' '}
-        <a 
-          href="/privacy" 
-          className="text-gym-orange hover:underline" 
-          onClick={(e) => e.stopPropagation()}
-        >
-          privacy policy
-        </a>
-      </Label>
+        <Link to="/terms" className="text-gym-orange hover:underline">
+          Terms of Service
+        </Link>{' '}
+        and{' '}
+        <Link to="/privacy" className="text-gym-orange hover:underline">
+          Privacy Policy
+        </Link>
+      </label>
     </div>
   );
 };

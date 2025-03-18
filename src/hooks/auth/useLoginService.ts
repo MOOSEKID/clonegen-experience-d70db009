@@ -1,7 +1,7 @@
 
 import { toast } from 'sonner';
-import { supabase } from '@/lib/supabase';
-import { AuthUser, UserRole, AccessLevel } from '@/types/auth.types';
+import { supabase } from '@/integrations/supabase/client';
+import { AuthUser } from '@/types/auth.types';
 
 /**
  * Hook that provides login functionality
@@ -16,14 +16,6 @@ export const useLoginService = () => {
     isAdmin?: boolean;
   }> => {
     try {
-      console.log(`Attempting to sign in with email: ${email}`);
-      
-      // Validate inputs
-      if (!email || !password) {
-        toast.error('Email and password are required');
-        return { success: false };
-      }
-      
       const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password,
@@ -35,62 +27,76 @@ export const useLoginService = () => {
         return { success: false };
       }
       
-      if (!data.user) {
-        console.error('Login failed: No user data returned');
-        toast.error('Login failed. Please try again.');
-        return { success: false };
-      }
-      
-      console.log('Login successful, user data:', data.user.email);
-      
-      // Profile is created by database trigger if it doesn't exist
-      // Fetch the profile to get user role and permissions
-      const { data: profile, error: profileError } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('id', data.user.id)
-        .single();
+      if (data.user) {
+        // Check if this is one of our known admin emails
+        const isKnownAdmin = email === 'admin@example.com' || email === 'admin@uptowngym.rw';
         
-      if (profileError) {
-        console.error('Error fetching user profile:', profileError);
-        // Still return success but with limited user info
+        // Get user role from profiles table
+        const { data: profile, error: profileError } = await supabase
+          .from('profiles')
+          .select('role, is_admin, full_name')
+          .eq('id', data.user.id)
+          .single();
+          
+        if (profileError) {
+          console.error('Error fetching user profile:', profileError);
+          // Handle the case where profile doesn't exist yet
+          if (profileError.code === 'PGRST116') {
+            // Create a default profile
+            const { error: insertError } = await supabase
+              .from('profiles')
+              .insert([
+                { 
+                  id: data.user.id,
+                  full_name: data.user.user_metadata?.full_name || email,
+                  role: isKnownAdmin ? 'admin' : 'member',
+                  is_admin: isKnownAdmin
+                }
+              ]);
+              
+            if (insertError) {
+              console.error('Error creating profile:', insertError);
+            }
+          }
+        } else if (isKnownAdmin && !profile.is_admin) {
+          // Update profile to set admin status for known admin emails
+          const { error: updateError } = await supabase
+            .from('profiles')
+            .update({
+              is_admin: true,
+              role: 'admin'
+            })
+            .eq('id', data.user.id);
+            
+          if (updateError) {
+            console.error('Error updating admin status:', updateError);
+          }
+        }
+        
+        // Get the latest profile data after possible updates
+        const { data: updatedProfile } = await supabase
+          .from('profiles')
+          .select('role, is_admin')
+          .eq('id', data.user.id)
+          .single();
+        
+        const userRole = updatedProfile?.role || (isKnownAdmin ? 'admin' : 'member');
+        const userIsAdmin = updatedProfile?.is_admin || isKnownAdmin;
+        
         toast.success('Login successful');
+        
         return { 
           success: true,
           user: {
-            id: data.user.id,
+            ...data.user,
             email: data.user.email || '', 
-            full_name: data.user.user_metadata?.full_name || data.user.email || '',
-            role: 'member',
-            is_admin: false,
-            is_staff: false,
-            status: 'Active',
-            access_level: 'Basic' as AccessLevel,
-            created_at: new Date().toISOString(),
-            updated_at: new Date().toISOString()
+            role: userRole
           },
-          isAdmin: false
+          isAdmin: userIsAdmin
         };
       }
       
-      // Return user with profile data
-      toast.success('Login successful');
-      return { 
-        success: true,
-        user: {
-          id: data.user.id,
-          email: data.user.email || '', 
-          full_name: profile.full_name || data.user.user_metadata?.full_name || '',
-          role: profile.role || 'member',
-          is_admin: profile.is_admin || false,
-          is_staff: profile.is_staff || false,
-          status: profile.status || 'Active',
-          access_level: profile.access_level || 'Basic',
-          created_at: profile.created_at || new Date().toISOString(),
-          updated_at: profile.updated_at || new Date().toISOString()
-        },
-        isAdmin: profile.is_admin || false
-      };
+      return { success: false };
     } catch (error) {
       console.error('Unexpected login error:', error);
       toast.error(error instanceof Error ? error.message : 'Login failed');

@@ -1,66 +1,78 @@
 
 import { PerformanceMetrics, ClassAttendance } from './types';
 
-export const generateMockPerformanceData = (trainerId: string) => {
-  // Create performance metrics
-  const performanceMetrics: PerformanceMetrics = {
-    id: trainerId,
-    trainerId,
-    period: 'Current Month',
-    classes_taught: 24,
+export const generateMockPerformanceMetrics = (trainerId?: string): PerformanceMetrics => {
+  return {
+    id: trainerId || 'mock-id',
+    trainerId: trainerId || 'mock-trainer-id',
+    period: 'monthly',
+    classes_taught: 156,
     private_sessions: 45,
-    new_clients: 5,
-    client_retention_rate: 88,
-    avg_session_rating: 4.7,
-    monthly_goal_progress: 82,
-    class_fill_rate: 89,
-    total_hours: 65,
+    new_clients: 12,
+    client_retention_rate: 78,
+    avg_session_rating: 4.3,
+    monthly_goal_progress: 85,
+    class_fill_rate: 85,
+    total_hours: 210,
     
-    // Legacy fields
-    averageRating: 4.7,
-    totalClasses: 24,
-    averageAttendance: 16,
-    clientRetentionRate: 88,
+    // Additional properties for backward compatibility
+    averageRating: 4.3,
+    totalClasses: 156,
+    averageAttendance: 85,
+    clientRetentionRate: 78,
     monthlySessions: [
-      { month: 'Jan', sessions: 30 },
-      { month: 'Feb', sessions: 35 },
-      { month: 'Mar', sessions: 40 },
-      { month: 'Apr', sessions: 38 },
-      { month: 'May', sessions: 42 },
-      { month: 'Jun', sessions: 45 }
+      { month: 'Jan', count: 18 },
+      { month: 'Feb', count: 20 },
+      { month: 'Mar', count: 22 },
+      { month: 'Apr', count: 19 },
+      { month: 'May', count: 24 },
+      { month: 'Jun', count: 28 }
     ],
     completionRate: 95,
-    assignedClients: 20,
-    retentionRate: 88,
-    satisfactionScore: 94,
-    activeClients: 20,
+    assignedClients: 12,
+    retentionRate: 78,
+    satisfactionScore: 89,
+    activeClients: 15,
     monthlyGrowth: 8
   };
-  
-  // Create mock class attendance data
-  const classTypes = ['Yoga', 'HIIT', 'Spinning', 'Zumba', 'Pilates', 'Boxing'];
-  const classAttendance: ClassAttendance[] = [];
-  
-  for (let i = 0; i < 6; i++) {
-    const date = new Date();
-    date.setDate(date.getDate() - i);
-    const dateString = date.toISOString().split('T')[0];
-    
-    const capacity = 20 + Math.floor(Math.random() * 10);
-    const attendees = Math.floor(capacity * (0.65 + Math.random() * 0.35));
-    
-    classAttendance.push({
-      classId: `class-${i}`,
-      className: classTypes[i % classTypes.length],
-      date: dateString,
-      capacity,
-      attendees,
-      fillRate: Math.round((attendees / capacity) * 100)
-    });
-  }
-  
-  return {
-    performanceMetrics,
-    classAttendance
-  };
+};
+
+export const generateMockAttendanceData = (trainerId?: string): ClassAttendance[] => {
+  return [
+    {
+      class_name: 'Morning HIIT',
+      class_date: 'Mon, June 10',
+      enrolled_count: 12,
+      attended_count: 10,
+      attendance_rate: 83
+    },
+    {
+      class_name: 'Power Yoga',
+      class_date: 'Wed, June 12',
+      enrolled_count: 15,
+      attended_count: 14,
+      attendance_rate: 93
+    },
+    {
+      class_name: 'Kickboxing',
+      class_date: 'Fri, June 14',
+      enrolled_count: 10,
+      attended_count: 7,
+      attendance_rate: 70
+    },
+    {
+      class_name: 'Core Strength',
+      class_date: 'Mon, June 17',
+      enrolled_count: 8,
+      attended_count: 8,
+      attendance_rate: 100
+    },
+    {
+      class_name: 'Spin Class',
+      class_date: 'Wed, June 19',
+      enrolled_count: 18,
+      attended_count: 12,
+      attendance_rate: 67
+    }
+  ];
 };

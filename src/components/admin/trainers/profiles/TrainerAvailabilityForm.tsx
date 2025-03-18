@@ -1,43 +1,50 @@
 
-import React from 'react';
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { Button } from "@/components/ui/button";
-import { Form, FormField, FormItem, FormLabel, FormControl, FormMessage } from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Input } from "@/components/ui/input";
+import { TrainerAvailability } from "@/hooks/trainers/useTrainerProfiles";
+import { weekDays } from "@/utils/classFormUtils";
 
 const availabilityFormSchema = z.object({
-  trainer_id: z.string(),
-  day_of_week: z.string(),
-  start_time: z.string(),
-  end_time: z.string()
+  day_of_week: z.string().min(1, { message: "Please select a day." }),
+  start_time: z.string().min(1, { message: "Start time is required." }),
+  end_time: z.string().min(1, { message: "End time is required." }),
+}).refine(data => data.end_time > data.start_time, {
+  message: "End time must be after start time.",
+  path: ["end_time"],
 });
+
+type AvailabilityFormValues = z.infer<typeof availabilityFormSchema>;
 
 interface TrainerAvailabilityFormProps {
   trainerId: string;
-  onSubmit: (data: z.infer<typeof availabilityFormSchema>) => Promise<void>;
+  onSubmit: (data: Omit<TrainerAvailability, 'id'>) => Promise<void>;
   onCancel: () => void;
 }
 
 const TrainerAvailabilityForm = ({ trainerId, onSubmit, onCancel }: TrainerAvailabilityFormProps) => {
-  const days = [
-    "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"
-  ];
-
-  const form = useForm<z.infer<typeof availabilityFormSchema>>({
+  const form = useForm<AvailabilityFormValues>({
     resolver: zodResolver(availabilityFormSchema),
     defaultValues: {
-      trainer_id: trainerId,
       day_of_week: "",
       start_time: "",
-      end_time: ""
-    }
+      end_time: "",
+    },
   });
 
-  const handleSubmit = async (data: z.infer<typeof availabilityFormSchema>) => {
-    await onSubmit(data);
+  const handleSubmit = async (data: AvailabilityFormValues) => {
+    const availabilityData: Omit<TrainerAvailability, 'id'> = {
+      trainer_id: trainerId,
+      day_of_week: data.day_of_week,
+      start_time: data.start_time,
+      end_time: data.end_time
+    };
+    await onSubmit(availabilityData);
+    form.reset();
   };
 
   return (
@@ -48,19 +55,16 @@ const TrainerAvailabilityForm = ({ trainerId, onSubmit, onCancel }: TrainerAvail
           name="day_of_week"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Day of Week</FormLabel>
-              <Select 
-                onValueChange={field.onChange} 
-                defaultValue={field.value}
-              >
+              <FormLabel>Day*</FormLabel>
+              <Select onValueChange={field.onChange} defaultValue={field.value}>
                 <FormControl>
                   <SelectTrigger>
                     <SelectValue placeholder="Select day" />
                   </SelectTrigger>
                 </FormControl>
                 <SelectContent>
-                  {days.map((day) => (
-                    <SelectItem key={day} value={day}>{day}</SelectItem>
+                  {weekDays.map(day => (
+                    <SelectItem key={day.value} value={day.value}>{day.label}</SelectItem>
                   ))}
                 </SelectContent>
               </Select>
@@ -75,7 +79,7 @@ const TrainerAvailabilityForm = ({ trainerId, onSubmit, onCancel }: TrainerAvail
             name="start_time"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Start Time</FormLabel>
+                <FormLabel>Start Time*</FormLabel>
                 <FormControl>
                   <Input type="time" {...field} />
                 </FormControl>
@@ -89,7 +93,7 @@ const TrainerAvailabilityForm = ({ trainerId, onSubmit, onCancel }: TrainerAvail
             name="end_time"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>End Time</FormLabel>
+                <FormLabel>End Time*</FormLabel>
                 <FormControl>
                   <Input type="time" {...field} />
                 </FormControl>
@@ -99,8 +103,8 @@ const TrainerAvailabilityForm = ({ trainerId, onSubmit, onCancel }: TrainerAvail
           />
         </div>
 
-        <div className="flex justify-end space-x-2 pt-4">
-          <Button variant="outline" onClick={onCancel} type="button">
+        <div className="flex justify-end space-x-2 pt-2">
+          <Button type="button" variant="outline" onClick={onCancel}>
             Cancel
           </Button>
           <Button type="submit">Add Availability</Button>

@@ -1,10 +1,11 @@
+
 import { useState } from 'react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
 import { Flag, MessageSquare, ChevronLeft } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useTrainersData } from '@/hooks/useTrainersData';
-import { useTrainerRatings } from '@/hooks/trainers/ratings/useTrainerRatings';
+import { useTrainerRatings } from '@/hooks/trainers/useTrainerRatings';
 import { StarRating } from '@/components/admin/trainers/ratings/StarRating';
 import RatingCard from '@/components/admin/trainers/ratings/RatingCard';
 import RatingsSummary from '@/components/admin/trainers/ratings/RatingsSummary';
@@ -128,6 +129,7 @@ const TrainerRatings = () => {
         </div>
       )}
       
+      {/* Add Rating Dialog */}
       <Dialog open={isAddRatingOpen} onOpenChange={setIsAddRatingOpen}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
@@ -149,6 +151,7 @@ const TrainerRatings = () => {
         </DialogContent>
       </Dialog>
       
+      {/* Response Dialog */}
       <Dialog open={selectedRatingId !== null} onOpenChange={(open) => !open && setSelectedRatingId(null)}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>

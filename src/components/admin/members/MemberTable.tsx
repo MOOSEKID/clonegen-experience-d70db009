@@ -18,7 +18,6 @@ interface MemberTableProps {
   selectAllMembers: () => void;
   handleStatusChange: (memberId: string, newStatus: string) => void;
   handleDelete: (memberId: string) => void;
-  onViewProfile: (memberId: string) => void;
 }
 
 const MemberTable = ({
@@ -29,8 +28,7 @@ const MemberTable = ({
   toggleMemberSelection,
   selectAllMembers,
   handleStatusChange,
-  handleDelete,
-  onViewProfile
+  handleDelete
 }: MemberTableProps) => {
   const allSelected = selectedMembers.length === filteredMembers.length && filteredMembers.length > 0;
   
@@ -52,7 +50,6 @@ const MemberTable = ({
                 onToggleSelect={toggleMemberSelection}
                 onStatusChange={handleStatusChange}
                 onDelete={handleDelete}
-                onViewProfile={onViewProfile}
               />
             ))
           ) : (

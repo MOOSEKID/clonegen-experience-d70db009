@@ -4,7 +4,6 @@ import { useToast } from '@/components/ui/use-toast';
 import { ClientAssignment, AssignedClient } from './assignments/types';
 import { fetchAssignments, createAssignment, updateAssignmentStatus } from './assignments/assignmentService';
 import { generateMockAssignments } from './assignments/mockAssignments';
-import { supabase } from '@/integrations/supabase/client';
 
 export type { ClientAssignment, AssignedClient } from './assignments/types';
 
@@ -123,3 +122,6 @@ export const useClientAssignments = (trainerId?: string, clientId?: string) => {
     getAssignedClients
   };
 };
+
+// Add missing supabase import
+import { supabase } from '@/integrations/supabase/client';

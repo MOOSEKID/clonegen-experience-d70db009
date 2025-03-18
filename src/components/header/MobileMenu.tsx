@@ -1,99 +1,103 @@
 
-import { Link, useLocation } from 'react-router-dom';
-import { cn } from '@/lib/utils';
+import { Building, Dumbbell, LucideIcon } from 'lucide-react';
+import { Button } from '../Button';
 import MobileNavItem from './MobileNavItem';
 import MobileDropdownSection from './MobileDropdownSection';
 
 interface NavItem {
   label: string;
   path: string;
-  icon?: React.ElementType;
+  icon?: LucideIcon;
+  isExternalLink?: boolean;
   action?: () => void;
 }
 
 interface MobileMenuProps {
   isOpen: boolean;
   navItems: NavItem[];
-  serviceItems: NavItem[];
-  companyItems: NavItem[];
+  serviceItems: { label: string; path: string }[];
+  companyItems: { label: string; path: string }[];
   dashboardItem: NavItem;
   authItems: NavItem[];
-  isLoggedIn: boolean;
-  onNavigation?: (path: string) => void;
+  isLoggedIn?: boolean;
 }
 
-const MobileMenu = ({
-  isOpen,
-  navItems,
-  serviceItems,
+const MobileMenu = ({ 
+  isOpen, 
+  navItems, 
+  serviceItems, 
   companyItems,
   dashboardItem,
-  authItems,
-  isLoggedIn,
-  onNavigation
+  authItems, 
+  isLoggedIn = false 
 }: MobileMenuProps) => {
-  const location = useLocation();
-  
   if (!isOpen) return null;
-  
-  const isActive = (path: string) => {
-    return location.pathname === path;
-  };
-  
-  const handleNavClick = (item: NavItem, e: React.MouseEvent) => {
-    if (item.action) {
-      e.preventDefault();
-      item.action();
-    } else if (onNavigation && item.path !== '#') {
-      e.preventDefault();
-      onNavigation(item.path);
-    }
-  };
 
   return (
-    <div className="absolute top-full left-0 right-0 bg-gym-darkblue shadow-lg md:hidden z-50">
-      <div className="px-4 pt-2 pb-4 space-y-1">
-        {/* Primary Nav Items */}
+    <div className="absolute top-full left-0 right-0 bg-gym-darkblue shadow-lg p-4 md:hidden animate-fade-in z-50">
+      <nav className="flex flex-col space-y-4">
         {navItems.map((item) => (
           <MobileNavItem 
-            key={item.label} 
-            label={item.label} 
+            key={item.path} 
             path={item.path} 
             icon={item.icon}
-            isActive={isActive(item.path)}
-            onClick={(e) => handleNavClick(item, e)}
-          />
+            isExternalLink={item.isExternalLink}
+            action={item.action}
+          >
+            {item.label}
+          </MobileNavItem>
         ))}
         
-        {/* Services Dropdown */}
-        <MobileDropdownSection title="Services" items={serviceItems} onItemClick={handleNavClick} />
+        <MobileDropdownSection 
+          title="Services" 
+          Icon={Dumbbell} 
+          items={serviceItems} 
+        />
         
-        {/* Company Dropdown */}
-        <MobileDropdownSection title="Company" items={companyItems} onItemClick={handleNavClick} />
+        <MobileDropdownSection 
+          title="Company" 
+          Icon={Building} 
+          items={companyItems} 
+        />
+
+        {/* Dashboard item placed between Company dropdown and auth buttons */}
+        <MobileNavItem 
+          path={dashboardItem.path} 
+          icon={dashboardItem.icon}
+          action={dashboardItem.action}
+        >
+          {dashboardItem.label}
+        </MobileNavItem>
         
-        {/* Dashboard Link (if logged in) */}
-        {isLoggedIn && (
-          <MobileNavItem 
-            label={dashboardItem.label} 
-            path={dashboardItem.path} 
-            icon={dashboardItem.icon}
-            isActive={isActive(dashboardItem.path)}
-            onClick={(e) => handleNavClick(dashboardItem, e)}
-          />
-        )}
-        
-        {/* Auth Items */}
-        {authItems.map((item) => (
-          <MobileNavItem 
-            key={item.label} 
-            label={item.label} 
-            path={item.path} 
-            icon={item.icon}
-            isActive={isActive(item.path)}
-            onClick={(e) => handleNavClick(item, e)}
-          />
-        ))}
-      </div>
+        <div className="flex gap-3 pt-3 border-t border-white/10">
+          {authItems.map((item) => (
+            item.action ? (
+              <Button 
+                key={item.path}
+                variant="outline" 
+                size="sm" 
+                className="flex-1 gap-2"
+                onClick={item.action}
+              >
+                {item.icon && <item.icon size={16} />}
+                {item.label}
+              </Button>
+            ) : (
+              <Button 
+                key={item.path}
+                isLink 
+                href={item.path} 
+                variant="outline" 
+                size="sm" 
+                className="flex-1 gap-2"
+              >
+                {item.icon && <item.icon size={16} />}
+                {item.label}
+              </Button>
+            )
+          ))}
+        </div>
+      </nav>
     </div>
   );
 };

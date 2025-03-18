@@ -13,20 +13,8 @@ if (!rootElement) {
 }
 
 // Create root and render app
-try {
-  console.log("Starting application...");
-  createRoot(document.getElementById("root")!).render(
-    <React.StrictMode>
-      <App />
-    </React.StrictMode>
-  );
-  console.log("App rendered successfully");
-} catch (error) {
-  console.error("Error rendering application:", error);
-  document.body.innerHTML = `
-    <div style="padding: 20px; color: red;">
-      <h1>Error Starting Application</h1>
-      <p>${error instanceof Error ? error.message : String(error)}</p>
-    </div>
-  `;
-}
+createRoot(document.getElementById("root")!).render(
+  <React.StrictMode>
+    <App />
+  </React.StrictMode>
+);
