@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { cn } from '@/lib/utils';
@@ -51,10 +50,8 @@ const Header = () => {
   }, [isCompanyDropdownOpen, isServicesDropdownOpen]);
 
   const handleLogout = async () => {
-    const success = await logout();
-    if (success) {
-      toast.success('Logged out successfully');
-    }
+    await logout();
+    toast.success('Logged out successfully');
   };
 
   const navItems = [
@@ -156,3 +153,4 @@ const Header = () => {
 };
 
 export default Header;
+

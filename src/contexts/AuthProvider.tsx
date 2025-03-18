@@ -310,17 +310,18 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     }
   };
 
-  const logout = async (): Promise<boolean> => {
+  const logout = async (): Promise<void> => {
     try {
       const { error } = await supabase.auth.signOut();
       if (error) throw error;
       
       toast.success('Successfully logged out');
-      return true;
+      setUser(null);
+      setIsAdmin(false);
+      setIsAuthenticated(false);
     } catch (error) {
       console.error('Logout error:', error);
       toast.error('Failed to logout. Please try again.');
-      return false;
     }
   };
 

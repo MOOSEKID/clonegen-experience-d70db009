@@ -10,13 +10,13 @@ export interface UserProfile {
   preferred_workout_time: string | null;
   gym_location: string | null;
   avatar_url: string | null;
-  bio: string | null; // Added bio field
+  bio?: string | null; // Make bio optional
   role: string;
   is_admin: boolean;
   email?: string;
   created_at: string;
   updated_at: string;
-  specialization?: string[]; // Added specialization field
+  specialization?: string[]; // Optional field
 }
 
 export const useUserProfile = () => {
@@ -65,7 +65,8 @@ export const useUserProfile = () => {
                 gym_location: null,
                 role: 'member',
                 is_admin: false,
-                avatar_url: null
+                avatar_url: null,
+                bio: null, // Add bio field
               }])
               .select()
               .single();
@@ -75,7 +76,7 @@ export const useUserProfile = () => {
               throw new Error('Failed to create user profile');
             }
             
-            // Convert to UserProfile format
+            // Convert to UserProfile format with type assertion
             setUserProfile({
               ...newProfile,
               email: user.email
@@ -87,6 +88,7 @@ export const useUserProfile = () => {
           // Add email from auth user to profile data
           const profileWithEmail = {
             ...profileData,
+            bio: profileData.bio || null, // Ensure bio exists
             email: user.email
           } as UserProfile;
           
@@ -102,7 +104,7 @@ export const useUserProfile = () => {
 
     fetchUserProfile();
     
-    // Set up auth state change listener
+    // Auth state change listener
     const { data: authListener } = supabase.auth.onAuthStateChange(
       async (event, session) => {
         console.log('Auth state changed:', event);
@@ -129,22 +131,24 @@ export const useUserProfile = () => {
                   gym_location: null,
                   role: 'member',
                   is_admin: false,
-                  avatar_url: null
+                  avatar_url: null,
+                  bio: null, // Add bio field
                 }])
                 .select()
                 .single();
                 
               if (!createError) {
-                // Convert to UserProfile format
+                // Convert to UserProfile format with explicit type assertion
                 setUserProfile({
                   ...newProfile,
                   email: session.user.email
                 } as UserProfile);
               }
             } else if (!error) {
-              // Convert to UserProfile format
+              // Ensure bio exists in the profile
               setUserProfile({
                 ...profile,
+                bio: profile.bio || null,
                 email: session.user.email
               } as UserProfile);
             }
@@ -181,9 +185,10 @@ export const useUserProfile = () => {
         throw new Error('Failed to update user profile');
       }
       
-      // Ensure UserProfile format is maintained
+      // Ensure bio exists in the updated profile
       setUserProfile({
         ...data,
+        bio: data.bio || null,
         email: userProfile.email
       } as UserProfile);
       

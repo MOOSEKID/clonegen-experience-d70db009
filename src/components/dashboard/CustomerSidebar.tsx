@@ -1,4 +1,3 @@
-
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { Home, BarChart2, Calendar, Dumbbell, Heart, Award, MapPin, Settings, LogOut } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -26,10 +25,9 @@ const CustomerSidebar = ({ isOpen }: CustomerSidebarProps) => {
 
   const handleLogout = async () => {
     try {
-      const success = await logout();
-      if (success) {
-        navigate('/', { replace: true });
-      }
+      await logout();
+      navigate('/', { replace: true });
+      toast.success('Logged out successfully');
     } catch (error) {
       console.error('Error during logout:', error);
       toast.error('Failed to logout. Please try again.');
