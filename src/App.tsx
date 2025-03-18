@@ -20,7 +20,7 @@ import StaffDashboard from '@/pages/staff/StaffDashboard';
 import AdminDashboard from '@/pages/admin/AdminDashboard';
 import PrivateRoute from '@/components/auth/PrivateRoute';
 import Index from '@/pages/Index';
-import NotFound from '@/components/NotFound';
+import NotFound from '@/pages/NotFound';
 import Membership from '@/pages/Membership';
 import Classes from '@/pages/Classes';
 import Blogs from '@/pages/Blogs';
