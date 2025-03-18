@@ -2,8 +2,7 @@
 import React from 'react';
 import PagePlaceholder from '@/components/PagePlaceholder';
 
-const Classes: React.FC = () => {
-  console.log("Classes page component rendering");
+const Classes = () => {
   return <PagePlaceholder title="Fitness Classes" />;
 };
 

@@ -2,8 +2,7 @@
 import React from 'react';
 import PagePlaceholder from '@/components/PagePlaceholder';
 
-const Shop: React.FC = () => {
-  console.log("Shop page component rendering");
+const Shop = () => {
   return <PagePlaceholder title="Fitness Shop" />;
 };
 
