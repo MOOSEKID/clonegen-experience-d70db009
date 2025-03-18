@@ -11,6 +11,8 @@ import { useAuth } from '@/hooks/useAuth';
 import { Eye, EyeOff } from 'lucide-react';
 
 const Login = () => {
+  console.log("Login component rendering"); // Debug logging
+
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [termsAccepted, setTermsAccepted] = useState(true); // Default to true for easier testing
@@ -20,6 +22,11 @@ const Login = () => {
   const { login, isAuthenticated, isAdmin } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
+  
+  // Debug log auth state
+  useEffect(() => {
+    console.log("Auth state in Login:", { isAuthenticated, isAdmin, isLoading });
+  }, [isAuthenticated, isAdmin, isLoading]);
   
   // Get the pathname from the location state, defaulting to dashboard or admin
   const from = location.state?.from || '/dashboard';
@@ -35,6 +42,7 @@ const Login = () => {
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
+    console.log("Login form submitted", { email, password });
     
     if (!email || !password) {
       toast.error('Please enter both email and password');
@@ -48,7 +56,9 @@ const Login = () => {
     
     try {
       setIsLoading(true);
+      console.log("Calling login function");
       const success = await login(email, password);
+      console.log("Login result:", success);
       
       if (success) {
         toast.success('Login successful');
@@ -68,6 +78,7 @@ const Login = () => {
     try {
       setIsLoading(true);
       setTermsAccepted(true);
+      console.log("Using admin login with demo credentials");
       
       const success = await login('admin@example.com', 'admin123');
       
@@ -89,6 +100,7 @@ const Login = () => {
     try {
       setIsLoading(true);
       setTermsAccepted(true);
+      console.log("Using user login with demo credentials");
       
       const success = await login('user@example.com', 'user123');
       
@@ -105,6 +117,9 @@ const Login = () => {
       setIsLoading(false);
     }
   };
+
+  // If component renders successfully, show this message
+  console.log("Login component rendered successfully");
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gym-dark p-4">

@@ -1,4 +1,3 @@
-
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { Toaster } from 'sonner';
 import { AuthProvider } from '@/contexts/AuthProvider';
@@ -9,7 +8,7 @@ import { useNavigate } from 'react-router-dom';
 import Header from '@/components/Header';
 
 // Page imports
-import Login from '@/pages/Login';
+import Login from '@/pages/auth/Login';
 import Register from '@/pages/auth/Register';
 import ForgotPassword from '@/pages/auth/ForgotPassword';
 import ResetPassword from '@/pages/auth/ResetPassword';
@@ -66,7 +65,22 @@ function App() {
                 <Routes>
                   {/* Public routes */}
                   <Route path="/" element={<Index />} />
-                  <Route path="/login" element={<Login />} />
+                  <Route path="/login" element={
+                    <ErrorBoundary fallback={<div className="min-h-screen flex items-center justify-center">
+                      <div className="text-center">
+                        <h1 className="text-2xl font-bold mb-4">Login Error</h1>
+                        <p>There was an error loading the login page.</p>
+                        <button 
+                          onClick={() => window.location.reload()}
+                          className="mt-4 px-4 py-2 bg-gym-orange text-white rounded"
+                        >
+                          Reload Page
+                        </button>
+                      </div>
+                    </div>}>
+                      <Login />
+                    </ErrorBoundary>
+                  } />
                   <Route path="/register" element={<Register />} />
                   <Route path="/forgot-password" element={<ForgotPassword />} />
                   <Route path="/reset-password" element={<ResetPassword />} />
