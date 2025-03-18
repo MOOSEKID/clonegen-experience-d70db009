@@ -13,6 +13,7 @@ export interface UserProfile {
   bio?: string | null; // Make bio optional
   role: string;
   is_admin: boolean;
+  is_staff: boolean;
   email?: string;
   created_at: string;
   updated_at: string;
@@ -66,7 +67,7 @@ export const useUserProfile = () => {
                 role: 'member',
                 is_admin: false,
                 avatar_url: null,
-                bio: null, // Add bio field
+                bio: null, // Add bio field explicitly
               }])
               .select()
               .single();
@@ -76,26 +77,32 @@ export const useUserProfile = () => {
               throw new Error('Failed to create user profile');
             }
             
-            // Ensure the profile has a bio field
-            const profileWithBio = {
+            // Add email and ensure bio exists
+            const completeProfile: UserProfile = {
               ...newProfile,
               bio: null,
-              email: user.email
-            } as UserProfile;
+              email: user.email,
+              is_staff: newProfile.is_staff || false,
+              created_at: newProfile.created_at || new Date().toISOString(),
+              updated_at: newProfile.updated_at || new Date().toISOString(),
+            };
             
-            setUserProfile(profileWithBio);
+            setUserProfile(completeProfile);
           } else {
             throw new Error('Failed to fetch user profile');
           }
         } else {
           // Add email from auth user to profile data and ensure bio exists
-          const profileWithEmailAndBio = {
+          const completeProfile: UserProfile = {
             ...profileData,
-            bio: profileData.bio || null, // Ensure bio exists
-            email: user.email
-          } as UserProfile;
+            bio: profileData.bio || null,
+            email: user.email,
+            is_staff: profileData.is_staff || false,
+            created_at: profileData.created_at || new Date().toISOString(),
+            updated_at: profileData.updated_at || new Date().toISOString(),
+          };
           
-          setUserProfile(profileWithEmailAndBio);
+          setUserProfile(completeProfile);
         }
       } catch (err) {
         console.error('Error in useUserProfile:', err);
@@ -135,30 +142,36 @@ export const useUserProfile = () => {
                   role: 'member',
                   is_admin: false,
                   avatar_url: null,
-                  bio: null, // Add bio field
+                  bio: null, // Add bio field explicitly
                 }])
                 .select()
                 .single();
                 
-              if (!createError) {
-                // Add bio field and ensure it exists
-                const profileWithBio = {
+              if (!createError && newProfile) {
+                // Create complete profile with required fields
+                const completeProfile: UserProfile = {
                   ...newProfile,
                   bio: null,
-                  email: session.user.email
-                } as UserProfile;
+                  email: session.user.email,
+                  is_staff: newProfile.is_staff || false,
+                  created_at: newProfile.created_at || new Date().toISOString(),
+                  updated_at: newProfile.updated_at || new Date().toISOString(),
+                };
                 
-                setUserProfile(profileWithBio);
+                setUserProfile(completeProfile);
               }
-            } else if (!error) {
-              // Ensure bio exists in the profile
-              const profileWithBio = {
+            } else if (!error && profile) {
+              // Create complete profile with required fields
+              const completeProfile: UserProfile = {
                 ...profile,
                 bio: profile.bio || null,
-                email: session.user.email
-              } as UserProfile;
+                email: session.user.email,
+                is_staff: profile.is_staff || false,
+                created_at: profile.created_at || new Date().toISOString(),
+                updated_at: profile.updated_at || new Date().toISOString(),
+              };
               
-              setUserProfile(profileWithBio);
+              setUserProfile(completeProfile);
             }
           }
         } else if (event === 'SIGNED_OUT') {
@@ -193,14 +206,17 @@ export const useUserProfile = () => {
         throw new Error('Failed to update user profile');
       }
       
-      // Ensure bio exists in the updated profile
-      const updatedProfileWithBio = {
+      // Create complete profile with required fields
+      const completeProfile: UserProfile = {
         ...data,
         bio: data.bio || null,
-        email: userProfile.email
-      } as UserProfile;
+        email: userProfile.email,
+        is_staff: data.is_staff || false,
+        created_at: data.created_at || userProfile.created_at,
+        updated_at: data.updated_at || new Date().toISOString(),
+      };
       
-      setUserProfile(updatedProfileWithBio);
+      setUserProfile(completeProfile);
       
       return data;
     } catch (err) {
