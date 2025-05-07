@@ -57,15 +57,19 @@ export const createAdminUser = async (email: string, password: string, fullName:
       .from('profiles')
       .select('*')
       .eq('id', userId)
-      .single();
+      .maybeSingle(); // Use maybeSingle instead of single to avoid errors if no profile exists
       
-    if (profileCheckError && profileCheckError.code !== 'PGRST116') {
+    if (profileCheckError) {
       console.error('Error checking for existing profile:', profileCheckError);
     }
     
+    // Create a Supabase client with service role to bypass RLS
+    // Normally we'd use service role client, but since we have proper RLS policies now,
+    // we can use the current client with proper settings
+    
     if (existingProfile) {
       console.log('Admin profile already exists, updating:', existingProfile.id);
-      // Update existing profile - removed access_level which doesn't exist in the schema
+      // Update existing profile
       const { error: updateError } = await supabase
         .from('profiles')
         .update({
@@ -84,7 +88,7 @@ export const createAdminUser = async (email: string, password: string, fullName:
       }
     } else {
       console.log('Creating new admin profile for user:', userId);
-      // Create new profile - removed access_level which doesn't exist in the schema
+      // Create new profile
       const { error: insertError } = await supabase
         .from('profiles')
         .insert([

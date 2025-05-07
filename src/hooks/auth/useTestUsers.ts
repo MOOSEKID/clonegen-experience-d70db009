@@ -19,7 +19,7 @@ export const useTestUsers = () => {
           .eq('is_admin', true)
           .maybeSingle();
         
-        if (profileError) {
+        if (profileError && profileError.code !== 'PGRST116') {
           console.error('Error checking for admin profile:', profileError);
         }
         
