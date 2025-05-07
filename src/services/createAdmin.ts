@@ -15,7 +15,7 @@ export const createAdminUser = async (email: string, password: string, fullName:
       console.error('Failed to list users:', usersError);
     } else if (authUsers?.users) {
       // Find user with matching email
-      const matchingUser = authUsers.users.find(user => user.email === email);
+      const matchingUser = authUsers.users.find((user: any) => user.email === email);
       if (matchingUser) {
         console.log('Found existing user through list:', matchingUser.id);
         userId = matchingUser.id;

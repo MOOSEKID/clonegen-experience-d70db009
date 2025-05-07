@@ -1,8 +1,9 @@
+
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Outlet } from "react-router-dom";
 import { AuthProvider } from "./contexts/AuthContext";
 
 // Layout components
@@ -68,6 +69,19 @@ const queryClient = new QueryClient({
   }
 });
 
+// Main Layout component that includes Header and Footer
+const MainLayout = () => {
+  return (
+    <div className="flex flex-col min-h-screen">
+      <Header />
+      <div className="flex-grow">
+        <Outlet />
+      </div>
+      <Footer />
+    </div>
+  );
+};
+
 const App = () => {
   console.log("App component rendering"); // Debug log
   
@@ -80,34 +94,26 @@ const App = () => {
           <BrowserRouter>
             <Routes>
               {/* Main Routes with Header and Footer */}
-              <Route path="*" element={
-                <div className="flex flex-col min-h-screen">
-                  <Header />
-                  <div className="flex-grow">
-                    <Routes>
-                      <Route index element={<Index />} />
-                      <Route path="/about-us" element={<AboutUs />} />
-                      <Route path="/services" element={<Services />} />
-                      <Route path="/services/fitness-facilities" element={<FitnessFacilities />} />
-                      <Route path="/services/youth-programs" element={<YouthPrograms />} />
-                      <Route path="/services/spa-wellness" element={<SpaWellness />} />
-                      <Route path="/membership" element={<Membership />} />
-                      <Route path="/classes" element={<Classes />} />
-                      <Route path="/blogs" element={<Blogs />} />
-                      <Route path="/shop" element={<ShopPage />} />
-                      <Route path="/shop/category/:categoryId" element={<CategoryPage />} />
-                      <Route path="/shop/product/:productId" element={<ProductPage />} />
-                      <Route path="/login" element={<Login />} />
-                      <Route path="/signup" element={<Signup />} />
-                      <Route path="/contact-us" element={<ContactUs />} />
-                      <Route path="/timetable" element={<Timetable />} />
-                      <Route path="/opening-times" element={<OpeningTimes />} />
-                      <Route path="*" element={<NotFound />} />
-                    </Routes>
-                  </div>
-                  <Footer />
-                </div>
-              } />
+              <Route element={<MainLayout />}>
+                <Route index element={<Index />} />
+                <Route path="/about-us" element={<AboutUs />} />
+                <Route path="/services" element={<Services />} />
+                <Route path="/services/fitness-facilities" element={<FitnessFacilities />} />
+                <Route path="/services/youth-programs" element={<YouthPrograms />} />
+                <Route path="/services/spa-wellness" element={<SpaWellness />} />
+                <Route path="/membership" element={<Membership />} />
+                <Route path="/classes" element={<Classes />} />
+                <Route path="/blogs" element={<Blogs />} />
+                <Route path="/shop" element={<ShopPage />} />
+                <Route path="/shop/category/:categoryId" element={<CategoryPage />} />
+                <Route path="/shop/product/:productId" element={<ProductPage />} />
+                <Route path="/login" element={<Login />} />
+                <Route path="/signup" element={<Signup />} />
+                <Route path="/contact-us" element={<ContactUs />} />
+                <Route path="/timetable" element={<Timetable />} />
+                <Route path="/opening-times" element={<OpeningTimes />} />
+                <Route path="*" element={<NotFound />} />
+              </Route>
               
               {/* Admin Routes */}
               <Route path="/admin/*" element={<AdminLayout />}>

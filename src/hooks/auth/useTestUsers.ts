@@ -40,7 +40,8 @@ export const useTestUsers = () => {
         // Determine if admin exists in auth table
         let adminExistsInAuth = false;
         if (authData && authData.users) {
-          adminExistsInAuth = authData.users.some(user => {
+          // Explicitly type the user object to avoid TypeScript errors
+          adminExistsInAuth = authData.users.some((user: any) => {
             return user.email === 'admin@example.com' || user.email === 'admin@uptowngym.rw';
           });
           console.log('Admin exists in auth table:', adminExistsInAuth);
@@ -97,7 +98,7 @@ export const useTestUsers = () => {
         let regularUserExists = false;
         const { data: authData } = await supabase.auth.admin.listUsers();
         if (authData && authData.users) {
-          regularUserExists = authData.users.some(user => {
+          regularUserExists = authData.users.some((user: any) => {
             if (user.email) {
               return user.email === 'user@example.com';
             }
