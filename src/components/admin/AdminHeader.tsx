@@ -12,6 +12,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '@/hooks/useAuth';
 
 interface AdminHeaderProps {
   toggleSidebar: () => void;
@@ -20,8 +21,11 @@ interface AdminHeaderProps {
 const AdminHeader = ({ toggleSidebar }: AdminHeaderProps) => {
   const [showNotifications, setShowNotifications] = useState(false);
   const navigate = useNavigate();
-  const userEmail = localStorage.getItem('userEmail') || 'admin@example.com';
-  const userName = localStorage.getItem('userName') || 'Admin User';
+  const { logout, user } = useAuth();
+  
+  // Get user data from auth context or fallback to localStorage
+  const userEmail = user?.email || localStorage.getItem('userEmail') || 'admin@example.com';
+  const userName = user?.user_metadata?.full_name || localStorage.getItem('userName') || 'Admin User';
   
   // Mock notifications
   const notifications = [
@@ -31,16 +35,21 @@ const AdminHeader = ({ toggleSidebar }: AdminHeaderProps) => {
     { id: 4, message: 'Monthly report is ready', time: '1 day ago', read: true },
   ];
 
-  const handleLogout = () => {
-    localStorage.removeItem('isLoggedIn');
-    localStorage.removeItem('isAdmin');
-    localStorage.removeItem('userEmail');
-    localStorage.removeItem('userName');
-    document.cookie = "session_active=; path=/; max-age=0";
-    document.cookie = "user_role=; path=/; max-age=0";
-    console.log('Logged out successfully');
-    toast.success('Logged out successfully');
-    navigate('/login');
+  const handleLogout = async () => {
+    try {
+      console.log("Admin logging out using auth context");
+      const success = await logout();
+      
+      if (success) {
+        toast.success('Logged out successfully');
+        navigate('/login');
+      } else {
+        toast.error("Failed to log out. Please try again.");
+      }
+    } catch (error) {
+      console.error("Error during logout:", error);
+      toast.error("Failed to log out. Please try again.");
+    }
   };
 
   return (

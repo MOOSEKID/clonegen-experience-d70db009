@@ -5,6 +5,14 @@ import AdminSidebar from '@/components/admin/AdminSidebar';
 import AdminHeader from '@/components/admin/AdminHeader';
 import { toast } from 'sonner';
 import { useAuth } from '@/hooks/useAuth';
+import { Button } from '@/components/ui/button';
+import { AlertCircle, ChevronDown } from 'lucide-react';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 const AdminLayout = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
@@ -18,13 +26,21 @@ const AdminLayout = () => {
       try {
         setIsLoading(true);
         
-        if (!isAuthenticated || !isAdmin) {
-          console.log('Admin authentication failed, redirecting to login');
-          toast.error('You must be logged in as an administrator');
+        if (!isAuthenticated) {
+          console.log('User not authenticated, redirecting to login');
+          toast.error('You must be logged in to access this page');
           navigate('/login', { state: { from: '/admin' } });
-        } else {
-          console.log('Admin authenticated successfully');
+          return;
         }
+        
+        if (!isAdmin) {
+          console.log('User authenticated but not an admin, redirecting to dashboard');
+          toast.error('You must be an administrator to access this page');
+          navigate('/dashboard');
+          return;
+        }
+        
+        console.log('Admin authenticated successfully');
       } catch (error) {
         console.error('Authentication check error:', error);
         toast.error('Authentication error. Please log in again.');
@@ -43,6 +59,10 @@ const AdminLayout = () => {
 
   const toggleSidebar = () => {
     setIsSidebarOpen(!isSidebarOpen);
+  };
+  
+  const switchToDashboard = () => {
+    navigate('/dashboard');
   };
 
   if (isLoading) {
@@ -63,6 +83,32 @@ const AdminLayout = () => {
       
       <div className="flex-1 flex flex-col">
         <AdminHeader toggleSidebar={toggleSidebar} />
+        
+        <div className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 py-2 px-4">
+          <div className="container mx-auto flex items-center justify-between">
+            <div className="flex items-center gap-2 text-sm">
+              <span className="font-semibold">Admin Mode</span>
+              <AlertCircle size={16} className="text-gym-orange" />
+            </div>
+            
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" size="sm" className="gap-1">
+                  <span>Switch View</span>
+                  <ChevronDown size={14} />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem className="font-medium" disabled>
+                  Admin Dashboard
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={switchToDashboard}>
+                  Member Dashboard
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
+        </div>
         
         <main className="flex-1 p-4 md:p-6 overflow-auto">
           <div className="container mx-auto">

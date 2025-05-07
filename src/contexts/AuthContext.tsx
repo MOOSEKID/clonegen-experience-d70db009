@@ -69,6 +69,10 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
           // Use setTimeout to defer profile checking after auth state update
           setTimeout(async () => {
             try {
+              // Check if this is one of our known admin emails
+              const userEmail = session.user.email;
+              const isKnownAdmin = userEmail === 'admin@example.com' || userEmail === 'admin@uptowngym.rw';
+              
               // Get user profile to check if admin
               const { data: profile, error } = await supabase
                 .from('profiles')
@@ -81,19 +85,23 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
                 return;
               }
               
-              if (profile) {
-                // Profile exists, update auth state
-                console.log('User profile found after session update:', profile);
-                const userIsAdmin = profile?.is_admin || false;
-                setIsAdmin(userIsAdmin);
-                
-                authStorageService.setAuthData(
-                  true, 
-                  userIsAdmin, 
-                  session.user.email || '', 
-                  session.user.user_metadata?.full_name || profile?.full_name || session.user.email || ''
-                );
-              }
+              // Set admin status based on profile or known admin emails
+              const userIsAdmin = profile?.is_admin || isKnownAdmin || false;
+              console.log('Auth state admin check:', { 
+                profile, 
+                isKnownAdmin, 
+                userIsAdmin,
+                userEmail
+              });
+              
+              setIsAdmin(userIsAdmin);
+              
+              authStorageService.setAuthData(
+                true, 
+                userIsAdmin, 
+                session.user.email || '', 
+                session.user.user_metadata?.full_name || profile?.full_name || session.user.email || ''
+              );
             } catch (error) {
               console.error('Error in profile check after session update:', error);
             }
@@ -127,6 +135,10 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
           // Defer profile checking
           setTimeout(async () => {
             try {
+              // Check if this is one of our known admin emails
+              const userEmail = session.user.email;
+              const isKnownAdmin = userEmail === 'admin@example.com' || userEmail === 'admin@uptowngym.rw';
+              
               // Get user profile to check if admin
               const { data: profile, error } = await supabase
                 .from('profiles')
@@ -135,22 +147,27 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
                 .maybeSingle();
               
               if (error && error.code !== 'PGRST116') {
-                console.error('Error fetching user profile after session update:', error);
+                console.error('Error fetching user profile during initial session:', error);
                 return;
               }
               
-              if (profile) {
-                // Profile exists, update auth state
-                const userIsAdmin = profile?.is_admin || false;
-                setIsAdmin(userIsAdmin);
-                
-                authStorageService.setAuthData(
-                  true, 
-                  userIsAdmin, 
-                  session.user.email || '', 
-                  session.user.user_metadata?.full_name || profile?.full_name || session.user.email || ''
-                );
-              }
+              // Set admin status based on profile or known admin emails
+              const userIsAdmin = profile?.is_admin || isKnownAdmin || false;
+              console.log('Initial session admin check:', { 
+                profile, 
+                isKnownAdmin, 
+                userIsAdmin,
+                userEmail
+              });
+              
+              setIsAdmin(userIsAdmin);
+              
+              authStorageService.setAuthData(
+                true, 
+                userIsAdmin, 
+                session.user.email || '', 
+                session.user.user_metadata?.full_name || profile?.full_name || session.user.email || ''
+              );
             } catch (error) {
               console.error('Error in profile check during initial session:', error);
             }

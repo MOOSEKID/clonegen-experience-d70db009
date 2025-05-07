@@ -57,7 +57,10 @@ const Login = () => {
             userIsAdmin = true;
           }
           
+          console.log('Login redirect check:', { userEmail, userIsAdmin, profileData });
+          
           const redirectPath = userIsAdmin ? '/admin' : '/dashboard';
+          console.log('Redirecting to:', redirectPath);
           
           // Force navigation with replace to prevent back button from returning to login
           navigate(redirectPath, { replace: true });
@@ -103,8 +106,15 @@ const Login = () => {
         // Check if this is one of our admin emails
         const isAdminUser = email === 'admin@example.com' || email === 'admin@uptowngym.rw';
         
+        // Get the admin status from local storage as well (belt and suspenders approach)
+        const isAdminFromStorage = localStorage.getItem('isAdmin') === 'true';
+        
+        // Determine if user should go to admin or dashboard
+        const isAdminRedirect = isAdminUser || isAdminFromStorage || false;
+        console.log('Admin redirect check:', { isAdminUser, isAdminFromStorage, isAdminRedirect });
+        
         // Force navigation to dashboard
-        const targetPath = isAdminUser ? '/admin' : '/dashboard';
+        const targetPath = isAdminRedirect ? '/admin' : '/dashboard';
         console.log('Forcing navigation to:', targetPath);
         
         // Small timeout to ensure state is updated before redirect

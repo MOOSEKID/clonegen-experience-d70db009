@@ -5,16 +5,24 @@ import CustomerSidebar from '@/components/dashboard/CustomerSidebar';
 import CustomerHeader from '@/components/dashboard/CustomerHeader';
 import { toast } from 'sonner';
 import { useAuth } from '@/hooks/useAuth';
+import { Button } from '@/components/ui/button';
+import { AlertCircle, ChevronDown } from 'lucide-react';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 const DashboardLayout = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [isLoading, setIsLoading] = useState(true);
-  const { isAuthenticated, user } = useAuth();
+  const { isAuthenticated, user, isAdmin } = useAuth();
   const navigate = useNavigate();
 
   // Check user authentication
   useEffect(() => {
-    console.log('DashboardLayout mounted, checking auth state:', { isAuthenticated });
+    console.log('DashboardLayout mounted, checking auth state:', { isAuthenticated, isAdmin });
     
     const checkAuth = async () => {
       try {
@@ -54,6 +62,10 @@ const DashboardLayout = () => {
   const toggleSidebar = () => {
     setIsSidebarOpen(!isSidebarOpen);
   };
+  
+  const switchToAdmin = () => {
+    navigate('/admin');
+  };
 
   if (isLoading) {
     return (
@@ -73,6 +85,34 @@ const DashboardLayout = () => {
       
       <div className="flex-1 flex flex-col">
         <CustomerHeader toggleSidebar={toggleSidebar} />
+        
+        {isAdmin && (
+          <div className="bg-gym-darkblue/80 border-b border-gray-700 py-2 px-4">
+            <div className="container mx-auto flex items-center justify-between">
+              <div className="flex items-center gap-2 text-sm text-white/80">
+                <span className="font-semibold">Member View</span>
+                <AlertCircle size={16} className="text-gym-orange" />
+              </div>
+              
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="outline" size="sm" className="gap-1 bg-transparent border-white/20 text-white hover:bg-white/10">
+                    <span>Switch View</span>
+                    <ChevronDown size={14} />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  <DropdownMenuItem onClick={switchToAdmin}>
+                    Admin Dashboard
+                  </DropdownMenuItem>
+                  <DropdownMenuItem className="font-medium" disabled>
+                    Member Dashboard
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
+          </div>
+        )}
         
         <main className="flex-1 p-4 md:p-6 overflow-auto">
           <div className="container mx-auto">
