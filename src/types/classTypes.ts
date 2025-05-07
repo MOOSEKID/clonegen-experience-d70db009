@@ -3,8 +3,8 @@ export interface MemberInfo {
   id: string;
   name: string;
   email: string;
-  joinDate?: string;
-  status?: string;
+  joinDate: string;
+  status: string;
 }
 
 export interface ClassType {
@@ -49,7 +49,7 @@ export interface PaymentGateway {
   provider: string;
   fees: string;
   setupComplete: boolean;
-  fee?: string;
-  isEnabled?: boolean;
-  supportedCards?: string[];
+  fee: string;  // Changed from optional to required to match the implementation
+  isEnabled: boolean; // Changed from optional to required
+  supportedCards: string[]; // Changed from optional to required
 }
