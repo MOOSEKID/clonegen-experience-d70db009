@@ -19,6 +19,13 @@ const AdminPayments = () => {
           icon={<Receipt className="h-6 w-6 text-gym-orange" />}
           description="Manage recurring membership plans, payment cycles, and subscription status."
           onClick={() => navigate('/admin/payments/subscriptions')}
+          features={[
+            "Create or modify plans",
+            "Manage pricing tiers",
+            "View subscribers",
+            "Pause/activate plans"
+          ]}
+          ctaText="Manage Subscriptions"
         />
         
         <PlaceholderSection
@@ -26,6 +33,13 @@ const AdminPayments = () => {
           icon={<DollarSign className="h-6 w-6 text-gym-orange" />}
           description="Process payments, generate invoices, and view payment history."
           onClick={() => navigate('/admin/payments/invoices')}
+          features={[
+            "Generate new invoices",
+            "Send payment reminders",
+            "View payment status",
+            "Download as PDF"
+          ]}
+          ctaText="View Invoices"
         />
         
         <PlaceholderSection
@@ -33,6 +47,13 @@ const AdminPayments = () => {
           icon={<CreditCard className="h-6 w-6 text-gym-orange" />}
           description="Configure payment gateways, processing fees, and supported payment methods."
           onClick={() => navigate('/admin/payments/methods')}
+          features={[
+            "Enable/disable gateways",
+            "Set up provider APIs",
+            "Configure webhooks",
+            "Manage transaction fees"
+          ]}
+          ctaText="Configure Methods"
         />
       </div>
     </div>
