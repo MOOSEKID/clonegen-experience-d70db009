@@ -79,7 +79,7 @@ export const useLoginService = () => {
               } else {
                 console.log('Profile created successfully for user:', data.user.id);
                 userProfile = newProfile;
-                userRole = newProfile?.role || isKnownAdmin ? 'admin' : 'member';
+                userRole = newProfile?.role || (isKnownAdmin ? 'admin' : 'member');
                 userIsAdmin = newProfile?.is_admin || isKnownAdmin;
               }
             } catch (e) {

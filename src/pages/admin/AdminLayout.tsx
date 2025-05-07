@@ -17,17 +17,19 @@ import {
 const AdminLayout = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [isLoading, setIsLoading] = useState(true);
-  const { isAuthenticated, isAdmin } = useAuth();
+  const { isAuthenticated, isAdmin, user } = useAuth();
   const navigate = useNavigate();
 
   // Check admin authentication
   useEffect(() => {
+    console.log('AdminLayout mounted, checking auth state:', { isAuthenticated, isAdmin, user });
+    
     const checkAuth = async () => {
       try {
         setIsLoading(true);
         
         if (!isAuthenticated) {
-          console.log('User not authenticated, redirecting to login');
+          console.log('User not authenticated, redirecting to login from admin layout');
           toast.error('You must be logged in to access this page');
           navigate('/login', { state: { from: '/admin' } });
           return;
@@ -53,9 +55,24 @@ const AdminLayout = () => {
     checkAuth();
     
     // Check authentication status periodically
-    const interval = setInterval(checkAuth, 600000); // 10 minutes
+    const interval = setInterval(() => {
+      console.log('Running periodic auth check in admin layout');
+      if (!isAuthenticated) {
+        console.log('User not authenticated in periodic admin check, redirecting to login');
+        clearInterval(interval);
+        navigate('/login', { state: { from: '/admin' } });
+        return;
+      }
+      
+      if (!isAdmin) {
+        console.log('User not admin in periodic check, redirecting to dashboard');
+        clearInterval(interval);
+        navigate('/dashboard');
+      }
+    }, 600000); // 10 minutes
+    
     return () => clearInterval(interval);
-  }, [navigate, isAuthenticated, isAdmin]);
+  }, [navigate, isAuthenticated, isAdmin, user]);
 
   const toggleSidebar = () => {
     setIsSidebarOpen(!isSidebarOpen);

@@ -113,7 +113,7 @@ const Login = () => {
         const isAdminRedirect = isAdminUser || isAdminFromStorage || false;
         console.log('Admin redirect check:', { isAdminUser, isAdminFromStorage, isAdminRedirect });
         
-        // Force navigation to dashboard
+        // Force navigation to admin dashboard for admin users
         const targetPath = isAdminRedirect ? '/admin' : '/dashboard';
         console.log('Forcing navigation to:', targetPath);
         

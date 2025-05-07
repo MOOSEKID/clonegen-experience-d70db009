@@ -1,4 +1,3 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -6,6 +5,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Outlet, useLocation, Navigate } from "react-router-dom";
 import { AuthProvider } from "./contexts/AuthContext";
 import { ErrorBoundary } from "./components/ui/error-boundary";
+import { useAuth } from "./hooks/useAuth";
 
 // Layout components
 import Header from "@/components/Header";
@@ -86,6 +86,73 @@ const ErrorFallback = () => {
   );
 };
 
+// Admin route guard component
+const AdminRoute = ({ children }: { children: React.ReactNode }) => {
+  const { isAuthenticated, isAdmin, isLoading } = useAuth();
+  const navigate = useLocation();
+  
+  console.log('AdminRoute check:', { isAuthenticated, isAdmin, isLoading, path: navigate.pathname });
+  
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-gym-orange"></div>
+      </div>
+    );
+  }
+  
+  if (!isAuthenticated) {
+    console.log('User not authenticated, redirecting to login from admin route');
+    return <Navigate to="/login" state={{ from: navigate.pathname }} replace />;
+  }
+  
+  if (!isAdmin) {
+    console.log('User not admin, redirecting to dashboard from admin route');
+    return <Navigate to="/dashboard" replace />;
+  }
+  
+  return <>{children}</>;
+};
+
+// User route guard component
+const UserRoute = ({ children }: { children: React.ReactNode }) => {
+  const { isAuthenticated, isLoading } = useAuth();
+  const navigate = useLocation();
+  
+  console.log('UserRoute check:', { isAuthenticated, isLoading, path: navigate.pathname });
+  
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-gym-orange"></div>
+      </div>
+    );
+  }
+  
+  if (!isAuthenticated) {
+    console.log('User not authenticated, redirecting to login from user route');
+    return <Navigate to="/login" state={{ from: navigate.pathname }} replace />;
+  }
+  
+  return <>{children}</>;
+};
+
+// Admin redirect component for the home page
+const AdminRedirect = () => {
+  const { isAuthenticated, isAdmin, isLoading } = useAuth();
+  
+  console.log('Home page admin redirect check:', { isAuthenticated, isAdmin, isLoading });
+  
+  // Only redirect after loading is complete
+  if (!isLoading && isAuthenticated && isAdmin) {
+    console.log('Admin user on homepage, redirecting to admin dashboard');
+    return <Navigate to="/admin" replace />;
+  }
+  
+  // Otherwise show the Index page
+  return <Index />;
+};
+
 // Main Layout component that includes Header and Footer
 const MainLayout = () => {
   return (
@@ -115,7 +182,7 @@ const App = () => {
               <Routes>
                 {/* Main Routes with Header and Footer */}
                 <Route element={<MainLayout />}>
-                  <Route index element={<Index />} />
+                  <Route index element={<AdminRedirect />} />
                   <Route path="/about-us" element={<AboutUs />} />
                   <Route path="/services" element={<Services />} />
                   <Route path="/services/fitness-facilities" element={<FitnessFacilities />} />
@@ -135,8 +202,12 @@ const App = () => {
                   <Route path="*" element={<NotFound />} />
                 </Route>
                 
-                {/* Admin Routes */}
-                <Route path="/admin/*" element={<AdminLayout />}>
+                {/* Admin Routes with protection */}
+                <Route path="/admin/*" element={
+                  <AdminRoute>
+                    <AdminLayout />
+                  </AdminRoute>
+                }>
                   <Route index element={<AdminDashboard />} />
                   <Route path="members" element={<AdminMembers />} />
                   <Route path="classes" element={<AdminClasses />} />
@@ -153,8 +224,12 @@ const App = () => {
                   <Route path="support" element={<AdminSupport />} />
                 </Route>
                 
-                {/* Customer Dashboard Routes */}
-                <Route path="/dashboard/*" element={<DashboardLayout />}>
+                {/* Customer Dashboard Routes with protection */}
+                <Route path="/dashboard/*" element={
+                  <UserRoute>
+                    <DashboardLayout />
+                  </UserRoute>
+                }>
                   <Route index element={<Dashboard />} />
                   <Route path="*" element={<NotFound />} />
                 </Route>
