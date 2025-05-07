@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { 
   Breadcrumb,
@@ -15,6 +16,7 @@ import { Badge } from '@/components/ui/badge';
 import { GatewayConfigurationModal } from '@/components/admin/payments/GatewayConfigurationModal';
 import { toast } from 'sonner';
 import { useIsMobile } from '@/hooks/use-mobile';
+import { PaymentGateway } from '@/types/classTypes';
 
 // Mock payment methods data
 const mockPaymentMethods = [
@@ -27,6 +29,9 @@ const mockPaymentMethods = [
     provider: 'Stripe',
     fees: '2.9% + RWF 300 per transaction',
     setupComplete: true,
+    fee: '2.9% + RWF 300',
+    isEnabled: true,
+    supportedCards: ['visa', 'mastercard', 'amex']
   },
   {
     id: '2',
@@ -37,6 +42,9 @@ const mockPaymentMethods = [
     provider: 'PayPal',
     fees: '3.4% + RWF 400 per transaction',
     setupComplete: false,
+    fee: '3.4% + RWF 400',
+    isEnabled: false,
+    supportedCards: ['paypal']
   },
   {
     id: '3',
@@ -47,6 +55,9 @@ const mockPaymentMethods = [
     provider: 'Manual',
     fees: 'No fees',
     setupComplete: true,
+    fee: 'No fees',
+    isEnabled: true,
+    supportedCards: []
   },
   {
     id: '4',
@@ -57,23 +68,14 @@ const mockPaymentMethods = [
     provider: 'MTN/Airtel API',
     fees: '1.5% per transaction',
     setupComplete: false,
+    fee: '1.5%',
+    isEnabled: false,
+    supportedCards: []
   },
 ];
 
-// Update the type definition for the GatewayConfigurationModal
-interface PaymentGateway {
-  id: string;
-  name: string;
-  description: string;
-  status: string;
-  icon: React.ReactNode;
-  provider: string;
-  fees: string;
-  setupComplete: boolean;
-}
-
 const Methods = () => {
-  const [paymentMethods, setPaymentMethods] = useState(mockPaymentMethods);
+  const [paymentMethods, setPaymentMethods] = useState<PaymentGateway[]>(mockPaymentMethods);
   const [isConfigModalOpen, setIsConfigModalOpen] = useState(false);
   const [selectedMethod, setSelectedMethod] = useState<PaymentGateway | null>(null);
   const isMobile = useIsMobile();

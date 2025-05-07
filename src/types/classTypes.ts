@@ -6,3 +6,50 @@ export interface MemberInfo {
   joinDate?: string;
   status?: string;
 }
+
+export interface ClassType {
+  id: number;
+  name: string;
+  description?: string;
+  type: string;
+  trainer: string;
+  trainerId?: string;
+  capacity: number;
+  enrolled: number;
+  enrolledMembers: MemberInfo[];
+  waitlist: number;
+  waitlistMembers: MemberInfo[];
+  day: string;
+  time: string;
+  duration: number;
+  room: string;
+  status: string;
+  classLevel?: string;
+  equipmentRequired: string[];
+  recurrence?: boolean;
+  recurrenceDays?: string[];
+  classFees: number | null;
+  feeType?: string;
+}
+
+export interface GymLocation {
+  id: string | number;
+  name: string;
+  type: 'room' | 'area';
+  capacity: number;
+  equipment: string[];
+}
+
+export interface PaymentGateway {
+  id: string;
+  name: string;
+  description: string;
+  status: string;
+  icon: React.ReactNode;
+  provider: string;
+  fees: string;
+  setupComplete: boolean;
+  fee?: string;
+  isEnabled?: boolean;
+  supportedCards?: string[];
+}
