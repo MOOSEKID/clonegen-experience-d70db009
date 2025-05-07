@@ -1,125 +1,210 @@
-
-import { Link, useLocation } from 'react-router-dom';
+import React, { useState } from 'react';
 import { cn } from '@/lib/utils';
-import { 
-  LayoutDashboard, 
-  Users, 
-  CalendarClock, 
-  Dumbbell, 
-  DollarSign,
-  ShoppingBag, 
-  FileEdit,
-  BarChart3, 
+import { Link, useLocation } from 'react-router-dom';
+import {
+  LayoutDashboard,
+  Users,
+  CalendarClock,
+  Dumbbell,
+  CreditCard,
+  Activity,
+  ShoppingCart,
+  FileText,
+  BarChart,
   Settings,
-  LifeBuoy,
-  ChevronRight,
-  Menu,
-  X
+  HelpCircle,
+  ChevronDown,
+  UserCog,
 } from 'lucide-react';
 
-interface SidebarLinkProps {
-  to: string;
-  icon: React.ReactNode;
-  label: string;
-  isActive: boolean;
+interface NavLinkProps {
+  icon: React.ComponentType<any>;
+  text: string;
+  href: string;
+  subLinks?: { text: string; href: string }[];
 }
-
-const SidebarLink = ({ to, icon, label, isActive }: SidebarLinkProps) => (
-  <Link 
-    to={to}
-    className={cn(
-      "flex items-center gap-3 px-4 py-3 rounded-lg transition-all",
-      isActive 
-        ? "bg-gym-orange/10 text-gym-orange" 
-        : "text-gray-600 hover:bg-gray-100 hover:text-gym-orange"
-    )}
-  >
-    {icon}
-    <span className="font-medium">{label}</span>
-    {isActive && <ChevronRight className="ml-auto h-4 w-4" />}
-  </Link>
-);
 
 interface AdminSidebarProps {
   isOpen: boolean;
 }
 
-const AdminSidebar = ({ isOpen }: AdminSidebarProps) => {
-  const location = useLocation();
-  const pathname = location.pathname;
+// Sidebar links configuration
+const sidebarLinks = [
+  {
+    icon: LayoutDashboard,
+    text: 'Dashboard',
+    href: '/admin',
+  },
+  {
+    icon: Users,
+    text: 'Members',
+    href: '/admin/members',
+  },
+  {
+    icon: CalendarClock,
+    text: 'Classes',
+    href: '/admin/classes',
+  },
+  {
+    icon: Dumbbell,
+    text: 'Trainers',
+    href: '/admin/trainers',
+    subLinks: [
+      {
+        text: 'Profiles',
+        href: '/admin/trainers/profiles',
+      },
+      {
+        text: 'Performance',
+        href: '/admin/trainers/performance',
+      },
+      {
+        text: 'Ratings',
+        href: '/admin/trainers/ratings',
+      },
+    ],
+  },
+  {
+    icon: CreditCard,
+    text: 'Payments',
+    href: '/admin/payments',
+  },
+  {
+    icon: Activity,
+    text: 'Workouts',
+    href: '/admin/workouts',
+  },
+  {
+    icon: ShoppingCart,
+    text: 'Shop',
+    href: '/admin/shop',
+  },
+  {
+    icon: FileText,
+    text: 'Content',
+    href: '/admin/content',
+  },
+  {
+    icon: BarChart,
+    text: 'Reports',
+    href: '/admin/reports',
+  },
+  {
+    icon: Settings,
+    text: 'Settings',
+    href: '/admin/settings',
+  },
+  {
+    icon: HelpCircle,
+    text: 'Support',
+    href: '/admin/support',
+  },
+  // New test accounts link
+  {
+    icon: UserCog,
+    text: 'Test Accounts',
+    href: '/admin/test-accounts',
+  },
+];
 
-  const isLinkActive = (path: string) => {
-    return pathname === path || pathname.startsWith(`${path}/`);
+const AdminSidebar: React.FC<AdminSidebarProps> = ({ isOpen }) => {
+  const location = useLocation();
+  const [openSubMenu, setOpenSubMenu] = useState<string | null>(null);
+
+  const toggleSubMenu = (text: string) => {
+    setOpenSubMenu(openSubMenu === text ? null : text);
   };
 
-  // Navigation links configuration
-  const navLinks = [
-    { to: '/admin', icon: <LayoutDashboard size={20} />, label: 'Dashboard' },
-    { to: '/admin/members', icon: <Users size={20} />, label: 'Members' },
-    { to: '/admin/classes', icon: <CalendarClock size={20} />, label: 'Classes' },
-    { to: '/admin/trainers', icon: <Users size={20} />, label: 'Trainers' },
-    { to: '/admin/workouts', icon: <Dumbbell size={20} />, label: 'Workouts' },
-    { to: '/admin/payments', icon: <DollarSign size={20} />, label: 'Payments' },
-    { to: '/admin/shop', icon: <ShoppingBag size={20} />, label: 'Shop' },
-    { to: '/admin/content', icon: <FileEdit size={20} />, label: 'Content' },
-    { to: '/admin/reports', icon: <BarChart3 size={20} />, label: 'Reports' },
-    { to: '/admin/support', icon: <LifeBuoy size={20} />, label: 'Support' },
-    { to: '/admin/settings', icon: <Settings size={20} />, label: 'Settings' },
-  ];
-
   return (
-    <aside 
+    <aside
       className={cn(
-        "bg-white border-r border-gray-200 z-20 transition-all duration-300",
-        isOpen 
-          ? "w-64 flex-shrink-0" 
-          : "w-0 md:w-20 overflow-hidden"
+        'fixed top-0 left-0 h-full w-64 bg-gym-darkblue border-r border-white/5 text-white transition-transform duration-300 z-50',
+        isOpen ? 'translate-x-0' : '-translate-x-full',
+        'md:translate-x-0 md:static' // Remove fixed positioning and translate on larger screens
       )}
     >
-      <div className={cn("h-full flex flex-col", isOpen ? "px-4" : "px-2")}>
-        {/* Logo */}
-        <div className="py-6 flex items-center justify-center">
-          <Link to="/" className="flex items-center gap-2">
-            {isOpen ? (
-              <img 
-                src="/lovable-uploads/01fa474e-e83a-48f4-9ffc-2047ca448aa7.png" 
-                alt="Uptown Gym Logo" 
-                className="h-16 w-auto object-contain"
+      <div className="flex flex-col h-full">
+        {/* Logo and Brand */}
+        <div className="flex items-center justify-center h-20 border-b border-white/5">
+          <Link to="/admin" className="flex items-center space-x-2">
+            <div className="h-10 w-auto">
+              <img
+                src="/lovable-uploads/50d3d473-1f3f-40d6-b895-c64a2e29ca1d.png"
+                alt="Uptown Gym Logo"
+                className="h-full w-auto object-contain"
               />
-            ) : (
-              <div className="bg-gym-orange p-2 rounded-lg">
-                <Dumbbell className="h-6 w-6 text-white" />
-              </div>
-            )}
+            </div>
           </Link>
         </div>
 
-        {/* Navigation */}
-        <nav className="flex-1 py-4 flex flex-col gap-1">
-          {navLinks.map((link) => (
-            <SidebarLink
-              key={link.to}
-              to={link.to}
-              icon={link.icon}
-              label={link.label}
-              isActive={isLinkActive(link.to)}
-            />
-          ))}
+        {/* Navigation Links */}
+        <nav className="flex-grow p-4">
+          <ul>
+            {sidebarLinks.map((link) => (
+              <li key={link.text} className="mb-1">
+                {link.subLinks ? (
+                  <div>
+                    <button
+                      className="flex items-center justify-between w-full py-2 px-4 rounded hover:bg-gym-dark transition-colors duration-200"
+                      onClick={() => toggleSubMenu(link.text)}
+                    >
+                      <div className="flex items-center">
+                        <link.icon className="mr-2 h-4 w-4" />
+                        <span>{link.text}</span>
+                      </div>
+                      <ChevronDown
+                        className={cn(
+                          'h-4 w-4 transition-transform duration-200',
+                          openSubMenu === link.text ? 'rotate-180' : ''
+                        )}
+                      />
+                    </button>
+                    {/* Submenu */}
+                    <ul
+                      className={cn(
+                        'ml-4 mt-1 overflow-hidden transition-all duration-300',
+                        openSubMenu === link.text ? 'max-h-96' : 'max-h-0'
+                      )}
+                    >
+                      {link.subLinks.map((subLink) => (
+                        <li key={subLink.text} className="mb-1">
+                          <Link
+                            to={subLink.href}
+                            className={cn(
+                              'block py-2 px-4 rounded hover:bg-gym-dark transition-colors duration-200',
+                              location.pathname === subLink.href
+                                ? 'text-gym-orange'
+                                : 'text-white/80'
+                            )}
+                          >
+                            {subLink.text}
+                          </Link>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                ) : (
+                  <Link
+                    to={link.href}
+                    className={cn(
+                      'flex items-center py-2 px-4 rounded hover:bg-gym-dark transition-colors duration-200',
+                      location.pathname === link.href
+                        ? 'text-gym-orange'
+                        : 'text-white/80'
+                    )}
+                  >
+                    <link.icon className="mr-2 h-4 w-4" />
+                    <span>{link.text}</span>
+                  </Link>
+                )}
+              </li>
+            ))}
+          </ul>
         </nav>
 
-        {/* User section */}
-        <div className="py-4 border-t border-gray-200">
-          <div className="flex items-center gap-3 px-4 py-2">
-            <div className="h-10 w-10 rounded-full bg-gym-orange/20 flex items-center justify-center">
-              <Users size={20} className="text-gym-orange" />
-            </div>
-            {isOpen && (
-              <div className="flex flex-col">
-                <span className="font-medium text-gray-700">Admin User</span>
-                <span className="text-xs text-gray-500">admin@uptowngym.com</span>
-              </div>
-            )}
-          </div>
+        {/* Footer or additional content can go here */}
+        <div className="p-4 border-t border-white/5 text-center text-white/60 text-sm">
+          <p>&copy; {new Date().getFullYear()} Uptown Gym</p>
         </div>
       </div>
     </aside>

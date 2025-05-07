@@ -1,10 +1,10 @@
 
 import { useState, useEffect } from 'react';
-import { Outlet, useNavigate } from 'react-router-dom';
+import { Outlet, useNavigate, Routes, Route } from 'react-router-dom';
 import AdminSidebar from '@/components/admin/AdminSidebar';
 import AdminHeader from '@/components/admin/AdminHeader';
 import { toast } from 'sonner';
-import { useAuth } from '@/hooks/useAuth';
+import { useOptimizedAuthContext } from '@/hooks/useOptimizedAuthContext';
 import { Button } from '@/components/ui/button';
 import { AlertCircle, ChevronDown } from 'lucide-react';
 import {
@@ -13,11 +13,22 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { LoadingSpinner } from '@/components/ui/LoadingSpinner';
+import { lazy, Suspense } from 'react';
+
+// Lazy load the test accounts page
+const TestAccounts = lazy(() => import('./TestAccounts'));
+
+const PageLoading = () => (
+  <div className="flex items-center justify-center h-full min-h-[50vh]">
+    <LoadingSpinner color="gym-orange" text="Loading..." />
+  </div>
+);
 
 const AdminLayout = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [isLoading, setIsLoading] = useState(true);
-  const { isAuthenticated, isAdmin, user } = useAuth();
+  const { isAuthenticated, isAdmin, user } = useOptimizedAuthContext();
   const navigate = useNavigate();
 
   // Check admin authentication
@@ -28,8 +39,11 @@ const AdminLayout = () => {
       try {
         setIsLoading(true);
         
-        // Handle not authenticated case
-        if (!isAuthenticated) {
+        // Fast check using cached data first
+        const isLoggedInLocal = localStorage.getItem('isLoggedIn') === 'true';
+        const isAdminLocal = localStorage.getItem('isAdmin') === 'true';
+        
+        if (!isLoggedInLocal) {
           console.log('User not authenticated, redirecting to login from admin layout');
           toast.error('You must be logged in to access this page', {
             id: 'admin-auth-redirect',
@@ -38,8 +52,7 @@ const AdminLayout = () => {
           return;
         }
         
-        // Handle authenticated but not an admin case
-        if (!isAdmin) {
+        if (!isAdminLocal) {
           console.log('User authenticated but not an admin, redirecting to dashboard');
           toast.error('You must be an administrator to access this page', {
             id: 'admin-role-redirect',
@@ -74,7 +87,7 @@ const AdminLayout = () => {
   if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-gym-orange"></div>
+        <LoadingSpinner color="gym-orange" size="lg" text="Loading admin dashboard..." />
       </div>
     );
   }
@@ -118,7 +131,14 @@ const AdminLayout = () => {
         
         <main className="flex-1 p-4 md:p-6 overflow-auto">
           <div className="container mx-auto">
-            <Outlet />
+            <Routes>
+              <Route path="test-accounts" element={
+                <Suspense fallback={<PageLoading />}>
+                  <TestAccounts />
+                </Suspense>
+              } />
+              <Route path="*" element={<Outlet />} />
+            </Routes>
           </div>
         </main>
       </div>
