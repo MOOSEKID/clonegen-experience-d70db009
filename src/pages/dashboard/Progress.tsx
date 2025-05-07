@@ -1,8 +1,19 @@
 
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { AreaChart, BarChart } from '@/components/ui/chart';
+import { ChartContainer } from '@/components/ui/chart';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { 
+  Area, 
+  AreaChart as RechartsAreaChart, 
+  Bar, 
+  BarChart as RechartsBarChart, 
+  XAxis, 
+  YAxis, 
+  CartesianGrid, 
+  Tooltip, 
+  Legend 
+} from 'recharts';
 
 const Progress = () => {
   const weightData = [
@@ -49,14 +60,20 @@ const Progress = () => {
               <CardTitle>Weight Progress</CardTitle>
             </CardHeader>
             <CardContent>
-              <AreaChart 
-                data={weightData} 
-                index="name" 
-                categories={["value"]}
-                colors={["orange"]}
-                valueFormatter={(value) => `${value} lbs`}
-                className="h-72 mt-4" 
-              />
+              <ChartContainer 
+                className="h-72 mt-4"
+                config={{
+                  value: { color: "orange" }
+                }}
+              >
+                <RechartsAreaChart data={weightData}>
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis dataKey="name" />
+                  <YAxis />
+                  <Tooltip formatter={(value) => [`${value} lbs`, 'Weight']} />
+                  <Area type="monotone" dataKey="value" stroke="orange" fill="rgba(255,165,0,0.2)" />
+                </RechartsAreaChart>
+              </ChartContainer>
             </CardContent>
           </Card>
           
@@ -65,14 +82,20 @@ const Progress = () => {
               <CardTitle>Cardio Fitness</CardTitle>
             </CardHeader>
             <CardContent>
-              <AreaChart 
-                data={cardioData} 
-                index="name" 
-                categories={["value"]}
-                colors={["blue"]}
-                valueFormatter={(value) => `${value} min`}
-                className="h-72 mt-4" 
-              />
+              <ChartContainer 
+                className="h-72 mt-4"
+                config={{
+                  value: { color: "blue" }
+                }}
+              >
+                <RechartsAreaChart data={cardioData}>
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis dataKey="name" />
+                  <YAxis />
+                  <Tooltip formatter={(value) => [`${value} min`, 'Cardio']} />
+                  <Area type="monotone" dataKey="value" stroke="blue" fill="rgba(0,0,255,0.2)" />
+                </RechartsAreaChart>
+              </ChartContainer>
             </CardContent>
           </Card>
         </TabsContent>
@@ -87,14 +110,23 @@ const Progress = () => {
               <CardTitle>Strength Progress</CardTitle>
             </CardHeader>
             <CardContent>
-              <BarChart 
-                data={strengthData} 
-                index="name" 
-                categories={["week1", "week6"]}
-                colors={["gray", "orange"]}
-                valueFormatter={(value) => `${value} lbs`}
-                className="h-96 mt-4" 
-              />
+              <ChartContainer 
+                className="h-96 mt-4"
+                config={{
+                  week1: { color: "gray" },
+                  week6: { color: "orange" }
+                }}
+              >
+                <RechartsBarChart data={strengthData}>
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis dataKey="name" />
+                  <YAxis />
+                  <Tooltip formatter={(value) => [`${value} lbs`, 'Weight']} />
+                  <Legend />
+                  <Bar dataKey="week1" fill="#999" name="Week 1" />
+                  <Bar dataKey="week6" fill="#ff8c00" name="Week 6" />
+                </RechartsBarChart>
+              </ChartContainer>
               <div className="flex justify-center mt-4 gap-6">
                 <div className="flex items-center gap-2">
                   <div className="w-3 h-3 bg-gray-400 rounded-full"></div>

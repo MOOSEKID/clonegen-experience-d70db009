@@ -1,7 +1,8 @@
 
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { AreaChart } from '@/components/ui/chart';
+import { ChartContainer } from '@/components/ui/chart';
+import { Area, AreaChart as RechartsAreaChart, ResponsiveContainer, XAxis, YAxis, CartesianGrid, Tooltip } from 'recharts';
 
 const Health = () => {
   const heartRateData = [
@@ -78,14 +79,20 @@ const Health = () => {
             <CardTitle>Heart Rate (Weekly)</CardTitle>
           </CardHeader>
           <CardContent>
-            <AreaChart 
-              data={heartRateData} 
-              index="day" 
-              categories={["rate"]}
-              colors={["red"]}
-              valueFormatter={(value) => `${value} bpm`}
+            <ChartContainer 
               className="h-72" 
-            />
+              config={{
+                rate: { color: "red" }
+              }}
+            >
+              <RechartsAreaChart data={heartRateData}>
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis dataKey="day" />
+                <YAxis />
+                <Tooltip formatter={(value) => [`${value} bpm`, 'Heart Rate']} />
+                <Area type="monotone" dataKey="rate" stroke="red" fill="rgba(255,0,0,0.2)" />
+              </RechartsAreaChart>
+            </ChartContainer>
           </CardContent>
         </Card>
         
@@ -94,14 +101,20 @@ const Health = () => {
             <CardTitle>Sleep Hours (Weekly)</CardTitle>
           </CardHeader>
           <CardContent>
-            <AreaChart 
-              data={sleepData} 
-              index="day" 
-              categories={["hours"]}
-              colors={["blue"]}
-              valueFormatter={(value) => `${value} hrs`}
-              className="h-72" 
-            />
+            <ChartContainer 
+              className="h-72"
+              config={{
+                hours: { color: "blue" }
+              }}
+            >
+              <RechartsAreaChart data={sleepData}>
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis dataKey="day" />
+                <YAxis />
+                <Tooltip formatter={(value) => [`${value} hrs`, 'Sleep']} />
+                <Area type="monotone" dataKey="hours" stroke="blue" fill="rgba(0,0,255,0.2)" />
+              </RechartsAreaChart>
+            </ChartContainer>
           </CardContent>
         </Card>
       </div>
