@@ -10,20 +10,37 @@ import { AuthContextType } from '@/types/auth.types';
  * @returns The authentication context
  */
 export const useAuth = (): AuthContextType => {
-  // Try the optimized context first
-  const optimizedContext = useContext(OptimizedAuthContext);
-  if (optimizedContext) {
-    return optimizedContext;
+  try {
+    // Try the optimized context first
+    const optimizedContext = useContext(OptimizedAuthContext);
+    if (optimizedContext) {
+      return optimizedContext;
+    }
+    
+    // Fall back to the original context
+    const originalContext = useContext(AuthContext);
+    
+    if (!originalContext) {
+      throw new Error('useAuth must be used within an AuthProvider');
+    }
+    
+    return originalContext;
+  } catch (error) {
+    // Provide a fallback value for edge cases where context isn't available yet
+    console.error('Auth context error:', error);
+    
+    return {
+      user: null,
+      isAdmin: false,
+      isLoading: true,
+      isAuthenticated: false,
+      login: async () => false,
+      signUp: async () => false,
+      logout: async () => false,
+      requestPasswordReset: async () => false,
+      updatePassword: async () => false
+    };
   }
-  
-  // Fall back to the original context
-  const originalContext = useContext(AuthContext);
-  
-  if (!originalContext) {
-    throw new Error('useAuth must be used within an AuthProvider');
-  }
-  
-  return originalContext;
 };
 
 export default useAuth;

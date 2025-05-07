@@ -1,27 +1,35 @@
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import type { AuthUser } from '@/types/auth.types';
 import { toast } from 'sonner';
-import { User } from '@supabase/supabase-js';
+import { User, AuthError } from '@supabase/supabase-js';
 
-const LOCAL_STORAGE_AUTH_KEY = 'uptownGym_auth_state';
-const LOCAL_STORAGE_PROFILE_KEY = 'uptownGym_profile';
+// Constants
+const AUTH_STORAGE_KEY = 'uptownGym_auth_state';
+const PROFILE_STORAGE_KEY = 'uptownGym_profile';
 
+/**
+ * Check if email is a known admin email
+ */
 const isKnownAdminEmail = (email?: string | null): boolean => {
   if (!email) return false;
   const lowerEmail = email.toLowerCase();
   return lowerEmail === 'admin@example.com' || lowerEmail === 'admin@uptowngym.rw';
 };
 
+/**
+ * Optimized authentication hook that reduces database calls and improves performance
+ */
 export const useOptimizedAuth = () => {
   const [user, setUser] = useState<AuthUser | null>(null);
   const [isAdmin, setIsAdmin] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const authStateInitializedRef = useRef(false);
 
   // Convert Supabase User to AuthUser
-  const convertToAuthUser = (sbUser: User | null): AuthUser | null => {
+  const convertToAuthUser = useCallback((sbUser: User | null): AuthUser | null => {
     if (!sbUser) return null;
     
     return {
@@ -30,12 +38,12 @@ export const useOptimizedAuth = () => {
       email: sbUser.email || '',
       role: sbUser.user_metadata?.role || 'member'
     };
-  };
+  }, []);
 
-  // Cached auth state management
+  // Cache management functions
   const saveToCache = useCallback((authState: any) => {
     try {
-      localStorage.setItem(LOCAL_STORAGE_AUTH_KEY, JSON.stringify(authState));
+      localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(authState));
     } catch (err) {
       console.error('Error saving auth state to cache:', err);
     }
@@ -43,7 +51,7 @@ export const useOptimizedAuth = () => {
 
   const loadFromCache = useCallback(() => {
     try {
-      const cachedState = localStorage.getItem(LOCAL_STORAGE_AUTH_KEY);
+      const cachedState = localStorage.getItem(AUTH_STORAGE_KEY);
       if (cachedState) {
         return JSON.parse(cachedState);
       }
@@ -53,17 +61,13 @@ export const useOptimizedAuth = () => {
     return null;
   }, []);
 
-  // Function to check cached profile after getting session
-  const checkCachedProfile = useCallback((userId: string) => {
+  // Profile cache management
+  const loadCachedProfile = useCallback((userId: string) => {
     try {
-      const cachedProfile = localStorage.getItem(LOCAL_STORAGE_PROFILE_KEY);
+      const cachedProfile = localStorage.getItem(PROFILE_STORAGE_KEY);
       if (cachedProfile) {
         const profile = JSON.parse(cachedProfile);
-        
         if (profile.id === userId) {
-          console.log('Using cached profile data');
-          // Set admin status from cache first for faster UI response
-          setIsAdmin(profile.is_admin || false);
           return profile;
         }
       }
@@ -73,26 +77,26 @@ export const useOptimizedAuth = () => {
     return null;
   }, []);
   
-  // Save profile to cache
   const saveProfileToCache = useCallback((profile: any) => {
     try {
-      localStorage.setItem(LOCAL_STORAGE_PROFILE_KEY, JSON.stringify(profile));
+      localStorage.setItem(PROFILE_STORAGE_KEY, JSON.stringify(profile));
     } catch (err) {
       console.error('Error saving profile to cache:', err);
     }
   }, []);
 
-  // Optimized check for admin status
-  const fetchUserProfileOptimized = useCallback(async (userId: string, userEmail: string | null) => {
-    // Check if this is a known admin email for immediate response
-    if (userEmail && isKnownAdminEmail(userEmail)) {
+  // Fetch user profile with optimizations
+  const fetchUserProfile = useCallback(async (userId: string, userEmail: string | null) => {
+    // Fast path for known admin emails
+    if (isKnownAdminEmail(userEmail)) {
       setIsAdmin(true);
       return { is_admin: true, role: 'admin' };
     }
     
-    // Check if we have a cached profile
-    const cachedProfile = checkCachedProfile(userId);
+    // Check for cached profile first
+    const cachedProfile = loadCachedProfile(userId);
     if (cachedProfile) {
+      setIsAdmin(cachedProfile.is_admin || false);
       return cachedProfile;
     }
     
@@ -115,50 +119,76 @@ export const useOptimizedAuth = () => {
           id: userId,
           ...profile
         });
+        
+        // Update admin state
+        setIsAdmin(profile.is_admin || false);
         return profile;
       }
       
       return null;
     } catch (err) {
-      console.error('Error in fetchUserProfileOptimized:', err);
+      console.error('Error in fetchUserProfile:', err);
       return null;
     }
-  }, [checkCachedProfile, saveProfileToCache]);
+  }, [loadCachedProfile, saveProfileToCache]);
 
   // Update auth state with optimized profile check
   const updateAuthState = useCallback(async (session: any) => {
     if (session?.user) {
       const authUser = convertToAuthUser(session.user);
+      
+      // Update UI state synchronously for better UX
       setUser(authUser);
       setIsAuthenticated(true);
       
-      // Optimized profile check
-      const profile = await fetchUserProfileOptimized(session.user.id, session.user.email);
-      const userIsAdmin = profile?.is_admin || isKnownAdminEmail(session.user.email) || false;
-      setIsAdmin(userIsAdmin);
+      // Fast path for known admin emails
+      if (isKnownAdminEmail(session.user.email)) {
+        setIsAdmin(true);
+      }
       
-      // Save to cache
+      // Save current auth state to cache for faster loading next time
       saveToCache({
         isAuthenticated: true,
-        isAdmin: userIsAdmin,
         userId: session.user.id,
         email: session.user.email || '',
+        lastUpdated: new Date().toISOString(),
       });
+      
+      // Non-blocking profile check
+      setTimeout(() => {
+        fetchUserProfile(session.user.id, session.user.email)
+          .then(profile => {
+            if (profile) {
+              const userIsAdmin = profile.is_admin || isKnownAdminEmail(session.user.email);
+              setIsAdmin(userIsAdmin);
+              
+              // Update cache with admin status
+              saveToCache({
+                isAuthenticated: true,
+                isAdmin: userIsAdmin,
+                userId: session.user.id,
+                email: session.user.email || '',
+                lastUpdated: new Date().toISOString(),
+              });
+            }
+          });
+      }, 0);
     } else {
       // No session - clear state
       setUser(null);
       setIsAdmin(false);
       setIsAuthenticated(false);
       saveToCache({ isAuthenticated: false, isAdmin: false });
+      localStorage.removeItem(PROFILE_STORAGE_KEY);
     }
-  }, [fetchUserProfileOptimized, saveToCache]);
+  }, [convertToAuthUser, fetchUserProfile, saveToCache]);
 
   // Login function
   const login = useCallback(async (email: string, password: string): Promise<boolean> => {
     try {
       setIsLoading(true);
       
-      // Check for known admin email
+      // Fast path for known admins
       const knownAdmin = isKnownAdminEmail(email);
       
       const { data, error } = await supabase.auth.signInWithPassword({
@@ -167,13 +197,12 @@ export const useOptimizedAuth = () => {
       });
       
       if (error) {
-        console.error('Login error:', error);
         toast.error(error.message);
         return false;
       }
       
       if (data.user) {
-        // Fast path - update UI immediately before profile check
+        // Fast UI update before complete profile check
         const authUser = convertToAuthUser(data.user);
         setUser(authUser);
         setIsAuthenticated(true);
@@ -182,11 +211,20 @@ export const useOptimizedAuth = () => {
           setIsAdmin(true);
         }
         
+        // Save auth state to cache
+        saveToCache({
+          isAuthenticated: true,
+          isAdmin: knownAdmin,
+          userId: data.user.id,
+          email: data.user.email || '',
+          lastUpdated: new Date().toISOString(),
+        });
+        
         toast.success('Login successful');
         
-        // In background, verify profile (non-blocking)
+        // Background profile check
         setTimeout(async () => {
-          await fetchUserProfileOptimized(data.user.id, data.user.email);
+          await fetchUserProfile(data.user.id, data.user.email);
         }, 0);
         
         return true;
@@ -194,15 +232,14 @@ export const useOptimizedAuth = () => {
       
       return false;
     } catch (error) {
-      console.error('Login error:', error);
       toast.error(error instanceof Error ? error.message : 'Login failed');
       return false;
     } finally {
       setIsLoading(false);
     }
-  }, [fetchUserProfileOptimized]);
+  }, [convertToAuthUser, fetchUserProfile, saveToCache]);
 
-  // Signup function
+  // Sign up function
   const signUp = useCallback(async (email: string, password: string, fullName: string): Promise<boolean> => {
     try {
       setIsLoading(true);
@@ -218,7 +255,6 @@ export const useOptimizedAuth = () => {
       });
       
       if (error) {
-        console.error('Signup error:', error);
         toast.error(error.message);
         return false;
       }
@@ -226,7 +262,6 @@ export const useOptimizedAuth = () => {
       toast.success('Signup successful! Please check your email for verification.');
       return true;
     } catch (error) {
-      console.error('Signup error:', error);
       toast.error(error instanceof Error ? error.message : 'Signup failed');
       return false;
     } finally {
@@ -246,7 +281,7 @@ export const useOptimizedAuth = () => {
       
       // Clear cache
       saveToCache({ isAuthenticated: false, isAdmin: false });
-      localStorage.removeItem(LOCAL_STORAGE_PROFILE_KEY);
+      localStorage.removeItem(PROFILE_STORAGE_KEY);
       
       // Then perform actual logout
       const { error } = await supabase.auth.signOut();
@@ -268,7 +303,7 @@ export const useOptimizedAuth = () => {
     }
   }, [saveToCache]);
 
-  // Password reset functions
+  // Password reset request
   const requestPasswordReset = useCallback(async (email: string): Promise<boolean> => {
     try {
       const { error } = await supabase.auth.resetPasswordForEmail(email, {
@@ -276,7 +311,6 @@ export const useOptimizedAuth = () => {
       });
       
       if (error) {
-        console.error('Password reset request error:', error);
         toast.error(error.message);
         return false;
       }
@@ -284,12 +318,12 @@ export const useOptimizedAuth = () => {
       toast.success('Password reset link has been sent to your email');
       return true;
     } catch (error) {
-      console.error('Password reset error:', error);
       toast.error(error instanceof Error ? error.message : 'Failed to send password reset link');
       return false;
     }
   }, []);
 
+  // Password update
   const updatePassword = useCallback(async (newPassword: string): Promise<boolean> => {
     try {
       const { error } = await supabase.auth.updateUser({
@@ -297,7 +331,6 @@ export const useOptimizedAuth = () => {
       });
       
       if (error) {
-        console.error('Update password error:', error);
         toast.error(error.message);
         return false;
       }
@@ -305,16 +338,18 @@ export const useOptimizedAuth = () => {
       toast.success('Password updated successfully');
       return true;
     } catch (error) {
-      console.error('Update password error:', error);
       toast.error(error instanceof Error ? error.message : 'Failed to update password');
       return false;
     }
   }, []);
 
-  // Initialize auth - this runs once on component mount
+  // Initialize auth state
   useEffect(() => {
     const initAuth = async () => {
       try {
+        if (authStateInitializedRef.current) return;
+        authStateInitializedRef.current = true;
+        
         setIsLoading(true);
         console.log('Initializing optimized auth...');
         
@@ -324,33 +359,31 @@ export const useOptimizedAuth = () => {
           // Use cached values immediately to reduce perceived loading time
           setIsAuthenticated(true);
           setIsAdmin(cachedAuth.isAdmin || false);
-          // We'll still verify with actual session check below
         }
         
-        // Set up the auth state change listener FIRST (important to prevent deadlocks)
+        // Set up auth state change listener
         const { data: authListener } = supabase.auth.onAuthStateChange((event, session) => {
           console.log('Auth state changed:', event);
           
-          // Non-blocking update using setTimeout to prevent deadlocks
-          setTimeout(() => {
+          // Non-blocking update
+          if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED' || event === 'USER_UPDATED') {
             updateAuthState(session);
-          }, 0);
-          
-          if (event === 'SIGNED_OUT') {
+          } else if (event === 'SIGNED_OUT') {
             // Clear state immediately for sign out
             setUser(null);
             setIsAdmin(false);
             setIsAuthenticated(false);
             saveToCache({ isAuthenticated: false, isAdmin: false });
-            localStorage.removeItem(LOCAL_STORAGE_PROFILE_KEY);
+            localStorage.removeItem(PROFILE_STORAGE_KEY);
           }
         });
         
-        // THEN get the current session
+        // Get the current session
         const { data } = await supabase.auth.getSession();
         await updateAuthState(data.session);
+        
         setIsLoading(false);
-
+        
         return () => {
           authListener.subscription.unsubscribe();
         };
