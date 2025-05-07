@@ -43,139 +43,123 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   useEffect(() => {
     console.log("Setting up auth state change listener in AuthContext");
     
-    // Initial session check
-    const checkCurrentSession = async () => {
-      const { data: { session }, error } = await supabase.auth.getSession();
-      if (error) {
-        console.error('Error checking current session:', error);
-        return;
-      }
-      
-      if (session) {
-        handleSessionUpdate(session);
-      } else {
-        // No session, ensure auth state is cleared
-        setUser(null);
-        setIsAdmin(false);
-        setIsAuthenticated(false);
-        authStorageService.setAuthData(false, false, '', '');
-      }
-    };
-    
-    // Check current session immediately
-    checkCurrentSession();
-    
-    // Set up the auth state change listener
+    // Set up the auth state change listener FIRST (important to prevent deadlocks)
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
         console.log('Auth state changed in context:', event);
         
         if (event === 'SIGNED_IN' && session) {
-          // Handle signed in event
-          await handleSessionUpdate(session);
+          // Handle signed in event - Use non-blocking approach to prevent deadlocks
+          setUser(session.user);
+          setIsAuthenticated(true);
+          
+          // Use setTimeout to defer profile checking after auth state update
+          setTimeout(async () => {
+            try {
+              // Get user profile to check if admin
+              const { data: profile, error } = await supabase
+                .from('profiles')
+                .select('role, is_admin, full_name')
+                .eq('id', session.user.id)
+                .maybeSingle();
+              
+              if (error && error.code !== 'PGRST116') {
+                console.error('Error fetching user profile after session update:', error);
+                return;
+              }
+              
+              if (profile) {
+                // Profile exists, update auth state
+                console.log('User profile found after session update:', profile);
+                const userIsAdmin = profile?.is_admin || false;
+                setIsAdmin(userIsAdmin);
+                
+                authStorageService.setAuthData(
+                  true, 
+                  userIsAdmin, 
+                  session.user.email || '', 
+                  session.user.user_metadata?.full_name || profile?.full_name || session.user.email || ''
+                );
+              }
+            } catch (error) {
+              console.error('Error in profile check after session update:', error);
+            }
+          }, 0);
         } else if (event === 'SIGNED_OUT') {
           console.log('User signed out, clearing auth state');
           setUser(null);
           setIsAdmin(false);
           setIsAuthenticated(false);
           authStorageService.setAuthData(false, false, '', '');
-        } else if (event === 'USER_UPDATED') {
+        } else if (event === 'USER_UPDATED' && session) {
           console.log('User was updated');
-          if (session) {
-            await handleSessionUpdate(session);
-          }
+          setUser(session.user);
         }
       }
     );
+    
+    // THEN check for existing session
+    const checkCurrentSession = async () => {
+      try {
+        const { data: { session }, error } = await supabase.auth.getSession();
+        if (error) {
+          console.error('Error checking current session:', error);
+          return;
+        }
+        
+        if (session) {
+          setUser(session.user);
+          setIsAuthenticated(true);
+          
+          // Defer profile checking
+          setTimeout(async () => {
+            try {
+              // Get user profile to check if admin
+              const { data: profile, error } = await supabase
+                .from('profiles')
+                .select('role, is_admin, full_name')
+                .eq('id', session.user.id)
+                .maybeSingle();
+              
+              if (error && error.code !== 'PGRST116') {
+                console.error('Error fetching user profile after session update:', error);
+                return;
+              }
+              
+              if (profile) {
+                // Profile exists, update auth state
+                const userIsAdmin = profile?.is_admin || false;
+                setIsAdmin(userIsAdmin);
+                
+                authStorageService.setAuthData(
+                  true, 
+                  userIsAdmin, 
+                  session.user.email || '', 
+                  session.user.user_metadata?.full_name || profile?.full_name || session.user.email || ''
+                );
+              }
+            } catch (error) {
+              console.error('Error in profile check during initial session:', error);
+            }
+          }, 0);
+        } else {
+          // No session, ensure auth state is cleared
+          setUser(null);
+          setIsAdmin(false);
+          setIsAuthenticated(false);
+          authStorageService.setAuthData(false, false, '', '');
+        }
+      } catch (error) {
+        console.error('Error checking initial session:', error);
+      }
+    };
+    
+    checkCurrentSession();
     
     return () => {
       subscription.unsubscribe();
     };
   }, [setUser, setIsAdmin, setIsAuthenticated]);
-
-  /**
-   * Handle session update - common logic for SIGNED_IN and initial session check
-   */
-  const handleSessionUpdate = async (session: any) => {
-    // Additional setup after sign-in or session found
-    console.log('Session established', session);
-    
-    // Get user profile to check if admin
-    try {
-      const { data: profile, error } = await supabase
-        .from('profiles')
-        .select('role, is_admin, full_name')
-        .eq('id', session.user.id)
-        .single();
-      
-      if (error) {
-        console.error('Error fetching user profile after session update:', error);
-        
-        // Create a default profile if one doesn't exist
-        if (error.code === 'PGRST116') {
-          console.log('Profile not found, creating profile...');
-          
-          const { error: insertError } = await supabase
-            .from('profiles')
-            .insert([
-              { 
-                id: session.user.id,
-                full_name: session.user.user_metadata?.full_name || session.user.email || 'User',
-                role: 'member',
-                is_admin: session.user.email === 'admin@example.com'
-              }
-            ]);
-            
-          if (insertError) {
-            console.error('Error creating profile after session update:', insertError);
-          } else {
-            console.log('Profile created after session update');
-            
-            // Set state with newly created profile
-            setUser({
-              ...session.user,
-              email: session.user.email || '',
-              role: 'member'
-            });
-            
-            setIsAdmin(session.user.email === 'admin@example.com');
-            setIsAuthenticated(true);
-            
-            authStorageService.setAuthData(
-              true, 
-              session.user.email === 'admin@example.com', 
-              session.user.email || '', 
-              session.user.user_metadata?.full_name || session.user.email || ''
-            );
-          }
-        }
-      } else {
-        // Profile exists, update auth state
-        console.log('User profile found after session update:', profile);
-        
-        const userRole = profile?.role || 'member';
-        const userIsAdmin = profile?.is_admin || false;
-        
-        setUser({
-          ...session.user,
-          email: session.user.email || '',
-          role: userRole
-        });
-        
-        setIsAdmin(userIsAdmin);
-        setIsAuthenticated(true);
-        
-        authStorageService.setAuthData(
-          true, 
-          userIsAdmin, 
-          session.user.email || '', 
-          session.user.user_metadata?.full_name || profile?.full_name || session.user.email || ''
-        );
-      }
-    } catch (error) {
-      console.error('Error in profile check after session update:', error);
-    }
-  };
 
   /**
    * Login with email and password
@@ -186,17 +170,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       const result = await loginService(email, password);
       
       if (result.success && result.user) {
-        // After successful login, refresh the session
-        const { data: { session }, error } = await supabase.auth.getSession();
-        
-        if (error) {
-          console.error('Error refreshing session after login:', error);
-        } else if (session) {
-          // Session successfully refreshed, handle the update
-          await handleSessionUpdate(session);
-        }
-        
-        // Update auth state
+        // Update auth state immediately to provide feedback
         setUser(result.user);
         setIsAdmin(result.isAdmin || false);
         setIsAuthenticated(true);
@@ -221,6 +195,8 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       return false;
     } catch (error) {
       console.error('Error in login context method:', error);
+      // Ensure loading state is cleared on error
+      toast.error(error instanceof Error ? error.message : 'Login failed');
       return false;
     }
   };

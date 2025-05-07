@@ -41,11 +41,10 @@ const Login = () => {
             .from('profiles')
             .select('is_admin, role')
             .eq('id', session.user.id)
-            .single();
+            .maybeSingle();
             
-          if (profileError) {
+          if (profileError && profileError.code !== 'PGRST116') {
             console.error("Error fetching profile:", profileError);
-            // Don't try to access properties on error
             return;
           }
           
@@ -56,18 +55,6 @@ const Login = () => {
           // Explicitly check for the admin email addresses
           if (userEmail === 'admin@example.com' || userEmail === 'admin@uptowngym.rw') {
             userIsAdmin = true;
-            
-            // Update profile if needed
-            if (!userIsAdmin) {
-              const { error: updateError } = await supabase
-                .from('profiles')
-                .update({ is_admin: true, role: 'admin' })
-                .eq('id', session.user.id);
-                
-              if (updateError) {
-                console.error("Error updating admin status:", updateError);
-              }
-            }
           }
           
           const redirectPath = userIsAdmin ? '/admin' : '/dashboard';
@@ -94,9 +81,20 @@ const Login = () => {
     setIsLoading(true);
     setLoginError(null);
     
+    // Set a timeout to prevent UI from freezing indefinitely
+    const loginTimeout = setTimeout(() => {
+      console.log('Login operation timed out');
+      setIsLoading(false);
+      setLoginError('Login timed out. Please try again.');
+      toast.error('Login timed out. Please try again.');
+    }, 15000); // 15 second timeout
+    
     try {
       console.log('Attempting login with:', email);
       const success = await login(email, password);
+      
+      // Clear timeout since operation completed
+      clearTimeout(loginTimeout);
       
       if (success) {
         console.log('Login successful!');
@@ -120,6 +118,9 @@ const Login = () => {
         toast.error('Login failed. Please check your credentials.');
       }
     } catch (error) {
+      // Clear timeout since operation completed with error
+      clearTimeout(loginTimeout);
+      
       console.error('Login error:', error);
       setLoginError(error instanceof Error ? error.message : 'Login failed');
       toast.error(error instanceof Error ? error.message : 'Login failed');

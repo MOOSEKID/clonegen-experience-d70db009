@@ -42,59 +42,74 @@ export const useLoginService = () => {
           .eq('id', data.user.id)
           .maybeSingle();
           
+        let userRole = 'member';
+        let userIsAdmin = false;
+        let userProfile = profile;
+        
         if (profileError) {
-          console.error('Error fetching user profile:', profileError);
+          // Only log real errors, not just "no rows returned"
+          if (profileError.code !== 'PGRST116') {
+            console.error('Error fetching user profile:', profileError);
+          }
+          
           // Handle the case where profile doesn't exist yet
           if (profileError.code === 'PGRST116') {
             console.log('Profile not found, creating default profile for user:', data.user.id);
-            // Create a default profile
-            const { error: insertError } = await supabase
-              .from('profiles')
-              .insert([
-                { 
-                  id: data.user.id,
-                  email: data.user.email,
-                  full_name: data.user.user_metadata?.full_name || email,
-                  role: isKnownAdmin ? 'admin' : 'member',
-                  is_admin: isKnownAdmin
-                }
-              ]);
-              
-            if (insertError) {
-              console.error('Error creating profile:', insertError);
-              toast.error('Login successful but profile creation failed');
-            } else {
-              console.log('Profile created successfully for user:', data.user.id);
+            // Create a default profile - using single insert with maybeSingle() 
+            // to prevent race conditions from multiple profile creations
+            try {
+              const { data: newProfile, error: insertError } = await supabase
+                .from('profiles')
+                .insert([
+                  { 
+                    id: data.user.id,
+                    email: data.user.email,
+                    full_name: data.user.user_metadata?.full_name || email,
+                    role: isKnownAdmin ? 'admin' : 'member',
+                    is_admin: isKnownAdmin
+                  }
+                ])
+                .select('*')
+                .maybeSingle();
+                
+              if (insertError) {
+                console.error('Error creating profile:', insertError);
+                toast.error('Login successful but profile creation failed');
+              } else {
+                console.log('Profile created successfully for user:', data.user.id);
+                userProfile = newProfile;
+                userRole = newProfile?.role || isKnownAdmin ? 'admin' : 'member';
+                userIsAdmin = newProfile?.is_admin || isKnownAdmin;
+              }
+            } catch (e) {
+              console.error('Exception during profile creation:', e);
             }
           }
-        } else if (isKnownAdmin && profile && !profile.is_admin) {
-          // Update profile to set admin status for known admin emails
-          console.log('Known admin email found, updating admin status');
-          
-          const { error: updateError } = await supabase
-            .from('profiles')
-            .update({
-              is_admin: true,
-              role: 'admin'
-            })
-            .eq('id', data.user.id);
+        } else if (profile) {
+          if (isKnownAdmin && !profile.is_admin) {
+            // Update profile to set admin status for known admin emails
+            console.log('Known admin email found, updating admin status');
             
-          if (updateError) {
-            console.error('Error updating admin status:', updateError);
+            const { error: updateError } = await supabase
+              .from('profiles')
+              .update({
+                is_admin: true,
+                role: 'admin'
+              })
+              .eq('id', data.user.id);
+              
+            if (updateError) {
+              console.error('Error updating admin status:', updateError);
+            } else {
+              console.log('Admin status updated successfully');
+              userIsAdmin = true;
+              userRole = 'admin';
+            }
           } else {
-            console.log('Admin status updated successfully');
+            userRole = profile.role || (isKnownAdmin ? 'admin' : 'member');
+            userIsAdmin = profile.is_admin || isKnownAdmin;
           }
         }
-        
-        // Get the latest profile data after possible updates
-        const { data: updatedProfile } = await supabase
-          .from('profiles')
-          .select('role, is_admin, full_name')
-          .eq('id', data.user.id)
-          .maybeSingle();
-        
-        const userRole = updatedProfile?.role || (isKnownAdmin ? 'admin' : 'member');
-        const userIsAdmin = updatedProfile?.is_admin || isKnownAdmin;
         
         console.log('User login processed with roles:', {
           role: userRole,
