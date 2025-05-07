@@ -8,23 +8,20 @@ export const createAdminUser = async (email: string, password: string, fullName:
     // First check if user exists in auth
     let userId: string | undefined;
     
-    // Get all users and filter to find the user with matching email
-    const { data: authUsers, error: usersError } = await supabase.auth.admin.listUsers();
+    // Try to sign in with the credentials to check if user exists
+    const { data: signInData, error: signInError } = await supabase.auth.signInWithPassword({
+      email,
+      password
+    });
     
-    if (usersError) {
-      console.error('Failed to list users:', usersError);
-    } else if (authUsers?.users) {
-      // Find user with matching email
-      const matchingUser = authUsers.users.find((user: any) => user.email === email);
-      if (matchingUser) {
-        console.log('Found existing user through list:', matchingUser.id);
-        userId = matchingUser.id;
-      }
-    }
-    
-    // If user doesn't exist in auth, create them
-    if (!userId) {
-      console.log('No existing user found, creating new admin user');
+    if (!signInError && signInData?.user) {
+      console.log('User already exists, using existing user:', signInData.user.id);
+      userId = signInData.user.id;
+      
+      // Sign out if we were just checking existence
+      await supabase.auth.signOut();
+    } else {
+      console.log('No existing user found or unable to sign in, creating new admin user');
       // Create admin user in auth
       const { data: authUser, error: authError } = await supabase.auth.signUp({
         email,

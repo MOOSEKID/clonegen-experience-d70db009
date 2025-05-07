@@ -3,8 +3,9 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route, Outlet } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Outlet, useLocation, Navigate } from "react-router-dom";
 import { AuthProvider } from "./contexts/AuthContext";
+import { ErrorBoundary } from "./components/ui/error-boundary";
 
 // Layout components
 import Header from "@/components/Header";
@@ -69,15 +70,33 @@ const queryClient = new QueryClient({
   }
 });
 
+// Error fallback component
+const ErrorFallback = () => {
+  return (
+    <div className="min-h-screen flex flex-col items-center justify-center p-4 bg-red-50 text-red-800">
+      <h1 className="text-2xl font-bold mb-4">Something went wrong</h1>
+      <p className="mb-4">The application encountered an error. Please try refreshing the page.</p>
+      <button 
+        onClick={() => window.location.reload()}
+        className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700"
+      >
+        Refresh Page
+      </button>
+    </div>
+  );
+};
+
 // Main Layout component that includes Header and Footer
 const MainLayout = () => {
   return (
     <div className="flex flex-col min-h-screen">
-      <Header />
-      <div className="flex-grow">
-        <Outlet />
-      </div>
-      <Footer />
+      <ErrorBoundary fallback={<ErrorFallback />}>
+        <Header />
+        <div className="flex-grow">
+          <Outlet />
+        </div>
+        <Footer />
+      </ErrorBoundary>
     </div>
   );
 };
@@ -86,63 +105,65 @@ const App = () => {
   console.log("App component rendering"); // Debug log
   
   return (
-    <QueryClientProvider client={queryClient}>
-      <AuthProvider>
-        <TooltipProvider>
-          <Toaster />
-          <Sonner />
-          <BrowserRouter>
-            <Routes>
-              {/* Main Routes with Header and Footer */}
-              <Route element={<MainLayout />}>
-                <Route index element={<Index />} />
-                <Route path="/about-us" element={<AboutUs />} />
-                <Route path="/services" element={<Services />} />
-                <Route path="/services/fitness-facilities" element={<FitnessFacilities />} />
-                <Route path="/services/youth-programs" element={<YouthPrograms />} />
-                <Route path="/services/spa-wellness" element={<SpaWellness />} />
-                <Route path="/membership" element={<Membership />} />
-                <Route path="/classes" element={<Classes />} />
-                <Route path="/blogs" element={<Blogs />} />
-                <Route path="/shop" element={<ShopPage />} />
-                <Route path="/shop/category/:categoryId" element={<CategoryPage />} />
-                <Route path="/shop/product/:productId" element={<ProductPage />} />
-                <Route path="/login" element={<Login />} />
-                <Route path="/signup" element={<Signup />} />
-                <Route path="/contact-us" element={<ContactUs />} />
-                <Route path="/timetable" element={<Timetable />} />
-                <Route path="/opening-times" element={<OpeningTimes />} />
-                <Route path="*" element={<NotFound />} />
-              </Route>
-              
-              {/* Admin Routes */}
-              <Route path="/admin/*" element={<AdminLayout />}>
-                <Route index element={<AdminDashboard />} />
-                <Route path="members" element={<AdminMembers />} />
-                <Route path="classes" element={<AdminClasses />} />
-                <Route path="trainers" element={<AdminTrainers />} />
-                <Route path="trainers/profiles" element={<TrainerProfiles />} />
-                <Route path="trainers/performance" element={<PerformanceTracking />} />
-                <Route path="trainers/ratings" element={<TrainerRatings />} />
-                <Route path="payments" element={<AdminPayments />} />
-                <Route path="workouts" element={<AdminWorkouts />} />
-                <Route path="shop" element={<AdminShop />} />
-                <Route path="content" element={<AdminContent />} />
-                <Route path="reports" element={<AdminReports />} />
-                <Route path="settings" element={<AdminSettings />} />
-                <Route path="support" element={<AdminSupport />} />
-              </Route>
-              
-              {/* Customer Dashboard Routes */}
-              <Route path="/dashboard/*" element={<DashboardLayout />}>
-                <Route index element={<Dashboard />} />
-                <Route path="*" element={<NotFound />} />
-              </Route>
-            </Routes>
-          </BrowserRouter>
-        </TooltipProvider>
-      </AuthProvider>
-    </QueryClientProvider>
+    <ErrorBoundary fallback={<ErrorFallback />}>
+      <QueryClientProvider client={queryClient}>
+        <AuthProvider>
+          <TooltipProvider>
+            <Toaster />
+            <Sonner />
+            <BrowserRouter>
+              <Routes>
+                {/* Main Routes with Header and Footer */}
+                <Route element={<MainLayout />}>
+                  <Route index element={<Index />} />
+                  <Route path="/about-us" element={<AboutUs />} />
+                  <Route path="/services" element={<Services />} />
+                  <Route path="/services/fitness-facilities" element={<FitnessFacilities />} />
+                  <Route path="/services/youth-programs" element={<YouthPrograms />} />
+                  <Route path="/services/spa-wellness" element={<SpaWellness />} />
+                  <Route path="/membership" element={<Membership />} />
+                  <Route path="/classes" element={<Classes />} />
+                  <Route path="/blogs" element={<Blogs />} />
+                  <Route path="/shop" element={<ShopPage />} />
+                  <Route path="/shop/category/:categoryId" element={<CategoryPage />} />
+                  <Route path="/shop/product/:productId" element={<ProductPage />} />
+                  <Route path="/login" element={<Login />} />
+                  <Route path="/signup" element={<Signup />} />
+                  <Route path="/contact-us" element={<ContactUs />} />
+                  <Route path="/timetable" element={<Timetable />} />
+                  <Route path="/opening-times" element={<OpeningTimes />} />
+                  <Route path="*" element={<NotFound />} />
+                </Route>
+                
+                {/* Admin Routes */}
+                <Route path="/admin/*" element={<AdminLayout />}>
+                  <Route index element={<AdminDashboard />} />
+                  <Route path="members" element={<AdminMembers />} />
+                  <Route path="classes" element={<AdminClasses />} />
+                  <Route path="trainers" element={<AdminTrainers />} />
+                  <Route path="trainers/profiles" element={<TrainerProfiles />} />
+                  <Route path="trainers/performance" element={<PerformanceTracking />} />
+                  <Route path="trainers/ratings" element={<TrainerRatings />} />
+                  <Route path="payments" element={<AdminPayments />} />
+                  <Route path="workouts" element={<AdminWorkouts />} />
+                  <Route path="shop" element={<AdminShop />} />
+                  <Route path="content" element={<AdminContent />} />
+                  <Route path="reports" element={<AdminReports />} />
+                  <Route path="settings" element={<AdminSettings />} />
+                  <Route path="support" element={<AdminSupport />} />
+                </Route>
+                
+                {/* Customer Dashboard Routes */}
+                <Route path="/dashboard/*" element={<DashboardLayout />}>
+                  <Route index element={<Dashboard />} />
+                  <Route path="*" element={<NotFound />} />
+                </Route>
+              </Routes>
+            </BrowserRouter>
+          </TooltipProvider>
+        </AuthProvider>
+      </QueryClientProvider>
+    </ErrorBoundary>
   );
 };
 

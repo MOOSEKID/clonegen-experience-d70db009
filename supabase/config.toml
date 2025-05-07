@@ -1,7 +1,6 @@
 
 project_id = "qrjwfiurwvcsyrcpewsj"
 
-# Enable site URL and redirect URLs for proper authentication
 [auth]
 site_url = "https://lovable.app"
 additional_redirect_urls = ["https://lovable.app/*", "https://*.lovable.app/*", "http://localhost:3000/*"]

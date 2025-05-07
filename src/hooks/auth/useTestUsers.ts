@@ -23,32 +23,42 @@ export const useTestUsers = () => {
           console.error('Error checking for admin profile:', profileError);
         }
         
-        // Check if admin exists in auth table
-        const { data: authData, error: authError } = await supabase.auth.admin.listUsers();
+        // Determine if admin exists in profiles table
+        if (adminProfile) {
+          console.log('Admin profile found:', adminProfile);
+          return; // Admin exists, no need to create one
+        }
         
-        if (authError) {
-          console.error('Error listing auth users:', authError);
-          // Try fallback approach - check session
-          const { data: sessionData } = await supabase.auth.getSession();
-          if (sessionData && sessionData.session) {
-            console.log('Session exists, admin user might be present');
+        // Try to see if admin email is already registered
+        const { data: signInData, error: signInError } = await supabase.auth.signInWithPassword({
+          email: 'admin@example.com',
+          password: 'admin123'
+        });
+        
+        if (!signInError && signInData?.user) {
+          console.log('Admin user found in auth, creating profile if needed');
+          // Admin exists in auth but not in profiles, create profile
+          const { error: createProfileError } = await supabase
+            .from('profiles')
+            .insert([{
+              id: signInData.user.id,
+              full_name: 'Admin User',
+              email: 'admin@example.com',
+              role: 'admin',
+              is_admin: true
+            }])
+            .single();
+            
+          if (createProfileError) {
+            console.error('Error creating admin profile:', createProfileError);
           } else {
-            console.log('No session found, admin creation likely needed');
+            console.log('Admin profile created successfully');
           }
-        }
-        
-        // Determine if admin exists in auth table
-        let adminExistsInAuth = false;
-        if (authData && authData.users) {
-          // Explicitly type the user object to avoid TypeScript errors
-          adminExistsInAuth = authData.users.some((user: any) => {
-            return user.email === 'admin@example.com' || user.email === 'admin@uptowngym.rw';
-          });
-          console.log('Admin exists in auth table:', adminExistsInAuth);
-        }
-        
-        // If admin doesn't exist in either table or auth, create one
-        if (!adminProfile && !adminExistsInAuth) {
+          
+          // Sign out if we were just checking existence
+          await supabase.auth.signOut();
+        } else {
+          // Admin doesn't exist, create one
           console.log('No admin found. Creating admin test user...');
           
           try {
@@ -69,8 +79,6 @@ export const useTestUsers = () => {
             console.error('Error during admin creation:', createError);
             toast.error('Failed to create admin user');
           }
-        } else {
-          console.log('Admin user already exists:', adminProfile || 'Admin found in auth table');
         }
         
         // Create regular user if needed
@@ -94,19 +102,25 @@ export const useTestUsers = () => {
           console.error('Error checking for regular user profile:', profileError);
         }
         
-        // Check auth table for regular user
-        let regularUserExists = false;
-        const { data: authData } = await supabase.auth.admin.listUsers();
-        if (authData && authData.users) {
-          regularUserExists = authData.users.some((user: any) => {
-            if (user.email) {
-              return user.email === 'user@example.com';
-            }
-            return false;
-          });
+        if (userProfile) {
+          console.log('Regular user already exists');
+          return;
         }
         
-        if (!userProfile && !regularUserExists) {
+        // Try to sign in with regular user credentials
+        const { data: signInData, error: signInError } = await supabase.auth.signInWithPassword({
+          email: 'user@example.com',
+          password: 'user123'
+        });
+        
+        if (!signInError && signInData?.user) {
+          console.log('Regular user exists in auth, creating profile if needed');
+          // Create profile for existing user
+          await createProfileForUser(signInData.user.id, 'Regular User');
+          
+          // Sign out if we were just checking existence
+          await supabase.auth.signOut();
+        } else {
           console.log('No regular user found. Creating regular test user...');
           
           try {
@@ -138,6 +152,9 @@ export const useTestUsers = () => {
                   // Create profile for existing user
                   await createProfileForUser(signInData.user.id, 'Regular User');
                   toast.success('Regular user profile created');
+                  
+                  // Sign out
+                  await supabase.auth.signOut();
                 }
               }
             } else if (data && data.user) {
@@ -149,8 +166,6 @@ export const useTestUsers = () => {
             console.error('Error creating regular user:', createError);
             toast.error('Failed to create regular user');
           }
-        } else {
-          console.log('Regular user already exists');
         }
       } catch (err) {
         console.error('Error creating regular test user:', err);
@@ -178,6 +193,7 @@ export const useTestUsers = () => {
             { 
               id: userId,
               full_name: fullName,
+              email: userId.includes('user@example.com') ? 'user@example.com' : undefined,
               role: 'member',
               is_admin: false
             }

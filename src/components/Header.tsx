@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { cn } from '@/lib/utils';
@@ -6,15 +7,31 @@ import { toast } from 'sonner';
 import DesktopNav from './header/DesktopNav';
 import MobileMenu from './header/MobileMenu';
 import { useAuth } from '@/hooks/useAuth';
+import { ErrorBoundary } from './ui/error-boundary';
 
 const Header = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isCompanyDropdownOpen, setIsCompanyDropdownOpen] = useState(false);
   const [isServicesDropdownOpen, setIsServicesDropdownOpen] = useState(false);
-  const { isAuthenticated, isAdmin, logout } = useAuth();
   const location = useLocation();
   const navigate = useNavigate();
+  
+  // Safely access auth context with default values
+  const auth = (() => {
+    try {
+      return useAuth();
+    } catch (error) {
+      console.error("Auth context not available yet:", error);
+      return {
+        isAuthenticated: false,
+        isAdmin: false,
+        logout: async () => false
+      };
+    }
+  })();
+  
+  const { isAuthenticated, isAdmin, logout } = auth;
 
   useEffect(() => {
     const handleScroll = () => {
@@ -59,9 +76,14 @@ const Header = () => {
   };
 
   const handleLogout = async () => {
-    const success = await logout();
-    if (success) {
-      navigate('/login');
+    try {
+      const success = await logout();
+      if (success) {
+        navigate('/login');
+      }
+    } catch (error) {
+      console.error("Error during logout:", error);
+      toast.error("Failed to log out. Please try again.");
     }
   };
 
@@ -112,55 +134,57 @@ const Header = () => {
       ];
 
   return (
-    <header 
-      className={cn(
-        'fixed top-0 left-0 right-0 z-50 transition-all duration-300 w-full',
-        isScrolled ? 'bg-gym-darkblue shadow-lg py-2' : 'bg-gym-dark/90 backdrop-blur-md py-4'
-      )}
-    >
-      <div className="container-custom flex items-center justify-between">
-        <Link to="/" className="flex items-center space-x-2">
-          <div className="h-12 w-auto">
-            <img 
-              src="/lovable-uploads/50d3d473-1f3f-40d6-b895-c64a2e29ca1d.png" 
-              alt="Uptown Gym Logo" 
-              className="h-full w-auto object-contain"
-            />
-          </div>
-        </Link>
+    <ErrorBoundary>
+      <header 
+        className={cn(
+          'fixed top-0 left-0 right-0 z-50 transition-all duration-300 w-full',
+          isScrolled ? 'bg-gym-darkblue shadow-lg py-2' : 'bg-gym-dark/90 backdrop-blur-md py-4'
+        )}
+      >
+        <div className="container-custom flex items-center justify-between">
+          <Link to="/" className="flex items-center space-x-2">
+            <div className="h-12 w-auto">
+              <img 
+                src="/lovable-uploads/50d3d473-1f3f-40d6-b895-c64a2e29ca1d.png" 
+                alt="Uptown Gym Logo" 
+                className="h-full w-auto object-contain"
+              />
+            </div>
+          </Link>
 
-        <DesktopNav 
-          navItems={navItems}
-          serviceItems={serviceItems}
-          companyItems={companyItems}
-          dashboardItem={dashboardItem}
-          authItems={authItems}
-          isServicesDropdownOpen={isServicesDropdownOpen}
-          setIsServicesDropdownOpen={setIsServicesDropdownOpen}
-          isCompanyDropdownOpen={isCompanyDropdownOpen}
-          setIsCompanyDropdownOpen={setIsCompanyDropdownOpen}
-          isLoggedIn={isAuthenticated}
-        />
+          <DesktopNav 
+            navItems={navItems}
+            serviceItems={serviceItems}
+            companyItems={companyItems}
+            dashboardItem={dashboardItem}
+            authItems={authItems}
+            isServicesDropdownOpen={isServicesDropdownOpen}
+            setIsServicesDropdownOpen={setIsServicesDropdownOpen}
+            isCompanyDropdownOpen={isCompanyDropdownOpen}
+            setIsCompanyDropdownOpen={setIsCompanyDropdownOpen}
+            isLoggedIn={isAuthenticated}
+          />
 
-        <button
-          className="md:hidden text-white/90 hover:text-white"
-          onClick={() => setIsMenuOpen(!isMenuOpen)}
-          aria-label={isMenuOpen ? 'Close menu' : 'Open menu'}
-        >
-          {isMenuOpen ? <X size={24} /> : <Menu size={24} />}
-        </button>
+          <button
+            className="md:hidden text-white/90 hover:text-white"
+            onClick={() => setIsMenuOpen(!isMenuOpen)}
+            aria-label={isMenuOpen ? 'Close menu' : 'Open menu'}
+          >
+            {isMenuOpen ? <X size={24} /> : <Menu size={24} />}
+          </button>
 
-        <MobileMenu 
-          isOpen={isMenuOpen}
-          navItems={navItems}
-          serviceItems={serviceItems}
-          companyItems={companyItems}
-          dashboardItem={dashboardItem}
-          authItems={authItems}
-          isLoggedIn={isAuthenticated}
-        />
-      </div>
-    </header>
+          <MobileMenu 
+            isOpen={isMenuOpen}
+            navItems={navItems}
+            serviceItems={serviceItems}
+            companyItems={companyItems}
+            dashboardItem={dashboardItem}
+            authItems={authItems}
+            isLoggedIn={isAuthenticated}
+          />
+        </div>
+      </header>
+    </ErrorBoundary>
   );
 };
 
