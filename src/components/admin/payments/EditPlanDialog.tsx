@@ -21,8 +21,16 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
+  FormDescription,
 } from '@/components/ui/form';
 import { Check, X, Plus } from 'lucide-react';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 
 const planFormSchema = z.object({
   name: z.string().min(1, { message: 'Plan name is required' }),
@@ -53,7 +61,7 @@ export const EditPlanDialog = ({ isOpen, onClose, onSave, plan }: EditPlanDialog
     resolver: zodResolver(planFormSchema),
     defaultValues: {
       name: plan?.name || '',
-      billingCycle: plan?.billingCycle || '',
+      billingCycle: plan?.billingCycle || 'Monthly',
       price: plan?.price || '',
       planId: plan?.planId || '',
       features: plan?.features || [''],
@@ -98,6 +106,15 @@ export const EditPlanDialog = ({ isOpen, onClose, onSave, plan }: EditPlanDialog
     onClose();
   };
 
+  const billingCycleOptions = [
+    { value: 'Daily', label: 'Daily' },
+    { value: 'Weekly', label: 'Weekly' },
+    { value: 'Monthly', label: 'Monthly' },
+    { value: '3 Months', label: '3 Months' },
+    { value: '6 Months', label: '6 Months' },
+    { value: 'Annual', label: 'Annual' },
+  ];
+
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-[550px] max-h-[90vh] overflow-y-auto">
@@ -128,9 +145,23 @@ export const EditPlanDialog = ({ isOpen, onClose, onSave, plan }: EditPlanDialog
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Billing Cycle</FormLabel>
-                    <FormControl>
-                      <Input placeholder="Monthly" {...field} />
-                    </FormControl>
+                    <Select 
+                      onValueChange={field.onChange} 
+                      defaultValue={field.value}
+                    >
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select a billing cycle" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {billingCycleOptions.map((option) => (
+                          <SelectItem key={option.value} value={option.value}>
+                            {option.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                     <FormMessage />
                   </FormItem>
                 )}
@@ -141,10 +172,13 @@ export const EditPlanDialog = ({ isOpen, onClose, onSave, plan }: EditPlanDialog
                 name="price"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Price</FormLabel>
+                    <FormLabel>Price (RWF)</FormLabel>
                     <FormControl>
-                      <Input placeholder="$49.99" {...field} />
+                      <Input placeholder="50,000" {...field} />
                     </FormControl>
+                    <FormDescription className="text-xs">
+                      Enter amount in Rwandan Francs
+                    </FormDescription>
                     <FormMessage />
                   </FormItem>
                 )}
@@ -160,6 +194,9 @@ export const EditPlanDialog = ({ isOpen, onClose, onSave, plan }: EditPlanDialog
                   <FormControl>
                     <Input placeholder="premium-monthly" {...field} />
                   </FormControl>
+                  <FormDescription className="text-xs">
+                    Used to sync this plan with the public membership page
+                  </FormDescription>
                   <FormMessage />
                 </FormItem>
               )}

@@ -17,6 +17,7 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
+  FormDescription,
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -29,8 +30,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { Search, Plus, Trash, ArrowRight, Calendar } from 'lucide-react';
+import { Search, Plus, Trash, ArrowRight, Calendar, Mail, Download } from 'lucide-react';
 import { toast } from 'sonner';
+import { exportToPDF } from '@/utils/exportUtils';
 
 // Mock member data for the searchable select
 const mockMembers = [
@@ -41,17 +43,27 @@ const mockMembers = [
   { id: '5', name: 'Robert Wilson', email: 'robert.wilson@example.com' },
 ];
 
+// Mock company data
+const mockCompanies = [
+  { id: '1', name: 'Acme Corporation', email: 'billing@acmecorp.com' },
+  { id: '2', name: 'Globex Industries', email: 'accounts@globex.com' },
+  { id: '3', name: 'Wayne Enterprises', email: 'finance@wayne.com' },
+  { id: '4', name: 'Stark Industries', email: 'invoices@stark.com' },
+  { id: '5', name: 'Umbrella Corporation', email: 'billing@umbrella.com' },
+];
+
 // Mock service items data
 const mockServices = [
-  { id: '1', name: 'Monthly Membership', price: 49.99 },
-  { id: '2', name: 'Personal Training Session', price: 65.00 },
-  { id: '3', name: 'Gym Equipment Rental', price: 15.00 },
-  { id: '4', name: 'Spa Access', price: 25.00 },
-  { id: '5', name: 'Nutrition Consultation', price: 40.00 },
+  { id: '1', name: 'Monthly Membership', price: 50000 },
+  { id: '2', name: 'Personal Training Session', price: 65000 },
+  { id: '3', name: 'Gym Equipment Rental', price: 15000 },
+  { id: '4', name: 'Spa Access', price: 25000 },
+  { id: '5', name: 'Nutrition Consultation', price: 40000 },
 ];
 
 const invoiceFormSchema = z.object({
-  member: z.string({ required_error: 'Please select a member' }),
+  invoiceType: z.enum(['individual', 'company']),
+  recipient: z.string({ required_error: 'Please select a recipient' }),
   invoiceDate: z.string({ required_error: 'Please select a date' }),
   dueDate: z.string({ required_error: 'Please select a due date' }),
   items: z.array(
@@ -59,7 +71,7 @@ const invoiceFormSchema = z.object({
       service: z.string({ required_error: 'Please select a service' }),
       description: z.string().optional(),
       quantity: z.coerce.number().min(1, { message: 'Quantity must be 1 or more' }),
-      price: z.coerce.number().min(0.01, { message: 'Price must be greater than 0' }),
+      price: z.coerce.number().min(1, { message: 'Price must be greater than 0' }),
     })
   ).min(1, { message: 'At least one item is required' }),
   taxRate: z.coerce.number().min(0, { message: 'Tax rate cannot be negative' }).max(100, { message: 'Tax rate cannot exceed 100%' }),
@@ -81,7 +93,8 @@ export const GenerateInvoiceModal = ({ isOpen, onClose, onGenerate }: GenerateIn
   const form = useForm<InvoiceFormValues>({
     resolver: zodResolver(invoiceFormSchema),
     defaultValues: {
-      member: '',
+      invoiceType: 'individual',
+      recipient: '',
       invoiceDate: new Date().toISOString().split('T')[0],
       dueDate: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString().split('T')[0], // 14 days from now
       items: [
@@ -92,7 +105,7 @@ export const GenerateInvoiceModal = ({ isOpen, onClose, onGenerate }: GenerateIn
           price: 0,
         },
       ],
-      taxRate: 10, // Default tax rate (10%)
+      taxRate: 18, // Default tax rate in Rwanda is 18%
       notes: '',
     },
   });
@@ -102,10 +115,14 @@ export const GenerateInvoiceModal = ({ isOpen, onClose, onGenerate }: GenerateIn
     name: 'items',
   });
 
-  const filteredMembers = mockMembers.filter(
-    member => 
-      member.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      member.email.toLowerCase().includes(searchTerm.toLowerCase())
+  const invoiceType = form.watch('invoiceType');
+  
+  const recipients = invoiceType === 'individual' ? mockMembers : mockCompanies;
+  
+  const filteredRecipients = recipients.filter(
+    recipient => 
+      recipient.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      recipient.email.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   const watchItems = form.watch('items');
@@ -118,6 +135,15 @@ export const GenerateInvoiceModal = ({ isOpen, onClose, onGenerate }: GenerateIn
   
   const taxAmount = subtotal * (watchTaxRate / 100);
   const total = subtotal + taxAmount;
+
+  const formatCurrency = (amount: number) => {
+    return new Intl.NumberFormat('en-RW', {
+      style: 'currency',
+      currency: 'RWF',
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0,
+    }).format(amount);
+  };
 
   const onServiceChange = (serviceId: string, index: number) => {
     const selectedService = mockServices.find(service => service.id === serviceId);
@@ -141,9 +167,14 @@ export const GenerateInvoiceModal = ({ isOpen, onClose, onGenerate }: GenerateIn
     const taxAmount = subtotal * (data.taxRate / 100);
     const total = subtotal + taxAmount;
     
+    // Find recipient details
+    const recipientData = recipients.find(r => r.id === data.recipient);
+    
     // Format the data with calculated totals
     const invoiceData = {
       ...data,
+      recipientName: recipientData?.name || '',
+      recipientEmail: recipientData?.email || '',
       subtotal,
       taxAmount,
       taxRate: data.taxRate,
@@ -151,6 +182,7 @@ export const GenerateInvoiceModal = ({ isOpen, onClose, onGenerate }: GenerateIn
       status: 'Pending',
       invoiceNumber: `INV-${new Date().getFullYear()}-${String(Math.floor(Math.random() * 10000)).padStart(4, '0')}`,
       createdAt: new Date().toISOString(),
+      currency: 'RWF',
     };
     
     // Send the data to the parent component
@@ -182,6 +214,39 @@ export const GenerateInvoiceModal = ({ isOpen, onClose, onGenerate }: GenerateIn
     else if (activeTab === 'items') setActiveTab('details');
   };
 
+  const handleSendEmail = () => {
+    const data = form.getValues();
+    const recipient = recipients.find(r => r.id === data.recipient);
+    if (recipient) {
+      toast.success(`Email sent to ${recipient.name} at ${recipient.email}`);
+    }
+  };
+
+  const handleDownloadPDF = () => {
+    const data = form.getValues();
+    const recipient = recipients.find(r => r.id === data.recipient);
+    
+    // This would normally call a proper PDF generation service
+    // For now we'll just show a success message
+    toast.success(`Invoice PDF ready for ${recipient?.name || 'customer'}`);
+    
+    // In a real app, you'd generate and download the PDF here
+    // Using the exportToPDF utility
+    const columnsForPDF = [
+      { label: 'Item', key: 'description' },
+      { label: 'Quantity', key: 'quantity' },
+      { label: 'Unit Price (RWF)', key: 'price' },
+      { label: 'Total (RWF)', key: 'total' }
+    ];
+    
+    const dataForPDF = watchItems.map(item => ({
+      ...item,
+      total: item.quantity * item.price
+    }));
+    
+    exportToPDF(`Invoice for ${recipient?.name || 'Customer'}`, dataForPDF, columnsForPDF);
+  };
+
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-[700px] max-h-[90vh] overflow-auto">
@@ -199,12 +264,44 @@ export const GenerateInvoiceModal = ({ isOpen, onClose, onGenerate }: GenerateIn
               </TabsList>
 
               <TabsContent value="details" className="space-y-4">
+                <FormField
+                  control={form.control}
+                  name="invoiceType"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Invoice Type</FormLabel>
+                      <Select
+                        onValueChange={(value) => {
+                          field.onChange(value);
+                          form.setValue('recipient', '');
+                          setSearchTerm('');
+                        }}
+                        defaultValue={field.value}
+                      >
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select invoice type" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          <SelectItem value="individual">Individual</SelectItem>
+                          <SelectItem value="company">Company</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <FormDescription>
+                        {invoiceType === 'individual' ? 'Create invoice for gym member' : 'Create invoice for corporate client'}
+                      </FormDescription>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
                 <div>
-                  <FormLabel>Select Member</FormLabel>
+                  <FormLabel>Select {invoiceType === 'individual' ? 'Member' : 'Company'}</FormLabel>
                   <div className="relative">
                     <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
                     <Input
-                      placeholder="Search members..."
+                      placeholder={`Search ${invoiceType === 'individual' ? 'members' : 'companies'}...`}
                       className="pl-10 mb-2"
                       value={searchTerm}
                       onChange={(e) => setSearchTerm(e.target.value)}
@@ -212,31 +309,31 @@ export const GenerateInvoiceModal = ({ isOpen, onClose, onGenerate }: GenerateIn
                   </div>
 
                   <div className="max-h-[200px] overflow-y-auto border rounded-md">
-                    {filteredMembers.length > 0 ? (
-                      filteredMembers.map((member) => (
+                    {filteredRecipients.length > 0 ? (
+                      filteredRecipients.map((recipient) => (
                         <div
-                          key={member.id}
+                          key={recipient.id}
                           className={`flex items-center p-3 border-b cursor-pointer hover:bg-gray-50 ${
-                            form.watch('member') === member.id ? 'bg-blue-50' : ''
+                            form.watch('recipient') === recipient.id ? 'bg-blue-50' : ''
                           }`}
-                          onClick={() => form.setValue('member', member.id)}
+                          onClick={() => form.setValue('recipient', recipient.id)}
                         >
                           <div>
-                            <p className="font-medium">{member.name}</p>
-                            <p className="text-sm text-gray-500">{member.email}</p>
+                            <p className="font-medium">{recipient.name}</p>
+                            <p className="text-sm text-gray-500">{recipient.email}</p>
                           </div>
                         </div>
                       ))
                     ) : (
                       <div className="p-3 text-center text-gray-500">
-                        No members found matching your search.
+                        No {invoiceType === 'individual' ? 'members' : 'companies'} found matching your search.
                       </div>
                     )}
                   </div>
                   
-                  {form.formState.errors.member && (
+                  {form.formState.errors.recipient && (
                     <p className="text-sm font-medium text-destructive mt-1">
-                      {form.formState.errors.member.message}
+                      {form.formState.errors.recipient.message}
                     </p>
                   )}
                 </div>
@@ -319,7 +416,7 @@ export const GenerateInvoiceModal = ({ isOpen, onClose, onGenerate }: GenerateIn
                               <SelectContent>
                                 {mockServices.map((service) => (
                                   <SelectItem key={service.id} value={service.id}>
-                                    {service.name} (${service.price.toFixed(2)})
+                                    {service.name} ({formatCurrency(service.price)})
                                   </SelectItem>
                                 ))}
                               </SelectContent>
@@ -353,15 +450,18 @@ export const GenerateInvoiceModal = ({ isOpen, onClose, onGenerate }: GenerateIn
                           name={`items.${index}.price`}
                           render={({ field }) => (
                             <FormItem>
-                              <FormLabel>Unit Price ($)</FormLabel>
+                              <FormLabel>Unit Price (RWF)</FormLabel>
                               <FormControl>
                                 <Input
                                   type="number"
-                                  step="0.01"
+                                  step="1"
                                   min="0"
                                   {...field}
                                 />
                               </FormControl>
+                              <FormDescription className="text-xs">
+                                Enter amount in Rwandan Francs
+                              </FormDescription>
                               <FormMessage />
                             </FormItem>
                           )}
@@ -409,6 +509,9 @@ export const GenerateInvoiceModal = ({ isOpen, onClose, onGenerate }: GenerateIn
                           {...field}
                         />
                       </FormControl>
+                      <FormDescription className="text-xs">
+                        Standard VAT in Rwanda is 18%
+                      </FormDescription>
                       <FormMessage />
                     </FormItem>
                   )}
@@ -427,22 +530,22 @@ export const GenerateInvoiceModal = ({ isOpen, onClose, onGenerate }: GenerateIn
               <TabsContent value="review" className="space-y-6">
                 {/* Customer Details Summary */}
                 <div className="border rounded-md p-4 space-y-2">
-                  <h3 className="text-lg font-medium">Customer Details</h3>
+                  <h3 className="text-lg font-medium">{invoiceType === 'individual' ? 'Customer' : 'Company'} Details</h3>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
-                      <p className="text-sm text-gray-500">Customer</p>
+                      <p className="text-sm text-gray-500">{invoiceType === 'individual' ? 'Customer' : 'Company'}</p>
                       <p className="font-medium">
-                        {form.watch('member') 
-                          ? mockMembers.find(m => m.id === form.watch('member'))?.name || 'Selected Customer' 
-                          : 'No customer selected'}
+                        {form.watch('recipient') 
+                          ? recipients.find(r => r.id === form.watch('recipient'))?.name || 'Selected Recipient' 
+                          : 'No recipient selected'}
                       </p>
                     </div>
                     <div>
                       <p className="text-sm text-gray-500">Email</p>
                       <p className="font-medium">
-                        {form.watch('member') 
-                          ? mockMembers.find(m => m.id === form.watch('member'))?.email || 'customer@example.com' 
-                          : 'No customer selected'}
+                        {form.watch('recipient') 
+                          ? recipients.find(r => r.id === form.watch('recipient'))?.email || 'recipient@example.com' 
+                          : 'No recipient selected'}
                       </p>
                     </div>
                     <div>
@@ -480,8 +583,8 @@ export const GenerateInvoiceModal = ({ isOpen, onClose, onGenerate }: GenerateIn
                               <td className="px-3 py-2 text-sm">{serviceName}</td>
                               <td className="px-3 py-2 text-sm">{item.description || '-'}</td>
                               <td className="px-3 py-2 text-sm text-right">{item.quantity}</td>
-                              <td className="px-3 py-2 text-sm text-right">${item.price?.toFixed(2)}</td>
-                              <td className="px-3 py-2 text-sm font-medium text-right">${itemTotal.toFixed(2)}</td>
+                              <td className="px-3 py-2 text-sm text-right">{formatCurrency(item.price)}</td>
+                              <td className="px-3 py-2 text-sm font-medium text-right">{formatCurrency(itemTotal)}</td>
                             </tr>
                           );
                         })}
@@ -490,17 +593,17 @@ export const GenerateInvoiceModal = ({ isOpen, onClose, onGenerate }: GenerateIn
                         <tr>
                           <td colSpan={3}></td>
                           <td className="px-3 py-2 text-sm font-medium text-right">Subtotal</td>
-                          <td className="px-3 py-2 text-sm font-medium text-right">${subtotal.toFixed(2)}</td>
+                          <td className="px-3 py-2 text-sm font-medium text-right">{formatCurrency(subtotal)}</td>
                         </tr>
                         <tr>
                           <td colSpan={3}></td>
                           <td className="px-3 py-2 text-sm font-medium text-right">Tax ({watchTaxRate}%)</td>
-                          <td className="px-3 py-2 text-sm font-medium text-right">${taxAmount.toFixed(2)}</td>
+                          <td className="px-3 py-2 text-sm font-medium text-right">{formatCurrency(taxAmount)}</td>
                         </tr>
                         <tr>
                           <td colSpan={3}></td>
                           <td className="px-3 py-2 text-base font-bold text-right">Total</td>
-                          <td className="px-3 py-2 text-base font-bold text-right">${total.toFixed(2)}</td>
+                          <td className="px-3 py-2 text-base font-bold text-right">{formatCurrency(total)}</td>
                         </tr>
                       </tfoot>
                     </table>
@@ -524,6 +627,29 @@ export const GenerateInvoiceModal = ({ isOpen, onClose, onGenerate }: GenerateIn
                     </FormItem>
                   )}
                 />
+
+                <div className="border rounded-md p-4">
+                  <h3 className="text-lg font-medium mb-3">Export Options</h3>
+                  <div className="flex flex-col sm:flex-row gap-3">
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={handleSendEmail}
+                      className="flex-1"
+                      disabled={!form.watch('recipient')}
+                    >
+                      <Mail className="mr-2 h-4 w-4" /> Email to Customer
+                    </Button>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={handleDownloadPDF}
+                      className="flex-1"
+                    >
+                      <Download className="mr-2 h-4 w-4" /> Download PDF
+                    </Button>
+                  </div>
+                </div>
 
                 <DialogFooter className="flex justify-between">
                   <Button type="button" variant="outline" onClick={goToPreviousTab}>

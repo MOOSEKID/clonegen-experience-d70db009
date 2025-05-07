@@ -21,7 +21,7 @@ const AdminPayments = () => {
           onClick={() => navigate('/admin/payments/subscriptions')}
           features={[
             "Create or modify plans",
-            "Manage pricing tiers",
+            "Manage pricing tiers (RWF)",
             "View subscribers",
             "Pause/activate plans"
           ]}
