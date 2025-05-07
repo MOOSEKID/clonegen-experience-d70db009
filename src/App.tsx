@@ -55,6 +55,11 @@ const TrainerProfiles = lazy(() => import("./pages/admin/trainers/TrainerProfile
 const PerformanceTracking = lazy(() => import("./pages/admin/trainers/PerformanceTracking"));
 const TrainerRatings = lazy(() => import("./pages/admin/trainers/TrainerRatings"));
 
+// Payment subpages
+const Subscriptions = lazy(() => import("./pages/admin/payments/Subscriptions"));
+const Invoices = lazy(() => import("./pages/admin/payments/Invoices"));
+const PaymentMethods = lazy(() => import("./pages/admin/payments/Methods"));
+
 // Customer Dashboard pages
 const DashboardLayout = lazy(() => import("./pages/dashboard/DashboardLayout"));
 const Dashboard = lazy(() => import("./pages/dashboard/Dashboard"));
@@ -308,9 +313,9 @@ const App = () => {
                   <Route path="trainers/performance" element={<PerformanceTracking />} />
                   <Route path="trainers/ratings" element={<TrainerRatings />} />
                   <Route path="payments" element={<AdminPayments />} />
-                  <Route path="payments/subscriptions" element={<AdminSubscriptions />} />
-                  <Route path="payments/invoices" element={<AdminInvoices />} />
-                  <Route path="payments/methods" element={<AdminPaymentMethods />} />
+                  <Route path="payments/subscriptions" element={<Subscriptions />} />
+                  <Route path="payments/invoices" element={<Invoices />} />
+                  <Route path="payments/methods" element={<PaymentMethods />} />
                   <Route path="workouts" element={<AdminWorkouts />} />
                   <Route path="shop" element={<AdminShop />} />
                   <Route path="content" element={<AdminContent />} />
