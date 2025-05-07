@@ -14,6 +14,7 @@ const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isCompanyDropdownOpen, setIsCompanyDropdownOpen] = useState(false);
   const [isServicesDropdownOpen, setIsServicesDropdownOpen] = useState(false);
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
   
@@ -76,14 +77,29 @@ const Header = () => {
   };
 
   const handleLogout = async () => {
+    if (isLoggingOut) return; // Prevent multiple clicks
+    
     try {
+      setIsLoggingOut(true);
+      console.log("Header: Initiating logout process");
+      
       const success = await logout();
+      
       if (success) {
-        navigate('/login');
+        console.log("Header: Logout successful, redirecting to login");
+        // Add a small delay before navigation to ensure state is updated
+        setTimeout(() => {
+          navigate('/login', { replace: true });
+        }, 150);
+      } else {
+        console.error("Header: Logout was unsuccessful");
+        toast.error("There was an issue during logout. Please try again.");
       }
     } catch (error) {
-      console.error("Error during logout:", error);
+      console.error("Header: Error during logout:", error);
       toast.error("Failed to log out. Please try again.");
+    } finally {
+      setIsLoggingOut(false);
     }
   };
 

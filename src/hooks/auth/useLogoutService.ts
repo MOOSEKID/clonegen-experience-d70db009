@@ -11,18 +11,23 @@ export const useLogoutService = () => {
    */
   const logout = async (): Promise<boolean> => {
     try {
+      console.log("Beginning Supabase logout process");
+      
       const { error } = await supabase.auth.signOut();
       
       if (error) {
-        console.error('Logout error:', error);
-        toast.error(error.message);
+        console.error('Logout error from Supabase:', error);
+        toast.error(error.message || 'Logout failed');
         return false;
       }
       
-      toast.success('Logged out successfully');
+      // Add a small delay to ensure Supabase has time to clear the session properly
+      await new Promise(resolve => setTimeout(resolve, 150));
+      
+      console.log('Supabase logout completed successfully');
       return true;
     } catch (error) {
-      console.error('Unexpected logout error:', error);
+      console.error('Unexpected error during logout:', error);
       toast.error(error instanceof Error ? error.message : 'Logout failed');
       return false;
     }

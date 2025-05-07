@@ -20,6 +20,7 @@ interface CustomerHeaderProps {
 
 const CustomerHeader = ({ toggleSidebar }: CustomerHeaderProps) => {
   const navigate = useNavigate();
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
   
   // Try to get auth context, or use fallback values if not available
   let userName = 'User';
@@ -39,17 +40,31 @@ const CustomerHeader = ({ toggleSidebar }: CustomerHeaderProps) => {
   }
 
   const handleLogout = async () => {
+    if (isLoggingOut) return; // Prevent multiple clicks
+    
     try {
+      setIsLoggingOut(true);
+      console.log("CustomerHeader: Initiating logout process");
+      
       const success = await logoutFunction();
+      
       if (success) {
+        console.log("CustomerHeader: Logout successful, redirecting to login");
         toast.success('Logged out successfully');
-        navigate('/login');
+        
+        // Add a small delay before navigation to ensure state is updated
+        setTimeout(() => {
+          navigate('/login', { replace: true });
+        }, 150);
       } else {
-        toast.error('Failed to log out');
+        console.error("CustomerHeader: Logout was unsuccessful");
+        toast.error('Failed to log out. Please try again.');
       }
     } catch (error) {
       console.error('Error during logout:', error);
       toast.error('An error occurred during logout');
+    } finally {
+      setIsLoggingOut(false);
     }
   };
 
@@ -117,9 +132,13 @@ const CustomerHeader = ({ toggleSidebar }: CustomerHeaderProps) => {
                 <span>Settings</span>
               </DropdownMenuItem>
               <DropdownMenuSeparator />
-              <DropdownMenuItem onClick={handleLogout}>
+              <DropdownMenuItem 
+                disabled={isLoggingOut} 
+                onClick={handleLogout}
+                className={isLoggingOut ? 'opacity-50 cursor-not-allowed' : ''}
+              >
                 <LogOut className="mr-2 h-4 w-4" />
-                <span>Log out</span>
+                <span>{isLoggingOut ? 'Logging out...' : 'Log out'}</span>
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>

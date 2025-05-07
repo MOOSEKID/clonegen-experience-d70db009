@@ -242,19 +242,35 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
    * Log out the current user
    */
   const logout = async (): Promise<boolean> => {
-    const success = await logoutService();
+    console.log("Starting logout process in AuthContext");
     
-    if (success) {
-      // Clear auth state
-      setUser(null);
-      setIsAdmin(false);
-      setIsAuthenticated(false);
+    // First clear all local auth state
+    setIsAuthenticated(false);
+    setIsAdmin(false);
+    setUser(null);
+    
+    // Clear local storage and cookies
+    authStorageService.setAuthData(false, false, '', '');
+    
+    try {
+      // Then call Supabase logout service
+      const success = await logoutService();
       
-      // Clear local storage and cookies
-      authStorageService.setAuthData(false, false, '', '');
+      if (success) {
+        console.log("Logout successfully completed");
+        toast.success('Logged out successfully');
+      } else {
+        console.error("Logout service returned unsuccessful");
+        toast.error("There was an issue during logout");
+        return false;
+      }
+      
+      return true;
+    } catch (error) {
+      console.error("Error during logout process:", error);
+      toast.error("Failed to log out. Please try again.");
+      return false;
     }
-    
-    return success;
   };
 
   const value: AuthContextType = {

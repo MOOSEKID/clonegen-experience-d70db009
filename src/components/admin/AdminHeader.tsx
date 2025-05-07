@@ -21,6 +21,7 @@ interface AdminHeaderProps {
 
 const AdminHeader = ({ toggleSidebar }: AdminHeaderProps) => {
   const [showNotifications, setShowNotifications] = useState(false);
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
   const navigate = useNavigate();
   const { logout, user } = useAuth();
   
@@ -37,19 +38,31 @@ const AdminHeader = ({ toggleSidebar }: AdminHeaderProps) => {
   ];
 
   const handleLogout = async () => {
+    if (isLoggingOut) return; // Prevent multiple clicks
+    
     try {
-      console.log("Admin logging out using auth context");
+      setIsLoggingOut(true);
+      console.log("AdminHeader: Initiating logout process");
+      
       const success = await logout();
       
       if (success) {
+        console.log("AdminHeader: Logout successful, redirecting to login");
         toast.success('Logged out successfully');
-        navigate('/login');
+        
+        // Add a small delay before navigation to ensure state is updated
+        setTimeout(() => {
+          navigate('/login', { replace: true });
+        }, 150);
       } else {
+        console.error("AdminHeader: Logout was unsuccessful");
         toast.error("Failed to log out. Please try again.");
       }
     } catch (error) {
       console.error("Error during logout:", error);
       toast.error("Failed to log out. Please try again.");
+    } finally {
+      setIsLoggingOut(false);
     }
   };
 
@@ -172,9 +185,13 @@ const AdminHeader = ({ toggleSidebar }: AdminHeaderProps) => {
                 <span>User Management</span>
               </DropdownMenuItem>
               <DropdownMenuSeparator />
-              <DropdownMenuItem onClick={handleLogout}>
+              <DropdownMenuItem 
+                disabled={isLoggingOut} 
+                onClick={handleLogout}
+                className={isLoggingOut ? 'opacity-50 cursor-not-allowed' : ''}
+              >
                 <LogOut className="mr-2 h-4 w-4" />
-                <span>Log out</span>
+                <span>{isLoggingOut ? 'Logging out...' : 'Log out'}</span>
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
