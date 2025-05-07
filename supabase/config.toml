@@ -1,7 +1,8 @@
 
-project_id = "uldnqunqeibvocxsbkhb"
+project_id = "qrjwfiurwvcsyrcpewsj"
 
-# Uncomment these lines if you need to customize the Supabase configuration
-# [auth]
-# site_url = "https://your-frontend-url.com"
-# additional_redirect_urls = ["https://your-frontend-url.com/*"]
+# Enable site URL and redirect URLs for proper authentication
+[auth]
+site_url = "https://lovable.app"
+additional_redirect_urls = ["https://lovable.app/*", "https://*.lovable.app/*", "http://localhost:3000/*"]
+

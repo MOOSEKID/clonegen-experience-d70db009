@@ -4,21 +4,37 @@ import { User } from '@supabase/supabase-js';
 
 export const createAdminUser = async (email: string, password: string, fullName: string) => {
   try {
-    // Check if admin already exists in auth
-    // Note: We no longer use filters as it's not supported in the PageParams type
-    const { data: authUsers, error: checkAuthError } = await supabase.auth.admin.listUsers({
-      page: 1,
-      perPage: 100 // Get more users and filter in code
-    });
+    console.log(`Attempting to create or update admin user: ${email}`);
     
-    // Find the user with the matching email
-    const existingAuthUser = authUsers?.users.find(user => {
-      return (user as User).email === email;
-    });
-    let userId = existingAuthUser?.id;
+    // First check if user exists in auth
+    const { data: existingUser, error: existingUserError } = await supabase.auth.admin.getUserByEmail(email);
+    
+    let userId: string | undefined;
+    
+    if (existingUserError) {
+      console.log('Error checking for existing user by email, will try list users:', existingUserError);
+      
+      // Alternative approach - get all users and filter
+      const { data: authUsers, error: usersError } = await supabase.auth.admin.listUsers();
+      
+      if (usersError) {
+        console.error('Failed to list users:', usersError);
+      } else if (authUsers?.users) {
+        // Find user with matching email
+        const matchingUser = authUsers.users.find(user => user.email === email);
+        if (matchingUser) {
+          console.log('Found existing user through list:', matchingUser.id);
+          userId = matchingUser.id;
+        }
+      }
+    } else if (existingUser) {
+      console.log('Found existing user directly:', existingUser.user.id);
+      userId = existingUser.user.id;
+    }
     
     // If user doesn't exist in auth, create them
     if (!userId) {
+      console.log('No existing user found, creating new admin user');
       // Create admin user in auth
       const { data: authUser, error: authError } = await supabase.auth.signUp({
         email,
@@ -46,26 +62,61 @@ export const createAdminUser = async (email: string, password: string, fullName:
       }
       
       userId = authUser.user.id;
+      console.log('Created new admin user:', userId);
     }
     
-    // Update or create profile as admin
-    const { error: profileError } = await supabase
+    // Check if profile exists
+    const { data: existingProfile, error: profileCheckError } = await supabase
       .from('profiles')
-      .upsert([
-        {
-          id: userId,
+      .select('*')
+      .eq('id', userId)
+      .single();
+      
+    if (profileCheckError && profileCheckError.code !== 'PGRST116') {
+      console.error('Error checking for existing profile:', profileCheckError);
+    }
+    
+    if (existingProfile) {
+      console.log('Admin profile already exists, updating:', existingProfile.id);
+      // Update existing profile
+      const { error: updateError } = await supabase
+        .from('profiles')
+        .update({
           full_name: fullName,
           role: 'admin',
           is_admin: true
-        }
-      ]);
-      
-    if (profileError) {
-      console.error('Error updating admin profile:', profileError);
-      return {
-        success: false,
-        message: profileError.message
-      };
+        })
+        .eq('id', userId);
+        
+      if (updateError) {
+        console.error('Error updating admin profile:', updateError);
+        return {
+          success: false,
+          message: updateError.message
+        };
+      }
+    } else {
+      console.log('Creating new admin profile for user:', userId);
+      // Create new profile
+      const { error: insertError } = await supabase
+        .from('profiles')
+        .insert([
+          {
+            id: userId,
+            full_name: fullName,
+            email: email,
+            role: 'admin',
+            is_admin: true
+          }
+        ]);
+        
+      if (insertError) {
+        console.error('Error creating admin profile:', insertError);
+        return {
+          success: false,
+          message: insertError.message
+        };
+      }
     }
     
     return {
