@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { 
   Breadcrumb,
@@ -61,10 +60,22 @@ const mockPaymentMethods = [
   },
 ];
 
+// Update the type definition for the GatewayConfigurationModal
+interface PaymentGateway {
+  id: string;
+  name: string;
+  description: string;
+  status: string;
+  icon: React.ReactNode;
+  provider: string;
+  fees: string;
+  setupComplete: boolean;
+}
+
 const Methods = () => {
   const [paymentMethods, setPaymentMethods] = useState(mockPaymentMethods);
   const [isConfigModalOpen, setIsConfigModalOpen] = useState(false);
-  const [selectedMethod, setSelectedMethod] = useState<any>(null);
+  const [selectedMethod, setSelectedMethod] = useState<PaymentGateway | null>(null);
   const isMobile = useIsMobile();
 
   const handleToggleStatus = (id: string) => {
@@ -82,7 +93,7 @@ const Methods = () => {
     }
   };
   
-  const handleConfigureMethod = (method: any) => {
+  const handleConfigureMethod = (method: PaymentGateway) => {
     setSelectedMethod(method);
     setIsConfigModalOpen(true);
   };
@@ -183,7 +194,8 @@ const Methods = () => {
         isOpen={isConfigModalOpen}
         onClose={() => setIsConfigModalOpen(false)}
         onSave={handleSaveConfiguration}
-        paymentMethod={selectedMethod}
+        gateway={selectedMethod}
+        isNew={selectedMethod === null}
       />
     </div>
   );

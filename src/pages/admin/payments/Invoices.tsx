@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { 
   Breadcrumb,
@@ -38,7 +37,7 @@ import {
 } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { GenerateInvoiceModal } from '@/components/admin/payments/GenerateInvoiceModal';
-import { InvoiceFilterDialog } from '@/components/admin/payments/InvoiceFilterDialog';
+import { InvoiceFilterDialog, FilterValues } from '@/components/admin/payments/InvoiceFilterDialog';
 import { ViewInvoiceDialog } from '@/components/admin/payments/ViewInvoiceDialog';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { toast } from 'sonner';
@@ -94,6 +93,13 @@ const Invoices = () => {
   const [isFilterDialogOpen, setIsFilterDialogOpen] = useState(false);
   const [isViewModalOpen, setIsViewModalOpen] = useState(false);
   const [selectedInvoice, setSelectedInvoice] = useState<any>(null);
+  const [filterValues, setFilterValues] = useState<FilterValues>({
+    dateFrom: '',
+    dateTo: '',
+    status: '',
+    minAmount: '',
+    maxAmount: '',
+  });
   const isMobile = useIsMobile();
   
   const filteredInvoices = invoices.filter(
@@ -101,6 +107,13 @@ const Invoices = () => {
       invoice.id.toLowerCase().includes(searchTerm.toLowerCase()) || 
       invoice.customer.toLowerCase().includes(searchTerm.toLowerCase())
   );
+
+  const handleApplyFilters = (filters: FilterValues) => {
+    console.log('Applied filters:', filters);
+    setFilterValues(filters);
+    // Here you would apply the filters to your invoice list
+    // This is a simplified example - in a real app, this would filter the invoices based on the filter values
+  };
 
   const handleGenerateInvoice = (data: any) => {
     // In a real app this would send the data to your backend
@@ -319,6 +332,8 @@ const Invoices = () => {
       <InvoiceFilterDialog
         isOpen={isFilterDialogOpen}
         onClose={() => setIsFilterDialogOpen(false)}
+        onApplyFilters={handleApplyFilters}
+        currentFilters={filterValues}
       />
 
       {selectedInvoice && (

@@ -48,11 +48,11 @@ interface PaymentGateway {
   customFields?: Record<string, string>;
 }
 
-interface GatewayConfigurationModalProps {
+export interface GatewayConfigurationModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSave: (data: PaymentGateway) => void;
-  gateway?: PaymentGateway;
+  gateway?: PaymentGateway | null;
   isNew?: boolean;
 }
 
