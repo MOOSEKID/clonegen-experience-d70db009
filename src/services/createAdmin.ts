@@ -1,35 +1,25 @@
 
 import { supabase } from '@/integrations/supabase/client';
-import { User } from '@supabase/supabase-js';
 
 export const createAdminUser = async (email: string, password: string, fullName: string) => {
   try {
     console.log(`Attempting to create or update admin user: ${email}`);
     
     // First check if user exists in auth
-    const { data: existingUser, error: existingUserError } = await supabase.auth.admin.getUserByEmail(email);
-    
     let userId: string | undefined;
     
-    if (existingUserError) {
-      console.log('Error checking for existing user by email, will try list users:', existingUserError);
-      
-      // Alternative approach - get all users and filter
-      const { data: authUsers, error: usersError } = await supabase.auth.admin.listUsers();
-      
-      if (usersError) {
-        console.error('Failed to list users:', usersError);
-      } else if (authUsers?.users) {
-        // Find user with matching email
-        const matchingUser = authUsers.users.find(user => user.email === email);
-        if (matchingUser) {
-          console.log('Found existing user through list:', matchingUser.id);
-          userId = matchingUser.id;
-        }
+    // Get all users and filter to find the user with matching email
+    const { data: authUsers, error: usersError } = await supabase.auth.admin.listUsers();
+    
+    if (usersError) {
+      console.error('Failed to list users:', usersError);
+    } else if (authUsers?.users) {
+      // Find user with matching email
+      const matchingUser = authUsers.users.find(user => user.email === email);
+      if (matchingUser) {
+        console.log('Found existing user through list:', matchingUser.id);
+        userId = matchingUser.id;
       }
-    } else if (existingUser) {
-      console.log('Found existing user directly:', existingUser.user.id);
-      userId = existingUser.user.id;
     }
     
     // If user doesn't exist in auth, create them

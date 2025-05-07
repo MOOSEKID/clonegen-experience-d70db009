@@ -5,4 +5,3 @@ project_id = "qrjwfiurwvcsyrcpewsj"
 [auth]
 site_url = "https://lovable.app"
 additional_redirect_urls = ["https://lovable.app/*", "https://*.lovable.app/*", "http://localhost:3000/*"]
-
