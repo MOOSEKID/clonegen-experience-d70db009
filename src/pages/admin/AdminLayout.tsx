@@ -1,6 +1,6 @@
 
 import { useState, useEffect } from 'react';
-import { Outlet, useNavigate, Routes, Route } from 'react-router-dom';
+import { Outlet, useNavigate } from 'react-router-dom';
 import AdminSidebar from '@/components/admin/AdminSidebar';
 import AdminHeader from '@/components/admin/AdminHeader';
 import { toast } from 'sonner';
@@ -14,16 +14,6 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { LoadingSpinner } from '@/components/ui/LoadingSpinner';
-import { lazy, Suspense } from 'react';
-
-// Lazy load the test accounts page
-const TestAccounts = lazy(() => import('./TestAccounts'));
-
-const PageLoading = () => (
-  <div className="flex items-center justify-center h-full min-h-[50vh]">
-    <LoadingSpinner color="gym-orange" text="Loading..." />
-  </div>
-);
 
 const AdminLayout = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
@@ -131,14 +121,8 @@ const AdminLayout = () => {
         
         <main className="flex-1 p-4 md:p-6 overflow-auto">
           <div className="container mx-auto">
-            <Routes>
-              <Route path="test-accounts" element={
-                <Suspense fallback={<PageLoading />}>
-                  <TestAccounts />
-                </Suspense>
-              } />
-              <Route path="*" element={<Outlet />} />
-            </Routes>
+            {/* Replace nested Routes with a single Outlet to use routes defined in App.tsx */}
+            <Outlet />
           </div>
         </main>
       </div>
