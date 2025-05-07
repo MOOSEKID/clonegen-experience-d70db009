@@ -13,6 +13,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { LoadingSpinner } from '@/components/ui/LoadingSpinner';
 
 const DashboardLayout = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
@@ -34,14 +35,13 @@ const DashboardLayout = () => {
           navigate('/login', { state: { from: '/dashboard' } });
         } else {
           console.log('User is authenticated in dashboard:', user?.email);
+          setIsLoading(false);
         }
       } catch (error) {
         console.error('Authentication check error in dashboard:', error);
         toast.error('Authentication error. Please log in again.');
         navigate('/login', { state: { from: '/dashboard' } });
-      } finally {
-        setIsLoading(false);
-      }
+      } 
     };
 
     checkAuth();
@@ -70,7 +70,7 @@ const DashboardLayout = () => {
   if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-gym-orange"></div>
+        <LoadingSpinner color="gym-orange" size="lg" text="Loading dashboard..." />
       </div>
     );
   }

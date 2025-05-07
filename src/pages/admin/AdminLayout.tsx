@@ -4,7 +4,7 @@ import { Outlet, useNavigate, Routes, Route } from 'react-router-dom';
 import AdminSidebar from '@/components/admin/AdminSidebar';
 import AdminHeader from '@/components/admin/AdminHeader';
 import { toast } from 'sonner';
-import { useOptimizedAuthContext } from '@/hooks/useOptimizedAuthContext';
+import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/button';
 import { AlertCircle, ChevronDown } from 'lucide-react';
 import {
@@ -28,7 +28,7 @@ const PageLoading = () => (
 const AdminLayout = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [isLoading, setIsLoading] = useState(true);
-  const { isAuthenticated, isAdmin, user } = useOptimizedAuthContext();
+  const { isAuthenticated, isAdmin, user } = useAuth();
   const navigate = useNavigate();
 
   // Check admin authentication

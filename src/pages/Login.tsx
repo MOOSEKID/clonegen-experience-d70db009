@@ -3,7 +3,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { Card } from '@/components/ui/card';
 import { toast } from 'sonner';
-import { useOptimizedAuthContext } from '@/hooks/useOptimizedAuthContext';
+import { useAuth } from '@/hooks/useAuth';
 import LoginForm from '@/components/auth/LoginForm';
 import PresetButtons from '@/components/auth/PresetButtons';
 import LoginInfo from '@/components/auth/LoginInfo';
@@ -16,7 +16,7 @@ const Login = () => {
   const [isCheckingAuth, setIsCheckingAuth] = useState(true);
   const navigate = useNavigate();
   const location = useLocation();
-  const { login, isAuthenticated, isAdmin } = useOptimizedAuthContext();
+  const { login, isAuthenticated, isAdmin } = useAuth();
   
   // Default redirect path (can be overridden by location state)
   const from = location.state?.from || '/dashboard';

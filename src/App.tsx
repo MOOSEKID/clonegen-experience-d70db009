@@ -1,11 +1,12 @@
+
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Outlet, useLocation, Navigate, useNavigate } from "react-router-dom";
-import { OptimizedAuthProvider } from "./contexts/OptimizedAuthContext";
+import { AuthProvider } from "./contexts/AuthContext";
 import { ErrorBoundary } from "./components/ui/error-boundary";
-import { useOptimizedAuthContext } from "./hooks/useOptimizedAuthContext";
+import { useAuth } from "./hooks/useAuth";
 import { useEffect, lazy, Suspense, useState } from "react";
 import AppLoadingScreen from "./components/ui/AppLoadingScreen";
 
@@ -95,7 +96,7 @@ const ErrorFallback = () => {
 
 // Admin redirect component for the home page
 const AdminRedirect = () => {
-  const { isAuthenticated, isAdmin, isLoading } = useOptimizedAuthContext();
+  const { isAuthenticated, isAdmin, isLoading } = useAuth();
   const navigate = useNavigate();
   
   useEffect(() => {
@@ -136,7 +137,7 @@ const MainLayout = () => {
 
 // Admin route guard component
 const AdminRoute = ({ children }: { children: React.ReactNode }) => {
-  const { isAuthenticated, isAdmin, isLoading } = useOptimizedAuthContext();
+  const { isAuthenticated, isAdmin, isLoading } = useAuth();
   const location = useLocation();
   
   if (isLoading) {
@@ -159,7 +160,7 @@ const AdminRoute = ({ children }: { children: React.ReactNode }) => {
 
 // User route guard component
 const UserRoute = ({ children }: { children: React.ReactNode }) => {
-  const { isAuthenticated, isLoading } = useOptimizedAuthContext();
+  const { isAuthenticated, isLoading } = useAuth();
   const location = useLocation();
   
   if (isLoading) {
@@ -192,7 +193,7 @@ const App = () => {
   return (
     <ErrorBoundary fallback={<ErrorFallback />}>
       <QueryClientProvider client={queryClient}>
-        <OptimizedAuthProvider>
+        <AuthProvider>
           <TooltipProvider>
             <Toaster />
             <Sonner />
@@ -322,7 +323,7 @@ const App = () => {
               </Routes>
             </BrowserRouter>
           </TooltipProvider>
-        </OptimizedAuthProvider>
+        </AuthProvider>
       </QueryClientProvider>
     </ErrorBoundary>
   );
