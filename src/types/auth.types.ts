@@ -3,7 +3,7 @@ import { User } from '@supabase/supabase-js';
 
 export interface AuthUser {
   id: string;
-  email: string;
+  email?: string; // Changed from required to optional to match Supabase User type
   role?: string;
   user_metadata?: {
     full_name?: string;

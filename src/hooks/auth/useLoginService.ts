@@ -2,6 +2,7 @@
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import { AuthUser } from '@/types/auth.types';
+import { User } from '@supabase/supabase-js';
 
 /**
  * Hook that provides login functionality
@@ -12,7 +13,7 @@ export const useLoginService = () => {
    */
   const login = async (email: string, password: string): Promise<{
     success: boolean;
-    user?: AuthUser;
+    user?: User;
     isAdmin?: boolean;
   }> => {
     try {
@@ -118,13 +119,10 @@ export const useLoginService = () => {
         
         toast.success('Login successful');
         
+        // Return the User object directly from Supabase rather than converting it here
         return { 
           success: true,
-          user: {
-            ...data.user,
-            email: data.user.email || '', 
-            role: userRole
-          },
+          user: data.user,
           isAdmin: userIsAdmin
         };
       }

@@ -1,7 +1,7 @@
 
 import { createContext, ReactNode, useEffect } from 'react';
 import { useAuthState } from '@/hooks/useAuthState';
-import { AuthContextType } from '@/types/auth.types';
+import { AuthContextType, AuthUser } from '@/types/auth.types';
 import { useLoginService } from '@/hooks/auth/useLoginService';
 import { useSignUpService } from '@/hooks/auth/useSignUpService';
 import { useLogoutService } from '@/hooks/auth/useLogoutService';
@@ -10,6 +10,7 @@ import { useTestUsers } from '@/hooks/auth/useTestUsers';
 import { authStorageService } from '@/services/authStorageService';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import { User } from '@supabase/supabase-js';
 
 // Create the auth context with default values
 export const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -17,6 +18,18 @@ export const AuthContext = createContext<AuthContextType | undefined>(undefined)
 interface AuthProviderProps {
   children: ReactNode;
 }
+
+// Helper function to convert Supabase User to AuthUser
+const convertToAuthUser = (user: User | null): AuthUser | null => {
+  if (!user) return null;
+  
+  return {
+    ...user,
+    id: user.id,
+    email: user.email || '', // Provide default empty string for email
+    role: user.user_metadata?.role || 'member'
+  };
+};
 
 export const AuthProvider = ({ children }: AuthProviderProps) => {
   // Get the authentication state using our custom hook
@@ -50,7 +63,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         
         if (event === 'SIGNED_IN' && session) {
           // Handle signed in event - Use non-blocking approach to prevent deadlocks
-          setUser(session.user);
+          setUser(convertToAuthUser(session.user));
           setIsAuthenticated(true);
           
           // Use setTimeout to defer profile checking after auth state update
@@ -93,7 +106,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
           authStorageService.setAuthData(false, false, '', '');
         } else if (event === 'USER_UPDATED' && session) {
           console.log('User was updated');
-          setUser(session.user);
+          setUser(convertToAuthUser(session.user));
         }
       }
     );
@@ -108,7 +121,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         }
         
         if (session) {
-          setUser(session.user);
+          setUser(convertToAuthUser(session.user));
           setIsAuthenticated(true);
           
           // Defer profile checking
@@ -171,7 +184,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       
       if (result.success && result.user) {
         // Update auth state immediately to provide feedback
-        setUser(result.user);
+        setUser(convertToAuthUser(result.user));
         setIsAdmin(result.isAdmin || false);
         setIsAuthenticated(true);
         
@@ -179,8 +192,8 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         authStorageService.setAuthData(
           true, 
           result.isAdmin || false, 
-          result.user.email, 
-          result.user.user_metadata?.full_name || result.user.email
+          result.user.email || '', 
+          result.user.user_metadata?.full_name || result.user.email || ''
         );
         
         console.log('Login success in context, auth state updated:', { 
