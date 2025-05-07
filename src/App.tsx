@@ -1,4 +1,3 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -58,6 +57,13 @@ const TrainerRatings = lazy(() => import("./pages/admin/trainers/TrainerRatings"
 // Customer Dashboard pages
 const DashboardLayout = lazy(() => import("./pages/dashboard/DashboardLayout"));
 const Dashboard = lazy(() => import("./pages/dashboard/Dashboard"));
+const Workouts = lazy(() => import("./pages/dashboard/Workouts"));
+const Progress = lazy(() => import("./pages/dashboard/Progress"));
+const Schedule = lazy(() => import("./pages/dashboard/Schedule"));
+const Health = lazy(() => import("./pages/dashboard/Health"));
+const Achievements = lazy(() => import("./pages/dashboard/Achievements"));
+const Locations = lazy(() => import("./pages/dashboard/Locations"));
+const Settings = lazy(() => import("./pages/dashboard/Settings"));
 
 // Create a new query client instance with optimized settings
 const queryClient = new QueryClient({
@@ -318,6 +324,13 @@ const App = () => {
                   </UserRoute>
                 }>
                   <Route index element={<Dashboard />} />
+                  <Route path="workouts" element={<Workouts />} />
+                  <Route path="progress" element={<Progress />} />
+                  <Route path="schedule" element={<Schedule />} />
+                  <Route path="health" element={<Health />} />
+                  <Route path="achievements" element={<Achievements />} />
+                  <Route path="locations" element={<Locations />} />
+                  <Route path="settings" element={<Settings />} />
                   <Route path="*" element={<NotFound />} />
                 </Route>
               </Routes>
