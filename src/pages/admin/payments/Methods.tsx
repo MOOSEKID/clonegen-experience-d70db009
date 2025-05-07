@@ -84,7 +84,11 @@ const Methods = () => {
     setPaymentMethods(methods => 
       methods.map(method => 
         method.id === id 
-          ? { ...method, status: method.status === 'Active' ? 'Inactive' : 'Active' } 
+          ? { 
+              ...method, 
+              status: method.status === 'Active' ? 'Inactive' : 'Active',
+              isEnabled: method.status !== 'Active'
+            } 
           : method
       )
     );
@@ -101,19 +105,50 @@ const Methods = () => {
   };
   
   const handleSaveConfiguration = (data: any) => {
-    // In a real app, this would update the payment method configuration
-    console.log('Saved configuration for', selectedMethod?.name, data);
+    // Determine if we're adding a new gateway or updating an existing one
+    const isNewGateway = selectedMethod === null;
     
-    // Update the payment method
-    setPaymentMethods(methods => 
-      methods.map(method => 
-        method.id === selectedMethod?.id 
-          ? { ...method, ...data, setupComplete: true } 
-          : method
-      )
-    );
+    // For a new gateway, create a complete gateway object with all required properties
+    if (isNewGateway) {
+      const newGateway: PaymentGateway = {
+        id: Date.now().toString(), // Generate a unique ID
+        name: data.name,
+        description: data.description,
+        provider: data.provider,
+        status: data.isEnabled ? 'Active' : 'Inactive',
+        icon: <CreditCard className="h-8 w-8" />, // Default icon
+        setupComplete: true, // Mark as complete since user just configured it
+        fee: data.fee,
+        fees: `${data.fee} per transaction`, // Format fees for display
+        isEnabled: data.isEnabled,
+        supportedCards: data.supportedCards || []
+      };
+      
+      // Add the new gateway to the payment methods array
+      setPaymentMethods(prevMethods => [...prevMethods, newGateway]);
+      toast.success(`${data.name} payment gateway added`);
+    } else {
+      // Update existing gateway
+      setPaymentMethods(methods => 
+        methods.map(method => 
+          method.id === selectedMethod?.id 
+            ? { 
+                ...method, 
+                ...data, 
+                status: data.isEnabled ? 'Active' : 'Inactive',
+                fees: `${data.fee} per transaction`, // Format fees for display
+                setupComplete: true 
+              } 
+            : method
+        )
+      );
+      
+      toast.success(`${selectedMethod?.name} configuration updated`);
+    }
     
-    toast.success(`${selectedMethod?.name} configuration updated`);
+    // Close the modal
+    setIsConfigModalOpen(false);
+    setSelectedMethod(null);
   };
   
   const handleAddGateway = () => {
