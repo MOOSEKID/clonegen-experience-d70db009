@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { Card } from '@/components/ui/card';
@@ -34,7 +33,7 @@ const Login = () => {
         }
         
         if (session) {
-          console.log('User is authenticated via Supabase, redirecting');
+          console.log('User is authenticated via Supabase, checking admin status');
           
           // Check if user is admin by querying the profiles table
           const { data: profileData, error: profileError } = await supabase
@@ -59,6 +58,7 @@ const Login = () => {
           
           console.log('Login redirect check:', { userEmail, userIsAdmin, profileData });
           
+          // Direct redirect based on admin status
           const redirectPath = userIsAdmin ? '/admin' : '/dashboard';
           console.log('Redirecting to:', redirectPath);
           
@@ -84,13 +84,13 @@ const Login = () => {
     setIsLoading(true);
     setLoginError(null);
     
-    // Set a timeout to prevent UI from freezing indefinitely
+    // Increased timeout to 30 seconds to prevent premature timeouts
     const loginTimeout = setTimeout(() => {
-      console.log('Login operation timed out');
+      console.log('Login operation timed out after 30 seconds');
       setIsLoading(false);
       setLoginError('Login timed out. Please try again.');
       toast.error('Login timed out. Please try again.');
-    }, 15000); // 15 second timeout
+    }, 30000); // Increased from 15s to 30s
     
     try {
       console.log('Attempting login with:', email);
@@ -106,22 +106,16 @@ const Login = () => {
         // Check if this is one of our admin emails
         const isAdminUser = email === 'admin@example.com' || email === 'admin@uptowngym.rw';
         
-        // Get the admin status from local storage as well (belt and suspenders approach)
-        const isAdminFromStorage = localStorage.getItem('isAdmin') === 'true';
-        
         // Determine if user should go to admin or dashboard
-        const isAdminRedirect = isAdminUser || isAdminFromStorage || false;
-        console.log('Admin redirect check:', { isAdminUser, isAdminFromStorage, isAdminRedirect });
+        const isAdminRedirect = isAdminUser || false;
+        console.log('Admin redirect check:', { isAdminUser, isAdminRedirect });
         
         // Force navigation to admin dashboard for admin users
         const targetPath = isAdminRedirect ? '/admin' : '/dashboard';
         console.log('Forcing navigation to:', targetPath);
         
-        // Small timeout to ensure state is updated before redirect
-        setTimeout(() => {
-          console.log('Executing redirect now');
-          navigate(targetPath, { replace: true });
-        }, 500);
+        // Immediate redirect for better user experience
+        navigate(targetPath, { replace: true });
       } else {
         console.log('Login failed');
         setLoginError('Login failed. Please check your credentials.');

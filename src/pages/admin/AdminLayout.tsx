@@ -28,50 +28,39 @@ const AdminLayout = () => {
       try {
         setIsLoading(true);
         
+        // Handle not authenticated case
         if (!isAuthenticated) {
           console.log('User not authenticated, redirecting to login from admin layout');
-          toast.error('You must be logged in to access this page');
-          navigate('/login', { state: { from: '/admin' } });
+          toast.error('You must be logged in to access this page', {
+            id: 'admin-auth-redirect',
+          });
+          navigate('/login', { state: { from: '/admin' }, replace: true });
           return;
         }
         
+        // Handle authenticated but not an admin case
         if (!isAdmin) {
           console.log('User authenticated but not an admin, redirecting to dashboard');
-          toast.error('You must be an administrator to access this page');
-          navigate('/dashboard');
+          toast.error('You must be an administrator to access this page', {
+            id: 'admin-role-redirect',
+          });
+          navigate('/dashboard', { replace: true });
           return;
         }
         
+        // All checks passed
         console.log('Admin authenticated successfully');
+        setIsLoading(false);
       } catch (error) {
         console.error('Authentication check error:', error);
         toast.error('Authentication error. Please log in again.');
-        navigate('/login', { state: { from: '/admin' } });
-      } finally {
-        setIsLoading(false);
+        navigate('/login', { state: { from: '/admin' }, replace: true });
       }
     };
 
+    // Run the auth check
     checkAuth();
     
-    // Check authentication status periodically
-    const interval = setInterval(() => {
-      console.log('Running periodic auth check in admin layout');
-      if (!isAuthenticated) {
-        console.log('User not authenticated in periodic admin check, redirecting to login');
-        clearInterval(interval);
-        navigate('/login', { state: { from: '/admin' } });
-        return;
-      }
-      
-      if (!isAdmin) {
-        console.log('User not admin in periodic check, redirecting to dashboard');
-        clearInterval(interval);
-        navigate('/dashboard');
-      }
-    }, 600000); // 10 minutes
-    
-    return () => clearInterval(interval);
   }, [navigate, isAuthenticated, isAdmin, user]);
 
   const toggleSidebar = () => {

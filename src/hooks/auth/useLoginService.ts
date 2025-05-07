@@ -33,10 +33,67 @@ export const useLoginService = () => {
       if (data.user) {
         console.log('Login successful for user:', data.user.id);
         
-        // Check if this is one of our known admin emails
-        const isKnownAdmin = email === 'admin@example.com' || email === 'admin@uptowngym.rw';
+        // Fast path for known admin emails to avoid extra database call
+        const isKnownAdmin = email.toLowerCase() === 'admin@example.com' || email.toLowerCase() === 'admin@uptowngym.rw';
         
-        // Get user role from profiles table
+        // If this is a known admin email, return immediately for faster response
+        if (isKnownAdmin) {
+          console.log('Known admin email detected, fast path enabled');
+          
+          // Update admin status in profile async (don't wait for it)
+          setTimeout(async () => {
+            try {
+              // Check if profile exists first
+              const { data: existingProfile, error: checkError } = await supabase
+                .from('profiles')
+                .select('id')
+                .eq('id', data.user.id)
+                .maybeSingle();
+                
+              if (checkError && checkError.code !== 'PGRST116') {
+                console.error('Error checking profile:', checkError);
+              }
+              
+              if (existingProfile) {
+                // Update existing profile
+                await supabase
+                  .from('profiles')
+                  .update({
+                    is_admin: true,
+                    role: 'admin'
+                  })
+                  .eq('id', data.user.id);
+              } else {
+                // Create new profile
+                await supabase
+                  .from('profiles')
+                  .insert([
+                    { 
+                      id: data.user.id,
+                      email: data.user.email,
+                      full_name: data.user.user_metadata?.full_name || email,
+                      role: 'admin',
+                      is_admin: true
+                    }
+                  ]);
+              }
+              
+              console.log('Admin status updated successfully in background');
+            } catch (e) {
+              console.error('Exception updating admin profile in background:', e);
+            }
+          }, 0);
+          
+          toast.success('Admin login successful');
+          
+          return { 
+            success: true,
+            user: data.user,
+            isAdmin: true
+          };
+        }
+        
+        // Regular path for non-admin users
         const { data: profile, error: profileError } = await supabase
           .from('profiles')
           .select('role, is_admin, full_name')
@@ -66,8 +123,8 @@ export const useLoginService = () => {
                     id: data.user.id,
                     email: data.user.email,
                     full_name: data.user.user_metadata?.full_name || email,
-                    role: isKnownAdmin ? 'admin' : 'member',
-                    is_admin: isKnownAdmin
+                    role: 'member',
+                    is_admin: false
                   }
                 ])
                 .select('*')
@@ -75,41 +132,19 @@ export const useLoginService = () => {
                 
               if (insertError) {
                 console.error('Error creating profile:', insertError);
-                toast.error('Login successful but profile creation failed');
               } else {
                 console.log('Profile created successfully for user:', data.user.id);
                 userProfile = newProfile;
-                userRole = newProfile?.role || (isKnownAdmin ? 'admin' : 'member');
-                userIsAdmin = newProfile?.is_admin || isKnownAdmin;
+                userRole = newProfile?.role || 'member';
+                userIsAdmin = newProfile?.is_admin || false;
               }
             } catch (e) {
               console.error('Exception during profile creation:', e);
             }
           }
         } else if (profile) {
-          if (isKnownAdmin && !profile.is_admin) {
-            // Update profile to set admin status for known admin emails
-            console.log('Known admin email found, updating admin status');
-            
-            const { error: updateError } = await supabase
-              .from('profiles')
-              .update({
-                is_admin: true,
-                role: 'admin'
-              })
-              .eq('id', data.user.id);
-              
-            if (updateError) {
-              console.error('Error updating admin status:', updateError);
-            } else {
-              console.log('Admin status updated successfully');
-              userIsAdmin = true;
-              userRole = 'admin';
-            }
-          } else {
-            userRole = profile.role || (isKnownAdmin ? 'admin' : 'member');
-            userIsAdmin = profile.is_admin || isKnownAdmin;
-          }
+          userRole = profile.role || 'member';
+          userIsAdmin = profile.is_admin || false;
         }
         
         console.log('User login processed with roles:', {

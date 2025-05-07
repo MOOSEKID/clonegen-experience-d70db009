@@ -73,7 +73,19 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
               const userEmail = session.user.email;
               const isKnownAdmin = userEmail === 'admin@example.com' || userEmail === 'admin@uptowngym.rw';
               
-              // Get user profile to check if admin
+              // If known admin, set state immediately for faster UI response
+              if (isKnownAdmin) {
+                console.log('Known admin email detected, setting admin status immediately');
+                setIsAdmin(true);
+                authStorageService.setAuthData(
+                  true, 
+                  true, 
+                  session.user.email || '', 
+                  session.user.user_metadata?.full_name || session.user.email || ''
+                );
+              }
+              
+              // Still check profile for consistency
               const { data: profile, error } = await supabase
                 .from('profiles')
                 .select('role, is_admin, full_name')
@@ -132,13 +144,25 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
           setUser(convertToAuthUser(session.user));
           setIsAuthenticated(true);
           
+          // Check if this is one of our known admin emails
+          const userEmail = session.user.email;
+          const isKnownAdmin = userEmail === 'admin@example.com' || userEmail === 'admin@uptowngym.rw';
+          
+          // If known admin, set state immediately for faster UI response
+          if (isKnownAdmin) {
+            console.log('Known admin email detected, setting admin status immediately');
+            setIsAdmin(true);
+            authStorageService.setAuthData(
+              true, 
+              true, 
+              session.user.email || '', 
+              session.user.user_metadata?.full_name || session.user.email || ''
+            );
+          }
+          
           // Defer profile checking
           setTimeout(async () => {
             try {
-              // Check if this is one of our known admin emails
-              const userEmail = session.user.email;
-              const isKnownAdmin = userEmail === 'admin@example.com' || userEmail === 'admin@uptowngym.rw';
-              
               // Get user profile to check if admin
               const { data: profile, error } = await supabase
                 .from('profiles')
@@ -197,25 +221,32 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   const login = async (email: string, password: string): Promise<boolean> => {
     try {
       console.log('Login attempt in context for:', email);
+      
+      // Fast path for known admin emails
+      const isKnownAdmin = email.toLowerCase() === 'admin@example.com' || email.toLowerCase() === 'admin@uptowngym.rw';
+      if (isKnownAdmin) {
+        console.log('Known admin login detected, taking fast path');
+      }
+      
       const result = await loginService(email, password);
       
       if (result.success && result.user) {
         // Update auth state immediately to provide feedback
         setUser(convertToAuthUser(result.user));
-        setIsAdmin(result.isAdmin || false);
+        setIsAdmin(result.isAdmin || isKnownAdmin || false);
         setIsAuthenticated(true);
         
         // Store auth data in local storage and cookies
         authStorageService.setAuthData(
           true, 
-          result.isAdmin || false, 
+          result.isAdmin || isKnownAdmin || false, 
           result.user.email || '', 
           result.user.user_metadata?.full_name || result.user.email || ''
         );
         
         console.log('Login success in context, auth state updated:', { 
           isAuthenticated: true, 
-          isAdmin: result.isAdmin 
+          isAdmin: result.isAdmin || isKnownAdmin
         });
         
         return true;

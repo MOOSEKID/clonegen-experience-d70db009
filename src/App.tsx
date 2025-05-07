@@ -86,13 +86,22 @@ const ErrorFallback = () => {
   );
 };
 
-// Admin route guard component
-const AdminRoute = ({ children }: { children: React.ReactNode }) => {
+// Admin redirect component for the home page
+const AdminRedirect = () => {
   const { isAuthenticated, isAdmin, isLoading } = useAuth();
-  const navigate = useLocation();
+  const navigate = useNavigate();
   
-  console.log('AdminRoute check:', { isAuthenticated, isAdmin, isLoading, path: navigate.pathname });
+  useEffect(() => {
+    // Wait until auth checking is complete
+    if (!isLoading) {
+      if (isAuthenticated && isAdmin) {
+        console.log('Admin user detected on homepage, redirecting to admin dashboard');
+        navigate('/admin', { replace: true });
+      }
+    }
+  }, [isLoading, isAuthenticated, isAdmin, navigate]);
   
+  // Show loading indicator while checking
   if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -101,16 +110,54 @@ const AdminRoute = ({ children }: { children: React.ReactNode }) => {
     );
   }
   
-  if (!isAuthenticated) {
-    console.log('User not authenticated, redirecting to login from admin route');
-    return <Navigate to="/login" state={{ from: navigate.pathname }} replace />;
+  // Show the Index page for non-admin users
+  return <Index />;
+};
+
+// Main Layout component that includes Header and Footer
+const MainLayout = () => {
+  return (
+    <div className="flex flex-col min-h-screen">
+      <ErrorBoundary fallback={<ErrorFallback />}>
+        <Header />
+        <div className="flex-grow">
+          <Outlet />
+        </div>
+        <Footer />
+      </ErrorBoundary>
+    </div>
+  );
+};
+
+// Admin route guard component
+const AdminRoute = ({ children }: { children: React.ReactNode }) => {
+  const { isAuthenticated, isAdmin, isLoading } = useAuth();
+  const location = useLocation();
+  
+  console.log('AdminRoute check:', { isAuthenticated, isAdmin, isLoading, path: location.pathname });
+  
+  // Show loading indicator while checking
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-gym-orange"></div>
+      </div>
+    );
   }
   
+  // Redirect to login if not authenticated
+  if (!isAuthenticated) {
+    console.log('User not authenticated, redirecting to login from admin route');
+    return <Navigate to="/login" state={{ from: location.pathname }} replace />;
+  }
+  
+  // Redirect to dashboard if not admin
   if (!isAdmin) {
     console.log('User not admin, redirecting to dashboard from admin route');
     return <Navigate to="/dashboard" replace />;
   }
   
+  // User is authenticated and admin, render children
   return <>{children}</>;
 };
 
@@ -135,37 +182,6 @@ const UserRoute = ({ children }: { children: React.ReactNode }) => {
   }
   
   return <>{children}</>;
-};
-
-// Admin redirect component for the home page
-const AdminRedirect = () => {
-  const { isAuthenticated, isAdmin, isLoading } = useAuth();
-  
-  console.log('Home page admin redirect check:', { isAuthenticated, isAdmin, isLoading });
-  
-  // Only redirect after loading is complete
-  if (!isLoading && isAuthenticated && isAdmin) {
-    console.log('Admin user on homepage, redirecting to admin dashboard');
-    return <Navigate to="/admin" replace />;
-  }
-  
-  // Otherwise show the Index page
-  return <Index />;
-};
-
-// Main Layout component that includes Header and Footer
-const MainLayout = () => {
-  return (
-    <div className="flex flex-col min-h-screen">
-      <ErrorBoundary fallback={<ErrorFallback />}>
-        <Header />
-        <div className="flex-grow">
-          <Outlet />
-        </div>
-        <Footer />
-      </ErrorBoundary>
-    </div>
-  );
 };
 
 const App = () => {
