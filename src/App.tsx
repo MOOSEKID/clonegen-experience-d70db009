@@ -48,6 +48,7 @@ const AdminContent = lazy(() => import("./pages/admin/Content"));
 const AdminReports = lazy(() => import("./pages/admin/Reports"));
 const AdminSettings = lazy(() => import("./pages/admin/Settings"));
 const AdminSupport = lazy(() => import("./pages/admin/Support"));
+const TestAccounts = lazy(() => import("./pages/admin/TestAccounts"));
 
 // Trainer subpages
 const TrainerProfiles = lazy(() => import("./pages/admin/trainers/TrainerProfiles"));
@@ -307,12 +308,16 @@ const App = () => {
                   <Route path="trainers/performance" element={<PerformanceTracking />} />
                   <Route path="trainers/ratings" element={<TrainerRatings />} />
                   <Route path="payments" element={<AdminPayments />} />
+                  <Route path="payments/subscriptions" element={<AdminSubscriptions />} />
+                  <Route path="payments/invoices" element={<AdminInvoices />} />
+                  <Route path="payments/methods" element={<AdminPaymentMethods />} />
                   <Route path="workouts" element={<AdminWorkouts />} />
                   <Route path="shop" element={<AdminShop />} />
                   <Route path="content" element={<AdminContent />} />
                   <Route path="reports" element={<AdminReports />} />
                   <Route path="settings" element={<AdminSettings />} />
                   <Route path="support" element={<AdminSupport />} />
+                  <Route path="test-accounts" element={<TestAccounts />} />
                 </Route>
                 
                 {/* Customer Dashboard Routes with protection */}
