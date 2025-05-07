@@ -65,7 +65,7 @@ export const createAdminUser = async (email: string, password: string, fullName:
     
     if (existingProfile) {
       console.log('Admin profile already exists, updating:', existingProfile.id);
-      // Update existing profile
+      // Update existing profile - removed access_level which doesn't exist in the schema
       const { error: updateError } = await supabase
         .from('profiles')
         .update({
@@ -84,7 +84,7 @@ export const createAdminUser = async (email: string, password: string, fullName:
       }
     } else {
       console.log('Creating new admin profile for user:', userId);
-      // Create new profile
+      // Create new profile - removed access_level which doesn't exist in the schema
       const { error: insertError } = await supabase
         .from('profiles')
         .insert([
