@@ -10,19 +10,14 @@ export const getAvailableMembers = (
   searchTerm: string = ''
 ): Promise<MemberInfo[]> => {
   return new Promise((resolve) => {
-    // Add joinDate and status to the mock members for display purposes
-    const enrichedMembers = mockMembers.map(member => ({
-      ...member,
-      joinDate: new Date().toISOString().split('T')[0], // Today's date
-      status: 'Active'
-    }));
+    // Use mock members directly since we've already added the required fields
     
     // Filter out members that are already enrolled or on waitlist
     const enrolledIds = enrolledMembers.map(m => m.id);
     const waitlistIds = waitlistMembers.map(m => m.id);
     const alreadyInClassIds = [...enrolledIds, ...waitlistIds];
     
-    let filteredMembers = enrichedMembers.filter(
+    let filteredMembers = mockMembers.filter(
       member => !alreadyInClassIds.includes(member.id)
     );
     

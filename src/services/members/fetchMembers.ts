@@ -16,7 +16,7 @@ export const getAvailableMembers = async (
     // Get members from Supabase
     let query = supabase
       .from('members')
-      .select('id, name, email')
+      .select('id, name, email, startdate, status')
       .eq('status', 'Active');
     
     if (searchTerm) {
@@ -38,7 +38,9 @@ export const getAvailableMembers = async (
       .map(member => ({
         id: member.id,
         name: member.name || 'Unknown',
-        email: member.email || ''
+        email: member.email || '',
+        joinDate: member.startdate || new Date().toISOString().split('T')[0], // Use startdate or today
+        status: member.status || 'Active'
       }))
       .filter(member => 
         !enrolledIds.has(member.id) && 
