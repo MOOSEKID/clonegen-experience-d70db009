@@ -3,7 +3,7 @@ import { lazy, Suspense } from "react";
 import { Route } from "react-router-dom";
 import Index from "../pages/Index";
 import NotFound from "../pages/NotFound";
-import { PageLoading } from "./RouteComponents";
+import { PageLoading, AdminRedirect } from "./RouteComponents";
 
 // Lazy loaded components for main routes
 const AboutUs = lazy(() => import("../pages/AboutUs"));
