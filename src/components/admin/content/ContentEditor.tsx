@@ -1,5 +1,6 @@
 
 import { useState, useEffect } from 'react';
+import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from '@/components/ui/resizable';
 import { Box } from 'lucide-react';
 import ElementProperties from './ElementProperties';
 import ContentEditorTools from './ContentEditorTools';
