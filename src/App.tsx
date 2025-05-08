@@ -49,6 +49,11 @@ const AdminSettings = lazy(() => import("./pages/admin/Settings"));
 const AdminSupport = lazy(() => import("./pages/admin/Support"));
 const TestAccounts = lazy(() => import("./pages/admin/TestAccounts"));
 
+// Admin Workout subpages
+const AdminWorkoutPrograms = lazy(() => import("./pages/admin/workouts/WorkoutPrograms"));
+const AdminExerciseLibrary = lazy(() => import("./pages/admin/workouts/ExerciseLibrary"));
+const AdminProgressTracking = lazy(() => import("./pages/admin/workouts/ProgressTracking"));
+
 // Trainer subpages
 const TrainerProfiles = lazy(() => import("./pages/admin/trainers/TrainerProfiles"));
 const PerformanceTracking = lazy(() => import("./pages/admin/trainers/PerformanceTracking"));
@@ -206,6 +211,9 @@ const App = () => {
                   <Route path="payments/invoices" element={<Invoices />} />
                   <Route path="payments/methods" element={<PaymentMethods />} />
                   <Route path="workouts" element={<AdminWorkouts />} />
+                  <Route path="workout-programs" element={<AdminWorkoutPrograms />} />
+                  <Route path="exercises" element={<AdminExerciseLibrary />} />
+                  <Route path="progress-tracking" element={<AdminProgressTracking />} />
                   <Route path="shop" element={<AdminShop />} />
                   <Route path="content" element={<AdminContent />} />
                   <Route path="reports" element={<AdminReports />} />
