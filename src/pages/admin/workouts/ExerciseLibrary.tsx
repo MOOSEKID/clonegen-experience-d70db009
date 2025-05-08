@@ -7,6 +7,7 @@ import { TabsContent } from '@/components/ui/tabs';
 import { Skeleton } from '@/components/ui/skeleton';
 import { toast } from 'sonner';
 import { useNavigate } from 'react-router-dom';
+import { ErrorBoundary } from '@/components/ui/error-boundary';
 import ExerciseSearch from '@/components/admin/workouts/ExerciseSearch';
 import ExerciseTabs from '@/components/admin/workouts/ExerciseTabs';
 import ExerciseGrid from '@/components/admin/workouts/ExerciseGrid';
@@ -153,75 +154,87 @@ const ExerciseLibrary = () => {
   }
 
   return (
-    <div className="space-y-6">
-      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-800">Exercise Library</h1>
-          <p className="text-gray-500">Manage exercises with instructions and videos</p>
+    <ErrorBoundary fallback={
+      <div className="p-4 text-center">
+        <h2 className="text-lg font-semibold text-red-600">Something went wrong</h2>
+        <Button 
+          onClick={() => window.location.reload()} 
+          className="mt-4"
+        >
+          Reload Page
+        </Button>
+      </div>
+    }>
+      <div className="space-y-6">
+        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+          <div>
+            <h1 className="text-2xl font-bold text-gray-800">Exercise Library</h1>
+            <p className="text-gray-500">Manage exercises with instructions and videos</p>
+          </div>
+          
+          <div className="flex flex-wrap gap-3 w-full md:w-auto">
+            <Button onClick={handleAddExercise}>
+              <Plus className="mr-2 h-4 w-4" /> Add Exercise
+            </Button>
+            <Button variant="outline" onClick={handleImportExercises}>
+              <UploadCloud className="mr-2 h-4 w-4" /> Import Exercises
+            </Button>
+          </div>
         </div>
         
-        <div className="flex flex-wrap gap-3 w-full md:w-auto">
-          <Button onClick={handleAddExercise}>
-            <Plus className="mr-2 h-4 w-4" /> Add Exercise
-          </Button>
-          <Button variant="outline" onClick={handleImportExercises}>
-            <UploadCloud className="mr-2 h-4 w-4" /> Import Exercises
-          </Button>
-        </div>
-      </div>
-      
-      <Card>
-        <CardContent className="pt-6">
-          <ExerciseSearch 
-            searchQuery={searchQuery}
-            onSearchChange={setSearchQuery}
-            onSearchSubmit={handleSearchSubmit}
-          />
+        <Card>
+          <CardContent className="pt-6">
+            <ExerciseSearch 
+              searchQuery={searchQuery}
+              onSearchChange={setSearchQuery}
+              onSearchSubmit={handleSearchSubmit}
+            />
 
-          <ExerciseTabs 
-            activeTab={activeTab}
-            onTabChange={setActiveTab}
-          />
-          
-          <TabsContent value={activeTab} className="mt-0">
-            {isLoading ? (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                {[...Array(6)].map((_, index) => (
-                  <Card key={index} className="overflow-hidden">
-                    <Skeleton className="h-[200px] w-full" />
-                    <div className="p-6">
-                      <Skeleton className="h-6 w-3/4 mb-2" />
-                      <div className="flex flex-wrap mt-2 gap-2">
-                        <Skeleton className="h-5 w-20" />
-                        <Skeleton className="h-5 w-20" />
-                        <Skeleton className="h-5 w-20" />
-                      </div>
-                      <div className="flex justify-between mt-4">
-                        <Skeleton className="h-8 w-[70px]" />
-                        <Skeleton className="h-8 w-[100px]" />
-                      </div>
-                    </div>
-                  </Card>
-                ))}
-              </div>
-            ) : (
-              <>
-                {filteredExercises.length > 0 ? (
-                  <ExerciseGrid exercises={filteredExercises} />
-                ) : (
-                  <div className="text-center py-12">
-                    <p className="text-gray-500">No exercises found matching your criteria.</p>
-                    <Button variant="outline" className="mt-4" onClick={handleClearFilters}>
-                      Clear Filters
-                    </Button>
+            <ExerciseTabs 
+              activeTab={activeTab}
+              onTabChange={setActiveTab}
+            >
+              <TabsContent value={activeTab} className="mt-0">
+                {isLoading ? (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {[...Array(6)].map((_, index) => (
+                      <Card key={index} className="overflow-hidden">
+                        <Skeleton className="h-[200px] w-full" />
+                        <div className="p-6">
+                          <Skeleton className="h-6 w-3/4 mb-2" />
+                          <div className="flex flex-wrap mt-2 gap-2">
+                            <Skeleton className="h-5 w-20" />
+                            <Skeleton className="h-5 w-20" />
+                            <Skeleton className="h-5 w-20" />
+                          </div>
+                          <div className="flex justify-between mt-4">
+                            <Skeleton className="h-8 w-[70px]" />
+                            <Skeleton className="h-8 w-[100px]" />
+                          </div>
+                        </div>
+                      </Card>
+                    ))}
                   </div>
+                ) : (
+                  <>
+                    {filteredExercises.length > 0 ? (
+                      <ExerciseGrid exercises={filteredExercises} />
+                    ) : (
+                      <div className="text-center py-12">
+                        <p className="text-gray-500">No exercises found matching your criteria.</p>
+                        <Button variant="outline" className="mt-4" onClick={handleClearFilters}>
+                          Clear Filters
+                        </Button>
+                      </div>
+                    )}
+                  </>
                 )}
-              </>
-            )}
-          </TabsContent>
-        </CardContent>
-      </Card>
-    </div>
+              </TabsContent>
+            </ExerciseTabs>
+          </CardContent>
+        </Card>
+      </div>
+    </ErrorBoundary>
   );
 };
 
