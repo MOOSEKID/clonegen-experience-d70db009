@@ -1,0 +1,142 @@
+
+import { useState, useEffect } from 'react';
+import { toast } from 'sonner';
+
+export interface SubscriptionPlan {
+  id: string;
+  name: string;
+  billingCycle: string;
+  price: string;
+  status: 'Active' | 'Paused' | 'Cancelled';
+  memberCount: number;
+  features: string[];
+  planId?: string;
+}
+
+export const useSubscriptionPlans = () => {
+  const [plans, setPlans] = useState<SubscriptionPlan[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  // Load plans from localStorage on initial render
+  useEffect(() => {
+    const loadPlans = () => {
+      try {
+        const savedPlans = localStorage.getItem('subscriptionPlans');
+        if (savedPlans) {
+          setPlans(JSON.parse(savedPlans));
+        } else {
+          // If no plans in storage, use the default ones
+          setPlans(defaultSubscriptionPlans);
+          // Save default plans to localStorage
+          localStorage.setItem('subscriptionPlans', JSON.stringify(defaultSubscriptionPlans));
+        }
+      } catch (error) {
+        console.error('Error loading subscription plans:', error);
+        toast.error('Failed to load subscription plans');
+        // Fallback to defaults if there's an error
+        setPlans(defaultSubscriptionPlans);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadPlans();
+  }, []);
+
+  // Save plans to localStorage whenever they change
+  useEffect(() => {
+    if (!loading) {
+      localStorage.setItem('subscriptionPlans', JSON.stringify(plans));
+    }
+  }, [plans, loading]);
+
+  const addPlan = (plan: Omit<SubscriptionPlan, 'id' | 'status' | 'memberCount'>) => {
+    const newPlan: SubscriptionPlan = {
+      id: Date.now().toString(),
+      status: 'Active',
+      memberCount: 0,
+      ...plan,
+    };
+    setPlans([...plans, newPlan]);
+    return newPlan;
+  };
+
+  const updatePlan = (updatedPlan: Partial<SubscriptionPlan> & { id: string }) => {
+    setPlans(plans.map(plan => 
+      plan.id === updatedPlan.id 
+        ? { ...plan, ...updatedPlan } 
+        : plan
+    ));
+  };
+
+  const togglePlanStatus = (id: string) => {
+    setPlans(plans.map(plan => 
+      plan.id === id 
+        ? { ...plan, status: plan.status === 'Active' ? 'Paused' : 'Active' } 
+        : plan
+    ));
+    return plans.find(p => p.id === id)?.status === 'Active' ? 'Paused' : 'Active';
+  };
+
+  return {
+    plans,
+    loading,
+    addPlan,
+    updatePlan,
+    togglePlanStatus
+  };
+};
+
+// Default subscription plans data
+const defaultSubscriptionPlans: SubscriptionPlan[] = [
+  {
+    id: '1',
+    name: 'Basic Membership',
+    billingCycle: 'Monthly',
+    price: '$29.99',
+    status: 'Active',
+    memberCount: 156,
+    features: ['Gym Access', 'Basic Equipment', 'Locker Room'],
+    planId: 'basic-monthly'
+  },
+  {
+    id: '2',
+    name: 'Premium Membership',
+    billingCycle: 'Monthly',
+    price: '$49.99',
+    status: 'Active',
+    memberCount: 89,
+    features: ['Full Gym Access', 'Group Classes', 'Personal Trainer (1x/month)'],
+    planId: 'premium-monthly'
+  },
+  {
+    id: '3',
+    name: 'Family Plan',
+    billingCycle: 'Annual',
+    price: '$899.99',
+    status: 'Active',
+    memberCount: 34,
+    features: ['Access for 4 Family Members', 'Group Classes', 'Pool & Spa'],
+    planId: 'family-annual'
+  },
+  {
+    id: '4',
+    name: 'Student Discount',
+    billingCycle: 'Semester',
+    price: '$199.99',
+    status: 'Paused',
+    memberCount: 127,
+    features: ['Valid Student ID Required', 'Gym Access', 'Study Area'],
+    planId: 'student-semester'
+  },
+  {
+    id: '5',
+    name: 'Corporate Partnership',
+    billingCycle: 'Annual',
+    price: 'Custom',
+    status: 'Active',
+    memberCount: 213,
+    features: ['Bulk Discounts', '24/7 Access', 'Dedicated Support'],
+    planId: 'corporate-annual'
+  }
+];

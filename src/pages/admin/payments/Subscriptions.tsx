@@ -15,63 +15,10 @@ import { EditPlanDialog } from '@/components/admin/payments/EditPlanDialog';
 import { PlanMembersDialog } from '@/components/admin/payments/PlanMembersDialog';
 import { ConfirmationDialog } from '@/components/admin/payments/ConfirmationDialog';
 import { toast } from 'sonner';
-
-// Mock subscription data
-const subscriptionPlansData = [
-  {
-    id: '1',
-    name: 'Basic Membership',
-    billingCycle: 'Monthly',
-    price: '$29.99',
-    status: 'Active',
-    memberCount: 156,
-    features: ['Gym Access', 'Basic Equipment', 'Locker Room'],
-    planId: 'basic-monthly'
-  },
-  {
-    id: '2',
-    name: 'Premium Membership',
-    billingCycle: 'Monthly',
-    price: '$49.99',
-    status: 'Active',
-    memberCount: 89,
-    features: ['Full Gym Access', 'Group Classes', 'Personal Trainer (1x/month)'],
-    planId: 'premium-monthly'
-  },
-  {
-    id: '3',
-    name: 'Family Plan',
-    billingCycle: 'Annual',
-    price: '$899.99',
-    status: 'Active',
-    memberCount: 34,
-    features: ['Access for 4 Family Members', 'Group Classes', 'Pool & Spa'],
-    planId: 'family-annual'
-  },
-  {
-    id: '4',
-    name: 'Student Discount',
-    billingCycle: 'Semester',
-    price: '$199.99',
-    status: 'Paused',
-    memberCount: 127,
-    features: ['Valid Student ID Required', 'Gym Access', 'Study Area'],
-    planId: 'student-semester'
-  },
-  {
-    id: '5',
-    name: 'Corporate Partnership',
-    billingCycle: 'Annual',
-    price: 'Custom',
-    status: 'Active',
-    memberCount: 213,
-    features: ['Bulk Discounts', '24/7 Access', 'Dedicated Support'],
-    planId: 'corporate-annual'
-  }
-];
+import { useSubscriptionPlans } from '@/hooks/useSubscriptionPlans';
 
 const Subscriptions = () => {
-  const [plans, setPlans] = useState(subscriptionPlansData);
+  const { plans, addPlan, updatePlan, togglePlanStatus, loading } = useSubscriptionPlans();
   const [editingPlan, setEditingPlan] = useState<any>(null);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
@@ -79,18 +26,14 @@ const Subscriptions = () => {
   const [isMembersModalOpen, setIsMembersModalOpen] = useState(false);
   const [isPauseConfirmOpen, setIsPauseConfirmOpen] = useState(false);
 
-  const togglePlanStatus = (id: string) => {
-    setPlans(plans.map(plan => 
-      plan.id === id 
-        ? { ...plan, status: plan.status === 'Active' ? 'Paused' : 'Active' } 
-        : plan
-    ));
+  const handleTogglePlanStatus = (id: string) => {
+    const newStatus = togglePlanStatus(id);
     // Close the confirmation dialog
     setIsPauseConfirmOpen(false);
     // Show toast notification
     const plan = plans.find(p => p.id === id);
     if (plan) {
-      toast.success(`${plan.name} has been ${plan.status === 'Active' ? 'paused' : 'activated'}`);
+      toast.success(`${plan.name} has been ${newStatus === 'Active' ? 'activated' : 'paused'}`);
     }
   };
 
@@ -100,6 +43,7 @@ const Subscriptions = () => {
   };
 
   const openAddModal = () => {
+    setEditingPlan(null);
     setIsAddModalOpen(true);
   };
 
@@ -116,20 +60,19 @@ const Subscriptions = () => {
   const handleSavePlan = (data: any) => {
     if (editingPlan) {
       // Update existing plan
-      setPlans(plans.map(plan => 
-        plan.id === editingPlan.id 
-          ? { ...plan, ...data } 
-          : plan
-      ));
+      updatePlan({
+        id: editingPlan.id,
+        ...data,
+        status: editingPlan.status,
+        memberCount: editingPlan.memberCount
+      });
+      toast.success(`Updated "${data.name}" plan successfully`);
+      setIsEditModalOpen(false);
     } else {
       // Add new plan
-      const newPlan = {
-        id: Date.now().toString(),
-        ...data,
-        status: 'Active',
-        memberCount: 0
-      };
-      setPlans([...plans, newPlan]);
+      addPlan(data);
+      toast.success(`Created "${data.name}" plan successfully`);
+      setIsAddModalOpen(false);
     }
   };
 
@@ -146,6 +89,15 @@ const Subscriptions = () => {
       {status}
     </span>
   );
+
+  // Display loading spinner while data is loading
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center h-64">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -274,7 +226,7 @@ const Subscriptions = () => {
         <ConfirmationDialog
           isOpen={isPauseConfirmOpen}
           onClose={() => setIsPauseConfirmOpen(false)}
-          onConfirm={() => togglePlanStatus(selectedPlan.id)}
+          onConfirm={() => handleTogglePlanStatus(selectedPlan.id)}
           title={selectedPlan.status === 'Active' ? 'Pause Plan' : 'Activate Plan'}
           description={
             selectedPlan.status === 'Active'
