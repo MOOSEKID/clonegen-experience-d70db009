@@ -24,7 +24,7 @@ const DateRangeFilter = ({ onDateRangeChange }: DateRangeFilterProps) => {
     newDateRange: { from: Date | undefined; to: Date | undefined }
   ) => {
     setDateRange(newDateRange);
-    if (newDateRange.from && newDateRange.to) {
+    if (newDateRange.from) {
       onDateRangeChange(newDateRange.from, newDateRange.to);
       // Only close when both dates are selected
       if (newDateRange.from && newDateRange.to) {

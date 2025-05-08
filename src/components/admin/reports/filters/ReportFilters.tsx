@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import {
   Download,
   FileSpreadsheet,
-  FilePdf,
+  FileText,
   Mail,
   RefreshCw,
   Filter,
@@ -112,7 +112,7 @@ const ReportFilters = ({
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
                 <DropdownMenuItem onClick={() => onExport('pdf')}>
-                  <FilePdf className="mr-2 h-4 w-4 text-red-600" />
+                  <FileText className="mr-2 h-4 w-4 text-red-600" />
                   <span>PDF</span>
                 </DropdownMenuItem>
                 <DropdownMenuItem onClick={() => onExport('csv')}>

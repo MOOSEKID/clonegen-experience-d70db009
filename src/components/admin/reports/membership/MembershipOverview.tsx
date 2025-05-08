@@ -3,7 +3,18 @@ import { useState, useEffect } from 'react';
 import ReportCard from '../ReportCard';
 import { ArrowUp, ArrowDown, Users, UserCheck, UserX, UserPlus, UserMinus, Building } from 'lucide-react';
 import { Card } from '@/components/ui/card';
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+import { 
+  LineChart, 
+  Line, 
+  XAxis, 
+  YAxis, 
+  CartesianGrid, 
+  Tooltip, 
+  Legend, 
+  ResponsiveContainer,
+  BarChart,
+  Bar
+} from 'recharts';
 
 interface MembershipOverviewProps {
   fromDate?: Date;
