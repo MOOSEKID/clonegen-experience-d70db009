@@ -15,6 +15,10 @@ export interface UserProfile {
   email?: string;
   created_at: string;
   updated_at: string;
+  // Add subscription-related fields
+  active_plan_id?: string | null;
+  billing_start_date?: string | null;
+  subscription_status?: string | null;
 }
 
 export const useUserProfile = () => {
@@ -188,3 +192,4 @@ export const useUserProfile = () => {
     updateUserProfile
   };
 };
+
