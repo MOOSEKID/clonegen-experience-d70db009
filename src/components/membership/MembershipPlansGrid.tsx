@@ -3,6 +3,9 @@ import React from 'react';
 import { Check } from 'lucide-react';
 import { Button } from '@/components/Button';
 import { SubscriptionPlan } from '@/hooks/useSubscriptionPlans';
+import { useSubscriptionCheckout } from '@/hooks/useSubscriptionCheckout';
+import AuthModal from './AuthModal';
+import PlanCheckoutModal from './PlanCheckoutModal';
 
 interface MembershipPlanCardProps {
   plan: {
@@ -13,10 +16,12 @@ interface MembershipPlanCardProps {
     features: string[];
     buttonText: string;
     highlighted: boolean;
+    planId: string;
   };
+  onGetStarted: (planId: string) => void;
 }
 
-const MembershipPlanCard = ({ plan }: MembershipPlanCardProps) => {
+const MembershipPlanCard = ({ plan, onGetStarted }: MembershipPlanCardProps) => {
   return (
     <div 
       className={`bg-white rounded-lg overflow-hidden transition-all duration-300 hover:shadow-xl ${
@@ -50,6 +55,7 @@ const MembershipPlanCard = ({ plan }: MembershipPlanCardProps) => {
         <Button 
           className="w-full" 
           variant={plan.highlighted ? 'primary' : 'outline'}
+          onClick={() => onGetStarted(plan.planId)}
         >
           {plan.buttonText}
         </Button>
@@ -64,6 +70,21 @@ interface MembershipPlansGridProps {
 }
 
 const MembershipPlansGrid = ({ plans, loading }: MembershipPlansGridProps) => {
+  const { 
+    isAuthModalOpen, 
+    isCheckoutModalOpen, 
+    isLoading, 
+    selectedPlanId,
+    startCheckout,
+    closeAuthModal,
+    closeCheckoutModal,
+    proceedAfterAuth,
+    completeSubscription
+  } = useSubscriptionCheckout();
+
+  // Get the selected plan
+  const selectedPlan = plans.find(plan => plan.planId === selectedPlanId);
+  
   if (loading) {
     return (
       <div className="flex justify-center py-20">
@@ -81,12 +102,39 @@ const MembershipPlansGrid = ({ plans, loading }: MembershipPlansGridProps) => {
     );
   }
 
+  const handleGetStarted = (planId: string) => {
+    startCheckout(planId);
+  };
+
   return (
-    <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-      {plans.map((plan, index) => (
-        <MembershipPlanCard key={index} plan={plan} />
-      ))}
-    </div>
+    <>
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+        {plans.map((plan, index) => (
+          <MembershipPlanCard 
+            key={index} 
+            plan={plan} 
+            onGetStarted={handleGetStarted}
+          />
+        ))}
+      </div>
+
+      {/* Authentication Modal */}
+      <AuthModal 
+        isOpen={isAuthModalOpen} 
+        onClose={closeAuthModal}
+        onSuccess={proceedAfterAuth}
+        planName={selectedPlan?.name || 'Membership Plan'}
+      />
+      
+      {/* Checkout Modal */}
+      <PlanCheckoutModal 
+        isOpen={isCheckoutModalOpen}
+        onClose={closeCheckoutModal}
+        onComplete={completeSubscription}
+        plan={selectedPlan}
+        isLoading={isLoading}
+      />
+    </>
   );
 };
 

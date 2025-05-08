@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { toast } from 'sonner';
 
@@ -11,6 +10,8 @@ export interface SubscriptionPlan {
   memberCount: number;
   features: string[];
   planId?: string;
+  slug?: string; // URL-friendly identifier for the plan
+  checkoutUrl?: string; // Direct URL to checkout page
 }
 
 export const useSubscriptionPlans = () => {
@@ -78,12 +79,31 @@ export const useSubscriptionPlans = () => {
     return plans.find(p => p.id === id)?.status === 'Active' ? 'Paused' : 'Active';
   };
 
+  // New function to get a specific plan by planId or slug
+  const getPlanByIdentifier = (identifier: string): SubscriptionPlan | undefined => {
+    // First try to match by planId
+    let plan = plans.find(p => p.planId === identifier);
+    
+    // If not found, try to match by slug
+    if (!plan) {
+      plan = plans.find(p => p.slug === identifier);
+    }
+    
+    // If still not found, try to match by id
+    if (!plan) {
+      plan = plans.find(p => p.id === identifier);
+    }
+    
+    return plan;
+  };
+
   return {
     plans,
     loading,
     addPlan,
     updatePlan,
-    togglePlanStatus
+    togglePlanStatus,
+    getPlanByIdentifier
   };
 };
 

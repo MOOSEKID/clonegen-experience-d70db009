@@ -22,7 +22,8 @@ const Membership = () => {
           description: `${plan.billingCycle} plan`,
           features: plan.features,
           buttonText: 'Get Started',
-          highlighted: plan.planId === 'premium-monthly' // Mark premium as highlighted
+          highlighted: plan.planId === 'premium-monthly', // Mark premium as highlighted
+          planId: plan.planId || plan.id // Important: Include planId for checkout flow
         }));
       
       setActivePlans(filtered);
