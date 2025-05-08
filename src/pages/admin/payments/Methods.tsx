@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { 
   Breadcrumb,
@@ -17,62 +18,6 @@ import { toast } from 'sonner';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { PaymentGateway } from '@/types/classTypes';
 import { usePaymentGateways } from '@/hooks/usePaymentGateways';
-
-// Mock payment methods data
-const mockPaymentMethods = [
-  {
-    id: '1',
-    name: 'Credit Card',
-    description: 'Accept credit and debit card payments directly on your site.',
-    status: 'Active',
-    icon: <CreditCard className="h-8 w-8" />,
-    provider: 'Stripe',
-    fees: '2.9% + RWF 300 per transaction',
-    setupComplete: true,
-    fee: '2.9% + RWF 300',
-    isEnabled: true,
-    supportedCards: ['visa', 'mastercard', 'amex']
-  },
-  {
-    id: '2',
-    name: 'PayPal',
-    description: 'Let customers pay via PayPal.',
-    status: 'Inactive',
-    icon: <CreditCard className="h-8 w-8" />,
-    provider: 'PayPal',
-    fees: '3.4% + RWF 400 per transaction',
-    setupComplete: false,
-    fee: '3.4% + RWF 400',
-    isEnabled: false,
-    supportedCards: ['paypal']
-  },
-  {
-    id: '3',
-    name: 'Bank Transfer',
-    description: 'Allow customers to pay via bank transfer.',
-    status: 'Active',
-    icon: <CreditCard className="h-8 w-8" />,
-    provider: 'Manual',
-    fees: 'No fees',
-    setupComplete: true,
-    fee: 'No fees',
-    isEnabled: true,
-    supportedCards: []
-  },
-  {
-    id: '4',
-    name: 'Mobile Money',
-    description: 'Accept payments via MTN Mobile Money and Airtel Money.',
-    status: 'Inactive',
-    icon: <CreditCard className="h-8 w-8" />,
-    provider: 'MTN/Airtel API',
-    fees: '1.5% per transaction',
-    setupComplete: false,
-    fee: '1.5%',
-    isEnabled: false,
-    supportedCards: []
-  },
-];
 
 const Methods = () => {
   const { 
