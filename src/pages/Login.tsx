@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { Card } from '@/components/ui/card';
@@ -7,8 +6,8 @@ import { useAuth } from '@/hooks/useAuth';
 import LoginForm from '@/components/auth/LoginForm';
 import PresetButtons from '@/components/auth/PresetButtons';
 import LoginInfo from '@/components/auth/LoginInfo';
-import { supabase } from '@/integrations/supabase/client';
 import { LoadingSpinner } from '@/components/ui/LoadingSpinner';
+import { supabase } from '@/integrations/supabase/client';
 
 const Login = () => {
   const [loginError, setLoginError] = useState<string | null>(null);
@@ -25,70 +24,42 @@ const Login = () => {
     // Clear any previous errors
     setLoginError(null);
     
-    const checkAuthStatus = async () => {
+    // Check if user is already authenticated from context
+    if (isAuthenticated) {
+      console.log('Already authenticated, redirecting...');
+      navigate(isAdmin ? '/admin' : '/dashboard', { replace: true });
+      return;
+    }
+    
+    // Fast client-side check using localStorage
+    const isLoggedInLocal = localStorage.getItem('isLoggedIn') === 'true';
+    const isAdminLocal = localStorage.getItem('isAdmin') === 'true';
+    
+    if (isLoggedInLocal) {
+      console.log('User appears to be authenticated via local storage');
+      // Quick redirect while verification continues
+      navigate(isAdminLocal ? '/admin' : '/dashboard', { replace: true });
+    }
+    
+    // Check session asynchronously without blocking
+    const checkSession = async () => {
       try {
-        // Fast client-side check using localStorage
-        const isLoggedInLocal = localStorage.getItem('isLoggedIn') === 'true';
-        const isAdminLocal = localStorage.getItem('isAdmin') === 'true';
-        
-        if (isLoggedInLocal) {
-          console.log('User appears to be authenticated via local storage');
-          // Quick redirect while we verify with Supabase
-          const redirectPath = isAdminLocal ? '/admin' : '/dashboard';
-          navigate(redirectPath, { replace: true });
-          return;
-        }
-        
-        // Get the session directly from Supabase
-        const { data: { session }, error } = await supabase.auth.getSession();
-        
-        if (error) {
-          console.error("Error checking authentication status:", error);
+        const { data } = await supabase.auth.getSession();
+        if (data.session) {
+          console.log('Session verified, user is authenticated');
           setIsCheckingAuth(false);
-          return;
-        }
-        
-        if (session) {
-          console.log('User is authenticated via Supabase');
-          
-          // Check if user is admin by querying the profiles table
-          const { data: profileData } = await supabase
-            .from('profiles')
-            .select('is_admin, role')
-            .eq('id', session.user.id)
-            .maybeSingle();
-            
-          // Check if it's one of our admin users
-          const userEmail = session.user.email;
-          let userIsAdmin = profileData?.is_admin || false;
-          
-          // Explicitly check for the admin email addresses
-          if (userEmail === 'admin@example.com' || userEmail === 'admin@uptowngym.rw') {
-            userIsAdmin = true;
-          }
-          
-          // Direct redirect based on admin status
-          const redirectPath = userIsAdmin ? '/admin' : '/dashboard';
-          console.log('Redirecting to:', redirectPath);
-          
-          // Force navigation with replace to prevent back button from returning to login
-          navigate(redirectPath, { replace: true });
         } else {
+          console.log('No active session found');
           setIsCheckingAuth(false);
         }
       } catch (error) {
-        console.error("Error in authentication check:", error);
+        console.error('Session check error:', error);
         setIsCheckingAuth(false);
       }
     };
     
-    checkAuthStatus();
-    
-    // If user is already authenticated through the context, also redirect
-    if (isAuthenticated) {
-      console.log('User is authenticated through context, redirecting');
-      navigate(isAdmin ? '/admin' : '/dashboard', { replace: true });
-    }
+    // Run session check without blocking initial render
+    checkSession();
   }, [isAuthenticated, isAdmin, navigate]);
 
   const handleLoginSubmit = async (email: string, password: string) => {
@@ -105,23 +76,20 @@ const Login = () => {
         // Check if this is one of our admin emails
         const isAdminUser = email === 'admin@example.com' || email === 'admin@uptowngym.rw';
         
-        // Determine if user should go to admin or dashboard
-        const isAdminRedirect = isAdminUser || false;
-        
-        // Force navigation to admin dashboard for admin users
-        const targetPath = isAdminRedirect ? '/admin' : '/dashboard';
-        console.log('Forcing navigation to:', targetPath);
+        // Determine redirect path
+        const targetPath = isAdminUser ? '/admin' : '/dashboard';
+        console.log('Redirecting to:', targetPath);
         
         // Immediate redirect for better user experience
         navigate(targetPath, { replace: true });
       } else {
         console.log('Login failed');
         setLoginError('Login failed. Please check your credentials.');
+        setIsLoading(false);
       }
     } catch (error) {
       console.error('Login error:', error);
       setLoginError(error instanceof Error ? error.message : 'Login failed');
-    } finally {
       setIsLoading(false);
     }
   };

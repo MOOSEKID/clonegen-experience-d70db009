@@ -1,3 +1,4 @@
+
 import { supabase } from '@/integrations/supabase/client';
 import type { AuthUser } from '@/types/auth.types';
 import { authStorageService } from '@/services/authStorageService';
@@ -11,7 +12,7 @@ type InitialAuthCheckParams = {
 };
 
 /**
- * Hook that performs a reliable initial authentication check
+ * Hook that performs an optimized initial authentication check
  */
 export const useInitialAuthCheck = () => {
   const checkAuth = async ({ setUser, setIsAdmin, setIsAuthenticated, setIsLoading }: InitialAuthCheckParams) => {
@@ -19,157 +20,116 @@ export const useInitialAuthCheck = () => {
       setIsLoading(true);
       console.log('Performing initial auth check...');
       
-      // Clear any potentially unreliable cached auth state
-      const cachedAuthState = localStorage.getItem('isLoggedIn');
-      const cachedAdminState = localStorage.getItem('isAdmin');
+      // Check localStorage first for instant UI feedback
+      const cachedAuthState = localStorage.getItem('isLoggedIn') === 'true';
+      const cachedAdminState = localStorage.getItem('isAdmin') === 'true';
       
-      console.log('Cached auth state:', { cachedAuthState, cachedAdminState });
+      if (cachedAuthState) {
+        // Apply cached state immediately for faster UI response
+        setIsAuthenticated(true);
+        if (cachedAdminState) {
+          setIsAdmin(true);
+        }
+      }
       
-      // Get current session
+      // Get current session from Supabase
       const { data: { session }, error: sessionError } = await supabase.auth.getSession();
       
       if (sessionError) {
         console.error('Error getting session:', sessionError);
-        throw sessionError;
+        setIsLoading(false);
+        return;
       }
       
       if (session) {
         const currentUser = session.user;
-        console.log('Current user found in initial check:', currentUser.email);
+        console.log('Current user found:', currentUser.email);
         
-        // Determine if this is an admin by email
-        const isKnownAdminEmail = currentUser.email === 'admin@example.com' || currentUser.email === 'admin@uptowngym.rw';
+        // Update user state immediately
+        setUser({
+          ...currentUser,
+          email: currentUser.email || '',
+          role: currentUser.user_metadata?.role || 'member'
+        });
         
-        // Get user role from profiles table
-        const { data: profile, error } = await supabase
-          .from('profiles')
-          .select('role, is_admin, full_name')
-          .eq('id', currentUser.id)
-          .single();
+        setIsAuthenticated(true);
+        
+        // Fast path for known admin emails
+        const isKnownAdminEmail = 
+          currentUser.email === 'admin@example.com' || 
+          currentUser.email === 'admin@uptowngym.rw';
           
-        if (error) {
-          console.error('Error fetching user profile in initial check:', error);
+        if (isKnownAdminEmail) {
+          setIsAdmin(true);
           
-          // Create a default profile if one doesn't exist
-          if (error.code === 'PGRST116') {
-            console.log('Profile not found in initial check, creating default profile...');
-            
-            // Use the email to determine admin status for consistency
-            const userIsAdmin = isKnownAdminEmail;
-            
-            const { error: insertError } = await supabase
+          // Update storage with admin status
+          authStorageService.setAuthData(
+            true, 
+            true, 
+            currentUser.email || '', 
+            currentUser.user_metadata?.full_name || currentUser.email || ''
+          );
+        }
+        
+        // Check profile in background to avoid blocking
+        setTimeout(async () => {
+          try {
+            // Get user profile
+            const { data: profile, error } = await supabase
               .from('profiles')
-              .insert([
-                { 
-                  id: currentUser.id,
-                  email: currentUser.email,
-                  full_name: currentUser.user_metadata?.full_name || currentUser.email || 'User',
-                  role: userIsAdmin ? 'admin' : 'member',
-                  is_admin: userIsAdmin
-                }
-              ]);
+              .select('role, is_admin, full_name')
+              .eq('id', currentUser.id)
+              .maybeSingle();
               
-            if (insertError) {
-              console.error('Error creating default profile in initial check:', insertError);
-              // Still set user as authenticated with admin status based on email
-              setUser({
-                ...currentUser,
-                email: currentUser.email || '',
-                role: userIsAdmin ? 'admin' : 'member'
-              });
-              
-              setIsAdmin(userIsAdmin);
-              setIsAuthenticated(true);
-              
-              authStorageService.setAuthData(
-                true, 
-                userIsAdmin, 
-                currentUser.email || '', 
-                currentUser.user_metadata?.full_name || currentUser.email || ''
-              );
-            } else {
-              console.log('Default profile created successfully in initial check');
-              
-              setUser({
-                ...currentUser,
-                email: currentUser.email || '',
-                role: userIsAdmin ? 'admin' : 'member'
-              });
-              
-              setIsAdmin(userIsAdmin);
-              setIsAuthenticated(true);
-              
-              authStorageService.setAuthData(
-                true, 
-                userIsAdmin, 
-                currentUser.email || '', 
-                currentUser.user_metadata?.full_name || currentUser.email || ''
-              );
+            if (error && error.code !== 'PGRST116') {
+              console.error('Error fetching user profile:', error);
+              setIsLoading(false);
+              return;
             }
-          } else {
-            // Other error fetching profile, but still set basic auth state
-            console.warn('Error fetching profile, setting basic auth state based on email');
             
+            // Update state based on profile
+            const userIsAdmin = Boolean(profile?.is_admin) || isKnownAdminEmail;
+            const userRole = userIsAdmin ? 'admin' : (profile?.role || 'member');
+            
+            setIsAdmin(userIsAdmin);
+            
+            // Update user object with role
             setUser({
               ...currentUser,
               email: currentUser.email || '',
-              role: isKnownAdminEmail ? 'admin' : 'member'
+              role: userRole
             });
             
-            setIsAdmin(isKnownAdminEmail);
-            setIsAuthenticated(true);
-            
+            // Update storage
             authStorageService.setAuthData(
               true, 
-              isKnownAdminEmail, 
+              userIsAdmin, 
               currentUser.email || '', 
-              currentUser.user_metadata?.full_name || currentUser.email || ''
+              currentUser.user_metadata?.full_name || profile?.full_name || currentUser.email || ''
             );
+          } catch (err) {
+            console.error('Background profile check error:', err);
+          } finally {
+            setIsLoading(false);
           }
-        } else {
-          // Profile exists
-          const userIsAdmin = Boolean(profile?.is_admin) || isKnownAdminEmail;
-          const userRole = userIsAdmin ? 'admin' : (profile?.role || 'member');
-          
-          console.log('User authenticated in initial check:', {
-            email: currentUser.email,
-            role: userRole,
-            isAdmin: userIsAdmin
-          });
-          
-          setUser({
-            ...currentUser,
-            email: currentUser.email || '',
-            role: userRole
-          });
-          
-          setIsAdmin(userIsAdmin);
-          setIsAuthenticated(true);
-          
-          authStorageService.setAuthData(
-            true, 
-            userIsAdmin, 
-            currentUser.email || '', 
-            currentUser.user_metadata?.full_name || profile?.full_name || currentUser.email || ''
-          );
-        }
+        }, 0);
       } else {
-        console.log('No active session found in initial check');
+        console.log('No active session found');
         setUser(null);
         setIsAdmin(false);
         setIsAuthenticated(false);
         
         authStorageService.setAuthData(false, false, '', '');
+        setIsLoading(false);
       }
     } catch (error) {
-      console.error('Error checking auth in initial check:', error);
+      console.error('Error checking auth:', error);
       toast.error('Authentication error. Please try logging in again.');
       
       setUser(null);
       setIsAdmin(false);
       setIsAuthenticated(false);
       authStorageService.setAuthData(false, false, '', '');
-    } finally {
       setIsLoading(false);
     }
   };

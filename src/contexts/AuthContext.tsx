@@ -1,5 +1,5 @@
 
-import { createContext, ReactNode, useEffect } from 'react';
+import { createContext, ReactNode, useEffect, useState, useCallback } from 'react';
 import { useAuthState } from '@/hooks/useAuthState';
 import { AuthContextType, AuthUser } from '@/types/auth.types';
 import { useLoginService } from '@/hooks/auth/useLoginService';
@@ -10,7 +10,7 @@ import { useTestUsers } from '@/hooks/auth/useTestUsers';
 import { authStorageService } from '@/services/authStorageService';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
-import { User } from '@supabase/supabase-js';
+import { User, Session } from '@supabase/supabase-js';
 
 // Create the auth context with default values
 export const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -26,15 +26,9 @@ const convertToAuthUser = (user: User | null): AuthUser | null => {
   return {
     ...user,
     id: user.id,
-    email: user.email || '', // Provide default empty string for email
+    email: user.email || '', 
     role: user.user_metadata?.role || 'member'
   };
-};
-
-// Debug log utility for auth operations
-const logAuthDebug = (operation: string, data: any) => {
-  const timestamp = new Date().toISOString();
-  console.debug(`[AUTH:${timestamp}] ${operation}:`, data);
 };
 
 export const AuthProvider = ({ children }: AuthProviderProps) => {
@@ -49,6 +43,9 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     setIsAuthenticated 
   } = useAuthState();
 
+  // Store Supabase session for token management
+  const [session, setSession] = useState<Session | null>(null);
+
   // Initialize test users - only if needed
   useTestUsers();
 
@@ -58,226 +55,126 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   const { logout: logoutService } = useLogoutService();
   const { requestPasswordReset, updatePassword } = usePasswordService();
 
-  // Check if session and storage data are in sync
-  const validateSessionConsistency = () => {
-    try {
-      const storedIsLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
-      const storedIsAdmin = localStorage.getItem('isAdmin') === 'true';
-      
-      if (storedIsLoggedIn !== isAuthenticated || storedIsAdmin !== isAdmin) {
-        logAuthDebug('Session consistency check failed', {
-          storage: { isLoggedIn: storedIsLoggedIn, isAdmin: storedIsAdmin },
-          state: { isAuthenticated, isAdmin },
-        });
-        
-        // Update storage to match state
-        authStorageService.setAuthData(isAuthenticated, isAdmin, user?.email || '', user?.user_metadata?.full_name || '');
-      }
-    } catch (error) {
-      console.error('Error validating session consistency:', error);
-    }
-  };
-
-  // Listen for auth changes
+  // Set up auth state listener and check current session
   useEffect(() => {
     console.log("Setting up auth state change listener in AuthContext");
-    logAuthDebug('Initial auth state', { isAuthenticated, isAdmin, email: user?.email });
     
-    // Set up the auth state change listener FIRST (important to prevent deadlocks)
+    // Set up the auth state change listener FIRST
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (event, session) => {
-        logAuthDebug('Auth state changed', { event, email: session?.user?.email });
+      (event, newSession) => {
+        console.log('Auth state changed:', event);
         
-        if (event === 'SIGNED_IN' && session) {
-          // Handle signed in event - Use non-blocking approach to prevent deadlocks
-          setUser(convertToAuthUser(session.user));
-          setIsAuthenticated(true);
-          
-          // Use setTimeout to defer profile checking after auth state update
-          setTimeout(async () => {
-            try {
-              // Check if this is one of our known admin emails
-              const userEmail = session.user.email;
-              const isKnownAdmin = userEmail === 'admin@example.com' || userEmail === 'admin@uptowngym.rw';
-              
-              // If known admin, set state immediately for faster UI response
-              if (isKnownAdmin) {
-                logAuthDebug('Known admin detected', { email: userEmail });
-                setIsAdmin(true);
-                authStorageService.setAuthData(
-                  true, 
-                  true, 
-                  session.user.email || '', 
-                  session.user.user_metadata?.full_name || session.user.email || ''
-                );
-              }
-              
-              // Still check profile for consistency
-              const { data: profile, error } = await supabase
-                .from('profiles')
-                .select('role, is_admin, full_name')
-                .eq('id', session.user.id)
-                .maybeSingle();
-              
-              if (error && error.code !== 'PGRST116') {
-                console.error('Error fetching user profile after session update:', error);
-                return;
-              }
-              
-              // Set admin status based on profile or known admin emails
-              const userIsAdmin = profile?.is_admin || isKnownAdmin || false;
-              logAuthDebug('Profile check complete', { 
-                profile, 
-                isKnownAdmin, 
-                userIsAdmin,
-                userEmail
-              });
-              
-              setIsAdmin(userIsAdmin);
-              
-              authStorageService.setAuthData(
-                true, 
-                userIsAdmin, 
-                session.user.email || '', 
-                session.user.user_metadata?.full_name || profile?.full_name || session.user.email || ''
-              );
-            } catch (error) {
-              console.error('Error in profile check after session update:', error);
+        // Update session state
+        setSession(newSession);
+        
+        // Handle auth events
+        if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
+          if (newSession?.user) {
+            // Update user state synchronously for UI
+            setUser(convertToAuthUser(newSession.user));
+            setIsAuthenticated(true);
+            
+            // Check if known admin
+            const email = newSession.user.email;
+            const isKnownAdmin = email === 'admin@example.com' || email === 'admin@uptowngym.rw';
+            
+            if (isKnownAdmin) {
+              setIsAdmin(true);
             }
-          }, 0);
+            
+            // Deferred profile check to avoid deadlocks
+            setTimeout(async () => {
+              try {
+                const { data: profile } = await supabase
+                  .from('profiles')
+                  .select('is_admin')
+                  .eq('id', newSession.user.id)
+                  .maybeSingle();
+                  
+                // Update admin status if profile found
+                if (profile) {
+                  const userIsAdmin = profile.is_admin || isKnownAdmin;
+                  setIsAdmin(userIsAdmin);
+                  
+                  // Update storage
+                  authStorageService.setAuthData(
+                    true,
+                    userIsAdmin,
+                    newSession.user.email || '',
+                    newSession.user.user_metadata?.full_name || ''
+                  );
+                }
+              } catch (error) {
+                console.error('Error in deferred profile check:', error);
+              }
+            }, 0);
+          }
         } else if (event === 'SIGNED_OUT') {
-          logAuthDebug('User signed out', {});
+          // Clear all auth state
           setUser(null);
           setIsAdmin(false);
           setIsAuthenticated(false);
+          setSession(null);
+          
+          // Clear storage
           authStorageService.setAuthData(false, false, '', '');
-        } else if (event === 'USER_UPDATED' && session) {
-          logAuthDebug('User was updated', {});
-          setUser(convertToAuthUser(session.user));
         }
       }
     );
     
     // THEN check for existing session
-    const checkCurrentSession = async () => {
+    const getInitialSession = async () => {
       try {
-        const { data: { session }, error } = await supabase.auth.getSession();
-        if (error) {
-          console.error('Error checking current session:', error);
-          return;
-        }
+        const { data } = await supabase.auth.getSession();
         
-        if (session) {
-          logAuthDebug('Existing session found', { email: session.user.email });
-          setUser(convertToAuthUser(session.user));
+        // Update session state
+        setSession(data.session);
+        
+        if (data.session?.user) {
+          // Update auth state for immediate UI response
+          setUser(convertToAuthUser(data.session.user));
           setIsAuthenticated(true);
           
-          // Check if this is one of our known admin emails
-          const userEmail = session.user.email;
-          const isKnownAdmin = userEmail === 'admin@example.com' || userEmail === 'admin@uptowngym.rw';
+          // Fast path for known admins
+          const email = data.session.user.email;
+          const isKnownAdmin = email === 'admin@example.com' || email === 'admin@uptowngym.rw';
           
-          // If known admin, set state immediately for faster UI response
           if (isKnownAdmin) {
-            logAuthDebug('Known admin detected in session check', { email: userEmail });
             setIsAdmin(true);
-            authStorageService.setAuthData(
-              true, 
-              true, 
-              session.user.email || '', 
-              session.user.user_metadata?.full_name || session.user.email || ''
-            );
           }
-          
-          // Defer profile checking
-          setTimeout(async () => {
-            try {
-              // Get user profile to check if admin
-              const { data: profile, error } = await supabase
-                .from('profiles')
-                .select('role, is_admin, full_name')
-                .eq('id', session.user.id)
-                .maybeSingle();
-              
-              if (error && error.code !== 'PGRST116') {
-                console.error('Error fetching user profile during initial session:', error);
-                return;
-              }
-              
-              // Set admin status based on profile or known admin emails
-              const userIsAdmin = profile?.is_admin || isKnownAdmin || false;
-              logAuthDebug('Initial profile check complete', { 
-                profile, 
-                isKnownAdmin, 
-                userIsAdmin,
-                userEmail
-              });
-              
-              setIsAdmin(userIsAdmin);
-              
-              authStorageService.setAuthData(
-                true, 
-                userIsAdmin, 
-                session.user.email || '', 
-                session.user.user_metadata?.full_name || profile?.full_name || session.user.email || ''
-              );
-            } catch (error) {
-              console.error('Error in profile check during initial session:', error);
-            }
-          }, 0);
-        } else {
-          // No session, ensure auth state is cleared
-          logAuthDebug('No existing session found', {});
-          setUser(null);
-          setIsAdmin(false);
-          setIsAuthenticated(false);
-          authStorageService.setAuthData(false, false, '', '');
         }
       } catch (error) {
-        console.error('Error checking initial session:', error);
+        console.error('Error getting initial session:', error);
       }
     };
     
-    checkCurrentSession();
-    
-    // Periodically validate session consistency
-    const validationInterval = setInterval(validateSessionConsistency, 30000);
+    getInitialSession();
     
     return () => {
       subscription.unsubscribe();
-      clearInterval(validationInterval);
     };
-  }, [setUser, setIsAdmin, setIsAuthenticated, user]);
+  }, [setUser, setIsAdmin, setIsAuthenticated]);
 
   /**
    * Login with email and password
    */
-  const login = async (email: string, password: string): Promise<boolean> => {
+  const login = useCallback(async (email: string, password: string): Promise<boolean> => {
     try {
-      logAuthDebug('Login attempt', { email });
-      
       // Fast path for known admin emails
-      const isKnownAdmin = email.toLowerCase() === 'admin@example.com' || email.toLowerCase() === 'admin@uptowngym.rw';
-      if (isKnownAdmin) {
-        logAuthDebug('Known admin login detected', { email });
-      }
+      const isKnownAdmin = email === 'admin@example.com' || email === 'admin@uptowngym.rw';
       
       const result = await loginService(email, password);
       
       if (result.success && result.user) {
-        logAuthDebug('Login successful', { 
-          email: result.user.email,
-          isAdmin: result.isAdmin || isKnownAdmin
-        });
-        
-        // Update auth state immediately to provide feedback
+        // Update auth state
         setUser(convertToAuthUser(result.user));
-        setIsAdmin(result.isAdmin || isKnownAdmin || false);
+        setIsAdmin(result.isAdmin || isKnownAdmin);
         setIsAuthenticated(true);
         
-        // Store auth data in local storage and cookies
+        // Store auth data
         authStorageService.setAuthData(
           true, 
-          result.isAdmin || isKnownAdmin || false, 
+          result.isAdmin || isKnownAdmin, 
           result.user.email || '', 
           result.user.user_metadata?.full_name || result.user.email || ''
         );
@@ -285,59 +182,54 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         return true;
       }
       
-      logAuthDebug('Login failed', { email });
       return false;
     } catch (error) {
-      console.error('Error in login context method:', error);
-      // Ensure loading state is cleared on error
+      console.error('Error in login:', error);
       toast.error(error instanceof Error ? error.message : 'Login failed');
       return false;
     }
-  };
+  }, [loginService, setUser, setIsAdmin, setIsAuthenticated]);
 
   /**
    * Sign up a new user
    */
-  const signUp = async (email: string, password: string, fullName: string): Promise<boolean> => {
-    logAuthDebug('Signup attempt', { email });
+  const signUp = useCallback(async (email: string, password: string, fullName: string): Promise<boolean> => {
     return signUpService(email, password, fullName);
-  };
+  }, [signUpService]);
 
   /**
    * Log out the current user
    */
-  const logout = async (): Promise<boolean> => {
-    logAuthDebug('Starting logout', { currentUser: user?.email });
-    
-    // First clear all local auth state
-    setIsAuthenticated(false);
-    setIsAdmin(false);
-    setUser(null);
-    
-    // Clear local storage and cookies
-    authStorageService.setAuthData(false, false, '', '');
-    
+  const logout = useCallback(async (): Promise<boolean> => {
     try {
-      // Then call Supabase logout service
+      // Clear local state first for immediate UI response
+      setIsAuthenticated(false);
+      setIsAdmin(false);
+      setUser(null);
+      setSession(null);
+      
+      // Clear storage
+      authStorageService.setAuthData(false, false, '', '');
+      
+      // Then sign out from Supabase
       const success = await logoutService();
       
       if (success) {
-        logAuthDebug('Logout successful', {});
         toast.success('Logged out successfully');
       } else {
-        console.error("Logout service returned unsuccessful");
         toast.error("There was an issue during logout");
         return false;
       }
       
       return true;
     } catch (error) {
-      console.error("Error during logout process:", error);
-      toast.error("Failed to log out. Please try again.");
+      console.error("Error during logout:", error);
+      toast.error("Failed to log out");
       return false;
     }
-  };
+  }, [logoutService, setUser, setIsAdmin, setIsAuthenticated]);
 
+  // Provide auth context value
   const value: AuthContextType = {
     user,
     isAdmin,
