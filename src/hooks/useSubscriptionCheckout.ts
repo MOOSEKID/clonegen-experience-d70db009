@@ -82,13 +82,16 @@ export const useSubscriptionCheckout = () => {
       const formattedDate = today.toISOString().split('T')[0];
       
       // Update user profile with subscription info
+      // Using a type-safe approach for the update operation
+      const updates = {
+        active_plan_id: plan.planId || plan.id,
+        billing_start_date: formattedDate,
+        subscription_status: 'Active'
+      };
+      
       const { error } = await supabase
         .from('profiles')
-        .update({
-          active_plan_id: plan.planId || plan.id,
-          billing_start_date: formattedDate,
-          subscription_status: 'Active'
-        })
+        .update(updates)
         .eq('id', user.id);
         
       if (error) {
