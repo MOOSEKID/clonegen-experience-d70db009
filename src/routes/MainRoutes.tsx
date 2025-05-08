@@ -1,5 +1,5 @@
 
-import { lazy, Suspense } from "react";
+import { lazy, Suspense, Fragment } from "react";
 import { Route } from "react-router-dom";
 import Index from "../pages/Index";
 import NotFound from "../pages/NotFound";
@@ -25,7 +25,7 @@ const Signup = lazy(() => import("../pages/Signup"));
 
 const MainRoutes = () => {
   return (
-    <>
+    <Fragment>
       <Route index element={<AdminRedirect />} />
       <Route path="/about-us" element={
         <Suspense fallback={<PageLoading />}>
@@ -108,7 +108,7 @@ const MainRoutes = () => {
         </Suspense>
       } />
       <Route path="*" element={<NotFound />} />
-    </>
+    </Fragment>
   );
 };
 

@@ -45,10 +45,8 @@ const App = () => {
                   <MainRoutes />
                 </Route>
                 
-                {/* Admin Routes */}
+                {/* Admin and Dashboard Routes */}
                 <AdminRoutes />
-                
-                {/* Customer Dashboard Routes */}
                 <DashboardRoutes />
               </Routes>
             </BrowserRouter>

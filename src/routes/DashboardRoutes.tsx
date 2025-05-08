@@ -1,5 +1,5 @@
 
-import { lazy, Suspense } from "react";
+import { lazy, Suspense, Fragment } from "react";
 import { Route } from "react-router-dom";
 import { UserRoute, PageLoading } from "./RouteComponents";
 import NotFound from "../pages/NotFound";
@@ -20,26 +20,28 @@ const NutritionTracking = lazy(() => import("../pages/dashboard/NutritionTrackin
 
 const DashboardRoutes = () => {
   return (
-    <Route path="/dashboard/*" element={
-      <UserRoute>
-        <Suspense fallback={<PageLoading />}>
-          <DashboardLayout />
-        </Suspense>
-      </UserRoute>
-    }>
-      <Route index element={<Dashboard />} />
-      <Route path="workouts" element={<Workouts />} />
-      <Route path="progress" element={<Progress />} />
-      <Route path="workout-programs" element={<WorkoutPrograms />} />
-      <Route path="exercise-library" element={<ExerciseLibrary />} />
-      <Route path="nutrition" element={<NutritionTracking />} />
-      <Route path="schedule" element={<Schedule />} />
-      <Route path="health" element={<Health />} />
-      <Route path="achievements" element={<Achievements />} />
-      <Route path="locations" element={<Locations />} />
-      <Route path="settings" element={<Settings />} />
-      <Route path="*" element={<NotFound />} />
-    </Route>
+    <Fragment>
+      <Route path="/dashboard" element={
+        <UserRoute>
+          <Suspense fallback={<PageLoading />}>
+            <DashboardLayout />
+          </Suspense>
+        </UserRoute>
+      }>
+        <Route index element={<Dashboard />} />
+        <Route path="workouts" element={<Workouts />} />
+        <Route path="progress" element={<Progress />} />
+        <Route path="workout-programs" element={<WorkoutPrograms />} />
+        <Route path="exercise-library" element={<ExerciseLibrary />} />
+        <Route path="nutrition" element={<NutritionTracking />} />
+        <Route path="schedule" element={<Schedule />} />
+        <Route path="health" element={<Health />} />
+        <Route path="achievements" element={<Achievements />} />
+        <Route path="locations" element={<Locations />} />
+        <Route path="settings" element={<Settings />} />
+        <Route path="*" element={<NotFound />} />
+      </Route>
+    </Fragment>
   );
 };
 

@@ -1,5 +1,5 @@
 
-import { lazy, Suspense } from "react";
+import { lazy, Suspense, Fragment } from "react";
 import { Route } from "react-router-dom";
 import { AdminRoute, PageLoading } from "./RouteComponents";
 
@@ -30,32 +30,34 @@ const PaymentMethods = lazy(() => import("../pages/admin/payments/Methods"));
 
 const AdminRoutes = () => {
   return (
-    <Route path="/admin/*" element={
-      <AdminRoute>
-        <Suspense fallback={<PageLoading />}>
-          <AdminLayout />
-        </Suspense>
-      </AdminRoute>
-    }>
-      <Route index element={<AdminDashboard />} />
-      <Route path="members" element={<AdminMembers />} />
-      <Route path="classes" element={<AdminClasses />} />
-      <Route path="trainers" element={<AdminTrainers />} />
-      <Route path="trainers/profiles" element={<TrainerProfiles />} />
-      <Route path="trainers/performance" element={<PerformanceTracking />} />
-      <Route path="trainers/ratings" element={<TrainerRatings />} />
-      <Route path="payments" element={<AdminPayments />} />
-      <Route path="payments/subscriptions" element={<Subscriptions />} />
-      <Route path="payments/invoices" element={<Invoices />} />
-      <Route path="payments/methods" element={<PaymentMethods />} />
-      <Route path="workouts" element={<AdminWorkouts />} />
-      <Route path="shop" element={<AdminShop />} />
-      <Route path="content" element={<AdminContent />} />
-      <Route path="reports" element={<AdminReports />} />
-      <Route path="settings" element={<AdminSettings />} />
-      <Route path="support" element={<AdminSupport />} />
-      <Route path="test-accounts" element={<TestAccounts />} />
-    </Route>
+    <Fragment>
+      <Route path="/admin" element={
+        <AdminRoute>
+          <Suspense fallback={<PageLoading />}>
+            <AdminLayout />
+          </Suspense>
+        </AdminRoute>
+      }>
+        <Route index element={<AdminDashboard />} />
+        <Route path="members" element={<AdminMembers />} />
+        <Route path="classes" element={<AdminClasses />} />
+        <Route path="trainers" element={<AdminTrainers />} />
+        <Route path="trainers/profiles" element={<TrainerProfiles />} />
+        <Route path="trainers/performance" element={<PerformanceTracking />} />
+        <Route path="trainers/ratings" element={<TrainerRatings />} />
+        <Route path="payments" element={<AdminPayments />} />
+        <Route path="payments/subscriptions" element={<Subscriptions />} />
+        <Route path="payments/invoices" element={<Invoices />} />
+        <Route path="payments/methods" element={<PaymentMethods />} />
+        <Route path="workouts" element={<AdminWorkouts />} />
+        <Route path="shop" element={<AdminShop />} />
+        <Route path="content" element={<AdminContent />} />
+        <Route path="reports" element={<AdminReports />} />
+        <Route path="settings" element={<AdminSettings />} />
+        <Route path="support" element={<AdminSupport />} />
+        <Route path="test-accounts" element={<TestAccounts />} />
+      </Route>
+    </Fragment>
   );
 };
 
