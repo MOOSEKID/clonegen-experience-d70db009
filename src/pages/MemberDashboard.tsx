@@ -1,11 +1,13 @@
 
 import React, { useEffect, useState } from 'react';
-import { Navigate } from 'react-router-dom';
+import { Navigate, useNavigate } from 'react-router-dom';
 import { useOptimizedAuthContext } from '@/hooks/useOptimizedAuthContext';
 import { useUserProfile } from '@/hooks/useUserProfile';
 import { useSubscriptionPlans } from '@/hooks/useSubscriptionPlans';
+import { toast } from 'sonner';
 
 const MemberDashboard = () => {
+  const navigate = useNavigate();
   const { isAuthenticated } = useOptimizedAuthContext();
   const { userProfile, isLoading: profileLoading } = useUserProfile();
   const { plans, loading: plansLoading, getPlanByIdentifier } = useSubscriptionPlans();
@@ -16,9 +18,19 @@ const MemberDashboard = () => {
       const plan = getPlanByIdentifier(userProfile.active_plan_id);
       if (plan) {
         setActivePlan(plan);
+      } else {
+        console.log('Plan not found for ID:', userProfile.active_plan_id);
       }
     }
   }, [profileLoading, userProfile, plansLoading, plans, getPlanByIdentifier]);
+
+  useEffect(() => {
+    // If this component is rendered, and the URL is '/member/dashboard',
+    // we should redirect to '/dashboard' to match our route structure
+    if (window.location.pathname === '/member/dashboard') {
+      navigate('/dashboard', { replace: true });
+    }
+  }, [navigate]);
   
   // Redirect if not authenticated
   if (!isAuthenticated && !profileLoading) {

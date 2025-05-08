@@ -102,8 +102,8 @@ export const useSubscriptionCheckout = () => {
         toast.success("Your subscription has been activated successfully!");
         closeCheckoutModal();
         
-        // Redirect to member dashboard or confirmation page
-        navigate('/member/dashboard');
+        // Redirect to dashboard instead of member/dashboard
+        navigate('/dashboard');
       } catch (error: any) {
         console.error('Failed to update subscription', error);
         toast.error("Failed to activate your subscription. Please try again.");
