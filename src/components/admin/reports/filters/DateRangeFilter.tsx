@@ -5,6 +5,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Calendar } from "@/components/ui/calendar";
 import { CalendarIcon } from "lucide-react";
 import { format } from "date-fns";
+import { DateRange } from 'react-day-picker';
 
 interface DateRangeFilterProps {
   onDateRangeChange: (from: Date | undefined, to: Date | undefined) => void;
@@ -12,24 +13,24 @@ interface DateRangeFilterProps {
 
 const DateRangeFilter = ({ onDateRangeChange }: DateRangeFilterProps) => {
   const [isOpen, setIsOpen] = useState(false);
-  const [dateRange, setDateRange] = useState<{
-    from: Date | undefined;
-    to: Date | undefined;
-  }>({
+  const [dateRange, setDateRange] = useState<DateRange>({
     from: new Date(new Date().setMonth(new Date().getMonth() - 1)),
     to: new Date()
   });
 
-  const handleDateRangeChange = (
-    newDateRange: { from: Date | undefined; to: Date | undefined }
-  ) => {
+  const handleDateRangeChange = (newDateRange: DateRange | undefined) => {
+    if (!newDateRange) {
+      setDateRange({ from: undefined, to: undefined });
+      onDateRangeChange(undefined, undefined);
+      return;
+    }
+    
     setDateRange(newDateRange);
-    if (newDateRange.from) {
-      onDateRangeChange(newDateRange.from, newDateRange.to);
-      // Only close when both dates are selected
-      if (newDateRange.from && newDateRange.to) {
-        setIsOpen(false);
-      }
+    onDateRangeChange(newDateRange.from, newDateRange.to);
+    
+    // Only close when both dates are selected
+    if (newDateRange.from && newDateRange.to) {
+      setIsOpen(false);
     }
   };
 
@@ -68,7 +69,7 @@ const DateRangeFilter = ({ onDateRangeChange }: DateRangeFilterProps) => {
           </div>
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-auto p-0" align="start">
+      <PopoverContent className="w-auto p-0 pointer-events-auto" align="start">
         <div className="grid grid-cols-2 gap-2">
           <div className="p-3 border-r">
             <div className="space-y-2">
@@ -92,9 +93,10 @@ const DateRangeFilter = ({ onDateRangeChange }: DateRangeFilterProps) => {
             <Calendar
               mode="range"
               selected={dateRange}
-              onSelect={(range) => handleDateRangeChange(range || { from: undefined, to: undefined })}
+              onSelect={handleDateRangeChange}
               numberOfMonths={1}
               disabled={(date) => date > new Date()}
+              className="pointer-events-auto"
             />
           </div>
         </div>
