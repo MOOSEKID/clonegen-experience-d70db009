@@ -18,13 +18,17 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Toaster } from '@/components/ui/toaster';
 
+interface CustomerHeaderProps {
+  toggleSidebar: () => void;
+}
+
 const DashboardLayout = () => {
-  const { signOut, user } = useAuth();
+  const { logout, user } = useAuth();
   const navigate = useNavigate();
   const [sidebarOpen, setSidebarOpen] = useState(true);
 
   const handleSignOut = async () => {
-    await signOut();
+    await logout();
     navigate('/');
   };
 
@@ -73,7 +77,7 @@ const DashboardLayout = () => {
             </DropdownMenu>
           </div>
         </div>
-        <CustomerHeader />
+        <CustomerHeader toggleSidebar={toggleSidebar} />
       </header>
 
       <div className="flex flex-1 overflow-hidden">
