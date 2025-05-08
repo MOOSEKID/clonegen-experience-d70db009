@@ -1,3 +1,4 @@
+
 import { useEffect, useState } from 'react';
 import { useSubscriptionPlans } from '@/hooks/useSubscriptionPlans';
 import MembershipHeader from '@/components/membership/MembershipHeader';
@@ -19,7 +20,11 @@ const Membership = () => {
           price: plan.price === 'Custom' ? 'Custom' : plan.price, // Keep "Custom" text as is
           period: plan.billingCycle.toLowerCase(),
           description: `${plan.billingCycle} plan`,
-          features: plan.features,
+          features: [
+            ...(plan.features || []),
+            ...(plan.planId === 'premium-monthly' || plan.planId === 'family-annual' ? 
+              ['AI-powered workout generation', 'Advanced exercise techniques', 'Premium progress tracking'] : [])
+          ],
           buttonText: 'Get Started',
           highlighted: plan.planId === 'premium-monthly', // Mark premium as highlighted
           planId: plan.planId || plan.id // Important: Include planId for checkout flow
@@ -72,15 +77,15 @@ const Membership = () => {
       ]
     },
     {
-      title: 'Specialized Programs',
+      title: 'Premium Features',
       icon: '🏆',
       services: [
-        'Weight management programs',
-        'Senior fitness classes',
-        'Prenatal and postnatal training',
-        'Rehabilitation services',
-        'Sports-specific conditioning',
-        'Nutrition and diet planning'
+        'AI-powered workout generation',
+        'Advanced exercise techniques library',
+        'Detailed progress tracking and analytics',
+        'Nutrition planning assistance',
+        'Personal fitness dashboard',
+        'Priority class booking'
       ]
     }
   ];
@@ -90,6 +95,7 @@ const Membership = () => {
     'Free wifi throughout the facility',
     'Access to member-only events',
     'Mobile app for tracking workouts',
+    'AI-powered fitness assistant (Premium)',
     'Discounts on merchandise and supplements',
     'Towel service',
     'Fitness assessment every 3 months'

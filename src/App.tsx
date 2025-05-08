@@ -336,6 +336,9 @@ const App = () => {
                   <Route index element={<Dashboard />} />
                   <Route path="workouts" element={<Workouts />} />
                   <Route path="progress" element={<Progress />} />
+                  <Route path="workout-programs" element={<WorkoutPrograms />} />
+                  <Route path="exercise-library" element={<ExerciseLibrary />} />
+                  <Route path="nutrition" element={<NutritionTracking />} />
                   <Route path="schedule" element={<Schedule />} />
                   <Route path="health" element={<Health />} />
                   <Route path="achievements" element={<Achievements />} />
