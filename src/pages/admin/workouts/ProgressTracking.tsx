@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { ChartContainer } from '@/components/ui/chart';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -7,6 +7,9 @@ import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Search, Download } from 'lucide-react';
+import MemberProgressDetail from '@/components/admin/workouts/MemberProgressDetail';
+import { exportToPDF } from '@/utils/exportUtils';
+import { toast } from 'sonner';
 import { 
   Area,
   AreaChart,
@@ -16,7 +19,8 @@ import {
   YAxis, 
   CartesianGrid, 
   Tooltip, 
-  Legend 
+  Legend,
+  ResponsiveContainer 
 } from 'recharts';
 
 const progressData = [
@@ -46,6 +50,35 @@ const mockMembers = [
 ];
 
 const ProgressTracking = () => {
+  const [searchTerm, setSearchTerm] = useState('');
+  const [timePeriod, setTimePeriod] = useState('6months');
+  const [selectedMember, setSelectedMember] = useState<any>(null);
+  const [memberDetailOpen, setMemberDetailOpen] = useState(false);
+  
+  const filteredMembers = mockMembers.filter(member => 
+    member.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    member.programName.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
+  const handleViewMemberDetails = (member: any) => {
+    setSelectedMember(member);
+    setMemberDetailOpen(true);
+  };
+
+  const handleExportReport = () => {
+    exportToPDF(
+      'Member Progress Report',
+      mockMembers,
+      [
+        { label: 'Name', key: 'name' },
+        { label: 'Program', key: 'programName' },
+        { label: 'Progress (%)', key: 'progress' },
+        { label: 'Last Activity', key: 'lastActivity' }
+      ]
+    );
+    toast.success("Progress report exported successfully");
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
@@ -54,7 +87,7 @@ const ProgressTracking = () => {
           <p className="text-gray-500">Monitor member progress on assigned workout programs</p>
         </div>
         
-        <Button variant="outline">
+        <Button variant="outline" onClick={handleExportReport}>
           <Download className="mr-2 h-4 w-4" /> Export Report
         </Button>
       </div>
@@ -99,7 +132,7 @@ const ProgressTracking = () => {
           </CardHeader>
           <CardContent className="pt-4">
             <div className="flex justify-end mb-4">
-              <Select defaultValue="6months">
+              <Select defaultValue={timePeriod} onValueChange={setTimePeriod}>
                 <SelectTrigger className="w-[180px]">
                   <SelectValue placeholder="Time Period" />
                 </SelectTrigger>
@@ -111,23 +144,26 @@ const ProgressTracking = () => {
                 </SelectContent>
               </Select>
             </div>
-            <ChartContainer 
-              className="h-72"
-              config={{
-                members: { color: "blue" },
-                completions: { color: "green" }
-              }}
-            >
-              <AreaChart data={progressData}>
-                <CartesianGrid strokeDasharray="3 3" vertical={false} />
-                <XAxis dataKey="month" />
-                <YAxis />
-                <Tooltip />
-                <Legend />
-                <Area type="monotone" dataKey="members" stroke="#3b82f6" fill="#93c5fd" name="Total Members" />
-                <Area type="monotone" dataKey="completions" stroke="#10b981" fill="#a7f3d0" name="Completions" />
-              </AreaChart>
-            </ChartContainer>
+            <div className="h-[300px]">
+              <ResponsiveContainer width="100%" height="100%">
+                <ChartContainer 
+                  config={{
+                    members: { color: "blue" },
+                    completions: { color: "green" }
+                  }}
+                >
+                  <AreaChart data={progressData}>
+                    <CartesianGrid strokeDasharray="3 3" vertical={false} />
+                    <XAxis dataKey="month" />
+                    <YAxis />
+                    <Tooltip />
+                    <Legend />
+                    <Area type="monotone" dataKey="members" stroke="#3b82f6" fill="#93c5fd" name="Total Members" />
+                    <Area type="monotone" dataKey="completions" stroke="#10b981" fill="#a7f3d0" name="Completions" />
+                  </AreaChart>
+                </ChartContainer>
+              </ResponsiveContainer>
+            </div>
           </CardContent>
         </Card>
         
@@ -137,34 +173,42 @@ const ProgressTracking = () => {
             <CardDescription>Average completion percentage</CardDescription>
           </CardHeader>
           <CardContent className="pt-4">
-            <ChartContainer 
-              className="h-72"
-              config={{
-                completion: { color: "orange" }
-              }}
-            >
-              <BarChart data={programCompletionData} layout="vertical">
-                <CartesianGrid strokeDasharray="3 3" horizontal={true} vertical={false} />
-                <XAxis type="number" domain={[0, 100]} />
-                <YAxis type="category" dataKey="name" width={120} />
-                <Tooltip formatter={(value) => [`${value}%`, 'Completion Rate']} />
-                <Bar dataKey="completion" fill="#f97316" name="Completion Rate %" />
-              </BarChart>
-            </ChartContainer>
+            <div className="h-[300px]">
+              <ResponsiveContainer width="100%" height="100%">
+                <ChartContainer 
+                  config={{
+                    completion: { color: "orange" }
+                  }}
+                >
+                  <BarChart data={programCompletionData} layout="vertical">
+                    <CartesianGrid strokeDasharray="3 3" horizontal={true} vertical={false} />
+                    <XAxis type="number" domain={[0, 100]} />
+                    <YAxis type="category" dataKey="name" width={120} />
+                    <Tooltip formatter={(value) => [`${value}%`, 'Completion Rate']} />
+                    <Bar dataKey="completion" fill="#f97316" name="Completion Rate %" />
+                  </BarChart>
+                </ChartContainer>
+              </ResponsiveContainer>
+            </div>
           </CardContent>
         </Card>
       </div>
       
       <Card>
         <CardHeader>
-          <div className="flex flex-col md:flex-row justify-between md:items-center">
+          <div className="flex flex-col md:flex-row justify-between md:items-center gap-4">
             <div>
               <CardTitle>Member Progress</CardTitle>
               <CardDescription>Track individual member progress on assigned programs</CardDescription>
             </div>
-            <div className="relative mt-2 md:mt-0 w-full md:w-64">
+            <div className="relative w-full md:w-64">
               <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-gray-500" />
-              <Input placeholder="Search members..." className="pl-8" />
+              <Input 
+                placeholder="Search members..." 
+                className="pl-8" 
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+              />
             </div>
           </div>
         </CardHeader>
@@ -181,7 +225,7 @@ const ProgressTracking = () => {
                 </tr>
               </thead>
               <tbody>
-                {mockMembers.map(member => (
+                {filteredMembers.map(member => (
                   <tr key={member.id} className="border-b hover:bg-gray-50">
                     <td className="py-3 px-4">{member.name}</td>
                     <td className="py-3 px-4">{member.programName}</td>
@@ -201,7 +245,13 @@ const ProgressTracking = () => {
                     </td>
                     <td className="py-3 px-4 text-gray-600">{member.lastActivity}</td>
                     <td className="py-3 px-4 text-right">
-                      <Button variant="ghost" size="sm">View Details</Button>
+                      <Button 
+                        variant="ghost" 
+                        size="sm"
+                        onClick={() => handleViewMemberDetails(member)}
+                      >
+                        View Details
+                      </Button>
                     </td>
                   </tr>
                 ))}
@@ -210,6 +260,14 @@ const ProgressTracking = () => {
           </div>
         </CardContent>
       </Card>
+
+      {selectedMember && (
+        <MemberProgressDetail 
+          open={memberDetailOpen} 
+          onOpenChange={setMemberDetailOpen}
+          member={selectedMember}
+        />
+      )}
     </div>
   );
 };

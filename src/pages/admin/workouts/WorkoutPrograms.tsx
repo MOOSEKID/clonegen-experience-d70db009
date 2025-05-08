@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -19,7 +19,9 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
-import { Plus, Search, Filter, FileEdit, Trash2 } from 'lucide-react';
+import { Plus, Search, Filter, FileEdit, Trash2, Users } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import ProgramMembersDialog from '@/components/admin/workouts/ProgramMembersDialog';
 
 const mockWorkoutPrograms = [
   { 
@@ -67,6 +69,29 @@ const levelBadgeColors = {
 };
 
 const WorkoutPrograms = () => {
+  const navigate = useNavigate();
+  const [searchTerm, setSearchTerm] = useState('');
+  const [selectedCategory, setSelectedCategory] = useState('all-categories');
+  const [viewMembersDialogOpen, setViewMembersDialogOpen] = useState(false);
+  const [selectedProgram, setSelectedProgram] = useState<{id: string, name: string} | null>(null);
+
+  const filteredPrograms = mockWorkoutPrograms.filter(program => {
+    const matchesSearch = program.name.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesCategory = selectedCategory === 'all-categories' || 
+      program.category.toLowerCase() === selectedCategory.replace('-', ' ');
+    
+    return matchesSearch && matchesCategory;
+  });
+
+  const handleCreateProgram = () => {
+    navigate('/admin/workouts/create-program');
+  };
+
+  const handleViewMembers = (programId: string, programName: string) => {
+    setSelectedProgram({ id: programId, name: programName });
+    setViewMembersDialogOpen(true);
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
@@ -75,7 +100,7 @@ const WorkoutPrograms = () => {
           <p className="text-gray-500">Create and manage workout programs for members</p>
         </div>
         
-        <Button>
+        <Button onClick={handleCreateProgram}>
           <Plus className="mr-2 h-4 w-4" /> Create Program
         </Button>
       </div>
@@ -89,11 +114,17 @@ const WorkoutPrograms = () => {
                 type="search"
                 placeholder="Search programs..."
                 className="pl-8"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
               />
             </div>
             
             <div className="flex items-center gap-2 w-full sm:w-auto">
-              <Select defaultValue="all-categories">
+              <Select 
+                defaultValue="all-categories" 
+                value={selectedCategory} 
+                onValueChange={setSelectedCategory}
+              >
                 <SelectTrigger className="w-full sm:w-[180px]">
                   <SelectValue placeholder="All Categories" />
                 </SelectTrigger>
@@ -127,7 +158,7 @@ const WorkoutPrograms = () => {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {mockWorkoutPrograms.map(program => (
+                {filteredPrograms.map(program => (
                   <TableRow key={program.id}>
                     <TableCell className="font-medium">{program.name}</TableCell>
                     <TableCell>
@@ -138,7 +169,17 @@ const WorkoutPrograms = () => {
                     <TableCell>{program.category}</TableCell>
                     <TableCell>{program.duration}</TableCell>
                     <TableCell>{program.exercises}</TableCell>
-                    <TableCell>{program.assignedTo} members</TableCell>
+                    <TableCell>
+                      <Button 
+                        variant="ghost" 
+                        size="sm" 
+                        className="flex items-center gap-1"
+                        onClick={() => handleViewMembers(program.id, program.name)}
+                      >
+                        <Users className="h-3.5 w-3.5" />
+                        {program.assignedTo} members
+                      </Button>
+                    </TableCell>
                     <TableCell className="text-right">
                       <div className="flex justify-end gap-2">
                         <Button variant="ghost" size="icon">
@@ -156,6 +197,15 @@ const WorkoutPrograms = () => {
           </div>
         </CardContent>
       </Card>
+
+      {selectedProgram && (
+        <ProgramMembersDialog 
+          programId={selectedProgram.id}
+          programName={selectedProgram.name}
+          open={viewMembersDialogOpen}
+          onOpenChange={setViewMembersDialogOpen}
+        />
+      )}
     </div>
   );
 };

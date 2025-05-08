@@ -53,6 +53,9 @@ const TestAccounts = lazy(() => import("./pages/admin/TestAccounts"));
 const AdminWorkoutPrograms = lazy(() => import("./pages/admin/workouts/WorkoutPrograms"));
 const AdminExerciseLibrary = lazy(() => import("./pages/admin/workouts/ExerciseLibrary"));
 const AdminProgressTracking = lazy(() => import("./pages/admin/workouts/ProgressTracking"));
+const AddExercise = lazy(() => import("./pages/admin/workouts/AddExercise"));
+const CreateProgram = lazy(() => import("./pages/admin/workouts/CreateProgram"));
+const GenerateReports = lazy(() => import("./pages/admin/workouts/GenerateReports"));
 
 // Trainer subpages
 const TrainerProfiles = lazy(() => import("./pages/admin/trainers/TrainerProfiles"));
@@ -214,6 +217,10 @@ const App = () => {
                   <Route path="workout-programs" element={<AdminWorkoutPrograms />} />
                   <Route path="exercises" element={<AdminExerciseLibrary />} />
                   <Route path="progress-tracking" element={<AdminProgressTracking />} />
+                  {/* New workout-related routes */}
+                  <Route path="workouts/create-program" element={<CreateProgram />} />
+                  <Route path="workouts/add-exercise" element={<AddExercise />} />
+                  <Route path="workouts/generate-reports" element={<GenerateReports />} />
                   <Route path="shop" element={<AdminShop />} />
                   <Route path="content" element={<AdminContent />} />
                   <Route path="reports" element={<AdminReports />} />

@@ -63,17 +63,23 @@ const AdminWorkouts = () => {
       <div className="mt-8">
         <h2 className="text-xl font-semibold mb-4">Quick Actions</h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-          <Button variant="outline" className="h-auto py-3 justify-start gap-2">
-            <Dumbbell className="h-5 w-5" />
-            <span>Create New Program</span>
+          <Button asChild variant="outline" className="h-auto py-3 justify-start gap-2 hover:bg-gym-orange/10 transition-colors">
+            <Link to="/admin/workouts/create-program">
+              <Dumbbell className="h-5 w-5" />
+              <span>Create New Program</span>
+            </Link>
           </Button>
-          <Button variant="outline" className="h-auto py-3 justify-start gap-2">
-            <Clipboard className="h-5 w-5" />
-            <span>Add Exercise</span>
+          <Button asChild variant="outline" className="h-auto py-3 justify-start gap-2 hover:bg-gym-orange/10 transition-colors">
+            <Link to="/admin/workouts/add-exercise">
+              <Clipboard className="h-5 w-5" />
+              <span>Add Exercise</span>
+            </Link>
           </Button>
-          <Button variant="outline" className="h-auto py-3 justify-start gap-2">
-            <Target className="h-5 w-5" />
-            <span>Generate Reports</span>
+          <Button asChild variant="outline" className="h-auto py-3 justify-start gap-2 hover:bg-gym-orange/10 transition-colors">
+            <Link to="/admin/workouts/generate-reports">
+              <Target className="h-5 w-5" />
+              <span>Generate Reports</span>
+            </Link>
           </Button>
         </div>
       </div>
