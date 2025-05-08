@@ -11,7 +11,7 @@ const initialPaymentMethods: PaymentGateway[] = [
     name: 'Credit Card',
     description: 'Accept credit and debit card payments directly on your site.',
     status: 'Active',
-    icon: <CreditCard className="h-8 w-8" />,
+    icon: React.createElement(CreditCard, { className: "h-8 w-8" }),
     provider: 'Stripe',
     fees: '2.9% + RWF 300 per transaction',
     setupComplete: true,
@@ -24,7 +24,7 @@ const initialPaymentMethods: PaymentGateway[] = [
     name: 'PayPal',
     description: 'Let customers pay via PayPal.',
     status: 'Inactive',
-    icon: <CreditCard className="h-8 w-8" />,
+    icon: React.createElement(CreditCard, { className: "h-8 w-8" }),
     provider: 'PayPal',
     fees: '3.4% + RWF 400 per transaction',
     setupComplete: false,
@@ -37,7 +37,7 @@ const initialPaymentMethods: PaymentGateway[] = [
     name: 'Bank Transfer',
     description: 'Allow customers to pay via bank transfer.',
     status: 'Active',
-    icon: <CreditCard className="h-8 w-8" />,
+    icon: React.createElement(CreditCard, { className: "h-8 w-8" }),
     provider: 'Manual',
     fees: 'No fees',
     setupComplete: true,
@@ -50,7 +50,7 @@ const initialPaymentMethods: PaymentGateway[] = [
     name: 'Mobile Money',
     description: 'Accept payments via MTN Mobile Money and Airtel Money.',
     status: 'Inactive',
-    icon: <CreditCard className="h-8 w-8" />,
+    icon: React.createElement(CreditCard, { className: "h-8 w-8" }),
     provider: 'MTN/Airtel API',
     fees: '1.5% per transaction',
     setupComplete: false,
@@ -77,7 +77,7 @@ const deserializeGateways = (data: string): PaymentGateway[] => {
     return parsed.map((gateway: any) => ({
       ...gateway,
       // Recreate the React element icons
-      icon: <CreditCard className="h-8 w-8" />,
+      icon: React.createElement(CreditCard, { className: "h-8 w-8" }),
     }));
   } catch (e) {
     console.error('Error deserializing payment gateways', e);
