@@ -1,125 +1,91 @@
 
-import { useState, useEffect } from 'react';
-import { Outlet, useNavigate } from 'react-router-dom';
+import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { Outlet } from 'react-router-dom';
+import { useAuth } from '@/hooks/useAuth';
 import CustomerSidebar from '@/components/dashboard/CustomerSidebar';
 import CustomerHeader from '@/components/dashboard/CustomerHeader';
-import { toast } from 'sonner';
-import { useAuth } from '@/hooks/useAuth';
+import { MenuIcon, BellIcon, LogOut } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { AlertCircle, ChevronDown } from 'lucide-react';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { LoadingSpinner } from '@/components/ui/LoadingSpinner';
+} from '@/components/ui/dropdown-menu';
+import { Toaster } from '@/components/ui/toaster';
 
 const DashboardLayout = () => {
-  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
-  const [isLoading, setIsLoading] = useState(true);
-  const { isAuthenticated, user, isAdmin } = useAuth();
+  const { signOut, user } = useAuth();
   const navigate = useNavigate();
+  const [sidebarOpen, setSidebarOpen] = useState(true);
 
-  // Check user authentication
-  useEffect(() => {
-    console.log('DashboardLayout mounted, checking auth state:', { isAuthenticated, isAdmin });
-    
-    const checkAuth = async () => {
-      try {
-        setIsLoading(true);
-        
-        if (!isAuthenticated) {
-          console.log('User not authenticated, redirecting to login from dashboard');
-          toast.error('You must be logged in to access this page');
-          navigate('/login', { state: { from: '/dashboard' } });
-        } else {
-          console.log('User is authenticated in dashboard:', user?.email);
-          setIsLoading(false);
-        }
-      } catch (error) {
-        console.error('Authentication check error in dashboard:', error);
-        toast.error('Authentication error. Please log in again.');
-        navigate('/login', { state: { from: '/dashboard' } });
-      } 
-    };
-
-    checkAuth();
-    
-    // Check authentication status periodically
-    const interval = setInterval(() => {
-      console.log('Running periodic auth check in dashboard');
-      if (!isAuthenticated) {
-        console.log('User not authenticated in periodic check, redirecting to login');
-        clearInterval(interval);
-        navigate('/login', { state: { from: '/dashboard' } });
-      }
-    }, 300000); // 5 minutes
-    
-    return () => clearInterval(interval);
-  }, [navigate, isAuthenticated, user]);
+  const handleSignOut = async () => {
+    await signOut();
+    navigate('/');
+  };
 
   const toggleSidebar = () => {
-    setIsSidebarOpen(!isSidebarOpen);
-  };
-  
-  const switchToAdmin = () => {
-    navigate('/admin');
+    setSidebarOpen(!sidebarOpen);
   };
 
-  if (isLoading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <LoadingSpinner color="gym-orange" size="lg" text="Loading dashboard..." />
-      </div>
-    );
-  }
-
-  if (!isAuthenticated) {
-    return null; // Redirect will happen in the useEffect
-  }
+  // Get user initials for avatar fallback
+  const getInitials = () => {
+    if (!user || !user.email) return 'U';
+    return user.email.charAt(0).toUpperCase();
+  };
 
   return (
-    <div className="flex flex-col md:flex-row min-h-screen bg-gym-dark">
-      <CustomerSidebar isOpen={isSidebarOpen} />
-      
-      <div className="flex-1 flex flex-col">
-        <CustomerHeader toggleSidebar={toggleSidebar} />
-        
-        {isAdmin && (
-          <div className="bg-gym-darkblue/80 border-b border-gray-700 py-2 px-4">
-            <div className="container mx-auto flex items-center justify-between">
-              <div className="flex items-center gap-2 text-sm text-white/80">
-                <span className="font-semibold">Member View</span>
-                <AlertCircle size={16} className="text-gym-orange" />
-              </div>
-              
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="outline" size="sm" className="gap-1 bg-transparent border-white/20 text-white hover:bg-white/10">
-                    <span>Switch View</span>
-                    <ChevronDown size={14} />
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end">
-                  <DropdownMenuItem onClick={switchToAdmin}>
-                    Admin Dashboard
-                  </DropdownMenuItem>
-                  <DropdownMenuItem className="font-medium" disabled>
-                    Member Dashboard
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-            </div>
+    <div className="flex flex-col h-screen bg-gray-100">
+      <header className="bg-white border-b z-10">
+        <div className="flex items-center justify-between px-4 py-3">
+          <div className="flex items-center space-x-2">
+            <Button variant="ghost" size="icon" onClick={toggleSidebar} className="md:hidden">
+              <MenuIcon className="h-5 w-5" />
+            </Button>
+            <h1 className="text-xl font-bold">Uptown Gym</h1>
           </div>
-        )}
-        
-        <main className="flex-1 p-4 md:p-6 overflow-auto">
-          <div className="container mx-auto">
-            <Outlet />
+          <div className="flex items-center space-x-4">
+            <Button variant="ghost" size="icon">
+              <BellIcon className="h-5 w-5" />
+            </Button>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Avatar className="cursor-pointer">
+                  <AvatarImage src={user?.user_metadata?.avatar_url} />
+                  <AvatarFallback>{getInitials()}</AvatarFallback>
+                </Avatar>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuLabel>My Account</DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={() => navigate('/dashboard/settings')}>
+                  Settings
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={handleSignOut} className="text-red-600">
+                  <LogOut className="mr-2 h-4 w-4" />
+                  Log Out
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
+        </div>
+        <CustomerHeader />
+      </header>
+
+      <div className="flex flex-1 overflow-hidden">
+        <div className={`${sidebarOpen ? 'block' : 'hidden'} md:block h-full`}>
+          <CustomerSidebar />
+        </div>
+        <main className="flex-1 overflow-y-auto p-4 md:p-6">
+          <Outlet />
         </main>
       </div>
+      
+      <Toaster />
     </div>
   );
 };

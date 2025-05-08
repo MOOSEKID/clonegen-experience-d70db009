@@ -70,6 +70,9 @@ const Health = lazy(() => import("./pages/dashboard/Health"));
 const Achievements = lazy(() => import("./pages/dashboard/Achievements"));
 const Locations = lazy(() => import("./pages/dashboard/Locations"));
 const Settings = lazy(() => import("./pages/dashboard/Settings"));
+const WorkoutPrograms = lazy(() => import("./pages/dashboard/WorkoutPrograms"));
+const ExerciseLibrary = lazy(() => import("./pages/dashboard/ExerciseLibrary"));
+const NutritionTracking = lazy(() => import("./pages/dashboard/NutritionTracking"));
 
 // Create a new query client instance with optimized settings
 const queryClient = new QueryClient({
