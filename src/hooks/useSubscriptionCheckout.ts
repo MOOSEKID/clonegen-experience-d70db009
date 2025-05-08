@@ -1,7 +1,7 @@
 
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useOptimizedAuthContext } from '@/hooks/useOptimizedAuthContext';
+import { useAuth } from '@/hooks/useAuth';
 import { useSubscriptionPlans } from '@/hooks/useSubscriptionPlans';
 import { useUserProfile } from '@/hooks/useUserProfile';
 import { toast } from 'sonner';
@@ -27,7 +27,7 @@ export const useSubscriptionCheckout = () => {
     isAuthModalOpen: false,
     isCheckoutModalOpen: false,
   });
-  const { isAuthenticated, user } = useOptimizedAuthContext();
+  const { isAuthenticated, user } = useAuth();
   const { getPlanByIdentifier } = useSubscriptionPlans();
   const { userProfile, updateUserProfile } = useUserProfile();
   const navigate = useNavigate();
