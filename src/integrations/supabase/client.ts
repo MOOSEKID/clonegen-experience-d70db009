@@ -1,4 +1,3 @@
-
 import { createClient } from '@supabase/supabase-js';
 import type { Database } from './types';
 
@@ -23,3 +22,30 @@ export const supabase = createClient<Database>(
     },
   }
 );
+
+// Add type assertions for custom tables in Database
+declare module '@supabase/supabase-js' {
+  interface Database {
+    public: {
+      Tables: {
+        // Add our settings tables
+        settings_general: any;
+        settings_business_hours: any;
+        settings_business_holidays: any;
+        settings_security: any;
+        settings_platform: any;
+        settings_integrations: any;
+        settings_roles: any;
+        settings_members_defaults: any;
+        settings_companies_automation: any;
+        settings_notifications: any;
+        settings_invoices_templates: any;
+        settings_reports_export: any;
+        settings_automations: any;
+        settings_testing_accounts: any;
+        settings_ui_messages: any;
+        // ... existing tables
+      }
+    }
+  }
+}

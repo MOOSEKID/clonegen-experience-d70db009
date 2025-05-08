@@ -1,12 +1,11 @@
 
 import { useState, useEffect } from 'react';
-import { Settings as SettingsIcon, Clock, Shield, User, Bell, FileText, Download, Zap, TestTube, MessageSquare, Store, DollarSign, BarChart } from 'lucide-react';
+import { Settings as SettingsIcon, User, Zap } from 'lucide-react';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import GeneralSettings from '@/components/admin/settings/general/GeneralSettings';
-import BusinessHoursSettings from '@/components/admin/settings/business/BusinessHoursSettings';
-import SecuritySettings from '@/components/admin/settings/security/SecuritySettings';
-import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
+import SystemTabContent from '@/components/admin/settings/SystemTabContent';
+import PeopleTabContent from '@/components/admin/settings/PeopleTabContent';
+import AdvancedTabContent from '@/components/admin/settings/AdvancedTabContent';
 
 // Storage setup
 const setupStorageBucket = async () => {
@@ -58,100 +57,15 @@ const AdminSettings = () => {
         </TabsList>
         
         <TabsContent value="system">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <div className="space-y-6">
-              <GeneralSettings />
-              <SecuritySettings />
-              <div className="grid grid-cols-1 gap-6">
-                {/* Platform Settings - This is a placeholder for now */}
-                <div className="bg-gray-100 p-6 rounded-lg shadow-sm min-h-[200px] flex flex-col justify-center items-center text-center">
-                  <Store className="h-12 w-12 text-gray-400 mb-3" />
-                  <h3 className="text-lg font-medium">Platform Settings</h3>
-                  <p className="text-sm text-gray-500">Coming soon - Enable/disable features, test mode</p>
-                </div>
-                
-                {/* Integrations - This is a placeholder for now */}
-                <div className="bg-gray-100 p-6 rounded-lg shadow-sm min-h-[200px] flex flex-col justify-center items-center text-center">
-                  <DollarSign className="h-12 w-12 text-gray-400 mb-3" />
-                  <h3 className="text-lg font-medium">Integrations</h3>
-                  <p className="text-sm text-gray-500">Coming soon - API keys for Stripe, MTN, Airtel, etc.</p>
-                </div>
-              </div>
-            </div>
-            
-            <BusinessHoursSettings />
-          </div>
+          <SystemTabContent />
         </TabsContent>
         
         <TabsContent value="people">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            {/* User Permissions - This is a placeholder for now */}
-            <div className="bg-gray-100 p-6 rounded-lg shadow-sm min-h-[200px] flex flex-col justify-center items-center text-center">
-              <Shield className="h-12 w-12 text-gray-400 mb-3" />
-              <h3 className="text-lg font-medium">User Permissions</h3>
-              <p className="text-sm text-gray-500">Coming soon - Create and manage user roles</p>
-            </div>
-            
-            {/* Default Member Settings - This is a placeholder for now */}
-            <div className="bg-gray-100 p-6 rounded-lg shadow-sm min-h-[200px] flex flex-col justify-center items-center text-center">
-              <User className="h-12 w-12 text-gray-400 mb-3" />
-              <h3 className="text-lg font-medium">Default Member Settings</h3>
-              <p className="text-sm text-gray-500">Coming soon - Configure default plans and renewal options</p>
-            </div>
-            
-            {/* Company Automation - This is a placeholder for now */}
-            <div className="bg-gray-100 p-6 rounded-lg shadow-sm min-h-[200px] flex flex-col justify-center items-center text-center">
-              <BarChart className="h-12 w-12 text-gray-400 mb-3" />
-              <h3 className="text-lg font-medium">Company Automation</h3>
-              <p className="text-sm text-gray-500">Coming soon - Set attendance reports and invoicing rules</p>
-            </div>
-            
-            {/* Notification Settings - This is a placeholder for now */}
-            <div className="bg-gray-100 p-6 rounded-lg shadow-sm min-h-[200px] flex flex-col justify-center items-center text-center">
-              <Bell className="h-12 w-12 text-gray-400 mb-3" />
-              <h3 className="text-lg font-medium">Notification Settings</h3>
-              <p className="text-sm text-gray-500">Coming soon - Configure email templates and SMS notifications</p>
-            </div>
-            
-            {/* Invoice Templates - This is a placeholder for now */}
-            <div className="bg-gray-100 p-6 rounded-lg shadow-sm min-h-[200px] flex flex-col justify-center items-center text-center">
-              <FileText className="h-12 w-12 text-gray-400 mb-3" />
-              <h3 className="text-lg font-medium">Invoice Templates</h3>
-              <p className="text-sm text-gray-500">Coming soon - Customize invoice appearance and content</p>
-            </div>
-          </div>
+          <PeopleTabContent />
         </TabsContent>
         
         <TabsContent value="advanced">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {/* Reports & Exports - This is a placeholder for now */}
-            <div className="bg-gray-100 p-6 rounded-lg shadow-sm min-h-[200px] flex flex-col justify-center items-center text-center">
-              <Download className="h-12 w-12 text-gray-400 mb-3" />
-              <h3 className="text-lg font-medium">Reports & Exports</h3>
-              <p className="text-sm text-gray-500">Coming soon - Configure automated export settings</p>
-            </div>
-            
-            {/* Automation Rules - This is a placeholder for now */}
-            <div className="bg-gray-100 p-6 rounded-lg shadow-sm min-h-[200px] flex flex-col justify-center items-center text-center">
-              <Zap className="h-12 w-12 text-gray-400 mb-3" />
-              <h3 className="text-lg font-medium">Automation Rules</h3>
-              <p className="text-sm text-gray-500">Coming soon - Create trigger-based workflows</p>
-            </div>
-            
-            {/* Test Account Settings - This is a placeholder for now */}
-            <div className="bg-gray-100 p-6 rounded-lg shadow-sm min-h-[200px] flex flex-col justify-center items-center text-center">
-              <TestTube className="h-12 w-12 text-gray-400 mb-3" />
-              <h3 className="text-lg font-medium">Test Account Settings</h3>
-              <p className="text-sm text-gray-500">Coming soon - Manage test accounts and mode</p>
-            </div>
-            
-            {/* Custom Messages - This is a placeholder for now */}
-            <div className="bg-gray-100 p-6 rounded-lg shadow-sm min-h-[200px] flex flex-col justify-center items-center text-center">
-              <MessageSquare className="h-12 w-12 text-gray-400 mb-3" />
-              <h3 className="text-lg font-medium">Custom Messages</h3>
-              <p className="text-sm text-gray-500">Coming soon - Create popups and motivational alerts</p>
-            </div>
-          </div>
+          <AdvancedTabContent />
         </TabsContent>
       </Tabs>
     </div>

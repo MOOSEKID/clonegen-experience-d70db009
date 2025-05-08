@@ -41,22 +41,26 @@ const BusinessHoursSettings = () => {
   useEffect(() => {
     const fetchBusinessHours = async () => {
       setLoadingHours(true);
-      const { data, error } = await supabase
-        .from('settings_business_hours')
-        .select('*')
-        .order('day_of_week', { ascending: true });
+      try {
+        const { data, error } = await supabase
+          .from('settings_business_hours')
+          .select('*')
+          .order('day_of_week', { ascending: true });
+          
+        if (error) {
+          console.error('Error fetching business hours:', error);
+          toast.error('Failed to load business hours');
+          setLoadingHours(false);
+          return;
+        }
         
-      if (error) {
-        console.error('Error fetching business hours:', error);
-        toast.error('Failed to load business hours');
+        setBusinessHours(data as BusinessHour[]);
+      } catch (err: any) {
+        console.error(`Error in fetchData for business hours:`, err);
+        toast.error(`Failed to load business hours: ${err.message}`);
+      } finally {
         setLoadingHours(false);
-        return;
       }
-      
-      if (data) {
-        setBusinessHours(data);
-      }
-      setLoadingHours(false);
     };
     
     fetchBusinessHours();
@@ -66,22 +70,26 @@ const BusinessHoursSettings = () => {
   useEffect(() => {
     const fetchHolidays = async () => {
       setLoadingHolidays(true);
-      const { data, error } = await supabase
-        .from('settings_business_holidays')
-        .select('*')
-        .order('holiday_date', { ascending: true });
+      try {
+        const { data, error } = await supabase
+          .from('settings_business_holidays')
+          .select('*')
+          .order('holiday_date', { ascending: true });
+          
+        if (error) {
+          console.error('Error fetching holidays:', error);
+          toast.error('Failed to load holidays');
+          setLoadingHolidays(false);
+          return;
+        }
         
-      if (error) {
-        console.error('Error fetching holidays:', error);
-        toast.error('Failed to load holidays');
+        setHolidays(data as Holiday[]);
+      } catch (err: any) {
+        console.error(`Error in fetchHolidays:`, err);
+        toast.error(`Failed to load holidays: ${err.message}`);
+      } finally {
         setLoadingHolidays(false);
-        return;
       }
-      
-      if (data) {
-        setHolidays(data);
-      }
-      setLoadingHolidays(false);
     };
     
     fetchHolidays();
@@ -141,7 +149,7 @@ const BusinessHoursSettings = () => {
       if (error) throw error;
       
       if (data && data[0]) {
-        setHolidays(prev => [...prev, data[0]]);
+        setHolidays(prev => [...prev, data[0] as Holiday]);
         setNewHoliday({ name: '', date: '' });
         toast.success('Holiday added successfully');
       }
