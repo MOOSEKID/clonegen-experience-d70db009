@@ -22,9 +22,9 @@ const ElementProperties = ({ element, onUpdate, viewMode = 'desktop' }: ElementP
 
   const handleResponsiveUpdate = (deviceType: 'desktop' | 'tablet' | 'mobile', settings: any) => {
     const currentResponsiveSettings = properties.responsiveSettings || {
-      desktop: { fontSize: 'medium', columns: 3 },
-      tablet: { fontSize: 'medium', columns: 2 },
-      mobile: { fontSize: 'small', columns: 1 }
+      desktop: { fontSize: 'medium', columns: 3, visible: true },
+      tablet: { fontSize: 'medium', columns: 2, visible: true },
+      mobile: { fontSize: 'small', columns: 1, visible: true }
     };
 
     onUpdate({

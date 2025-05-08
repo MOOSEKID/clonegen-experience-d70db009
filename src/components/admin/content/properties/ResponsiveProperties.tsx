@@ -5,6 +5,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Monitor, Tablet, Smartphone } from "lucide-react";
 import { Slider } from "@/components/ui/slider";
+import { Switch } from "@/components/ui/switch";
 
 interface ResponsivePropertiesProps {
   properties: any;
@@ -22,19 +23,23 @@ const ResponsiveProperties = ({
   const [selectedDevice, setSelectedDevice] = useState<'desktop' | 'tablet' | 'mobile'>(currentDevice);
   
   const responsiveSettings = properties.responsiveSettings || {
-    desktop: { fontSize: 'medium', columns: 3 },
-    tablet: { fontSize: 'medium', columns: 2 },
-    mobile: { fontSize: 'small', columns: 1 }
+    desktop: { fontSize: 'medium', columns: 3, visible: true },
+    tablet: { fontSize: 'medium', columns: 2, visible: true },
+    mobile: { fontSize: 'small', columns: 1, visible: true }
   };
 
   const deviceSettings = responsiveSettings[selectedDevice];
   
   const handleFontSizeChange = (value: string) => {
-    onUpdate(selectedDevice, { fontSize: value });
+    onUpdate(selectedDevice, { ...deviceSettings, fontSize: value });
   };
 
   const handleColumnsChange = (value: number) => {
-    onUpdate(selectedDevice, { columns: value });
+    onUpdate(selectedDevice, { ...deviceSettings, columns: value });
+  };
+  
+  const handleVisibilityChange = (visible: boolean) => {
+    onUpdate(selectedDevice, { ...deviceSettings, visible });
   };
 
   return (
@@ -68,6 +73,7 @@ const ResponsiveProperties = ({
               elementType={elementType}
               onFontSizeChange={handleFontSizeChange}
               onColumnsChange={handleColumnsChange}
+              onVisibilityChange={handleVisibilityChange}
               maxColumns={4}
             />
           </TabsContent>
@@ -78,6 +84,7 @@ const ResponsiveProperties = ({
               elementType={elementType}
               onFontSizeChange={handleFontSizeChange}
               onColumnsChange={handleColumnsChange}
+              onVisibilityChange={handleVisibilityChange}
               maxColumns={3}
             />
           </TabsContent>
@@ -88,6 +95,7 @@ const ResponsiveProperties = ({
               elementType={elementType}
               onFontSizeChange={handleFontSizeChange}
               onColumnsChange={handleColumnsChange}
+              onVisibilityChange={handleVisibilityChange}
               maxColumns={2}
             />
           </TabsContent>
@@ -101,10 +109,12 @@ interface DeviceSettingsProps {
   settings: {
     fontSize: string;
     columns: number;
+    visible: boolean;
   };
   elementType: string;
   onFontSizeChange: (value: string) => void;
   onColumnsChange: (value: number) => void;
+  onVisibilityChange: (value: boolean) => void;
   maxColumns: number;
 }
 
@@ -113,6 +123,7 @@ const DeviceSettings = ({
   elementType,
   onFontSizeChange, 
   onColumnsChange,
+  onVisibilityChange,
   maxColumns
 }: DeviceSettingsProps) => {
   const showFontSize = elementType === 'text' || elementType === 'button';
@@ -120,6 +131,15 @@ const DeviceSettings = ({
   
   return (
     <div className="space-y-6">
+      <div className="flex items-center justify-between space-x-4">
+        <Label htmlFor="visibility-toggle">Element visibility</Label>
+        <Switch 
+          id="visibility-toggle"
+          checked={settings.visible !== false}
+          onCheckedChange={onVisibilityChange}
+        />
+      </div>
+      
       {showFontSize && (
         <div>
           <Label className="block mb-2">Font Size</Label>

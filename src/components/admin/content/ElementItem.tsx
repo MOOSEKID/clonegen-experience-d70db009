@@ -6,8 +6,10 @@ import {
   Copy,
   ArrowDown,
   ArrowUp,
+  EyeOff
 } from 'lucide-react';
 import EditableElement from './EditableElement';
+import { cn } from '@/lib/utils';
 
 interface ElementItemProps {
   element: any;
@@ -39,8 +41,16 @@ const ElementItem = ({
   // Get responsive settings based on view mode
   const responsiveSettings = element.currentViewSettings || {
     fontSize: 'medium',
-    columns: viewMode === 'mobile' ? 1 : viewMode === 'tablet' ? 2 : 3
+    columns: viewMode === 'mobile' ? 1 : viewMode === 'tablet' ? 2 : 3,
+    visible: true
   };
+  
+  // Check if the element should be visible in the current view mode
+  const isVisible = responsiveSettings.visible !== false;
+
+  if (!isVisible && isPreviewMode) {
+    return null; // Don't render the element in preview mode if it's not visible
+  }
 
   return (
     <Draggable 
@@ -53,13 +63,24 @@ const ElementItem = ({
         <div
           ref={provided.innerRef}
           {...provided.draggableProps}
-          className={`border ${selectedElement?.id === element.id && !isPreviewMode ? 'border-gym-orange' : 'border-gray-200'} 
-            rounded-lg shadow-sm relative group ${isPreviewMode ? 'border-transparent shadow-none' : ''}`}
+          className={cn(
+            `border rounded-lg shadow-sm relative group`,
+            selectedElement?.id === element.id && !isPreviewMode ? 'border-gym-orange' : 'border-gray-200',
+            isPreviewMode ? 'border-transparent shadow-none' : '',
+            !isVisible && !isPreviewMode ? 'opacity-50' : ''
+          )}
           style={{
             ...provided.draggableProps.style,
             gridColumnEnd: `span ${responsiveSettings.columns || 1}`
           }}
         >
+          {!isPreviewMode && !isVisible && (
+            <div className="absolute -top-3 left-1/2 transform -translate-x-1/2 bg-gray-500 text-white text-xs px-2 py-1 rounded-full flex items-center">
+              <EyeOff size={12} className="mr-1" />
+              <span>Hidden on {viewMode}</span>
+            </div>
+          )}
+          
           {!isPreviewMode && (
             <div className="absolute -top-3 -right-3 flex space-x-1 opacity-0 group-hover:opacity-100 transition-opacity">
               <button

@@ -1,5 +1,5 @@
 
-import { PlusCircle, Monitor, Smartphone, Tablet, Eye, EyeOff } from 'lucide-react';
+import { PlusCircle, Monitor, Smartphone, Tablet, Eye, EyeOff, Download } from 'lucide-react';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -9,6 +9,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 export const AddElementButton = ({ onAddElement }) => {
   return (
@@ -47,6 +48,7 @@ interface ContentEditorToolsProps {
   onAddElement: (type: string) => void;
   viewMode: 'desktop' | 'tablet' | 'mobile';
   onChangeViewMode: (mode: 'desktop' | 'tablet' | 'mobile') => void;
+  onImportLiveLayout?: () => void;
 }
 
 const ContentEditorTools = ({ 
@@ -54,7 +56,8 @@ const ContentEditorTools = ({
   onTogglePreview, 
   onAddElement, 
   viewMode, 
-  onChangeViewMode 
+  onChangeViewMode,
+  onImportLiveLayout
 }: ContentEditorToolsProps) => {
   return (
     <div className="flex items-center justify-between p-4 border-b border-gray-200 bg-white flex-wrap gap-2">
@@ -70,30 +73,53 @@ const ContentEditorTools = ({
         </Button>
 
         {!isPreviewMode && (
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="outline" size="sm" className="flex items-center gap-1">
-                <PlusCircle className="h-4 w-4" />
-                <span className="hidden sm:inline">Add Element</span>
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent>
-              <DropdownMenuLabel>Element Type</DropdownMenuLabel>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem onClick={() => onAddElement('text')}>
-                Text Block
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => onAddElement('image')}>
-                Image
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => onAddElement('video')}>
-                Video
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => onAddElement('button')}>
-                Button
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
+          <>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" size="sm" className="flex items-center gap-1">
+                  <PlusCircle className="h-4 w-4" />
+                  <span className="hidden sm:inline">Add Element</span>
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent>
+                <DropdownMenuLabel>Element Type</DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={() => onAddElement('text')}>
+                  Text Block
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => onAddElement('image')}>
+                  Image
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => onAddElement('video')}>
+                  Video
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => onAddElement('button')}>
+                  Button
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+            
+            {onImportLiveLayout && (
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button 
+                      variant="outline" 
+                      size="sm"
+                      className="hidden sm:flex items-center gap-1"
+                      onClick={onImportLiveLayout}
+                    >
+                      <Download className="h-4 w-4" />
+                      <span>Import Live Layout</span>
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    Import the current live website layout into the editor
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+            )}
+          </>
         )}
       </div>
 

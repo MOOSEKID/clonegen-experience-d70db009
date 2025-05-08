@@ -6,10 +6,12 @@ import ContentEditorTools from './ContentEditorTools';
 import ElementsList from './ElementsList';
 import { toast } from "sonner";
 import PageSelector from './PageSelector';
+import { Button } from '@/components/ui/button';
+import { Sheet, SheetContent, SheetTrigger, SheetClose } from '@/components/ui/sheet';
+import { pages as pageComponents } from '@/data/pageComponentsData'; 
 
 // Mock data for page content
 import { pageContentData } from '@/data/cmsData';
-import { Button } from '@/components/ui/button';
 
 interface ContentEditorProps {
   selectedPage: string;
@@ -30,10 +32,19 @@ const ContentEditor = ({
   const [viewMode, setViewMode] = useState<'desktop' | 'tablet' | 'mobile'>('desktop');
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(true);
   const [isPropertiesPanelOpen, setIsPropertiesPanelOpen] = useState(true);
+  const [propertiesSheetOpen, setPropertiesSheetOpen] = useState(false);
   
   useEffect(() => {
+    // Load page content, including predefined components for the page type
     const content = pageContentData[selectedPage] || [];
-    setPageContent(content);
+    
+    // If content is empty and we have predefined components for this page, load them
+    if (content.length === 0 && pageComponents[selectedPage]) {
+      setPageContent(pageComponents[selectedPage]);
+    } else {
+      setPageContent(content);
+    }
+    
     setSelectedElement(null);
   }, [selectedPage]);
 
@@ -62,6 +73,7 @@ const ContentEditor = ({
     newContent.splice(index + 1, 0, duplicatedElement);
     setPageContent(newContent);
     onContentChange();
+    toast.success("Element duplicated successfully");
   };
 
   const handleMoveElement = (index, direction) => {
@@ -89,9 +101,9 @@ const ContentEditor = ({
         color: '#000000',
         padding: 'medium',
         responsiveSettings: {
-          desktop: { fontSize: 'medium', columns: 3 },
-          tablet: { fontSize: 'medium', columns: 2 },
-          mobile: { fontSize: 'small', columns: 1 }
+          desktop: { fontSize: 'medium', columns: 3, visible: true },
+          tablet: { fontSize: 'medium', columns: 2, visible: true },
+          mobile: { fontSize: 'small', columns: 1, visible: true }
         }
       }
     };
@@ -99,6 +111,7 @@ const ContentEditor = ({
     setPageContent([...pageContent, newElement]);
     setSelectedElement(newElement);
     onContentChange();
+    toast.success(`New ${type} element added`);
   };
 
   const handleUpdateElement = (element, index) => {
@@ -141,35 +154,64 @@ const ContentEditor = ({
   const togglePropertiesPanel = () => {
     setIsPropertiesPanelOpen(!isPropertiesPanelOpen);
   };
+  
+  const handleImportLiveLayout = () => {
+    // In a real app, this would fetch the live layout from the server
+    // For now, we'll simulate it with toast message
+    toast.success("Live layout imported into editor");
+    
+    // Get default components for this page type if available
+    if (pageComponents[selectedPage]) {
+      setPageContent(pageComponents[selectedPage]);
+      onContentChange();
+    }
+  };
 
   return (
     <div className={`flex flex-col md:flex-row h-full ${className}`}>
       {/* Mobile/Tablet Controls */}
       <div className="md:hidden flex justify-between items-center p-2 border-b">
-        <Button 
-          variant="outline" 
-          size="sm" 
-          onClick={toggleMobileSidebar}
-          className="flex items-center gap-1"
-        >
-          {isMobileSidebarOpen ? "Hide" : "Show"} Pages
-        </Button>
+        <PageSelector 
+          selectedPage={selectedPage} 
+          onSelectPage={() => {}} // This is handled at a higher level
+          isMobileSidebarOpen={true}
+        />
         
         {selectedElement && (
-          <Button 
-            variant="outline" 
-            size="sm" 
-            onClick={togglePropertiesPanel}
-            className="flex items-center gap-1"
-          >
-            {isPropertiesPanelOpen ? "Hide" : "Show"} Properties
-          </Button>
+          <Sheet open={propertiesSheetOpen} onOpenChange={setPropertiesSheetOpen}>
+            <SheetTrigger asChild>
+              <Button 
+                variant="outline" 
+                size="sm" 
+                className="flex items-center gap-1"
+              >
+                Edit Properties
+              </Button>
+            </SheetTrigger>
+            <SheetContent className="w-full sm:max-w-md">
+              <div className="h-full overflow-auto">
+                <h3 className="text-sm font-medium text-gray-700 mb-4">Element Properties</h3>
+                {selectedElement && (
+                  <ElementProperties 
+                    element={selectedElement} 
+                    onUpdate={handleUpdateProperties}
+                    viewMode={viewMode} 
+                  />
+                )}
+              </div>
+              <div className="mt-4">
+                <SheetClose asChild>
+                  <Button className="w-full">Done</Button>
+                </SheetClose>
+              </div>
+            </SheetContent>
+          </Sheet>
         )}
       </div>
       
       {/* Responsive Layout Structure */}
       <div className="flex flex-1 overflow-hidden">
-        {/* Page Selector */}
+        {/* Page Selector - only shown on desktop */}
         <PageSelector 
           selectedPage={selectedPage} 
           onSelectPage={() => {}} // This is handled at a higher level 
@@ -185,6 +227,7 @@ const ContentEditor = ({
             onAddElement={handleAddElement}
             viewMode={viewMode}
             onChangeViewMode={setViewMode}
+            onImportLiveLayout={handleImportLiveLayout}
           />
           
           {/* Main Content Area */}
@@ -202,7 +245,13 @@ const ContentEditor = ({
                 onDeleteElement={handleDeleteElement}
                 onDuplicateElement={handleDuplicateElement}
                 onMoveElement={handleMoveElement}
-                onSelectElement={setSelectedElement}
+                onSelectElement={(element) => {
+                  setSelectedElement(element);
+                  // On mobile, open properties sheet when selecting an element
+                  if (window.innerWidth < 768) {
+                    setPropertiesSheetOpen(true);
+                  }
+                }}
                 onUpdateElement={handleUpdateElement}
                 onAddElement={handleAddElement}
                 viewMode={viewMode}
@@ -211,7 +260,7 @@ const ContentEditor = ({
           </div>
         </div>
         
-        {/* Properties Panel */}
+        {/* Properties Panel - Desktop only */}
         {!isPreviewMode && (
           <div className={`
             ${!isPropertiesPanelOpen && 'hidden'} 

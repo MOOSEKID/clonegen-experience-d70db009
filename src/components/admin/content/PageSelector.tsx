@@ -11,9 +11,13 @@ import {
   Book,
   ChevronRight,
   ChevronDown,
-  Briefcase
+  Briefcase,
+  Menu,
+  X
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { Sheet, SheetContent, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
+import { Button } from '@/components/ui/button';
 
 interface PageSelectorProps {
   selectedPage: string;
@@ -62,7 +66,11 @@ const PageSelector = ({
   className = '',
   isMobileSidebarOpen = true 
 }: PageSelectorProps) => {
-  const [expandedItems, setExpandedItems] = useState<Record<string, boolean>>({});
+  const [expandedItems, setExpandedItems] = useState<Record<string, boolean>>({
+    company: true, // Expand company by default
+    services: true // Expand services by default
+  });
+  const [mobileOpen, setMobileOpen] = useState(false);
 
   const toggleExpand = (pageId: string) => {
     setExpandedItems(prev => ({
@@ -82,6 +90,7 @@ const PageSelector = ({
         toggleExpand(page.id);
       } else {
         onSelectPage(page.id);
+        setMobileOpen(false); // Close sheet on mobile after selecting
       }
     };
 
@@ -119,23 +128,59 @@ const PageSelector = ({
     );
   };
 
+  const pagesList = (
+    <ul className="py-2">
+      {pages.map(page => renderPageItem(page))}
+    </ul>
+  );
+  
+  // For smaller screens, use a Sheet component
   if (!isMobileSidebarOpen) {
     return null;
   }
 
   return (
-    <div className={cn(
-      "w-52 border-r border-gray-200 overflow-auto flex-shrink-0",
-      "md:block", // Always visible on medium screens and up
-      className
-    )}>
-      <div className="p-4 border-b border-gray-200">
-        <h3 className="text-sm font-medium text-gray-700">Select Page</h3>
+    <>
+      {/* Mobile view */}
+      <div className="md:hidden block">
+        <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
+          <SheetTrigger asChild>
+            <Button variant="outline" size="sm" className="flex items-center gap-2 mb-2">
+              <Menu size={16} />
+              Select Page
+            </Button>
+          </SheetTrigger>
+          <SheetContent side="left" className="w-64 p-0">
+            <SheetTitle className="p-4 border-b">
+              <div className="flex justify-between items-center">
+                <span>Select Page</span>
+                <Button 
+                  variant="ghost" 
+                  size="sm"
+                  className="h-8 w-8 p-0"
+                  onClick={() => setMobileOpen(false)}
+                >
+                  <X size={18} />
+                </Button>
+              </div>
+            </SheetTitle>
+            {pagesList}
+          </SheetContent>
+        </Sheet>
       </div>
-      <ul className="py-2">
-        {pages.map(page => renderPageItem(page))}
-      </ul>
-    </div>
+      
+      {/* Desktop view */}
+      <div className={cn(
+        "w-52 border-r border-gray-200 overflow-auto flex-shrink-0 hidden",
+        "md:block", // Always visible on medium screens and up
+        className
+      )}>
+        <div className="p-4 border-b border-gray-200">
+          <h3 className="text-sm font-medium text-gray-700">Select Page</h3>
+        </div>
+        {pagesList}
+      </div>
+    </>
   );
 };
 

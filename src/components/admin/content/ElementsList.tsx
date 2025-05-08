@@ -47,10 +47,18 @@ const ElementsList = ({
             >
               {pageContent.map((element, index) => {
                 // Get responsive settings for current view mode
-                const responsiveSettings = element.properties?.responsiveSettings?.[viewMode] || {
+                const defaultSettings = {
                   fontSize: viewMode === 'mobile' ? 'small' : 'medium',
-                  columns: viewMode === 'mobile' ? 1 : viewMode === 'tablet' ? 2 : 3
+                  columns: viewMode === 'mobile' ? 1 : viewMode === 'tablet' ? 2 : 3,
+                  visible: true
                 };
+                
+                const responsiveSettings = element.properties?.responsiveSettings?.[viewMode] || defaultSettings;
+                
+                // Skip rendering elements that are hidden in the current view mode when in preview
+                if (isPreviewMode && responsiveSettings.visible === false) {
+                  return null;
+                }
                 
                 return (
                   <ElementItem 

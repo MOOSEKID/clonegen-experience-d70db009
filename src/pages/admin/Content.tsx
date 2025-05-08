@@ -3,10 +3,10 @@ import { useState } from 'react';
 import { FileText, Image, Layout, Video, DollarSign, Search, Monitor, Smartphone, Tablet } from 'lucide-react';
 import ContentEditor from '@/components/admin/content/ContentEditor';
 import MediaLibrary from '@/components/admin/content/MediaLibrary';
-import PageSelector from '@/components/admin/content/PageSelector';
 import SitePreview from '@/components/admin/content/SitePreview';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { toast } from "sonner";
 
 const AdminContent = () => {
@@ -49,35 +49,74 @@ const AdminContent = () => {
         </div>
         
         <div className="flex flex-wrap gap-3 w-full md:w-auto">
-          <Button 
-            variant="outline" 
-            onClick={togglePreviewMode}
-            className={showPreview ? "bg-gray-100" : ""}
-          >
-            <Monitor className="h-4 w-4 mr-2" />
-            {showPreview ? "Hide Preview" : "Show Preview"}
-          </Button>
-          <Button 
-            variant="outline" 
-            onClick={handleSaveDraft}
-            disabled={!isDirty}
-          >
-            Save Draft
-          </Button>
-          <Button 
-            variant="outline" 
-            onClick={handleRevert}
-            disabled={!isDirty}
-          >
-            Revert Changes
-          </Button>
-          <Button 
-            onClick={handlePublish}
-            disabled={!isDirty || isPublishing}
-            className="bg-gym-orange hover:bg-gym-orange/90"
-          >
-            {isPublishing ? "Publishing..." : "Publish Changes"}
-          </Button>
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button 
+                  variant="outline" 
+                  onClick={togglePreviewMode}
+                  className={showPreview ? "bg-gray-100" : ""}
+                >
+                  <Monitor className="h-4 w-4 mr-2" />
+                  {showPreview ? "Hide Preview" : "Show Preview"}
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>
+                {showPreview ? "Hide the site preview panel" : "Show how your site will look"}
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+          
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button 
+                  variant="outline" 
+                  onClick={handleSaveDraft}
+                  disabled={!isDirty}
+                >
+                  Save Draft
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>
+                Save your changes without publishing
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+          
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button 
+                  variant="outline" 
+                  onClick={handleRevert}
+                  disabled={!isDirty}
+                >
+                  Revert Changes
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>
+                Undo all changes since last publish
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+          
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button 
+                  onClick={handlePublish}
+                  disabled={!isDirty || isPublishing}
+                  className="bg-gym-orange hover:bg-gym-orange/90"
+                >
+                  {isPublishing ? "Publishing..." : "Publish Changes"}
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>
+                Make changes live on the website
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
         </div>
       </div>
       
@@ -100,21 +139,7 @@ const AdminContent = () => {
           
           <TabsContent value="editor" className="p-0">
             <div className="flex flex-col h-[calc(100vh-280px)]">
-              <div className="flex md:hidden p-2 border-b">
-                <PageSelector 
-                  selectedPage={selectedPage} 
-                  onSelectPage={setSelectedPage} 
-                  isMobileSidebarOpen={true}
-                />
-              </div>
-              
               <div className="flex flex-1 h-full">
-                <PageSelector 
-                  selectedPage={selectedPage} 
-                  onSelectPage={setSelectedPage}
-                  className="hidden md:block"
-                />
-                
                 <div className={`flex-1 ${showPreview ? 'flex flex-col lg:flex-row' : ''} h-full overflow-hidden`}>
                   <ContentEditor 
                     selectedPage={selectedPage} 
@@ -180,8 +205,26 @@ const AdminContent = () => {
 // SEO Settings Form Component
 const SeoSettingsForm = ({ selectedPage, onSettingsChange }) => {
   return (
-    <div className="grid grid-cols-1 gap-6">
-      <div className="space-y-2">
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div className="space-y-2 col-span-2">
+        <label htmlFor="page-slug" className="text-sm font-medium">Page URL Slug</label>
+        <div className="flex">
+          <span className="bg-gray-100 px-3 py-2 border border-gray-300 border-r-0 rounded-l-md text-gray-500">
+            https://uptowngym.com/
+          </span>
+          <input 
+            id="page-slug" 
+            type="text" 
+            className="flex-1 p-2 border border-gray-300 rounded-r-md"
+            placeholder="page-slug"
+            defaultValue={selectedPage}
+            onChange={onSettingsChange}
+          />
+        </div>
+        <p className="text-xs text-gray-500">The URL path for this page (e.g., "about-us")</p>
+      </div>
+      
+      <div className="space-y-2 col-span-2">
         <label htmlFor="meta-title" className="text-sm font-medium">Meta Title</label>
         <input 
           id="meta-title" 
@@ -194,7 +237,7 @@ const SeoSettingsForm = ({ selectedPage, onSettingsChange }) => {
         <p className="text-xs text-gray-500">Recommended length: 50-60 characters</p>
       </div>
       
-      <div className="space-y-2">
+      <div className="space-y-2 col-span-2">
         <label htmlFor="meta-description" className="text-sm font-medium">Meta Description</label>
         <textarea 
           id="meta-description" 
@@ -217,6 +260,22 @@ const SeoSettingsForm = ({ selectedPage, onSettingsChange }) => {
           defaultValue="gym, fitness, workout, health, wellness"
           onChange={onSettingsChange}
         />
+      </div>
+      
+      <div className="space-y-2">
+        <label htmlFor="og-image" className="text-sm font-medium">Social Media Image</label>
+        <div className="flex items-center space-x-2">
+          <input 
+            id="og-image" 
+            type="text" 
+            className="flex-1 p-2 border border-gray-300 rounded-md"
+            placeholder="Image URL for social sharing"
+            defaultValue="/images/social-share.jpg"
+            onChange={onSettingsChange}
+          />
+          <Button variant="outline">Select</Button>
+        </div>
+        <p className="text-xs text-gray-500">Image shown when sharing on social media</p>
       </div>
     </div>
   );
