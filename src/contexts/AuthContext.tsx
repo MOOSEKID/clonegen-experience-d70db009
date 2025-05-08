@@ -31,6 +31,12 @@ const convertToAuthUser = (user: User | null): AuthUser | null => {
   };
 };
 
+// Debug log utility for auth operations
+const logAuthDebug = (operation: string, data: any) => {
+  const timestamp = new Date().toISOString();
+  console.debug(`[AUTH:${timestamp}] ${operation}:`, data);
+};
+
 export const AuthProvider = ({ children }: AuthProviderProps) => {
   // Get the authentication state using our custom hook
   const { 
@@ -43,7 +49,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     setIsAuthenticated 
   } = useAuthState();
 
-  // Initialize test users
+  // Initialize test users - only if needed
   useTestUsers();
 
   // Get authentication service hooks
@@ -52,14 +58,35 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   const { logout: logoutService } = useLogoutService();
   const { requestPasswordReset, updatePassword } = usePasswordService();
 
+  // Check if session and storage data are in sync
+  const validateSessionConsistency = () => {
+    try {
+      const storedIsLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
+      const storedIsAdmin = localStorage.getItem('isAdmin') === 'true';
+      
+      if (storedIsLoggedIn !== isAuthenticated || storedIsAdmin !== isAdmin) {
+        logAuthDebug('Session consistency check failed', {
+          storage: { isLoggedIn: storedIsLoggedIn, isAdmin: storedIsAdmin },
+          state: { isAuthenticated, isAdmin },
+        });
+        
+        // Update storage to match state
+        authStorageService.setAuthData(isAuthenticated, isAdmin, user?.email || '', user?.user_metadata?.full_name || '');
+      }
+    } catch (error) {
+      console.error('Error validating session consistency:', error);
+    }
+  };
+
   // Listen for auth changes
   useEffect(() => {
     console.log("Setting up auth state change listener in AuthContext");
+    logAuthDebug('Initial auth state', { isAuthenticated, isAdmin, email: user?.email });
     
     // Set up the auth state change listener FIRST (important to prevent deadlocks)
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event, session) => {
-        console.log('Auth state changed in context:', event);
+      (event, session) => {
+        logAuthDebug('Auth state changed', { event, email: session?.user?.email });
         
         if (event === 'SIGNED_IN' && session) {
           // Handle signed in event - Use non-blocking approach to prevent deadlocks
@@ -75,7 +102,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
               
               // If known admin, set state immediately for faster UI response
               if (isKnownAdmin) {
-                console.log('Known admin email detected, setting admin status immediately');
+                logAuthDebug('Known admin detected', { email: userEmail });
                 setIsAdmin(true);
                 authStorageService.setAuthData(
                   true, 
@@ -99,7 +126,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
               
               // Set admin status based on profile or known admin emails
               const userIsAdmin = profile?.is_admin || isKnownAdmin || false;
-              console.log('Auth state admin check:', { 
+              logAuthDebug('Profile check complete', { 
                 profile, 
                 isKnownAdmin, 
                 userIsAdmin,
@@ -119,13 +146,13 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
             }
           }, 0);
         } else if (event === 'SIGNED_OUT') {
-          console.log('User signed out, clearing auth state');
+          logAuthDebug('User signed out', {});
           setUser(null);
           setIsAdmin(false);
           setIsAuthenticated(false);
           authStorageService.setAuthData(false, false, '', '');
         } else if (event === 'USER_UPDATED' && session) {
-          console.log('User was updated');
+          logAuthDebug('User was updated', {});
           setUser(convertToAuthUser(session.user));
         }
       }
@@ -141,6 +168,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         }
         
         if (session) {
+          logAuthDebug('Existing session found', { email: session.user.email });
           setUser(convertToAuthUser(session.user));
           setIsAuthenticated(true);
           
@@ -150,7 +178,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
           
           // If known admin, set state immediately for faster UI response
           if (isKnownAdmin) {
-            console.log('Known admin email detected, setting admin status immediately');
+            logAuthDebug('Known admin detected in session check', { email: userEmail });
             setIsAdmin(true);
             authStorageService.setAuthData(
               true, 
@@ -177,7 +205,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
               
               // Set admin status based on profile or known admin emails
               const userIsAdmin = profile?.is_admin || isKnownAdmin || false;
-              console.log('Initial session admin check:', { 
+              logAuthDebug('Initial profile check complete', { 
                 profile, 
                 isKnownAdmin, 
                 userIsAdmin,
@@ -198,6 +226,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
           }, 0);
         } else {
           // No session, ensure auth state is cleared
+          logAuthDebug('No existing session found', {});
           setUser(null);
           setIsAdmin(false);
           setIsAuthenticated(false);
@@ -210,27 +239,36 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     
     checkCurrentSession();
     
+    // Periodically validate session consistency
+    const validationInterval = setInterval(validateSessionConsistency, 30000);
+    
     return () => {
       subscription.unsubscribe();
+      clearInterval(validationInterval);
     };
-  }, [setUser, setIsAdmin, setIsAuthenticated]);
+  }, [setUser, setIsAdmin, setIsAuthenticated, user]);
 
   /**
    * Login with email and password
    */
   const login = async (email: string, password: string): Promise<boolean> => {
     try {
-      console.log('Login attempt in context for:', email);
+      logAuthDebug('Login attempt', { email });
       
       // Fast path for known admin emails
       const isKnownAdmin = email.toLowerCase() === 'admin@example.com' || email.toLowerCase() === 'admin@uptowngym.rw';
       if (isKnownAdmin) {
-        console.log('Known admin login detected, taking fast path');
+        logAuthDebug('Known admin login detected', { email });
       }
       
       const result = await loginService(email, password);
       
       if (result.success && result.user) {
+        logAuthDebug('Login successful', { 
+          email: result.user.email,
+          isAdmin: result.isAdmin || isKnownAdmin
+        });
+        
         // Update auth state immediately to provide feedback
         setUser(convertToAuthUser(result.user));
         setIsAdmin(result.isAdmin || isKnownAdmin || false);
@@ -244,15 +282,10 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
           result.user.user_metadata?.full_name || result.user.email || ''
         );
         
-        console.log('Login success in context, auth state updated:', { 
-          isAuthenticated: true, 
-          isAdmin: result.isAdmin || isKnownAdmin
-        });
-        
         return true;
       }
       
-      console.log('Login failed in context');
+      logAuthDebug('Login failed', { email });
       return false;
     } catch (error) {
       console.error('Error in login context method:', error);
@@ -266,6 +299,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
    * Sign up a new user
    */
   const signUp = async (email: string, password: string, fullName: string): Promise<boolean> => {
+    logAuthDebug('Signup attempt', { email });
     return signUpService(email, password, fullName);
   };
 
@@ -273,7 +307,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
    * Log out the current user
    */
   const logout = async (): Promise<boolean> => {
-    console.log("Starting logout process in AuthContext");
+    logAuthDebug('Starting logout', { currentUser: user?.email });
     
     // First clear all local auth state
     setIsAuthenticated(false);
@@ -288,7 +322,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       const success = await logoutService();
       
       if (success) {
-        console.log("Logout successfully completed");
+        logAuthDebug('Logout successful', {});
         toast.success('Logged out successfully');
       } else {
         console.error("Logout service returned unsuccessful");

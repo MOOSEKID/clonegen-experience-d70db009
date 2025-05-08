@@ -3,17 +3,44 @@ import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 
 /**
- * Hook that provides logout functionality
+ * Hook that provides comprehensive logout functionality
  */
 export const useLogoutService = () => {
   /**
-   * Log out the current user
+   * Log out the current user and clean up all session data
    */
   const logout = async (): Promise<boolean> => {
     try {
-      console.log("Beginning Supabase logout process");
+      console.log("Beginning comprehensive Supabase logout process");
       
-      const { error } = await supabase.auth.signOut();
+      // First clear all auth-related localStorage items
+      const keysToRemove = [
+        'isLoggedIn',
+        'isAdmin',
+        'userEmail',
+        'userName',
+        'sb-qrjwfiurwvcsyrcpewsj-auth-token',
+        'supabase.auth.token',
+        'uptownGym_auth_state',
+        'uptownGym_profile'
+      ];
+      
+      keysToRemove.forEach(key => {
+        try {
+          localStorage.removeItem(key);
+        } catch (e) {
+          console.error(`Error removing ${key} from localStorage:`, e);
+        }
+      });
+      
+      // Clear cookies
+      document.cookie = "session_active=; path=/; max-age=0";
+      document.cookie = "user_role=; path=/; max-age=0";
+      
+      // Then perform Supabase signOut
+      const { error } = await supabase.auth.signOut({
+        scope: 'global' // Sign out from all tabs/windows
+      });
       
       if (error) {
         console.error('Logout error from Supabase:', error);
@@ -22,7 +49,7 @@ export const useLogoutService = () => {
       }
       
       // Add a small delay to ensure Supabase has time to clear the session properly
-      await new Promise(resolve => setTimeout(resolve, 150));
+      await new Promise(resolve => setTimeout(resolve, 200));
       
       console.log('Supabase logout completed successfully');
       return true;

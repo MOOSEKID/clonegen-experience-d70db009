@@ -11,13 +11,19 @@ type InitialAuthCheckParams = {
 };
 
 /**
- * Hook that performs the initial authentication check
+ * Hook that performs a reliable initial authentication check
  */
 export const useInitialAuthCheck = () => {
   const checkAuth = async ({ setUser, setIsAdmin, setIsAuthenticated, setIsLoading }: InitialAuthCheckParams) => {
     try {
       setIsLoading(true);
       console.log('Performing initial auth check...');
+      
+      // Clear any potentially unreliable cached auth state
+      const cachedAuthState = localStorage.getItem('isLoggedIn');
+      const cachedAdminState = localStorage.getItem('isAdmin');
+      
+      console.log('Cached auth state:', { cachedAuthState, cachedAdminState });
       
       // Get current session
       const { data: { session }, error: sessionError } = await supabase.auth.getSession();
@@ -48,6 +54,9 @@ export const useInitialAuthCheck = () => {
           if (error.code === 'PGRST116') {
             console.log('Profile not found in initial check, creating default profile...');
             
+            // Use the email to determine admin status for consistency
+            const userIsAdmin = isKnownAdminEmail;
+            
             const { error: insertError } = await supabase
               .from('profiles')
               .insert([
@@ -55,8 +64,8 @@ export const useInitialAuthCheck = () => {
                   id: currentUser.id,
                   email: currentUser.email,
                   full_name: currentUser.user_metadata?.full_name || currentUser.email || 'User',
-                  role: isKnownAdminEmail ? 'admin' : 'member',
-                  is_admin: isKnownAdminEmail
+                  role: userIsAdmin ? 'admin' : 'member',
+                  is_admin: userIsAdmin
                 }
               ]);
               
@@ -66,58 +75,41 @@ export const useInitialAuthCheck = () => {
               setUser({
                 ...currentUser,
                 email: currentUser.email || '',
-                role: isKnownAdminEmail ? 'admin' : 'member'
+                role: userIsAdmin ? 'admin' : 'member'
               });
               
-              setIsAdmin(isKnownAdminEmail);
+              setIsAdmin(userIsAdmin);
               setIsAuthenticated(true);
               
               authStorageService.setAuthData(
                 true, 
-                isKnownAdminEmail, 
+                userIsAdmin, 
                 currentUser.email || '', 
                 currentUser.user_metadata?.full_name || currentUser.email || ''
               );
             } else {
               console.log('Default profile created successfully in initial check');
               
-              // Get the newly created profile
-              const { data: newProfile } = await supabase
-                .from('profiles')
-                .select('role, is_admin, full_name')
-                .eq('id', currentUser.id)
-                .single();
-                
-              if (newProfile) {
-                const userRole = newProfile.role || isKnownAdminEmail ? 'admin' : 'member';
-                const userIsAdmin = newProfile.is_admin || isKnownAdminEmail;
-                
-                console.log('User authenticated with new profile in initial check:', {
-                  email: currentUser.email,
-                  role: userRole,
-                  isAdmin: userIsAdmin
-                });
-                
-                setUser({
-                  ...currentUser,
-                  email: currentUser.email || '',
-                  role: userRole
-                });
-                
-                setIsAdmin(userIsAdmin);
-                setIsAuthenticated(true);
-                
-                authStorageService.setAuthData(
-                  true, 
-                  userIsAdmin, 
-                  currentUser.email || '', 
-                  currentUser.user_metadata?.full_name || newProfile.full_name || currentUser.email || ''
-                );
-              }
+              setUser({
+                ...currentUser,
+                email: currentUser.email || '',
+                role: userIsAdmin ? 'admin' : 'member'
+              });
+              
+              setIsAdmin(userIsAdmin);
+              setIsAuthenticated(true);
+              
+              authStorageService.setAuthData(
+                true, 
+                userIsAdmin, 
+                currentUser.email || '', 
+                currentUser.user_metadata?.full_name || currentUser.email || ''
+              );
             }
           } else {
             // Other error fetching profile, but still set basic auth state
             console.warn('Error fetching profile, setting basic auth state based on email');
+            
             setUser({
               ...currentUser,
               email: currentUser.email || '',
@@ -135,29 +127,9 @@ export const useInitialAuthCheck = () => {
             );
           }
         } else {
-          // Profile exists, check if admin by email and update if needed
-          let userRole = profile?.role || 'member';
-          let userIsAdmin = Boolean(profile?.is_admin);
-          
-          // If this is a known admin email but profile doesn't reflect that, update the profile
-          if (isKnownAdminEmail && !userIsAdmin) {
-            console.log('Known admin email detected, updating profile...');
-            
-            const { error: updateError } = await supabase
-              .from('profiles')
-              .update({
-                role: 'admin',
-                is_admin: true
-              })
-              .eq('id', currentUser.id);
-              
-            if (updateError) {
-              console.error('Error updating admin status:', updateError);
-            } else {
-              userRole = 'admin';
-              userIsAdmin = true;
-            }
-          }
+          // Profile exists
+          const userIsAdmin = Boolean(profile?.is_admin) || isKnownAdminEmail;
+          const userRole = userIsAdmin ? 'admin' : (profile?.role || 'member');
           
           console.log('User authenticated in initial check:', {
             email: currentUser.email,
