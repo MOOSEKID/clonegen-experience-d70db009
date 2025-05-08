@@ -7,6 +7,7 @@ export interface AuthUser {
   role?: string;
   user_metadata?: {
     full_name?: string;
+    avatar_url?: string; // Add avatar_url property to fix the TypeScript error
   };
   // Add any other properties from Supabase User that we need
   app_metadata?: any;
