@@ -59,7 +59,8 @@ const DashboardLayout = () => {
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Avatar className="cursor-pointer">
-                  <AvatarImage src={user?.user_metadata?.avatar_url} />
+                  {/* Fix: Correctly access avatar_url from user_metadata which might be undefined */}
+                  <AvatarImage src={user?.user_metadata?.avatar_url || undefined} />
                   <AvatarFallback>{getInitials()}</AvatarFallback>
                 </Avatar>
               </DropdownMenuTrigger>
