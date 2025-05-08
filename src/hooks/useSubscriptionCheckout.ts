@@ -14,6 +14,7 @@ interface CheckoutState {
   isCheckoutModalOpen: boolean;
 }
 
+// Define a strong type for subscription updates
 interface SubscriptionUpdate {
   active_plan_id: string | null;
   billing_start_date: string | null;
@@ -50,6 +51,13 @@ export const useSubscriptionCheckout = () => {
       return;
     }
     
+    // Only allow active and visible plans to be purchased
+    if (plan.status !== 'Active' || !plan.is_visible_on_membership_page) {
+      toast.error("This membership plan is not currently available for purchase.");
+      setState(prev => ({ ...prev, isLoading: false }));
+      return;
+    }
+    
     // Show checkout modal or navigate to checkout page
     setState(prev => ({ ...prev, isCheckoutModalOpen: true, isLoading: false }));
   };
@@ -72,7 +80,10 @@ export const useSubscriptionCheckout = () => {
 
   // Complete subscription process
   const completeSubscription = async (paymentMethod: string) => {
-    if (!state.selectedPlanId || !user) return;
+    if (!state.selectedPlanId || !user) {
+      toast.error("Missing plan or user information. Please try again.");
+      return;
+    }
     
     setState(prev => ({ ...prev, isLoading: true }));
     
@@ -102,7 +113,7 @@ export const useSubscriptionCheckout = () => {
         toast.success("Your subscription has been activated successfully!");
         closeCheckoutModal();
         
-        // Redirect to dashboard instead of member/dashboard
+        // Redirect to dashboard
         navigate('/dashboard');
       } catch (error: any) {
         console.error('Failed to update subscription', error);

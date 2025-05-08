@@ -7,6 +7,7 @@ interface PlanGridProps {
   onEdit: (plan: SubscriptionPlan) => void;
   onToggleStatus: (plan: SubscriptionPlan) => void;
   onViewMembers: (plan: SubscriptionPlan) => void;
+  onToggleVisibility?: (plan: SubscriptionPlan) => void;
   isLoading: boolean;
 }
 
@@ -15,6 +16,7 @@ export const PlanGrid = ({
   onEdit, 
   onToggleStatus, 
   onViewMembers,
+  onToggleVisibility,
   isLoading
 }: PlanGridProps) => {
   if (isLoading) {
@@ -34,6 +36,7 @@ export const PlanGrid = ({
           onEdit={onEdit}
           onToggleStatus={onToggleStatus}
           onViewMembers={onViewMembers}
+          onToggleVisibility={onToggleVisibility}
         />
       ))}
     </div>

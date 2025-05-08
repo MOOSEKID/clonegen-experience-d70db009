@@ -1,14 +1,14 @@
 
 import React, { useEffect, useState } from 'react';
 import { Navigate, useNavigate } from 'react-router-dom';
-import { useOptimizedAuthContext } from '@/hooks/useOptimizedAuthContext';
+import { useAuth } from '@/hooks/useAuth';
 import { useUserProfile } from '@/hooks/useUserProfile';
 import { useSubscriptionPlans } from '@/hooks/useSubscriptionPlans';
 import { toast } from 'sonner';
 
 const MemberDashboard = () => {
   const navigate = useNavigate();
-  const { isAuthenticated } = useOptimizedAuthContext();
+  const { isAuthenticated } = useAuth();
   const { userProfile, isLoading: profileLoading } = useUserProfile();
   const { plans, loading: plansLoading, getPlanByIdentifier } = useSubscriptionPlans();
   const [activePlan, setActivePlan] = useState<any>(null);
@@ -58,7 +58,9 @@ const MemberDashboard = () => {
               <div className="mb-4">
                 <span className="text-gray-600">Current Plan:</span>
                 <span className="ml-2 font-medium">{activePlan.name}</span>
-                <span className="ml-2 px-2 py-1 text-xs bg-green-100 text-green-800 rounded-full">Active</span>
+                <span className="ml-2 px-2 py-1 text-xs bg-green-100 text-green-800 rounded-full">
+                  {userProfile?.subscription_status || 'Active'}
+                </span>
               </div>
               
               <div className="mb-4">
@@ -69,7 +71,7 @@ const MemberDashboard = () => {
               <div className="mb-4">
                 <span className="text-gray-600">Price:</span>
                 <span className="ml-2 font-medium">
-                  {activePlan.price.startsWith('RWF') ? activePlan.price : `RWF ${activePlan.price}`}
+                  {activePlan.price}
                   /{activePlan.billingCycle.toLowerCase()}
                 </span>
               </div>
@@ -78,9 +80,24 @@ const MemberDashboard = () => {
                 <span className="text-gray-600">Started On:</span>
                 <span className="ml-2">{userProfile?.billing_start_date || 'N/A'}</span>
               </div>
+
+              <h3 className="text-lg font-semibold mt-6 mb-2">Plan Features:</h3>
+              <ul className="list-disc pl-5 space-y-1">
+                {activePlan.features.map((feature: string, idx: number) => (
+                  <li key={idx} className="text-gray-700">{feature}</li>
+                ))}
+              </ul>
             </div>
           ) : (
-            <p className="text-gray-600">You don't have an active membership plan.</p>
+            <div>
+              <p className="text-gray-600 mb-4">You don't have an active membership plan.</p>
+              <button
+                onClick={() => navigate('/membership')}
+                className="bg-gym-orange hover:bg-gym-orange-dark text-white py-2 px-4 rounded transition-colors"
+              >
+                View Membership Plans
+              </button>
+            </div>
           )}
         </div>
         

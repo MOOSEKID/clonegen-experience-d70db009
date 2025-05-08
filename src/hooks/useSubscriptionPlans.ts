@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { toast } from 'sonner';
 
@@ -12,6 +13,7 @@ export interface SubscriptionPlan {
   planId?: string;
   slug?: string; // URL-friendly identifier for the plan
   checkoutUrl?: string; // Direct URL to checkout page
+  is_visible_on_membership_page: boolean; // New field for controlling visibility
 }
 
 export const useSubscriptionPlans = () => {
@@ -51,11 +53,12 @@ export const useSubscriptionPlans = () => {
     }
   }, [plans, loading]);
 
-  const addPlan = (plan: Omit<SubscriptionPlan, 'id' | 'status' | 'memberCount'>) => {
+  const addPlan = (plan: Omit<SubscriptionPlan, 'id' | 'status' | 'memberCount' | 'is_visible_on_membership_page'>) => {
     const newPlan: SubscriptionPlan = {
       id: Date.now().toString(),
       status: 'Active',
       memberCount: 0,
+      is_visible_on_membership_page: true, // Default to visible
       ...plan,
     };
     setPlans([...plans, newPlan]);
@@ -77,6 +80,16 @@ export const useSubscriptionPlans = () => {
         : plan
     ));
     return plans.find(p => p.id === id)?.status === 'Active' ? 'Paused' : 'Active';
+  };
+
+  // Toggle plan visibility on membership page
+  const togglePlanVisibility = (id: string) => {
+    setPlans(plans.map(plan => 
+      plan.id === id 
+        ? { ...plan, is_visible_on_membership_page: !plan.is_visible_on_membership_page } 
+        : plan
+    ));
+    return plans.find(p => p.id === id)?.is_visible_on_membership_page ? false : true;
   };
 
   // New function to get a specific plan by planId or slug
@@ -103,6 +116,7 @@ export const useSubscriptionPlans = () => {
     addPlan,
     updatePlan,
     togglePlanStatus,
+    togglePlanVisibility,
     getPlanByIdentifier
   };
 };
@@ -113,41 +127,45 @@ const defaultSubscriptionPlans: SubscriptionPlan[] = [
     id: '1',
     name: 'Basic Membership',
     billingCycle: 'Monthly',
-    price: '$29.99',
+    price: 'RWF 29,999',
     status: 'Active',
     memberCount: 156,
     features: ['Gym Access', 'Basic Equipment', 'Locker Room'],
-    planId: 'basic-monthly'
+    planId: 'basic-monthly',
+    is_visible_on_membership_page: true
   },
   {
     id: '2',
     name: 'Premium Membership',
     billingCycle: 'Monthly',
-    price: '$49.99',
+    price: 'RWF 49,999',
     status: 'Active',
     memberCount: 89,
     features: ['Full Gym Access', 'Group Classes', 'Personal Trainer (1x/month)'],
-    planId: 'premium-monthly'
+    planId: 'premium-monthly',
+    is_visible_on_membership_page: true
   },
   {
     id: '3',
     name: 'Family Plan',
     billingCycle: 'Annual',
-    price: '$899.99',
+    price: 'RWF 899,999',
     status: 'Active',
     memberCount: 34,
     features: ['Access for 4 Family Members', 'Group Classes', 'Pool & Spa'],
-    planId: 'family-annual'
+    planId: 'family-annual',
+    is_visible_on_membership_page: true
   },
   {
     id: '4',
     name: 'Student Discount',
     billingCycle: 'Semester',
-    price: '$199.99',
+    price: 'RWF 199,999',
     status: 'Paused',
     memberCount: 127,
     features: ['Valid Student ID Required', 'Gym Access', 'Study Area'],
-    planId: 'student-semester'
+    planId: 'student-semester',
+    is_visible_on_membership_page: false
   },
   {
     id: '5',
@@ -157,6 +175,7 @@ const defaultSubscriptionPlans: SubscriptionPlan[] = [
     status: 'Active',
     memberCount: 213,
     features: ['Bulk Discounts', '24/7 Access', 'Dedicated Support'],
-    planId: 'corporate-annual'
+    planId: 'corporate-annual',
+    is_visible_on_membership_page: false
   }
 ];

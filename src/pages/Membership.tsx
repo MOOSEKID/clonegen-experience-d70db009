@@ -10,11 +10,11 @@ const Membership = () => {
   const { plans, loading } = useSubscriptionPlans();
   const [activePlans, setActivePlans] = useState<any[]>([]);
 
-  // Filter active plans and format them for display
+  // Filter active and visible plans and format them for display
   useEffect(() => {
     if (!loading) {
       const filtered = plans
-        .filter(plan => plan.status === 'Active')
+        .filter(plan => plan.status === 'Active' && plan.is_visible_on_membership_page)
         .map(plan => ({
           name: plan.name,
           price: plan.price.startsWith('$') ? plan.price.substring(1) : plan.price,

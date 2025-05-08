@@ -31,6 +31,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import { Switch } from '@/components/ui/switch';
 
 const planFormSchema = z.object({
   name: z.string().min(1, { message: 'Plan name is required' }),
@@ -38,6 +39,7 @@ const planFormSchema = z.object({
   price: z.string().min(1, { message: 'Price is required' }),
   planId: z.string().optional(),
   features: z.array(z.string()).min(1, { message: 'At least one feature is required' }),
+  is_visible_on_membership_page: z.boolean().default(true),
 });
 
 type PlanFormValues = z.infer<typeof planFormSchema>;
@@ -53,6 +55,7 @@ interface EditPlanDialogProps {
     price: string;
     planId?: string;
     features: string[];
+    is_visible_on_membership_page?: boolean;
   };
 }
 
@@ -65,6 +68,7 @@ export const EditPlanDialog = ({ isOpen, onClose, onSave, plan }: EditPlanDialog
       price: plan?.price || '',
       planId: plan?.planId || '',
       features: plan?.features || [''],
+      is_visible_on_membership_page: plan?.is_visible_on_membership_page ?? true,
     },
   });
 
@@ -76,6 +80,7 @@ export const EditPlanDialog = ({ isOpen, onClose, onSave, plan }: EditPlanDialog
         price: plan.price,
         planId: plan.planId,
         features: plan.features,
+        is_visible_on_membership_page: plan.is_visible_on_membership_page ?? true,
       });
     }
   }, [form, plan]);
@@ -198,6 +203,27 @@ export const EditPlanDialog = ({ isOpen, onClose, onSave, plan }: EditPlanDialog
                     Used to sync this plan with the public membership page
                   </FormDescription>
                   <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="is_visible_on_membership_page"
+              render={({ field }) => (
+                <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
+                  <div className="space-y-0.5">
+                    <FormLabel className="text-base">Show on Membership Page</FormLabel>
+                    <FormDescription>
+                      When enabled, this plan will be visible on the public membership page
+                    </FormDescription>
+                  </div>
+                  <FormControl>
+                    <Switch
+                      checked={field.value}
+                      onCheckedChange={field.onChange}
+                    />
+                  </FormControl>
                 </FormItem>
               )}
             />

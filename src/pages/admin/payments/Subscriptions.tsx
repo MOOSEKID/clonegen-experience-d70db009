@@ -9,7 +9,7 @@ import { PlanGrid } from '@/components/admin/payments/subscription/PlanGrid';
 import { useSubscriptionDialogs } from '@/components/admin/payments/subscription/useSubscriptionDialogs';
 
 const Subscriptions = () => {
-  const { plans, addPlan, updatePlan, togglePlanStatus, loading } = useSubscriptionPlans();
+  const { plans, addPlan, updatePlan, togglePlanStatus, togglePlanVisibility, loading } = useSubscriptionPlans();
   const {
     editingPlan,
     isEditModalOpen,
@@ -27,6 +27,9 @@ const Subscriptions = () => {
     openPauseConfirm
   } = useSubscriptionDialogs();
 
+  // Add state for visibility confirmation dialog
+  const [isVisibilityConfirmOpen, setIsVisibilityConfirmOpen] = React.useState(false);
+
   const handleTogglePlanStatus = (id: string) => {
     const newStatus = togglePlanStatus(id);
     // Close the confirmation dialog
@@ -36,6 +39,30 @@ const Subscriptions = () => {
     if (plan) {
       toast.success(`${plan.name} has been ${newStatus === 'Active' ? 'activated' : 'paused'}`);
     }
+  };
+
+  const handleToggleVisibility = (id: string) => {
+    const newVisibility = togglePlanVisibility(id);
+    // Close the confirmation dialog
+    setIsVisibilityConfirmOpen(false);
+    // Show toast notification
+    const plan = plans.find(p => p.id === id);
+    if (plan) {
+      toast.success(`${plan.name} is now ${newVisibility ? 'visible' : 'hidden'} on the membership page`);
+    }
+  };
+
+  const openVisibilityConfirm = (plan: SubscriptionPlan) => {
+    setSelectedPlan(plan);
+    setIsVisibilityConfirmOpen(true);
+  };
+
+  // Helper function to encapsulate setting the selected plan
+  const setSelectedPlan = (plan: SubscriptionPlan) => {
+    // Using any subscription dialog function that sets selectedPlan
+    openEditModal(plan);
+    // Close the edit modal that was just opened
+    setIsEditModalOpen(false);
   };
 
   const handleSavePlan = (data: any) => {
@@ -66,6 +93,7 @@ const Subscriptions = () => {
         onEdit={openEditModal}
         onToggleStatus={openPauseConfirm}
         onViewMembers={openMembersModal}
+        onToggleVisibility={openVisibilityConfirm}
         isLoading={loading}
       />
 
@@ -108,6 +136,22 @@ const Subscriptions = () => {
               : `Are you sure you want to activate the "${selectedPlan.name}" plan? This will make it available for new subscriptions.`
           }
           confirmLabel={selectedPlan.status === 'Active' ? 'Pause' : 'Activate'}
+        />
+      )}
+
+      {/* Visibility Confirmation */}
+      {selectedPlan && (
+        <ConfirmationDialog
+          isOpen={isVisibilityConfirmOpen}
+          onClose={() => setIsVisibilityConfirmOpen(false)}
+          onConfirm={() => handleToggleVisibility(selectedPlan.id)}
+          title={selectedPlan.is_visible_on_membership_page ? 'Hide Plan' : 'Show Plan'}
+          description={
+            selectedPlan.is_visible_on_membership_page
+              ? `Are you sure you want to hide "${selectedPlan.name}" from the membership page? It will no longer be visible to potential customers.`
+              : `Are you sure you want to show "${selectedPlan.name}" on the membership page? It will be visible to potential customers.`
+          }
+          confirmLabel={selectedPlan.is_visible_on_membership_page ? 'Hide' : 'Show'}
         />
       )}
     </div>

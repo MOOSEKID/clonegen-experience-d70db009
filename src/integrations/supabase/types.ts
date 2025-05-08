@@ -397,7 +397,9 @@ export type Database = {
       }
       profiles: {
         Row: {
+          active_plan_id: string | null
           avatar_url: string | null
+          billing_start_date: string | null
           bio: string | null
           contact_number: string | null
           created_at: string | null
@@ -409,11 +411,14 @@ export type Database = {
           is_staff: boolean | null
           preferred_workout_time: string | null
           role: string | null
+          subscription_status: string | null
           updated_at: string | null
           username: string | null
         }
         Insert: {
+          active_plan_id?: string | null
           avatar_url?: string | null
+          billing_start_date?: string | null
           bio?: string | null
           contact_number?: string | null
           created_at?: string | null
@@ -425,11 +430,14 @@ export type Database = {
           is_staff?: boolean | null
           preferred_workout_time?: string | null
           role?: string | null
+          subscription_status?: string | null
           updated_at?: string | null
           username?: string | null
         }
         Update: {
+          active_plan_id?: string | null
           avatar_url?: string | null
+          billing_start_date?: string | null
           bio?: string | null
           contact_number?: string | null
           created_at?: string | null
@@ -441,6 +449,7 @@ export type Database = {
           is_staff?: boolean | null
           preferred_workout_time?: string | null
           role?: string | null
+          subscription_status?: string | null
           updated_at?: string | null
           username?: string | null
         }
