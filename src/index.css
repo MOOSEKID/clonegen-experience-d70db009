@@ -208,3 +208,49 @@
 }
 
 /* Add other custom styles below */
+
+/* Hide scrollbar but maintain scroll functionality */
+.hide-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+.hide-scrollbar {
+  -ms-overflow-style: none;  /* IE and Edge */
+  scrollbar-width: none;  /* Firefox */
+}
+
+/* Category carousel styles */
+.service-carousel-container {
+  position: relative;
+  padding: 0 40px; /* space for arrows */
+}
+
+.service-carousel-arrow {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 10;
+  background-color: white;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.service-carousel-arrow:hover {
+  background-color: #f3f4f6;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+}
+
+.service-carousel-arrow.left {
+  left: 0;
+}
+
+.service-carousel-arrow.right {
+  right: 0;
+}

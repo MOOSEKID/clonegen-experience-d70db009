@@ -7,7 +7,7 @@ import ServiceCategoriesGrid from '@/components/membership/ServiceCategoriesGrid
 import MembershipBenefits from '@/components/membership/MembershipBenefits';
 
 const Membership = () => {
-  const { plans, loading } = useSubscriptionPlans();
+  const { plans, loading, formatPrice } = useSubscriptionPlans();
   const [activePlans, setActivePlans] = useState<any[]>([]);
 
   // Filter active and visible plans and format them for display
@@ -17,7 +17,7 @@ const Membership = () => {
         .filter(plan => plan.status === 'Active' && plan.is_visible_on_membership_page)
         .map(plan => ({
           name: plan.name,
-          price: plan.price.startsWith('$') ? plan.price.substring(1) : plan.price,
+          price: plan.price === 'Custom' ? 'Custom' : plan.price, // Keep "Custom" text as is
           period: plan.billingCycle.toLowerCase(),
           description: `${plan.billingCycle} plan`,
           features: plan.features,

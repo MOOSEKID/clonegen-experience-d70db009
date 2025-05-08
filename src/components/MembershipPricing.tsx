@@ -17,7 +17,8 @@ const MembershipPricing = () => {
         .map(plan => ({
           id: plan.planId || plan.id,
           name: plan.name,
-          price: plan.price.startsWith('RWF') ? plan.price.substring(4).trim() : plan.price,
+          price: plan.price === 'Custom' ? 'Custom' : plan.price.split(' ')[1], // Extract price value without currency
+          currency: plan.currency || 'RWF',
           period: plan.billingCycle.toLowerCase(),
           description: `${plan.billingCycle} plan`,
           features: plan.features,
@@ -106,8 +107,15 @@ const MembershipPricing = () => {
                   <h3 className="text-xl font-bold mb-2">{plan.name}</h3>
                   <p className="text-gray-600 mb-4">{plan.description}</p>
                   <div className="flex items-end mb-6">
-                    <span className="text-4xl font-bold">${plan.price}</span>
-                    <span className="text-gray-600 mb-1">/{plan.period}</span>
+                    {plan.price === 'Custom' ? (
+                      <span className="text-4xl font-bold">Custom</span>
+                    ) : (
+                      <>
+                        <span className="text-sm mr-1 mt-2">{plan.currency}</span>
+                        <span className="text-4xl font-bold">{plan.price}</span>
+                        <span className="text-gray-600 mb-1">/{plan.period}</span>
+                      </>
+                    )}
                   </div>
                   <ul className="space-y-3 mb-8">
                     {plan.features.map((feature: string, index: number) => (
