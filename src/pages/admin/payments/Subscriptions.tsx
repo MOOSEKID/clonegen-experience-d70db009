@@ -1,9 +1,10 @@
 
+import React, { useState } from 'react';
 import { toast } from 'sonner';
 import { EditPlanDialog } from '@/components/admin/payments/EditPlanDialog';
 import { PlanMembersDialog } from '@/components/admin/payments/PlanMembersDialog';
 import { ConfirmationDialog } from '@/components/admin/payments/ConfirmationDialog';
-import { useSubscriptionPlans } from '@/hooks/useSubscriptionPlans';
+import { useSubscriptionPlans, SubscriptionPlan } from '@/hooks/useSubscriptionPlans';
 import { SubscriptionHeader } from '@/components/admin/payments/subscription/SubscriptionHeader';
 import { PlanGrid } from '@/components/admin/payments/subscription/PlanGrid';
 import { useSubscriptionDialogs } from '@/components/admin/payments/subscription/useSubscriptionDialogs';
@@ -28,7 +29,7 @@ const Subscriptions = () => {
   } = useSubscriptionDialogs();
 
   // Add state for visibility confirmation dialog
-  const [isVisibilityConfirmOpen, setIsVisibilityConfirmOpen] = React.useState(false);
+  const [isVisibilityConfirmOpen, setIsVisibilityConfirmOpen] = useState(false);
 
   const handleTogglePlanStatus = (id: string) => {
     const newStatus = togglePlanStatus(id);
