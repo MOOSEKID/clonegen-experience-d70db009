@@ -1,5 +1,5 @@
 
-import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
+import { Draggable } from 'react-beautiful-dnd';
 import { 
   Trash, 
   GripVertical, 
@@ -20,6 +20,7 @@ interface ElementItemProps {
   onSelectElement: (element: any) => void;
   onUpdateElement: (element: any, index: number) => void;
   totalElements: number;
+  viewMode?: 'desktop' | 'tablet' | 'mobile';
 }
 
 const ElementItem = ({ 
@@ -32,8 +33,15 @@ const ElementItem = ({
   onMoveElement, 
   onSelectElement, 
   onUpdateElement,
-  totalElements 
+  totalElements,
+  viewMode = 'desktop'
 }: ElementItemProps) => {
+  // Get responsive settings based on view mode
+  const responsiveSettings = element.currentViewSettings || {
+    fontSize: 'medium',
+    columns: viewMode === 'mobile' ? 1 : viewMode === 'tablet' ? 2 : 3
+  };
+
   return (
     <Draggable 
       key={element.id} 
@@ -47,6 +55,10 @@ const ElementItem = ({
           {...provided.draggableProps}
           className={`border ${selectedElement?.id === element.id && !isPreviewMode ? 'border-gym-orange' : 'border-gray-200'} 
             rounded-lg shadow-sm relative group ${isPreviewMode ? 'border-transparent shadow-none' : ''}`}
+          style={{
+            ...provided.draggableProps.style,
+            gridColumnEnd: `span ${responsiveSettings.columns || 1}`
+          }}
         >
           {!isPreviewMode && (
             <div className="absolute -top-3 -right-3 flex space-x-1 opacity-0 group-hover:opacity-100 transition-opacity">
@@ -97,9 +109,10 @@ const ElementItem = ({
             onClick={() => !isPreviewMode && onSelectElement(element)}
           >
             <EditableElement 
-              element={element} 
+              element={{...element, responsiveSettings: element.currentViewSettings}}
               isEditing={!isPreviewMode} 
               onUpdate={(updatedElement) => onUpdateElement(updatedElement, index)}
+              viewMode={viewMode}
             />
           </div>
         </div>

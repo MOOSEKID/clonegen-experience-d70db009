@@ -15,6 +15,7 @@ interface ElementsListProps {
   onSelectElement: (element: any) => void;
   onUpdateElement: (element: any, index: number) => void;
   onAddElement: (type: string) => void;
+  viewMode?: 'desktop' | 'tablet' | 'mobile';
 }
 
 const ElementsList = ({ 
@@ -27,7 +28,8 @@ const ElementsList = ({
   onMoveElement,
   onSelectElement,
   onUpdateElement,
-  onAddElement
+  onAddElement,
+  viewMode = 'desktop'
 }: ElementsListProps) => {
   if (pageContent.length === 0) {
     return <EmptyContentState onAddElement={onAddElement} />;
@@ -43,21 +45,30 @@ const ElementsList = ({
               ref={provided.innerRef}
               className="space-y-4"
             >
-              {pageContent.map((element, index) => (
-                <ElementItem 
-                  key={element.id}
-                  element={element}
-                  index={index}
-                  isPreviewMode={isPreviewMode}
-                  selectedElement={selectedElement}
-                  onDeleteElement={onDeleteElement}
-                  onDuplicateElement={onDuplicateElement}
-                  onMoveElement={onMoveElement}
-                  onSelectElement={onSelectElement}
-                  onUpdateElement={onUpdateElement}
-                  totalElements={pageContent.length}
-                />
-              ))}
+              {pageContent.map((element, index) => {
+                // Get responsive settings for current view mode
+                const responsiveSettings = element.properties?.responsiveSettings?.[viewMode] || {
+                  fontSize: viewMode === 'mobile' ? 'small' : 'medium',
+                  columns: viewMode === 'mobile' ? 1 : viewMode === 'tablet' ? 2 : 3
+                };
+                
+                return (
+                  <ElementItem 
+                    key={element.id}
+                    element={{...element, currentViewSettings: responsiveSettings}}
+                    index={index}
+                    isPreviewMode={isPreviewMode}
+                    selectedElement={selectedElement}
+                    onDeleteElement={onDeleteElement}
+                    onDuplicateElement={onDuplicateElement}
+                    onMoveElement={onMoveElement}
+                    onSelectElement={onSelectElement}
+                    onUpdateElement={onUpdateElement}
+                    totalElements={pageContent.length}
+                    viewMode={viewMode}
+                  />
+                );
+              })}
               {provided.placeholder}
             </div>
           )}
