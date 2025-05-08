@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from 'react';
 import { useSubscriptionPlans } from '@/hooks/useSubscriptionPlans';
 import MembershipHeader from '@/components/membership/MembershipHeader';
@@ -7,7 +6,7 @@ import ServiceCategoriesGrid from '@/components/membership/ServiceCategoriesGrid
 import MembershipBenefits from '@/components/membership/MembershipBenefits';
 
 const Membership = () => {
-  const { plans, loading, formatPrice } = useSubscriptionPlans();
+  const { plans, loading } = useSubscriptionPlans();
   const [activePlans, setActivePlans] = useState<any[]>([]);
 
   // Filter active and visible plans and format them for display

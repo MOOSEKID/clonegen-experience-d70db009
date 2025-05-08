@@ -1,6 +1,6 @@
 
-import React from 'react';
-import { Check } from 'lucide-react';
+import React, { useRef, useState, useEffect } from 'react';
+import { Check, ChevronLeft, ChevronRight } from 'lucide-react';
 import { Button } from '@/components/Button';
 import { SubscriptionPlan } from '@/hooks/useSubscriptionPlans';
 import { useSubscriptionCheckout } from '@/hooks/useSubscriptionCheckout';
@@ -24,7 +24,7 @@ interface MembershipPlanCardProps {
 const MembershipPlanCard = ({ plan, onGetStarted }: MembershipPlanCardProps) => {
   return (
     <div 
-      className={`bg-white rounded-lg overflow-hidden transition-all duration-300 hover:shadow-xl ${
+      className={`bg-white rounded-lg overflow-hidden transition-all duration-300 hover:shadow-xl min-w-[300px] ${
         plan.highlighted 
           ? 'ring-2 ring-gym-orange shadow-lg relative transform hover:-translate-y-2' 
           : 'shadow-md hover:-translate-y-1'
@@ -40,7 +40,7 @@ const MembershipPlanCard = ({ plan, onGetStarted }: MembershipPlanCardProps) => 
         <p className="text-gray-600 mb-6">{plan.description}</p>
         <div className="mb-8">
           <span className="text-4xl font-bold text-gym-dark">
-            {plan.price.startsWith('RWF') ? plan.price : `RWF ${plan.price}`}
+            {plan.price}
           </span>
           <span className="text-gray-500 ml-1">/ {plan.period}</span>
         </div>
@@ -82,9 +82,49 @@ const MembershipPlansGrid = ({ plans, loading }: MembershipPlansGridProps) => {
     completeSubscription
   } = useSubscriptionCheckout();
 
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
+  const [showLeftArrow, setShowLeftArrow] = useState(false);
+  const [showRightArrow, setShowRightArrow] = useState(true);
+
   // Get the selected plan
   const selectedPlan = plans.find(plan => plan.planId === selectedPlanId);
   
+  // Check scroll position to show/hide arrows
+  const checkScroll = () => {
+    if (!scrollContainerRef.current) return;
+    
+    const { scrollLeft, scrollWidth, clientWidth } = scrollContainerRef.current;
+    // Show left arrow if scrolled right
+    setShowLeftArrow(scrollLeft > 10);
+    // Show right arrow if more content to scroll right
+    setShowRightArrow(scrollLeft + clientWidth < scrollWidth - 10);
+  };
+
+  useEffect(() => {
+    const scrollContainer = scrollContainerRef.current;
+    if (scrollContainer) {
+      scrollContainer.addEventListener('scroll', checkScroll);
+      // Initial check
+      checkScroll();
+      // Check again after content might have loaded/rendered
+      setTimeout(checkScroll, 100);
+    }
+    
+    return () => {
+      scrollContainer?.removeEventListener('scroll', checkScroll);
+    };
+  }, []);
+
+  const scrollLeft = () => {
+    if (!scrollContainerRef.current) return;
+    scrollContainerRef.current.scrollBy({ left: -300, behavior: 'smooth' });
+  };
+
+  const scrollRight = () => {
+    if (!scrollContainerRef.current) return;
+    scrollContainerRef.current.scrollBy({ left: 300, behavior: 'smooth' });
+  };
+
   if (loading) {
     return (
       <div className="flex justify-center py-20">
@@ -108,14 +148,41 @@ const MembershipPlansGrid = ({ plans, loading }: MembershipPlansGridProps) => {
 
   return (
     <>
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-        {plans.map((plan, index) => (
-          <MembershipPlanCard 
-            key={index} 
-            plan={plan} 
-            onGetStarted={handleGetStarted}
-          />
-        ))}
+      <div className="relative">
+        {showLeftArrow && (
+          <button 
+            onClick={scrollLeft} 
+            className="absolute left-0 top-1/2 -translate-y-1/2 z-10 bg-white shadow-lg rounded-full p-2 hover:bg-gray-100"
+            aria-label="Scroll left"
+          >
+            <ChevronLeft className="text-gym-dark" size={24} />
+          </button>
+        )}
+        
+        <div 
+          ref={scrollContainerRef} 
+          className="flex overflow-x-auto gap-6 pb-4 hide-scrollbar snap-x snap-mandatory"
+          style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+        >
+          {plans.map((plan, index) => (
+            <div key={index} className="snap-center first:ml-0 last:mr-0">
+              <MembershipPlanCard 
+                plan={plan} 
+                onGetStarted={handleGetStarted}
+              />
+            </div>
+          ))}
+        </div>
+        
+        {showRightArrow && (
+          <button 
+            onClick={scrollRight} 
+            className="absolute right-0 top-1/2 -translate-y-1/2 z-10 bg-white shadow-lg rounded-full p-2 hover:bg-gray-100"
+            aria-label="Scroll right"
+          >
+            <ChevronRight className="text-gym-dark" size={24} />
+          </button>
+        )}
       </div>
 
       {/* Authentication Modal */}
