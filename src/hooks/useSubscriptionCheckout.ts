@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useOptimizedAuthContext } from '@/hooks/useOptimizedAuthContext';
 import { useSubscriptionPlans } from '@/hooks/useSubscriptionPlans';
+import { useUserProfile } from '@/hooks/useUserProfile';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 
@@ -11,6 +12,12 @@ interface CheckoutState {
   selectedPlanId: string | null;
   isAuthModalOpen: boolean;
   isCheckoutModalOpen: boolean;
+}
+
+interface SubscriptionUpdate {
+  active_plan_id: string | null;
+  billing_start_date: string | null;
+  subscription_status: string | null;
 }
 
 export const useSubscriptionCheckout = () => {
@@ -22,6 +29,7 @@ export const useSubscriptionCheckout = () => {
   });
   const { isAuthenticated, user } = useOptimizedAuthContext();
   const { getPlanByIdentifier } = useSubscriptionPlans();
+  const { userProfile, updateUserProfile } = useUserProfile();
   const navigate = useNavigate();
 
   // Handle the initial checkout flow
@@ -81,31 +89,25 @@ export const useSubscriptionCheckout = () => {
       const today = new Date();
       const formattedDate = today.toISOString().split('T')[0];
       
-      // Update user profile with subscription info
-      // Using a type-safe approach for the update operation
-      const updates = {
+      // Create a properly typed subscription update object
+      const subscriptionUpdate: SubscriptionUpdate = {
         active_plan_id: plan.planId || plan.id,
         billing_start_date: formattedDate,
         subscription_status: 'Active'
       };
       
-      const { error } = await supabase
-        .from('profiles')
-        .update(updates)
-        .eq('id', user.id);
+      // Update user profile with subscription info using the updateUserProfile function
+      try {
+        await updateUserProfile(subscriptionUpdate);
+        toast.success("Your subscription has been activated successfully!");
+        closeCheckoutModal();
         
-      if (error) {
+        // Redirect to member dashboard or confirmation page
+        navigate('/member/dashboard');
+      } catch (error: any) {
         console.error('Failed to update subscription', error);
         toast.error("Failed to activate your subscription. Please try again.");
-        setState(prev => ({ ...prev, isLoading: false }));
-        return;
       }
-      
-      toast.success("Your subscription has been activated successfully!");
-      closeCheckoutModal();
-      
-      // Redirect to member dashboard or confirmation page
-      navigate('/member/dashboard');
     } catch (error) {
       console.error('Subscription error:', error);
       toast.error("An unexpected error occurred. Please try again.");
