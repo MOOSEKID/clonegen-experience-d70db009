@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { 
   Breadcrumb,
@@ -17,6 +16,7 @@ import { GatewayConfigurationModal } from '@/components/admin/payments/GatewayCo
 import { toast } from 'sonner';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { PaymentGateway } from '@/types/classTypes';
+import { usePaymentGateways } from '@/hooks/usePaymentGateways';
 
 // Mock payment methods data
 const mockPaymentMethods = [
@@ -75,23 +75,19 @@ const mockPaymentMethods = [
 ];
 
 const Methods = () => {
-  const [paymentMethods, setPaymentMethods] = useState<PaymentGateway[]>(mockPaymentMethods);
+  const { 
+    paymentMethods, 
+    toggleGatewayStatus, 
+    addPaymentGateway, 
+    updatePaymentGateway 
+  } = usePaymentGateways();
+  
   const [isConfigModalOpen, setIsConfigModalOpen] = useState(false);
   const [selectedMethod, setSelectedMethod] = useState<PaymentGateway | null>(null);
   const isMobile = useIsMobile();
 
   const handleToggleStatus = (id: string) => {
-    setPaymentMethods(methods => 
-      methods.map(method => 
-        method.id === id 
-          ? { 
-              ...method, 
-              status: method.status === 'Active' ? 'Inactive' : 'Active',
-              isEnabled: method.status !== 'Active'
-            } 
-          : method
-      )
-    );
+    toggleGatewayStatus(id);
     
     const method = paymentMethods.find(m => m.id === id);
     if (method) {
@@ -124,24 +120,17 @@ const Methods = () => {
         supportedCards: data.supportedCards || []
       };
       
-      // Add the new gateway to the payment methods array
-      setPaymentMethods(prevMethods => [...prevMethods, newGateway]);
+      // Add the new gateway using the custom hook function
+      addPaymentGateway(newGateway);
       toast.success(`${data.name} payment gateway added`);
     } else {
       // Update existing gateway
-      setPaymentMethods(methods => 
-        methods.map(method => 
-          method.id === selectedMethod?.id 
-            ? { 
-                ...method, 
-                ...data, 
-                status: data.isEnabled ? 'Active' : 'Inactive',
-                fees: `${data.fee} per transaction`, // Format fees for display
-                setupComplete: true 
-              } 
-            : method
-        )
-      );
+      updatePaymentGateway(selectedMethod!.id, {
+        ...data,
+        status: data.isEnabled ? 'Active' : 'Inactive',
+        fees: `${data.fee} per transaction`, // Format fees for display
+        setupComplete: true
+      });
       
       toast.success(`${selectedMethod?.name} configuration updated`);
     }
