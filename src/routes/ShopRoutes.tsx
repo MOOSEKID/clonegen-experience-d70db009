@@ -9,11 +9,10 @@ import CheckoutPage from '@/pages/shop/CheckoutPage';
 const ShopRoutes = () => {
   return (
     <>
-      <Route path="/" element={<ShopPage />} />
       <Route path="/shop" element={<ShopPage />} />
-      <Route path="/category/:categoryId" element={<CategoryPage />} />
-      <Route path="/product/:productId" element={<ProductPage />} />
-      <Route path="/checkout" element={<CheckoutPage />} />
+      <Route path="/shop/category/:categoryId" element={<CategoryPage />} />
+      <Route path="/shop/product/:productId" element={<ProductPage />} />
+      <Route path="/shop/checkout" element={<CheckoutPage />} />
     </>
   );
 };

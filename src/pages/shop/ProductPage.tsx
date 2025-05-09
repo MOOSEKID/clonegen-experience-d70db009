@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { ChevronRight } from 'lucide-react';
@@ -20,9 +21,16 @@ import { ShoppingBag } from 'lucide-react';
 import { Alert, AlertDescription as AlertDescriptionUi, AlertTitle } from "@/components/ui/alert"
 import { AlertCircle } from 'lucide-react';
 
+// Typescript interface to ensure proper typing for category object
+interface ProductWithCategory extends Product {
+  category?: {
+    name: string;
+  }
+}
+
 const ProductPage = () => {
   const { productId } = useParams<{ productId: string }>();
-  const [product, setProduct] = useState<Product | null>(null);
+  const [product, setProduct] = useState<ProductWithCategory | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const { user } = useAuth();
@@ -45,7 +53,7 @@ const ProductPage = () => {
             console.error('Error fetching product:', error);
             setError('Failed to load product');
           } else if (data) {
-            setProduct(data as Product);
+            setProduct(data as ProductWithCategory);
           } else {
             setError('Product not found');
           }
@@ -102,6 +110,7 @@ const ProductPage = () => {
   }
 
   const price = user?.role === 'member' && product.member_price ? product.member_price : product.price;
+  const categoryName = product.category?.name || 'Uncategorized';
 
   return (
     <div className="bg-gym-light min-h-screen pt-24 pb-16">
@@ -110,7 +119,7 @@ const ProductPage = () => {
         <div className="flex items-center gap-2 mb-6 text-sm text-gray-600">
           <Link to="/shop" className="hover:text-gym-orange">Shop</Link>
           <ChevronRight size={14} />
-          <Link to={`/shop/category/${product.category_id}`} className="hover:text-gym-orange">{product.category?.name}</Link>
+          <Link to={`/shop/category/${product.category_id}`} className="hover:text-gym-orange">{categoryName}</Link>
           <ChevronRight size={14} />
           <span className="font-semibold text-gym-orange">{product.name}</span>
         </div>
@@ -135,7 +144,7 @@ const ProductPage = () => {
               )}
             </div>
             <div className="space-y-2">
-              <p className="text-gray-600">Category: {product.category?.name}</p>
+              <p className="text-gray-600">Category: {categoryName}</p>
               <p className="text-gray-600">Price: RWF {price?.toLocaleString()}</p>
               <p className="text-gray-600">Stock: {product.stock_count}</p>
             </div>

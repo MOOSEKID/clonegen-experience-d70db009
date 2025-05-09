@@ -21,6 +21,7 @@ const RouteSyncManager: React.FC = () => {
   const [lastSyncTime, setLastSyncTime] = useState<Date | null>(null);
   const [showQuickSetup, setShowQuickSetup] = useState(false);
   const [bootstrapped, setBootstrapped] = useState(false);
+  const [showEmergencyTools, setShowEmergencyTools] = useState(false);
 
   useEffect(() => {
     // Check if we need to bootstrap pages on first load
@@ -60,6 +61,7 @@ const RouteSyncManager: React.FC = () => {
   return (
     <TooltipProvider>
       <div className="space-y-6">
+        {/* Main Card */}
         <Card>
           <CardHeader className="pb-3">
             <div className="flex justify-between items-center">
@@ -69,14 +71,24 @@ const RouteSyncManager: React.FC = () => {
                   Detect and sync frontend routes with the CMS database
                 </CardDescription>
               </div>
-              <Button 
-                onClick={handleSync} 
-                disabled={isSyncing}
-                className="flex items-center gap-2"
-              >
-                <RefreshCcw className={`h-4 w-4 ${isSyncing ? "animate-spin" : ""}`} />
-                {isSyncing ? "Syncing..." : "Sync Routes"}
-              </Button>
+              <div className="flex gap-2">
+                <Button 
+                  variant="outline" 
+                  onClick={() => setShowEmergencyTools(!showEmergencyTools)}
+                  className="text-amber-600 border-amber-300"
+                  size="sm"
+                >
+                  {showEmergencyTools ? "Hide Emergency Tools" : "Emergency Tools"}
+                </Button>
+                <Button 
+                  onClick={handleSync} 
+                  disabled={isSyncing}
+                  className="flex items-center gap-2"
+                >
+                  <RefreshCcw className={`h-4 w-4 ${isSyncing ? "animate-spin" : ""}`} />
+                  {isSyncing ? "Syncing..." : "Sync Routes"}
+                </Button>
+              </div>
             </div>
             {lastSyncTime && (
               <p className="text-xs text-gray-500 mt-2">
@@ -85,6 +97,7 @@ const RouteSyncManager: React.FC = () => {
             )}
           </CardHeader>
 
+          {/* Route Table - existing functionality */}
           <CardContent className="p-0">
             <Table>
               <TableHeader>
@@ -167,6 +180,20 @@ const RouteSyncManager: React.FC = () => {
           </CardFooter>
         </Card>
       
+        {/* Emergency restoration component */}
+        {showEmergencyTools && (
+          <div className="border-l-4 border-amber-500 pl-4">
+            <h3 className="text-amber-800 font-semibold mb-2">Emergency Route Recovery</h3>
+            <p className="text-sm text-amber-700 mb-4">
+              Use these tools only when the site has significant navigation or routing issues.
+            </p>
+            <div className="mt-4">
+              <RoutesRestorer />
+            </div>
+          </div>
+        )}
+        
+        {/* Other existing components */}
         {showQuickSetup && (
           <>
             <Alert className="bg-blue-50 border-blue-200">
