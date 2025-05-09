@@ -53,13 +53,13 @@ export const useShopProducts = () => {
           setProducts(productsData as Product[]);
           
           // Count products by category
-          const countsByCategory: Record<string, number> = {};
+          const countsByCategoryMap: Record<string, number> = {};
           productsData.forEach(product => {
             if (product.category_id) {
-              countsByCategory[product.category_id] = (countsByCategory[product.category_id] || 0) + 1;
+              countsByCategoryMap[product.category_id] = (countsByCategoryMap[product.category_id] || 0) + 1;
             }
           });
-          setCategoryCount(countsByCategory);
+          setCategoryCount(countsByCategoryMap);
         } else {
           console.log('No products found in database');
           setProducts([]);
@@ -69,7 +69,7 @@ export const useShopProducts = () => {
         if (categoriesData) {
           const categoriesWithCounts = categoriesData.map(category => ({
             ...category,
-            productCount: countsByCategory[category.id] || 0
+            productCount: countsByCategoryMap[category.id] || 0
           }));
           setCategories(categoriesWithCounts);
         }
