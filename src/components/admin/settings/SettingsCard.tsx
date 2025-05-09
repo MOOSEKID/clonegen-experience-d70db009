@@ -14,6 +14,7 @@ interface SettingsCardProps {
   className?: string;
   link?: string;
   status?: string;
+  "aria-label"?: string;
 }
 
 const SettingsCard = ({
@@ -24,7 +25,8 @@ const SettingsCard = ({
   saveState = SaveState.Idle,
   className = "",
   link,
-  status
+  status,
+  "aria-label": ariaLabel
 }: SettingsCardProps) => {
   const renderSaveIndicator = () => {
     switch (saveState) {
@@ -42,7 +44,11 @@ const SettingsCard = ({
   const CardWrapper = ({ children }: { children: ReactNode }) => {
     if (link) {
       return (
-        <Link to={link} className="block transition-all hover:scale-[1.01] focus:outline-none focus-visible:ring-2 focus-visible:ring-gym-orange rounded-lg">
+        <Link 
+          to={link} 
+          className="block transition-all hover:scale-[1.01] focus:outline-none focus-visible:ring-2 focus-visible:ring-gym-orange rounded-lg"
+          aria-label={ariaLabel}
+        >
           {children}
         </Link>
       );

@@ -9,31 +9,36 @@ const PeopleTabContent = () => {
       title: "User Permissions",
       description: "Manage roles, access levels",
       icon: <Shield className="h-10 w-10 text-gray-400" />,
-      link: "/admin/settings/user-permissions"
+      link: "/admin/settings/permissions",
+      ariaLabel: "Configure user permissions and roles"
     },
     {
       title: "Default Member Settings",
       description: "Set default plans, auto-renew, welcome flows",
       icon: <User className="h-10 w-10 text-gray-400" />,
-      link: "/admin/settings/member-defaults"
+      link: "/admin/settings/member-defaults",
+      ariaLabel: "Configure default settings for new members"
     },
     {
       title: "Company Automation",
       description: "Control attendance exports, invoice schedules",
       icon: <BarChart className="h-10 w-10 text-gray-400" />,
-      link: "/admin/settings/company-automation"
+      link: "/admin/settings/automation",
+      ariaLabel: "Configure company automation settings"
     },
     {
       title: "Notification Settings",
       description: "Email/SMS template editor and toggles",
       icon: <Bell className="h-10 w-10 text-gray-400" />,
-      link: "/admin/settings/notifications"
+      link: "/admin/settings/notifications",
+      ariaLabel: "Configure notification settings"
     },
     {
       title: "Invoice Templates",
       description: "Customize PDF layout, logo, disclaimers",
       icon: <FileText className="h-10 w-10 text-gray-400" />,
-      link: "/admin/settings/invoice-templates"
+      link: "/admin/settings/invoice-templates",
+      ariaLabel: "Configure invoice template settings"
     }
   ];
 
@@ -45,6 +50,7 @@ const PeopleTabContent = () => {
           title={card.title}
           description={card.description}
           link={card.link}
+          aria-label={card.ariaLabel}
         >
           <div className="flex flex-col items-center justify-center py-6">
             {card.icon}

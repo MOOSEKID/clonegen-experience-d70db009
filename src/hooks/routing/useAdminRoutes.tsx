@@ -20,6 +20,9 @@ const BusinessHours = lazy(() => import("../../pages/admin/settings/BusinessHour
 const Holidays = lazy(() => import("../../pages/admin/settings/Holidays"));
 const Platform = lazy(() => import("../../pages/admin/settings/Platform"));
 const Integrations = lazy(() => import("../../pages/admin/settings/Integrations"));
+const Permissions = lazy(() => import("../../pages/admin/settings/Permissions"));
+const MemberDefaults = lazy(() => import("../../pages/admin/settings/MemberDefaults"));
+const Automation = lazy(() => import("../../pages/admin/settings/Automation"));
 const AdminSupport = lazy(() => import("../../pages/admin/Support"));
 const TestAccounts = lazy(() => import("../../pages/admin/TestAccounts"));
 
@@ -99,6 +102,22 @@ export const useAdminRoutes = () => {
       <Route path="settings/integrations" element={
         <Suspense fallback={<PageLoading />}>
           <Integrations />
+        </Suspense>
+      } />
+      {/* New settings routes */}
+      <Route path="settings/permissions" element={
+        <Suspense fallback={<PageLoading />}>
+          <Permissions />
+        </Suspense>
+      } />
+      <Route path="settings/member-defaults" element={
+        <Suspense fallback={<PageLoading />}>
+          <MemberDefaults />
+        </Suspense>
+      } />
+      <Route path="settings/automation" element={
+        <Suspense fallback={<PageLoading />}>
+          <Automation />
         </Suspense>
       } />
       <Route path="support" element={<AdminSupport />} />
