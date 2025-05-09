@@ -140,12 +140,14 @@ const HolidaysSettings = () => {
       }
       
       // Handle deleted holidays (in settings but not in holidays)
-      for (const settingHoliday of settings || []) {
-        const stillExists = holidays.some(h => h.id === settingHoliday.id);
-        
-        if (!stillExists) {
-          // Delete this holiday
-          await updateSettings({ id: settingHoliday.id });
+      if (settings) {
+        for (const settingHoliday of settings) {
+          const stillExists = holidays.some(h => h.id === settingHoliday.id);
+          
+          if (!stillExists) {
+            // Delete this holiday
+            await updateSettings({ id: settingHoliday.id });
+          }
         }
       }
       
