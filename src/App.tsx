@@ -17,19 +17,15 @@ function App() {
         <Router>
           <Suspense fallback={<LoadingSpinner />}>
             <Routes>
-              {/* Shop Routes - the only ones we'll implement for now */}
-              <Route path="/shop/*" element={
-                <CartProvider>
-                  <Routes>
-                    <Route path="/" element={<ShopPage />} />
-                    <Route path="/category/:categoryId" element={<CategoryPage />} />
-                    <Route path="/product/:productId" element={<ProductPage />} />
-                    <Route path="/checkout" element={<CheckoutPage />} />
-                  </Routes>
-                </CartProvider>
-              } />
-              {/* Default route */}
-              <Route path="*" element={<ShopPage />} />
+              {/* Shop Routes with CartProvider */}
+              <Route path="/" element={<CartProvider><ShopPage /></CartProvider>} />
+              <Route path="/shop" element={<CartProvider><ShopPage /></CartProvider>} />
+              <Route path="/shop/category/:categoryId" element={<CartProvider><CategoryPage /></CartProvider>} />
+              <Route path="/shop/product/:productId" element={<CartProvider><ProductPage /></CartProvider>} />
+              <Route path="/shop/checkout" element={<CartProvider><CheckoutPage /></CartProvider>} />
+              
+              {/* Catch-all route */}
+              <Route path="*" element={<CartProvider><ShopPage /></CartProvider>} />
             </Routes>
           </Suspense>
         </Router>
