@@ -58,7 +58,7 @@ const EditProduct = () => {
     description: product.description || undefined,
     category: typeof product.category === 'object' && product.category !== null 
       ? (product.category.name || '') 
-      : (product.category || ''),
+      : (typeof product.category === 'string' ? product.category : ''),
     category_id: product.category_id || '',
     price: product.price,
     sku: product.sku || undefined,
