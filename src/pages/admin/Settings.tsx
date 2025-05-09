@@ -2,6 +2,7 @@
 import { useState, useEffect } from 'react';
 import { Settings as SettingsIcon, User, Zap } from 'lucide-react';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbSeparator } from "@/components/ui/breadcrumb";
 import { supabase } from '@/integrations/supabase/client';
 import SystemTabContent from '@/components/admin/settings/SystemTabContent';
 import PeopleTabContent from '@/components/admin/settings/PeopleTabContent';
@@ -36,7 +37,19 @@ const AdminSettings = () => {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold text-gray-800">Settings</h1>
+        <Breadcrumb>
+          <BreadcrumbList>
+            <BreadcrumbItem>
+              <BreadcrumbLink href="/admin">Dashboard</BreadcrumbLink>
+            </BreadcrumbItem>
+            <BreadcrumbSeparator />
+            <BreadcrumbItem>
+              <BreadcrumbLink href="/admin/settings">Settings</BreadcrumbLink>
+            </BreadcrumbItem>
+          </BreadcrumbList>
+        </Breadcrumb>
+        
+        <h1 className="text-2xl font-bold text-gray-800 mt-4">Settings</h1>
         <p className="text-gray-500">Configure your gym's system settings</p>
       </div>
       
