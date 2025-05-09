@@ -46,7 +46,7 @@ export function useSettings<T extends Record<string, any>>({
         return;
       }
 
-      setData(fetchedData as T);
+      setData(fetchedData as unknown as T);
     } catch (err: any) {
       console.error(`Error in fetchData for ${tableName}:`, err);
       setError(err);
@@ -70,7 +70,10 @@ export function useSettings<T extends Record<string, any>>({
     try {
       const { error: updateError } = await supabase
         .from(tableName)
-        .update({ ...newData, updated_at: new Date() })
+        .update({ 
+          ...newData, 
+          updated_at: new Date().toISOString() 
+        } as any)
         .eq('id', data.id);
 
       if (updateError) {
@@ -83,10 +86,12 @@ export function useSettings<T extends Record<string, any>>({
       }
 
       // Update local state with the new values
-      setData(prev => prev ? { ...prev, ...newData } : undefined);
+      setData(prev => prev ? { ...prev, ...newData } as unknown as T : undefined);
       setSaveState(SaveState.Saved);
       
-      if (onSuccess) onSuccess({ ...data, ...newData } as T);
+      if (onSuccess && data) {
+        onSuccess({ ...data, ...newData } as T);
+      }
       
       // Reset state after a delay
       setTimeout(() => {
