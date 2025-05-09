@@ -1,17 +1,71 @@
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useNavigation } from '@/hooks/cms/useNavigation';
 import { cn } from '@/lib/utils';
 import HeaderDropdown from './HeaderDropdown';
+import { getNavItems, getServiceItems, getCompanyItems } from '@/data/headerNavData';
+import { toast } from 'sonner';
 
 const DynamicNavigation: React.FC = () => {
-  const { mainItems, dropdowns, isLoading } = useNavigation();
-  
+  const { mainItems, dropdowns, isLoading, error } = useNavigation();
+  const [useFallback, setUseFallback] = useState(false);
+
+  // Determine if we should use fallback navigation
+  useEffect(() => {
+    if ((mainItems.length === 0 && !isLoading) || error) {
+      setUseFallback(true);
+      if (process.env.NODE_ENV === 'development') {
+        console.log('Using fallback navigation due to:', 
+          mainItems.length === 0 ? 'No items' : 'Error', 
+          error);
+      }
+    } else {
+      setUseFallback(false);
+    }
+  }, [mainItems.length, isLoading, error]);
+
+  // If we're still loading and don't know yet, show nothing
   if (isLoading) {
-    return null; // Don't render anything while loading
+    return null;
   }
-  
+
+  // If using fallback navigation
+  if (useFallback) {
+    const staticNavItems = getNavItems();
+    const serviceItems = getServiceItems();
+    const companyItems = getCompanyItems();
+
+    return (
+      <>
+        {staticNavItems.map((item) => (
+          <Link
+            key={item.path}
+            to={item.path}
+            className="nav-link text-white/90 hover:text-white"
+          >
+            {item.label}
+          </Link>
+        ))}
+        
+        <HeaderDropdown 
+          title="Services" 
+          items={serviceItems}
+          isActive={false} 
+          isOpenState={[false, () => {}]} 
+        />
+        
+        <HeaderDropdown 
+          title="Company" 
+          items={companyItems} 
+          isActive={false}
+          isOpenState={[false, () => {}]} 
+        />
+      </>
+    );
+  }
+
+  // Using CMS-driven navigation
   return (
     <>
       {/* Render main nav items */}

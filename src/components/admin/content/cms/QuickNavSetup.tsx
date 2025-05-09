@@ -43,7 +43,7 @@ const QuickNavSetup: React.FC = () => {
         await createNavItem({
           label: page.title,
           linked_page_id: page.id,
-          nav_group: 'Main Navigation',
+          nav_group: 'header',
           order_index: i,
           visible: true
         });
@@ -54,6 +54,14 @@ const QuickNavSetup: React.FC = () => {
     } catch (error) {
       console.error("Error creating navigation items:", error);
       toast.error("Failed to create navigation items");
+    }
+  };
+  
+  const handleSelectAll = () => {
+    if (selectedPages.length === mainMenuPages.length) {
+      setSelectedPages([]);
+    } else {
+      setSelectedPages(mainMenuPages.map(page => page.id));
     }
   };
   
@@ -68,6 +76,22 @@ const QuickNavSetup: React.FC = () => {
       </CardHeader>
       <CardContent>
         <p className="mb-4">Select pages to add to the main navigation:</p>
+        
+        {mainMenuPages.length > 0 && (
+          <div className="flex items-center space-x-2 mb-4">
+            <Checkbox 
+              id="select-all"
+              checked={selectedPages.length === mainMenuPages.length && mainMenuPages.length > 0}
+              onCheckedChange={handleSelectAll}
+            />
+            <label 
+              htmlFor="select-all"
+              className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+            >
+              Select All
+            </label>
+          </div>
+        )}
         
         <div className="space-y-2 mb-6">
           {mainMenuPages.length > 0 ? (

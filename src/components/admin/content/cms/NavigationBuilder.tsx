@@ -1,4 +1,3 @@
-
 import React, { useState, useCallback } from 'react';
 import { DragDropContext, Droppable, Draggable, DropResult } from 'react-beautiful-dnd';
 import { useNavItems } from '@/hooks/cms/useNavItems';
@@ -25,21 +24,21 @@ const NavigationBuilder = () => {
     label: '',
     linkedPageId: '',
     externalUrl: '',
-    navGroup: '',
+    navGroup: 'header',
     visible: true,
     orderIndex: 0,
   });
   
   const navGroups = Array.from(new Set([...navItems.map(item => item.nav_group)].filter(Boolean))) as string[];
   const groupedNavItems = navItems.reduce((acc: Record<string, NavItem[]>, item) => {
-    const group = item.nav_group || 'Main Navigation';
+    const group = item.nav_group || 'header';
     if (!acc[group]) acc[group] = [];
     acc[group].push(item);
     return acc;
   }, {});
 
-  // Sort groups alphabetically but ensure Main Navigation is first
-  const sortedNavGroups = ['Main Navigation', ...navGroups.filter(g => g !== 'Main Navigation').sort()];
+  // Sort groups alphabetically but ensure header is first
+  const sortedNavGroups = ['header', ...navGroups.filter(g => g !== 'header').sort()];
   
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -59,7 +58,7 @@ const NavigationBuilder = () => {
       label: '',
       linkedPageId: '',
       externalUrl: '',
-      navGroup: 'Main Navigation',
+      navGroup: 'header',
       visible: true,
       orderIndex: navItems.length,
     });
@@ -72,7 +71,7 @@ const NavigationBuilder = () => {
       label: navItem.label,
       linkedPageId: navItem.linked_page_id || '',
       externalUrl: navItem.external_url || '',
-      navGroup: navItem.nav_group || 'Main Navigation',
+      navGroup: navItem.nav_group || 'header',
       visible: navItem.visible,
       orderIndex: navItem.order_index,
     });
@@ -210,7 +209,7 @@ const NavigationBuilder = () => {
           {sortedNavGroups.map((group) => (
             <Card key={group} className="overflow-hidden">
               <h3 className="text-md font-medium p-4 bg-muted">
-                {group === 'Main Navigation' ? 'Main Navigation' : `Dropdown: ${group}`}
+                {group === 'header' ? 'Main Navigation' : `Dropdown: ${group}`}
               </h3>
               <CardContent className="p-0">
                 <Droppable droppableId={group}>
@@ -391,8 +390,8 @@ const NavigationBuilder = () => {
                     <SelectValue placeholder="Main Navigation" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="Main Navigation">Main Navigation</SelectItem>
-                    {navGroups.filter(g => g !== 'Main Navigation').map(group => (
+                    <SelectItem value="header">Main Navigation</SelectItem>
+                    {navGroups.filter(g => g !== 'header').map(group => (
                       <SelectItem key={group} value={group}>
                         {group}
                       </SelectItem>
@@ -514,8 +513,8 @@ const NavigationBuilder = () => {
                     <SelectValue placeholder="Main Navigation" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="Main Navigation">Main Navigation</SelectItem>
-                    {navGroups.filter(g => g !== 'Main Navigation').map(group => (
+                    <SelectItem value="header">Main Navigation</SelectItem>
+                    {navGroups.filter(g => g !== 'header').map(group => (
                       <SelectItem key={group} value={group}>
                         {group}
                       </SelectItem>

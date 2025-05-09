@@ -80,5 +80,23 @@ export const routeService = {
       console.error("Error syncing routes:", error);
       return [];
     }
+  },
+
+  // Bootstrap CMS pages if empty
+  async bootstrapCmsPages(): Promise<boolean> {
+    try {
+      const existingPages = await cmsService.getPages();
+      
+      // Only bootstrap if no pages exist
+      if (existingPages.length === 0) {
+        await this.syncRoutes();
+        return true;
+      }
+      
+      return false;
+    } catch (error) {
+      console.error("Error bootstrapping CMS pages:", error);
+      return false;
+    }
   }
 };

@@ -42,7 +42,7 @@ export const useNavigation = (): NavigationData => {
   // Separate main navigation from dropdown items
   const mainItems = (navItems || [])
     .filter(item => 
-      (!item.nav_group || item.nav_group === 'Main Navigation') && 
+      (!item.nav_group || item.nav_group === 'header') && 
       item.visible
     )
     .sort((a, b) => a.order_index - b.order_index);
@@ -52,7 +52,7 @@ export const useNavigation = (): NavigationData => {
   (navItems || [])
     .filter(item => 
       item.nav_group && 
-      item.nav_group !== 'Main Navigation' && 
+      item.nav_group !== 'header' && 
       item.visible
     )
     .forEach(item => {
