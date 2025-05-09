@@ -1,23 +1,34 @@
 
 // Shared category definitions and utility functions for the shop
-export const categories = [
+export interface Category {
+  id: string;
+  name: string;
+  description: string;
+  dbName: string;
+  productCount?: number;
+}
+
+export const categories: Category[] = [
   {
     id: 'supplements',
     name: 'Supplements',
     description: 'Protein powders, pre-workout formulas, and nutritional supplements to enhance your fitness journey.',
-    dbName: 'Supplements'
+    dbName: 'Supplements',
+    productCount: 0
   },
   {
     id: 'equipment',
     name: 'Equipment',
     description: 'High-quality fitness equipment for strength, cardio, and flexibility training.',
-    dbName: 'Equipment'
+    dbName: 'Equipment',
+    productCount: 0
   },
   {
     id: 'apparel',
     name: 'Apparel',
     description: 'Comfortable and stylish athletic wear for optimal performance during workouts.',
-    dbName: 'Apparel'
+    dbName: 'Apparel',
+    productCount: 0
   }
 ];
 
