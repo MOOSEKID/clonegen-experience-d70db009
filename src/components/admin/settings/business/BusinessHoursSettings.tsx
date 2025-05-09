@@ -110,11 +110,12 @@ const BusinessHoursSettings = () => {
       // Save each record individually
       for (const day of daysOfWeek) {
         if (formData[day]) {
+          const recordData = formData[day];
           await updateSettings({
-            id: formData[day].id,
-            open_time: formData[day].open_time,
-            close_time: formData[day].close_time,
-            is_closed: formData[day].is_closed
+            id: recordData.id,
+            open_time: recordData.open_time,
+            close_time: recordData.close_time,
+            is_closed: recordData.is_closed
           });
         }
       }
