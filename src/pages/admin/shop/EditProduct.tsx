@@ -51,10 +51,12 @@ const EditProduct = () => {
     );
   }
 
-  // Get category name safely using a null-safe approach
-  const categoryName = typeof product.category === 'string'
-    ? product.category
-    : product.category?.name ?? '';
+  // Get category name safely using a properly typed approach
+  const categoryName = typeof product.category === 'string' 
+    ? product.category 
+    : (product.category && typeof product.category === 'object' && 'name' in product.category) 
+      ? product.category.name 
+      : '';
 
   // Convert Product to ProductFormData by ensuring all required fields are present
   const productFormData: ProductFormData = {
