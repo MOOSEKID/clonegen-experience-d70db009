@@ -51,18 +51,10 @@ const EditProduct = () => {
     );
   }
 
-  // Get category name safely with proper null checking
-  let categoryName = '';
-  if (product.category) {
-    // Check if category exists and then determine if it's an object or string
-    if (typeof product.category === 'object' && product.category !== null) {
-      // Access the name property safely
-      categoryName = product.category.name || '';
-    } else {
-      // If it's not an object, convert it to a string
-      categoryName = String(product.category);
-    }
-  }
+  // Get category name safely using a null-safe approach
+  const categoryName = typeof product.category === 'string'
+    ? product.category
+    : product.category?.name ?? '';
 
   // Convert Product to ProductFormData by ensuring all required fields are present
   const productFormData: ProductFormData = {
