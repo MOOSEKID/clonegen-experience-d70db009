@@ -4,6 +4,7 @@ import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { ShoppingCart, ShoppingBag } from 'lucide-react';
 import { Product } from '@/hooks/useProducts';
+import { Badge } from '@/components/ui/badge';
 
 type ProductCardProps = {
   product: Product;
@@ -29,7 +30,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, onAddToCart }) => {
   return (
     <Link to={`/shop/product/${product.id}`} className="block">
       <div className="bg-white rounded-lg overflow-hidden shadow-md transition-all hover:shadow-lg h-full flex flex-col">
-        <div className="h-48 overflow-hidden">
+        <div className="h-48 overflow-hidden relative">
           {product.image_url ? (
             <img 
               src={product.image_url} 
@@ -42,6 +43,15 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, onAddToCart }) => {
           ) : (
             <div className="w-full h-full flex items-center justify-center bg-gray-100">
               <ShoppingBag size={32} className="text-gray-400" />
+            </div>
+          )}
+          
+          {/* Out of stock badge */}
+          {(product.stock_count !== undefined && product.stock_count <= 0) && (
+            <div className="absolute top-2 right-2">
+              <Badge variant="destructive" className="bg-red-500">
+                Out of stock
+              </Badge>
             </div>
           )}
         </div>
@@ -65,17 +75,12 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, onAddToCart }) => {
               size="sm" 
               onClick={handleAddToCart}
               className="bg-gym-orange hover:bg-gym-orange/90"
+              disabled={product.stock_count <= 0}
             >
               <ShoppingCart className="h-4 w-4 mr-1" />
               Add
             </Button>
           </div>
-          
-          {(product.stock_count !== undefined && product.stock_count <= 0) && (
-            <div className="mt-2 text-xs text-red-600 font-medium">
-              Out of stock
-            </div>
-          )}
         </div>
       </div>
     </Link>

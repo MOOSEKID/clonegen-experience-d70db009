@@ -2,10 +2,10 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { ChevronRight, ShoppingCart, ShoppingBag, Share2, Heart, AlertCircle } from 'lucide-react';
-import { getProductById, getProductsByCategory } from '@/data/shopData';
 import { Button } from '@/components/ui/button';
 import { Product } from '@/hooks/useProducts';
 import ProductGrid from '@/components/shop/ProductGrid';
+import { supabase } from '@/integrations/supabase/client';
 
 const ProductPage = () => {
   const { productId } = useParams<{ productId: string }>();
@@ -17,33 +17,53 @@ const ProductPage = () => {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    try {
-      if (productId) {
-        setLoading(true);
-        // Get product details
-        const productDetails = getProductById(productId);
-        
-        if (!productDetails) {
-          setError('Product not found');
-          setLoading(false);
-          return;
-        }
-        
-        setProduct(productDetails);
-        
-        // Get related products (from same category)
-        const related = getProductsByCategory(productDetails.category)
-          .filter(p => p.id !== productId)
-          .slice(0, 4);
+    const fetchProductAndRelated = async () => {
+      try {
+        if (productId) {
+          setLoading(true);
           
-        setRelatedProducts(related || []);
+          // Get product details from database
+          const { data: productData, error: productError } = await supabase
+            .from('products')
+            .select('*')
+            .eq('id', productId)
+            .single();
+          
+          if (productError) {
+            setError('Product not found');
+            setLoading(false);
+            return;
+          }
+          
+          const typedProduct = productData as Product;
+          setProduct(typedProduct);
+          
+          // Get related products (from same category)
+          const { data: relatedData, error: relatedError } = await supabase
+            .from('products')
+            .select('*')
+            .eq('category', typedProduct.category)
+            .eq('is_active', true)
+            .eq('is_public', true)
+            .neq('id', productId)
+            .limit(4);
+            
+          if (relatedError) {
+            console.error('Error loading related products:', relatedError);
+          } else {
+            setRelatedProducts(relatedData || []);
+          }
+          
+          setLoading(false);
+        }
+      } catch (err) {
+        console.error('Error loading product data:', err);
+        setError('Failed to load product data');
         setLoading(false);
       }
-    } catch (err) {
-      console.error('Error loading product data:', err);
-      setError('Failed to load product data');
-      setLoading(false);
-    }
+    };
+    
+    fetchProductAndRelated();
   }, [productId]);
 
   const formatPrice = (price: number) => {
@@ -108,8 +128,8 @@ const ProductPage = () => {
         <div className="flex items-center gap-2 mb-6 text-sm text-gray-600">
           <Link to="/shop" className="hover:text-gym-orange">Shop</Link>
           <ChevronRight size={14} />
-          <Link to={`/shop/category/${product.category}`} className="hover:text-gym-orange">
-            {product.category.charAt(0).toUpperCase() + product.category.slice(1)}
+          <Link to={`/shop/category/${product.category.toLowerCase()}`} className="hover:text-gym-orange">
+            {product.category}
           </Link>
           <ChevronRight size={14} />
           <span className="font-semibold text-gym-orange">{product.name}</span>
@@ -175,9 +195,10 @@ const ProductPage = () => {
                   <Button 
                     onClick={handleAddToCartClick}
                     className="flex-grow bg-gym-orange hover:bg-gym-orange/90"
+                    disabled={product.stock_count <= 0}
                   >
                     <ShoppingCart className="mr-2 h-4 w-4" />
-                    Add to Cart
+                    {product.stock_count > 0 ? 'Add to Cart' : 'Out of Stock'}
                   </Button>
                   
                   <Button variant="outline" className="p-2">

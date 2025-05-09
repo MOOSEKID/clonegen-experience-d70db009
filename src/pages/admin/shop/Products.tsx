@@ -36,12 +36,16 @@ import {
   Loader2,
   Filter,
   ShoppingBag,
-  Store
+  Store,
+  Eye,
+  EyeOff
 } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { useToast } from '@/components/ui/use-toast';
 
 const Products = () => {
   const navigate = useNavigate();
+  const { toast } = useToast();
   const [searchQuery, setSearchQuery] = useState('');
   const [activeTab, setActiveTab] = useState('all');
   
@@ -49,9 +53,21 @@ const Products = () => {
   const { data: products = [], isLoading } = useProductsQuery();
   const deleteMutation = useDeleteProductMutation();
 
-  const handleDeleteProduct = async (id: string) => {
-    if (window.confirm('Are you sure you want to delete this product?')) {
-      await deleteMutation.mutateAsync(id);
+  const handleDeleteProduct = async (id: string, productName: string) => {
+    if (window.confirm(`Are you sure you want to delete the product "${productName}"?`)) {
+      try {
+        await deleteMutation.mutateAsync(id);
+        toast({
+          title: "Product deleted",
+          description: `"${productName}" has been successfully deleted.`,
+        });
+      } catch (error) {
+        toast({
+          title: "Error deleting product",
+          description: "There was a problem deleting the product. Please try again.",
+          variant: "destructive",
+        });
+      }
     }
   };
 
@@ -77,6 +93,37 @@ const Products = () => {
   // Format price to RWF
   const formatPrice = (price: number) => {
     return `RWF ${price.toLocaleString()}`;
+  };
+
+  // Function to get visibility status badges
+  const getVisibilityBadges = (product: Product) => {
+    const badges = [];
+    
+    if (product.is_public) {
+      badges.push(
+        <Badge key="public" variant="outline" className="border-blue-200 bg-blue-50 text-blue-700">
+          <Eye className="h-3 w-3 mr-1" /> E-commerce
+        </Badge>
+      );
+    }
+    
+    if (product.is_instore) {
+      badges.push(
+        <Badge key="instore" variant="outline" className="border-green-200 bg-green-50 text-green-700">
+          <Store className="h-3 w-3 mr-1" /> In-store
+        </Badge>
+      );
+    }
+    
+    if (!product.is_public && !product.is_instore) {
+      badges.push(
+        <Badge key="hidden" variant="outline" className="border-gray-200 bg-gray-50 text-gray-500">
+          <EyeOff className="h-3 w-3 mr-1" /> Hidden
+        </Badge>
+      );
+    }
+    
+    return badges;
   };
 
   return (
@@ -175,6 +222,9 @@ const Products = () => {
                                     src={product.image_url} 
                                     alt={product.name} 
                                     className="h-full w-full rounded object-cover"
+                                    onError={(e) => {
+                                      (e.target as HTMLImageElement).src = 'https://via.placeholder.com/100?text=No+Image';
+                                    }}
                                   />
                                 ) : (
                                   <div className="flex h-full w-full items-center justify-center bg-gray-100 text-gray-400">
@@ -193,7 +243,11 @@ const Products = () => {
                           <TableCell>{product.category}</TableCell>
                           <TableCell>{formatPrice(product.price)}</TableCell>
                           <TableCell>
-                            {product.stock_count > 0 ? product.stock_count : (
+                            {product.stock_count > 0 ? (
+                              <span className={product.stock_count < 10 ? 'text-amber-600' : ''}>
+                                {product.stock_count}
+                              </span>
+                            ) : (
                               <Badge variant="outline" className="text-red-500 border-red-200 bg-red-50">
                                 Out of stock
                               </Badge>
@@ -201,16 +255,7 @@ const Products = () => {
                           </TableCell>
                           <TableCell>
                             <div className="flex flex-wrap gap-1">
-                              {product.is_public && (
-                                <Badge variant="outline" className="border-blue-200 bg-blue-50 text-blue-700">
-                                  E-commerce
-                                </Badge>
-                              )}
-                              {product.is_instore && (
-                                <Badge variant="outline" className="border-green-200 bg-green-50 text-green-700">
-                                  In-store
-                                </Badge>
-                              )}
+                              {getVisibilityBadges(product)}
                             </div>
                           </TableCell>
                           <TableCell>
@@ -234,7 +279,7 @@ const Products = () => {
                                 </DropdownMenuItem>
                                 <DropdownMenuSeparator />
                                 <DropdownMenuItem 
-                                  onClick={() => handleDeleteProduct(product.id)}
+                                  onClick={() => handleDeleteProduct(product.id, product.name)}
                                   className="text-red-600"
                                 >
                                   <Trash2 className="mr-2 h-4 w-4" />

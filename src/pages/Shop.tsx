@@ -103,13 +103,6 @@ const ShopPage = () => {
     }
   };
 
-  // Get products by category
-  const getProductsByCategory = (categoryId: string) => {
-    return products.filter(product => 
-      product.category.toLowerCase() === categoryId.toLowerCase()
-    );
-  };
-
   // Filter products by search term
   const filteredProducts = products.filter(product => 
     product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -119,7 +112,14 @@ const ShopPage = () => {
   // Update category product counts
   useEffect(() => {
     categories.forEach(category => {
-      category.productCount = categoryCount[category.name] || 0;
+      // Convert category.id to proper case for matching with database
+      const formattedCategoryName = 
+        category.id === 'supplements' ? 'Supplements' :
+        category.id === 'equipment' ? 'Equipment' :
+        category.id === 'apparel' ? 'Apparel' : category.id;
+      
+      // Set the count from the database or 0 if none found
+      category.productCount = categoryCount[formattedCategoryName] || 0;
     });
   }, [categoryCount]);
 

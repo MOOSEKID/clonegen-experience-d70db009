@@ -2,9 +2,31 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { ChevronRight, ShoppingBag, AlertCircle } from 'lucide-react';
-import { getProductsByCategory, categories } from '@/data/shopData';
 import ProductGrid from '@/components/shop/ProductGrid';
 import { Product } from '@/hooks/useProducts';
+import { supabase } from '@/integrations/supabase/client';
+
+// Category definitions
+const categories = [
+  {
+    id: 'supplements',
+    name: 'Supplements',
+    description: 'Protein powders, pre-workout formulas, and nutritional supplements to enhance your fitness journey.',
+    dbName: 'Supplements'
+  },
+  {
+    id: 'equipment',
+    name: 'Equipment',
+    description: 'High-quality fitness equipment for strength, cardio, and flexibility training.',
+    dbName: 'Equipment'
+  },
+  {
+    id: 'apparel',
+    name: 'Apparel',
+    description: 'Comfortable and stylish athletic wear for optimal performance during workouts.',
+    dbName: 'Apparel'
+  }
+];
 
 const CategoryPage = () => {
   const { categoryId } = useParams<{ categoryId: string }>();
@@ -14,30 +36,48 @@ const CategoryPage = () => {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    try {
-      if (categoryId) {
-        setLoading(true);
-        // Get category details
-        const categoryDetails = categories.find(cat => cat.id === categoryId);
-        
-        if (!categoryDetails) {
-          setError('Category not found');
+    const fetchProductsByCategory = async () => {
+      try {
+        if (categoryId) {
+          setLoading(true);
+          
+          // Get category details
+          const categoryDetails = categories.find(cat => cat.id === categoryId);
+          
+          if (!categoryDetails) {
+            setError('Category not found');
+            setLoading(false);
+            return;
+          }
+          
+          setCategory(categoryDetails);
+          
+          // Get products for this category from the database
+          const { data, error } = await supabase
+            .from('products')
+            .select('*')
+            .eq('category', categoryDetails.dbName)
+            .eq('is_active', true)
+            .eq('is_public', true);
+            
+          if (error) {
+            console.error('Error fetching products:', error);
+            setError('Failed to load products');
+            setLoading(false);
+            return;
+          }
+          
+          setProducts(data || []);
           setLoading(false);
-          return;
         }
-        
-        setCategory(categoryDetails);
-        
-        // Get products for this category
-        const categoryProducts = getProductsByCategory(categoryId);
-        setProducts(categoryProducts || []);
+      } catch (err) {
+        console.error('Error loading category data:', err);
+        setError('Failed to load category data');
         setLoading(false);
       }
-    } catch (err) {
-      console.error('Error loading category data:', err);
-      setError('Failed to load category data');
-      setLoading(false);
-    }
+    };
+    
+    fetchProductsByCategory();
   }, [categoryId]);
 
   // Function to add products to cart (placeholder)
