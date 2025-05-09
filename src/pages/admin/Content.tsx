@@ -4,6 +4,7 @@ import { FileText, Image, Layout, Video, DollarSign, Search, Monitor, Smartphone
 import ContentEditor from '@/components/admin/content/ContentEditor';
 import MediaLibrary from '@/components/admin/content/MediaLibrary';
 import SitePreview from '@/components/admin/content/SitePreview';
+import PageStructureManager from '@/components/admin/content/PageStructureManager';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
@@ -15,6 +16,7 @@ const AdminContent = () => {
   const [isPublishing, setIsPublishing] = useState(false);
   const [showPreview, setShowPreview] = useState(false);
   const [previewDevice, setPreviewDevice] = useState<'desktop' | 'tablet' | 'mobile'>('desktop');
+  const [activeTab, setActiveTab] = useState<'editor' | 'structure' | 'media' | 'seo'>('editor');
 
   const handleSaveDraft = () => {
     toast.success("Draft saved successfully");
@@ -121,11 +123,20 @@ const AdminContent = () => {
       </div>
       
       <div className="bg-white rounded-lg shadow-sm border border-gray-200">
-        <Tabs defaultValue="editor" className="w-full">
+        <Tabs 
+          defaultValue="editor" 
+          value={activeTab}
+          onValueChange={(value) => setActiveTab(value as any)}
+          className="w-full"
+        >
           <TabsList className="w-full justify-start border-b rounded-none p-0 overflow-x-auto">
             <TabsTrigger value="editor" className="rounded-none rounded-tl-lg data-[state=active]:border-b-2 data-[state=active]:border-gym-orange">
               <Layout className="h-4 w-4 mr-2" />
-              Page Editor
+              Content Editor
+            </TabsTrigger>
+            <TabsTrigger value="structure" className="rounded-none data-[state=active]:border-b-2 data-[state=active]:border-gym-orange">
+              <FileText className="h-4 w-4 mr-2" />
+              Page Structure
             </TabsTrigger>
             <TabsTrigger value="media" className="rounded-none data-[state=active]:border-b-2 data-[state=active]:border-gym-orange">
               <Image className="h-4 w-4 mr-2" />
@@ -183,6 +194,15 @@ const AdminContent = () => {
                   )}
                 </div>
               </div>
+            </div>
+          </TabsContent>
+          
+          <TabsContent value="structure" className="p-0">
+            <div className="flex flex-col h-[calc(100vh-280px)]">
+              <PageStructureManager 
+                selectedPage={selectedPage} 
+                onSave={() => setIsDirty(true)}
+              />
             </div>
           </TabsContent>
           
