@@ -1,256 +1,275 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
-import { useNavigate } from 'react-router-dom';
-import { Loader2, ImageIcon } from 'lucide-react';
-import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Switch } from '@/components/ui/switch';
+import {
+  Form,
+  FormControl,
+  FormDescription,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from '@/components/ui/form';
 import { Card, CardContent } from '@/components/ui/card';
-import { Separator } from '@/components/ui/separator';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { AlertCircle, ImageIcon } from 'lucide-react';
 import { ProductFormData } from '@/hooks/useProducts';
+import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
+import { useCategories } from '@/hooks/useCategories';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 
-// Form validation schema
+// Define the form validation schema
 const productFormSchema = z.object({
-  name: z.string().min(1, 'Product name is required'),
-  description: z.string().optional().nullable(),
-  category: z.string().min(1, 'Category is required'),
-  price: z.number().positive('Price must be a positive number'),
-  sku: z.string().optional().nullable(),
-  stock_count: z.number().int().nonnegative('Stock must be a non-negative number'),
+  name: z.string().min(2, 'Product name is required'),
+  description: z.string().optional(),
+  category_id: z.string().min(1, 'Category is required'),
+  price: z.coerce.number().min(0, 'Price must be a positive number'),
+  sku: z.string().optional(),
+  stock_count: z.coerce.number().min(0, 'Stock count must be a non-negative number'),
+  image_url: z.string().optional().nullable(),
   is_active: z.boolean().default(true),
   is_public: z.boolean().default(true),
   is_instore: z.boolean().default(true),
-  image_url: z.string().optional().nullable(),
 });
 
-export type ProductFormProps = {
+interface ProductFormProps {
   initialData?: ProductFormData;
   onSubmit: (data: ProductFormData) => void;
-  isLoading: boolean;
-};
+  isLoading?: boolean;
+}
 
-const PRODUCT_CATEGORIES = [
-  'Supplements',
-  'Apparel',
-  'Equipment',
-  'Membership',
-  'Accessories',
-  'Food & Drinks'
-];
-
-const ProductForm: React.FC<ProductFormProps> = ({ initialData, onSubmit, isLoading }) => {
-  const navigate = useNavigate();
+const ProductForm: React.FC<ProductFormProps> = ({
+  initialData,
+  onSubmit,
+  isLoading = false,
+}) => {
   const [imagePreview, setImagePreview] = useState<string | null>(initialData?.image_url || null);
   const [imageFile, setImageFile] = useState<File | null>(null);
-  
-  const form = useForm<ProductFormData>({
+  const { useCategoriesQuery } = useCategories();
+  const { data: categories = [], isLoading: categoriesLoading } = useCategoriesQuery();
+
+  const form = useForm<z.infer<typeof productFormSchema>>({
     resolver: zodResolver(productFormSchema),
     defaultValues: {
       name: initialData?.name || '',
       description: initialData?.description || '',
-      category: initialData?.category || PRODUCT_CATEGORIES[0],
+      category_id: initialData?.category_id || '',
       price: initialData?.price || 0,
       sku: initialData?.sku || '',
       stock_count: initialData?.stock_count || 0,
-      is_active: initialData?.is_active ?? true,
-      is_public: initialData?.is_public ?? true,
-      is_instore: initialData?.is_instore ?? true,
       image_url: initialData?.image_url || null,
+      is_active: initialData?.is_active !== undefined ? initialData.is_active : true,
+      is_public: initialData?.is_public !== undefined ? initialData.is_public : true,
+      is_instore: initialData?.is_instore !== undefined ? initialData.is_instore : true,
     },
   });
 
-  // Handle image upload
-  const handleImageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
     if (file) {
       setImageFile(file);
-      const objectUrl = URL.createObjectURL(file);
-      setImagePreview(objectUrl);
-      form.setValue('image_url', objectUrl);
-      
-      return () => URL.revokeObjectURL(objectUrl);
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setImagePreview(reader.result as string);
+      };
+      reader.readAsDataURL(file);
     }
   };
-  
-  // Handle form submission
-  const handleSubmit = (values: any) => {
+
+  const handleSubmit = (values: z.infer<typeof productFormSchema>) => {
     onSubmit({
       ...values,
+      imageFile,
       id: initialData?.id,
-      imageFile: imageFile,
     });
   };
 
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-8">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <div className="md:col-span-2 space-y-6">
-            <Card>
-              <CardContent className="pt-6">
-                <FormField
-                  control={form.control}
-                  name="name"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Product Name</FormLabel>
-                      <FormControl>
-                        <Input placeholder="Enter product name" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+          <div className="space-y-6">
+            <FormField
+              control={form.control}
+              name="name"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Product Name</FormLabel>
+                  <FormControl>
+                    <Input placeholder="Product name" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
 
-                <FormField
-                  control={form.control}
-                  name="description"
-                  render={({ field }) => (
-                    <FormItem className="mt-4">
-                      <FormLabel>Description</FormLabel>
-                      <FormControl>
-                        <Textarea 
-                          placeholder="Enter product description" 
-                          className="min-h-32" 
-                          {...field} 
-                          value={field.value || ''}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </CardContent>
-            </Card>
+            <FormField
+              control={form.control}
+              name="description"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Description</FormLabel>
+                  <FormControl>
+                    <Textarea
+                      placeholder="Describe the product..."
+                      className="min-h-[100px]"
+                      {...field}
+                      value={field.value || ''}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
 
-            <Card>
-              <CardContent className="pt-6 grid grid-cols-1 md:grid-cols-2 gap-4">
-                <FormField
-                  control={form.control}
-                  name="category"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Category</FormLabel>
-                      <Select onValueChange={field.onChange} defaultValue={field.value}>
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Select a category" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          {PRODUCT_CATEGORIES.map((category) => (
-                            <SelectItem key={category} value={category}>{category}</SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+            <FormField
+              control={form.control}
+              name="category_id"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Category</FormLabel>
+                  <Select
+                    disabled={categoriesLoading}
+                    onValueChange={field.onChange}
+                    defaultValue={field.value}
+                  >
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select a category" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      {categories.map((category) => (
+                        <SelectItem key={category.id} value={category.id}>
+                          {category.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
 
-                <FormField
-                  control={form.control}
-                  name="price"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Price (RWF)</FormLabel>
-                      <FormControl>
-                        <Input 
-                          type="number" 
-                          placeholder="0.00" 
-                          {...field} 
-                          onChange={(e) => field.onChange(parseFloat(e.target.value))} 
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+            <div className="grid grid-cols-2 gap-4">
+              <FormField
+                control={form.control}
+                name="price"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Price (RWF)</FormLabel>
+                    <FormControl>
+                      <Input type="number" min="0" step="100" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
 
-                <FormField
-                  control={form.control}
-                  name="sku"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>SKU</FormLabel>
-                      <FormControl>
-                        <Input placeholder="Enter SKU code" {...field} value={field.value || ''} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+              <FormField
+                control={form.control}
+                name="stock_count"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Stock Quantity</FormLabel>
+                    <FormControl>
+                      <Input type="number" min="0" step="1" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
 
-                <FormField
-                  control={form.control}
-                  name="stock_count"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Stock Quantity</FormLabel>
-                      <FormControl>
-                        <Input 
-                          type="number"
-                          placeholder="0"
-                          {...field}
-                          onChange={(e) => field.onChange(parseInt(e.target.value))}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </CardContent>
-            </Card>
+            <FormField
+              control={form.control}
+              name="sku"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>SKU (Stock Keeping Unit)</FormLabel>
+                  <FormControl>
+                    <Input placeholder="e.g. PROD-001" {...field} value={field.value || ''} />
+                  </FormControl>
+                  <FormDescription>
+                    A unique identifier for your product
+                  </FormDescription>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
           </div>
 
           <div className="space-y-6">
             <Card>
               <CardContent className="pt-6">
-                <div className="space-y-4">
-                  <div>
-                    <h3 className="text-sm font-medium mb-2">Product Image</h3>
-                    <div className="border rounded-md p-2">
-                      <div className="flex flex-col items-center justify-center">
-                        <div className="mb-4 h-40 w-full relative">
-                          {imagePreview ? (
-                            <img 
-                              src={imagePreview} 
-                              alt="Product preview" 
-                              className="h-full w-full object-contain mx-auto"
-                            />
-                          ) : (
-                            <div className="h-full w-full flex items-center justify-center bg-gray-50 border-2 border-dashed border-gray-300 rounded-md">
-                              <ImageIcon className="h-16 w-16 text-gray-400" />
-                            </div>
-                          )}
-                        </div>
-                        <Input 
-                          id="image"
-                          type="file"
-                          accept="image/*"
-                          onChange={handleImageChange}
-                          className="text-sm text-gray-500"
-                        />
-                      </div>
+                <FormLabel className="block mb-2">Product Image</FormLabel>
+                <div className="border-2 border-dashed rounded-lg p-4 text-center">
+                  {imagePreview ? (
+                    <div className="relative">
+                      <img
+                        src={imagePreview}
+                        alt="Product preview"
+                        className="h-40 w-auto mx-auto rounded-md object-contain"
+                      />
+                      <Button
+                        type="button"
+                        variant="destructive"
+                        size="sm"
+                        className="mt-2"
+                        onClick={() => {
+                          setImagePreview(null);
+                          setImageFile(null);
+                          form.setValue('image_url', null);
+                        }}
+                      >
+                        Remove Image
+                      </Button>
                     </div>
-                  </div>
-                  
-                  <Separator />
+                  ) : (
+                    <div className="flex flex-col items-center">
+                      <ImageIcon className="h-10 w-10 text-gray-400 mb-2" />
+                      <p className="text-sm text-gray-500 mb-2">
+                        Drag and drop an image or click to upload
+                      </p>
+                      <Input
+                        type="file"
+                        className="w-4/5"
+                        accept="image/*"
+                        onChange={handleImageChange}
+                      />
+                    </div>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
 
+            <Card>
+              <CardContent className="pt-6">
+                <h3 className="font-medium mb-4">Visibility Settings</h3>
+                <div className="space-y-4">
                   <FormField
                     control={form.control}
                     name="is_active"
                     render={({ field }) => (
-                      <FormItem className="flex flex-row items-center justify-between">
-                        <div className="space-y-0">
-                          <FormLabel>Active</FormLabel>
-                          <FormDescription>Show this product in stores</FormDescription>
+                      <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
+                        <div className="space-y-0.5">
+                          <FormLabel className="text-base">
+                            Active
+                          </FormLabel>
+                          <FormDescription>
+                            Product is active and can be displayed
+                          </FormDescription>
                         </div>
                         <FormControl>
                           <Switch
@@ -266,10 +285,14 @@ const ProductForm: React.FC<ProductFormProps> = ({ initialData, onSubmit, isLoad
                     control={form.control}
                     name="is_public"
                     render={({ field }) => (
-                      <FormItem className="flex flex-row items-center justify-between">
-                        <div className="space-y-0">
-                          <FormLabel>Public E-Commerce</FormLabel>
-                          <FormDescription>Show in online store</FormDescription>
+                      <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
+                        <div className="space-y-0.5">
+                          <FormLabel className="text-base">
+                            E-commerce Store
+                          </FormLabel>
+                          <FormDescription>
+                            Show in online shop
+                          </FormDescription>
                         </div>
                         <FormControl>
                           <Switch
@@ -285,10 +308,14 @@ const ProductForm: React.FC<ProductFormProps> = ({ initialData, onSubmit, isLoad
                     control={form.control}
                     name="is_instore"
                     render={({ field }) => (
-                      <FormItem className="flex flex-row items-center justify-between">
-                        <div className="space-y-0">
-                          <FormLabel>In-Store POS</FormLabel>
-                          <FormDescription>Show in gym POS system</FormDescription>
+                      <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
+                        <div className="space-y-0.5">
+                          <FormLabel className="text-base">
+                            In-store
+                          </FormLabel>
+                          <FormDescription>
+                            Available for in-person purchases
+                          </FormDescription>
                         </div>
                         <FormControl>
                           <Switch
@@ -304,21 +331,37 @@ const ProductForm: React.FC<ProductFormProps> = ({ initialData, onSubmit, isLoad
             </Card>
           </div>
         </div>
-        
-        <div className="flex justify-end gap-2">
-          <Button 
-            variant="outline" 
-            onClick={() => navigate(-1)}
+
+        {form.formState.errors.root && (
+          <Alert variant="destructive">
+            <AlertCircle className="h-4 w-4" />
+            <AlertTitle>Error</AlertTitle>
+            <AlertDescription>
+              {form.formState.errors.root.message}
+            </AlertDescription>
+          </Alert>
+        )}
+
+        <div className="flex justify-end space-x-2">
+          <Button
             type="button"
+            variant="outline"
+            onClick={() => window.history.back()}
+            disabled={isLoading}
           >
             Cancel
           </Button>
-          <Button 
-            type="submit"
-            disabled={isLoading}
-          >
-            {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-            {initialData?.id ? 'Update Product' : 'Create Product'}
+          <Button type="submit" disabled={isLoading}>
+            {isLoading ? (
+              <>
+                <span className="loading loading-spinner loading-sm mr-2"></span>
+                Saving...
+              </>
+            ) : initialData ? (
+              'Update Product'
+            ) : (
+              'Create Product'
+            )}
           </Button>
         </div>
       </form>

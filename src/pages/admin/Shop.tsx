@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { ShoppingBag, CreditCard, Dumbbell, Plus } from 'lucide-react';
+import { ShoppingBag, CreditCard, Dumbbell, Plus, Tag } from 'lucide-react';
 import PlaceholderSection from '@/components/admin/PlaceholderSection';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -41,18 +41,18 @@ const AdminShop = () => {
           className="hover:scale-[1.02] transition-transform"
         />
       
-        {/* E-Commerce Store Card */}
+        {/* Categories Card */}
         <PlaceholderSection
-          title="E-Commerce Store"
-          icon={<ShoppingBag className="h-6 w-6 text-gym-orange" />}
-          description="Sell your gym products online to the public and logged-in members."
-          ctaText="Manage E-Commerce"
-          onClick={() => navigate('/admin/shop/ecommerce')}
+          title="Categories"
+          icon={<Tag className="h-6 w-6 text-gym-orange" />}
+          description="Organize your products into categories for easier navigation."
+          ctaText="Manage Categories"
+          onClick={() => navigate('/admin/shop/categories')}
           features={[
-            "Product catalog management", 
-            "Online checkout with Stripe/MTN MoMo", 
-            "Delivery options", 
-            "Promo code support"
+            "View all categories", 
+            "Create new categories", 
+            "Edit category details", 
+            "Organize product catalog"
           ]}
           className="hover:scale-[1.02] transition-transform"
         />

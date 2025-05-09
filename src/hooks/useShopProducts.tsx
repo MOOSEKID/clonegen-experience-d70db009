@@ -2,8 +2,8 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Product } from '@/hooks/useProducts';
-import { categories } from '@/utils/categoryUtils';
 import { toast } from 'sonner';
+import { useCategories, Category } from '@/hooks/useCategories';
 
 export const useShopProducts = () => {
   const [searchTerm, setSearchTerm] = useState('');
@@ -11,44 +11,67 @@ export const useShopProducts = () => {
   const [products, setProducts] = useState<Product[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [categories, setCategories] = useState<Category[]>([]);
   const [categoryCount, setCategoryCount] = useState<Record<string, number>>({});
   
-  // Fetch products from Supabase
+  // Fetch products and categories from Supabase
   useEffect(() => {
-    const fetchProducts = async () => {
+    const fetchData = async () => {
       setIsLoading(true);
       setError(null);
       
       try {
+        // Fetch products
         console.log('Fetching products from Supabase...');
-        const { data, error } = await supabase
+        const { data: productsData, error: productsError } = await supabase
           .from('products')
-          .select('*')
+          .select('*, category:categories(id, name)')
           .eq('is_active', true)
           .eq('is_public', true);
           
-        if (error) {
-          console.error('Error fetching products:', error);
+        if (productsError) {
+          console.error('Error fetching products:', productsError);
           setError('Failed to load products. Please try again later.');
           return;
         }
+
+        // Fetch categories
+        const { data: categoriesData, error: categoriesError } = await supabase
+          .from('categories')
+          .select('*')
+          .order('name');
+
+        if (categoriesError) {
+          console.error('Error fetching categories:', categoriesError);
+          setError('Failed to load categories. Please try again later.');
+          return;
+        }
         
-        if (data && data.length > 0) {
-          console.log(`Fetched ${data.length} products successfully`);
-          setProducts(data as Product[]);
+        // Process products data
+        if (productsData && productsData.length > 0) {
+          console.log(`Fetched ${productsData.length} products successfully`);
+          setProducts(productsData as Product[]);
           
           // Count products by category
           const counts: Record<string, number> = {};
-          data.forEach(product => {
-            if (product.category) {
-              counts[product.category] = (counts[product.category] || 0) + 1;
+          productsData.forEach(product => {
+            if (product.category_id) {
+              counts[product.category_id] = (counts[product.category_id] || 0) + 1;
             }
           });
           setCategoryCount(counts);
         } else {
           console.log('No products found in database');
-          // Set empty array but don't treat as error
           setProducts([]);
+        }
+
+        // Process categories data
+        if (categoriesData) {
+          const categoriesWithCounts = categoriesData.map(category => ({
+            ...category,
+            productCount: counts[category.id] || 0
+          }));
+          setCategories(categoriesWithCounts);
         }
       } catch (error) {
         console.error('Unexpected error:', error);
@@ -58,19 +81,9 @@ export const useShopProducts = () => {
       }
     };
     
-    fetchProducts();
+    fetchData();
   }, []);
 
-  // Update category product counts
-  useEffect(() => {
-    if (Object.keys(categoryCount).length > 0) {
-      categories.forEach(category => {      
-        // Set the count from the database or 0 if none found
-        category.productCount = categoryCount[category.dbName] || 0;
-      });
-    }
-  }, [categoryCount]);
-  
   // Function to add products to cart
   const addToCart = (product: Product) => {
     setCartItems(prev => [...prev, product]);
@@ -94,9 +107,11 @@ export const useShopProducts = () => {
     setSearchTerm,
     cartItems,
     products,
+    categories,
     isLoading,
     error,
     filteredProducts,
-    addToCart
+    addToCart,
+    categoryCount
   };
 };

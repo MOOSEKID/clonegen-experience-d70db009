@@ -1,81 +1,147 @@
 
 import {
   LayoutDashboard,
-  Users,
-  CalendarClock,
+  UsersRound,
+  CalendarDays,
   Dumbbell,
+  ShoppingBag,
   CreditCard,
-  Activity,
-  ShoppingCart,
+  BarChartBig,
   FileText,
-  BarChart,
-  Settings,
   HelpCircle,
-  UserCog,
-} from 'lucide-react';
-import { NavLinkProps } from './types';
+  Settings,
+  Tag,
+  Store
+} from "lucide-react";
 
-// Sidebar links configuration
-export const sidebarLinks: NavLinkProps[] = [
+import { NavLink } from "./types";
+
+export const navLinks: NavLink[] = [
   {
+    title: "Dashboard",
+    href: "/admin",
     icon: LayoutDashboard,
-    text: 'Dashboard',
-    href: '/admin',
   },
   {
-    icon: Users,
-    text: 'Members',
-    href: '/admin/members',
+    title: "Members",
+    href: "/admin/members",
+    icon: UsersRound,
   },
   {
-    icon: CalendarClock,
-    text: 'Classes',
-    href: '/admin/classes',
+    title: "Classes",
+    href: "/admin/classes",
+    icon: CalendarDays,
   },
   {
+    title: "Trainers",
+    href: "/admin/trainers",
     icon: Dumbbell,
-    text: 'Trainers',
-    href: '/admin/trainers',
+    subItems: [
+      {
+        title: "Trainer Profiles",
+        href: "/admin/trainers",
+      },
+      {
+        title: "Performance Tracking",
+        href: "/admin/trainers/performance",
+      },
+      {
+        title: "Ratings",
+        href: "/admin/trainers/ratings",
+      },
+      {
+        title: "Scheduling",
+        href: "/admin/trainers/scheduling",
+      },
+    ],
   },
   {
+    title: "Shop",
+    href: "/admin/shop",
+    icon: ShoppingBag,
+    subItems: [
+      {
+        title: "Dashboard",
+        href: "/admin/shop",
+      },
+      {
+        title: "Products",
+        href: "/admin/shop/products",
+      },
+      {
+        title: "Categories",
+        href: "/admin/shop/categories",
+      },
+      {
+        title: "E-Commerce",
+        href: "/admin/shop/ecommerce",
+      },
+      {
+        title: "In-Store POS",
+        href: "/admin/shop/member-pos",
+      },
+    ],
+  },
+  {
+    title: "Payments",
+    href: "/admin/payments",
     icon: CreditCard,
-    text: 'Payments',
-    href: '/admin/payments',
+    subItems: [
+      {
+        title: "Subscriptions",
+        href: "/admin/payments/subscriptions",
+      },
+      {
+        title: "Invoices",
+        href: "/admin/payments/invoices",
+      },
+      {
+        title: "Payment Methods",
+        href: "/admin/payments/methods",
+      },
+    ],
   },
   {
-    icon: Activity,
-    text: 'Workouts',
-    href: '/admin/workouts',
+    title: "Workouts",
+    href: "/admin/workouts",
+    icon: Dumbbell,
+    subItems: [
+      {
+        title: "Programs",
+        href: "/admin/workouts",
+      },
+      {
+        title: "Exercise Library",
+        href: "/admin/workouts/exercise-library",
+      },
+      {
+        title: "Progress Tracking",
+        href: "/admin/workouts/progress-tracking",
+      },
+      {
+        title: "Reports",
+        href: "/admin/workouts/generate-reports",
+      },
+    ],
   },
   {
-    icon: ShoppingCart,
-    text: 'Shop',
-    href: '/admin/shop',
+    title: "Reports",
+    href: "/admin/reports",
+    icon: BarChartBig,
   },
   {
+    title: "Content",
+    href: "/admin/content",
     icon: FileText,
-    text: 'Content',
-    href: '/admin/content',
   },
   {
-    icon: BarChart,
-    text: 'Reports',
-    href: '/admin/reports',
-  },
-  {
-    icon: Settings,
-    text: 'Settings',
-    href: '/admin/settings',
-  },
-  {
+    title: "Support",
+    href: "/admin/support",
     icon: HelpCircle,
-    text: 'Support',
-    href: '/admin/support',
   },
-  // Test accounts link
   {
-    icon: UserCog,
-    text: 'Test Accounts',
-    href: '/admin/test-accounts',
+    title: "Settings",
+    href: "/admin/settings",
+    icon: Settings,
   },
 ];

@@ -24,7 +24,7 @@ const CategoryCard: React.FC<CategoryCardProps> = ({ id, name, icon, description
           <h3 className="font-semibold text-lg mb-2">{name}</h3>
           <p className="text-gray-600 text-sm mb-3">{description}</p>
           <div className="text-gym-orange text-sm font-semibold">
-            {productCount} Products
+            {productCount} {productCount === 1 ? 'Product' : 'Products'}
           </div>
         </CardContent>
       </Card>

@@ -1,4 +1,3 @@
-
 import { Outlet, Navigate, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../hooks/useAuth";
 import { useEffect } from "react";
@@ -56,6 +55,16 @@ export const AdminRedirect = () => {
 // Dynamically import Index to avoid circular dependency
 import Index from "../pages/Index";
 
+// Admin Shop Pages
+const AdminShop = React.lazy(() => import('@/pages/admin/Shop'));
+const AdminShopProducts = React.lazy(() => import('@/pages/admin/shop/Products'));
+const AdminShopECommerce = React.lazy(() => import('@/pages/admin/shop/ECommerce'));
+const AdminShopMemberPOS = React.lazy(() => import('@/pages/admin/shop/MemberPOS'));
+const AdminShopSettings = React.lazy(() => import('@/pages/admin/shop/Settings'));
+const AdminShopAddProduct = React.lazy(() => import('@/pages/admin/shop/AddProduct'));
+const AdminShopEditProduct = React.lazy(() => import('@/pages/admin/shop/EditProduct'));
+const AdminShopCategories = React.lazy(() => import('@/pages/admin/shop/Categories'));
+
 // Main Layout component that includes Header and Footer
 export const MainLayout = () => {
   return (
@@ -109,3 +118,39 @@ export const UserRoute = ({ children }: { children: React.ReactNode }) => {
   
   return <>{children}</>;
 };
+
+// Admin shop routes
+export const adminShopRoutes: Route[] = [
+  {
+    path: "/admin/shop",
+    element: <AdminShop />,
+  },
+  {
+    path: "/admin/shop/products",
+    element: <AdminShopProducts />,
+  },
+  {
+    path: "/admin/shop/categories",
+    element: <AdminShopCategories />,
+  },
+  {
+    path: "/admin/shop/ecommerce",
+    element: <AdminShopECommerce />,
+  },
+  {
+    path: "/admin/shop/member-pos",
+    element: <AdminShopMemberPOS />,
+  },
+  {
+    path: "/admin/shop/settings",
+    element: <AdminShopSettings />,
+  },
+  {
+    path: "/admin/shop/add-product",
+    element: <AdminShopAddProduct />,
+  },
+  {
+    path: "/admin/shop/edit-product/:id",
+    element: <AdminShopEditProduct />,
+  },
+];

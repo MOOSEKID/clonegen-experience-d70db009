@@ -23,6 +23,15 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, onAddToCart }) => {
     onAddToCart(product);
   };
 
+  // Get category name (handle both old and new structure)
+  const getCategoryName = () => {
+    if (typeof product.category === 'object' && product.category !== null) {
+      // @ts-ignore - We know category might be an object now
+      return product.category.name || 'Uncategorized';
+    }
+    return product.category || 'Uncategorized';
+  };
+
   if (!product) {
     return null; // Don't render anything if product is missing
   }
@@ -57,9 +66,9 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, onAddToCart }) => {
         </div>
         
         <div className="p-4 flex flex-col flex-grow">
-          {product.category && (
+          {getCategoryName() && (
             <span className="inline-block px-2 py-1 text-xs font-semibold bg-gray-100 rounded-full mb-2">
-              {product.category}
+              {getCategoryName()}
             </span>
           )}
           

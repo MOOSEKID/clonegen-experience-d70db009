@@ -9,6 +9,7 @@ export type Product = {
   name: string;
   description: string | null;
   category: string;
+  category_id?: string;
   price: number;
   image_url: string | null;
   sku: string | null;
@@ -34,7 +35,7 @@ export const useProducts = () => {
   const fetchProducts = async () => {
     const { data, error } = await supabase
       .from('products')
-      .select('*')
+      .select('*, category:categories(name)')
       .order('created_at', { ascending: false });
 
     if (error) {
@@ -47,7 +48,7 @@ export const useProducts = () => {
   const fetchProductById = async (id: string) => {
     const { data, error } = await supabase
       .from('products')
-      .select('*')
+      .select('*, category:categories(id, name)')
       .eq('id', id)
       .single();
 

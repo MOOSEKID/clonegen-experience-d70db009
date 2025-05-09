@@ -5,7 +5,6 @@ import ShopSearch from '@/components/shop/ShopSearch';
 import CategoriesSection from '@/components/shop/CategoriesSection';
 import ProductsSection from '@/components/shop/ProductsSection';
 import { useShopProducts } from '@/hooks/useShopProducts';
-import { categories } from '@/utils/categoryUtils';
 
 const ShopPage = () => {
   const {
@@ -14,6 +13,8 @@ const ShopPage = () => {
     cartItems,
     isLoading,
     filteredProducts,
+    categories,
+    categoryCount,
     error,
     addToCart
   } = useShopProducts();
@@ -27,7 +28,10 @@ const ShopPage = () => {
           setSearchTerm={setSearchTerm} 
           cartItems={cartItems} 
         />
-        <CategoriesSection categories={categories} />
+        <CategoriesSection 
+          categories={categories} 
+          categoryCount={categoryCount} 
+        />
         <ProductsSection 
           isLoading={isLoading} 
           filteredProducts={filteredProducts} 

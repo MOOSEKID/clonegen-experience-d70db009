@@ -5,53 +5,56 @@ import { ChevronRight, ShoppingBag, AlertCircle } from 'lucide-react';
 import ProductGrid from '@/components/shop/ProductGrid';
 import { Product } from '@/hooks/useProducts';
 import { supabase } from '@/integrations/supabase/client';
-import { findCategoryById } from '@/utils/categoryUtils';
 import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
+import { Category } from '@/hooks/useCategories';
+import { toast } from 'sonner';
 
 const CategoryPage = () => {
   const { categoryId } = useParams<{ categoryId: string }>();
   const [products, setProducts] = useState<Product[]>([]);
-  const [category, setCategory] = useState<any>(null);
+  const [category, setCategory] = useState<Category | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    const fetchProductsByCategory = async () => {
+    const fetchCategoryDetails = async () => {
       try {
         if (categoryId) {
           setLoading(true);
           setError(null);
           
-          // Get category details using case-insensitive matching
-          const categoryDetails = findCategoryById(categoryId);
-          
-          if (!categoryDetails) {
+          // Get category details
+          const { data: categoryData, error: categoryError } = await supabase
+            .from('categories')
+            .select('*')
+            .eq('id', categoryId)
+            .single();
+            
+          if (categoryError) {
+            console.error('Error fetching category:', categoryError);
             setError('Category not found');
             setLoading(false);
             return;
           }
           
-          setCategory(categoryDetails);
+          setCategory(categoryData);
           
-          console.log(`Fetching products for category: ${categoryDetails.dbName}`);
-          
-          // Get products for this category from the database
-          const { data, error } = await supabase
+          // Get products for this category
+          const { data: productsData, error: productsError } = await supabase
             .from('products')
             .select('*')
-            .eq('category', categoryDetails.dbName)
+            .eq('category_id', categoryId)
             .eq('is_active', true)
             .eq('is_public', true);
             
-          if (error) {
-            console.error('Error fetching products:', error);
+          if (productsError) {
+            console.error('Error fetching products:', productsError);
             setError('Failed to load products');
             setLoading(false);
             return;
           }
           
-          console.log(`Fetched ${data?.length || 0} products for category ${categoryDetails.dbName}`);
-          setProducts(data || []);
+          setProducts(productsData || []);
           setLoading(false);
         }
       } catch (err) {
@@ -61,18 +64,16 @@ const CategoryPage = () => {
       }
     };
     
-    fetchProductsByCategory();
+    fetchCategoryDetails();
   }, [categoryId]);
 
-  // Function to add products to cart (placeholder)
+  // Function to add products to cart
   const addToCart = (product: Product) => {
-    // Show a toast notification using Sonner
-    import('sonner').then(({ toast }) => {
-      toast(`${product.name} added to cart`, {
-        description: "Item added to your shopping cart",
-        position: "top-right",
-        duration: 2000
-      });
+    // Show a toast notification
+    toast(`${product.name} added to cart`, {
+      description: "Item added to your shopping cart",
+      position: "top-right",
+      duration: 2000
     });
   };
 
