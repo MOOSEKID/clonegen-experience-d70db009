@@ -1,20 +1,46 @@
 
 import React from 'react';
-import { ShoppingBag, CreditCard, Dumbbell } from 'lucide-react';
+import { ShoppingBag, CreditCard, Dumbbell, Plus } from 'lucide-react';
 import PlaceholderSection from '@/components/admin/PlaceholderSection';
 import { useNavigate } from 'react-router-dom';
+import { Button } from '@/components/ui/button';
 
 const AdminShop = () => {
   const navigate = useNavigate();
   
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold text-gray-800">Shop Management</h1>
-        <p className="text-gray-500">Manage your store products, orders, and promotions</p>
+      <div className="flex justify-between items-center">
+        <div>
+          <h1 className="text-2xl font-bold text-gray-800">Shop Management</h1>
+          <p className="text-gray-500">Manage your store products, orders, and promotions</p>
+        </div>
+        <Button 
+          onClick={() => navigate('/admin/shop/add-product')}
+          className="bg-gym-orange hover:bg-gym-orange/90"
+        >
+          <Plus className="mr-2 h-4 w-4" />
+          Add Product
+        </Button>
       </div>
       
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        {/* Products Management Card */}
+        <PlaceholderSection
+          title="Products"
+          icon={<ShoppingBag className="h-6 w-6 text-gym-orange" />}
+          description="Manage your products catalog for both online and in-store sales."
+          ctaText="Manage Products"
+          onClick={() => navigate('/admin/shop/products')}
+          features={[
+            "View all products", 
+            "Add/edit products", 
+            "Manage inventory", 
+            "Set visibility options"
+          ]}
+          className="hover:scale-[1.02] transition-transform"
+        />
+      
         {/* E-Commerce Store Card */}
         <PlaceholderSection
           title="E-Commerce Store"

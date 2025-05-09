@@ -1,105 +1,92 @@
 import React from 'react';
-import { Route } from 'react-router-dom';
+import { Route } from "react-router-dom";
 
 // Admin pages
-import Dashboard from '@/pages/admin/Dashboard';
-import Members from '@/pages/admin/Members';
-import Classes from '@/pages/admin/Classes';
-import Trainers from '@/pages/admin/Trainers';
-import Payments from '@/pages/admin/Payments';
-import Reports from '@/pages/admin/Reports';
-import Workouts from '@/pages/admin/Workouts';
-import Content from '@/pages/admin/Content';
-import Shop from '@/pages/admin/Shop';
-import Support from '@/pages/admin/Support';
-import TestAccounts from '@/pages/admin/TestAccounts';
-import Settings from '@/pages/admin/Settings';
-
-// Settings pages
-import GeneralSettings from '@/pages/admin/settings/General';
-import BusinessHoursSettings from '@/pages/admin/settings/BusinessHours';
-import HolidaysSettings from '@/pages/admin/settings/Holidays';
-import SecuritySettings from '@/pages/admin/settings/Security';
-import PlatformSettings from '@/pages/admin/settings/Platform';
-import IntegrationsSettings from '@/pages/admin/settings/Integrations';
-import UserPermissionsSettings from '@/pages/admin/settings/Permissions';
-import MemberDefaultsSettings from '@/pages/admin/settings/MemberDefaults';
-import CompanyAutomationSettings from '@/pages/admin/settings/Automation';
-import AutomationRulesSettings from '@/pages/admin/settings/AutomationRules';
-import TestingAccountsSettings from '@/pages/admin/settings/TestAccounts';
-import CMSSettings from '@/pages/admin/settings/CMS';
-
-// Payment pages
-const Invoices = React.lazy(() => import('@/pages/admin/payments/Invoices'));
-const PaymentMethods = React.lazy(() => import('@/pages/admin/payments/Methods'));
-const Subscriptions = React.lazy(() => import('@/pages/admin/payments/Subscriptions'));
-
-// Trainer pages
-const TrainerProfiles = React.lazy(() => import('@/pages/admin/trainers/TrainerProfiles'));
-const TrainerPerformance = React.lazy(() => import('@/pages/admin/trainers/PerformanceTracking'));
-const TrainerRatings = React.lazy(() => import('@/pages/admin/trainers/TrainerRatings'));
-const TrainerScheduling = React.lazy(() => import('@/pages/admin/trainers/TrainerScheduling')); // New import
-
-// Workout pages
-const ExerciseLibrary = React.lazy(() => import('@/pages/admin/workouts/ExerciseLibrary'));
-const WorkoutPrograms = React.lazy(() => import('@/pages/admin/workouts/WorkoutPrograms'));
-const AddExercise = React.lazy(() => import('@/pages/admin/workouts/AddExercise'));
-const CreateProgram = React.lazy(() => import('@/pages/admin/workouts/CreateProgram'));
-const ProgressTracking = React.lazy(() => import('@/pages/admin/workouts/ProgressTracking'));
-const WorkoutReports = React.lazy(() => import('@/pages/admin/workouts/GenerateReports'));
-
-// Shop pages
-const ECommerce = React.lazy(() => import('@/pages/admin/shop/ECommerce'));
-const MemberPOS = React.lazy(() => import('@/pages/admin/shop/MemberPOS'));
-const ShopSettings = React.lazy(() => import('@/pages/admin/shop/Settings'));
+import Dashboard from "../../pages/admin/Dashboard";
+import Members from "../../pages/admin/Members";
+import Classes from "../../pages/admin/Classes";
+import Content from "../../pages/admin/Content";
+import Trainers from "../../pages/admin/Trainers";
+import TrainerProfiles from "../../pages/admin/trainers/TrainerProfiles";
+import TrainerRatings from "../../pages/admin/trainers/TrainerRatings";
+import TrainerScheduling from "../../pages/admin/trainers/TrainerScheduling";
+import PerformanceTracking from "../../pages/admin/trainers/PerformanceTracking";
+import Workouts from "../../pages/admin/Workouts";
+import ExerciseLibrary from "../../pages/admin/workouts/ExerciseLibrary";
+import AddExercise from "../../pages/admin/workouts/AddExercise";
+import WorkoutPrograms from "../../pages/admin/workouts/WorkoutPrograms";
+import CreateProgram from "../../pages/admin/workouts/CreateProgram";
+import ProgressTracking from "../../pages/admin/workouts/ProgressTracking";
+import GenerateReports from "../../pages/admin/workouts/GenerateReports";
+import Shop from "../../pages/admin/Shop";
+import ECommerce from "../../pages/admin/shop/ECommerce";
+import MemberPOS from "../../pages/admin/shop/MemberPOS";
+import Settings from "../../pages/admin/Settings";
+import Reports from "../../pages/admin/Reports";
+import Support from "../../pages/admin/Support";
+import TestAccounts from "../../pages/admin/TestAccounts";
+import Payments from "../../pages/admin/Payments";
+import Invoices from "../../pages/admin/payments/Invoices";
+import Methods from "../../pages/admin/payments/Methods";
+import Subscriptions from "../../pages/admin/payments/Subscriptions";
+import MemberSettings from "../../pages/admin/settings/MemberDefaults";
+import GeneralSettings from "../../pages/admin/settings/General";
+import SecuritySettings from "../../pages/admin/settings/Security";
+import BusinessHours from "../../pages/admin/settings/BusinessHours";
+import Holidays from "../../pages/admin/settings/Holidays";
+import MemberPurchases from "../../pages/admin/members/MemberPurchases";
+import ShopSettings from "../../pages/admin/shop/Settings";
+import Products from "../../pages/admin/shop/Products";
+import AddProduct from "../../pages/admin/shop/AddProduct";
+import EditProduct from "../../pages/admin/shop/EditProduct";
 
 const useAdminRoutes = () => {
-  return (
-    <>
-      <Route index element={<Dashboard />} />
-      <Route path="members" element={<Members />} />
-      <Route path="classes" element={<Classes />} />
-      <Route path="trainers" element={<Trainers />} />
-      <Route path="trainers/profiles" element={<TrainerProfiles />} />
-      <Route path="trainers/performance" element={<TrainerPerformance />} />
-      <Route path="trainers/ratings" element={<TrainerRatings />} />
-      <Route path="trainers/scheduling" element={<TrainerScheduling />} /> {/* New route */}
-      <Route path="payments" element={<Payments />}>
-        <Route index element={<Invoices />} />
-        <Route path="methods" element={<PaymentMethods />} />
-        <Route path="subscriptions" element={<Subscriptions />} />
-      </Route>
-      <Route path="reports" element={<Reports />} />
-      <Route path="workouts" element={<Workouts />}>
-        <Route index element={<ExerciseLibrary />} />
-        <Route path="programs" element={<WorkoutPrograms />} />
-        <Route path="add-exercise" element={<AddExercise />} />
-        <Route path="create-program" element={<CreateProgram />} />
-        <Route path="progress" element={<ProgressTracking />} />
-        <Route path="reports" element={<WorkoutReports />} />
-      </Route>
-      <Route path="content" element={<Content />} />
-      <Route path="shop" element={<Shop />} />
-      <Route path="shop/ecommerce" element={<ECommerce />} />
-      <Route path="shop/member-pos" element={<MemberPOS />} />
-      <Route path="shop/settings" element={<ShopSettings />} />
-      <Route path="support" element={<Support />} />
-      <Route path="test-accounts" element={<TestAccounts />} />
-      <Route path="settings" element={<Settings />} />
-      <Route path="settings/general" element={<GeneralSettings />} />
-      <Route path="settings/business-hours" element={<BusinessHoursSettings />} />
-      <Route path="settings/holidays" element={<HolidaysSettings />} />
-      <Route path="settings/security" element={<SecuritySettings />} />
-      <Route path="settings/platform" element={<PlatformSettings />} />
-      <Route path="settings/integrations" element={<IntegrationsSettings />} />
-      <Route path="settings/permissions" element={<UserPermissionsSettings />} />
-      <Route path="settings/member-defaults" element={<MemberDefaultsSettings />} />
-      <Route path="settings/company-automation" element={<CompanyAutomationSettings />} />
-      <Route path="settings/automation-rules" element={<AutomationRulesSettings />} />
-      <Route path="settings/test-accounts" element={<TestingAccountsSettings />} />
-      <Route path="settings/cms" element={<CMSSettings />} />
-    </>
-  );
+  return [
+    <Route key="admin-dashboard" path="/" element={<Dashboard />} />,
+    <Route key="admin-members" path="members" element={<Members />} />,
+    <Route key="admin-classes" path="classes" element={<Classes />} />,
+    <Route key="admin-content" path="content" element={<Content />} />,
+    
+    <Route key="admin-trainers" path="trainers" element={<Trainers />} />,
+    <Route key="admin-trainer-profiles" path="trainers/trainer-profiles" element={<TrainerProfiles />} />,
+    <Route key="admin-trainer-ratings" path="trainers/trainer-ratings" element={<TrainerRatings />} />,
+    <Route key="admin-trainer-scheduling" path="trainers/trainer-scheduling" element={<TrainerScheduling />} />,
+    <Route key="admin-trainer-performance" path="trainers/performance-tracking" element={<PerformanceTracking />} />,
+    
+    <Route key="admin-workouts" path="workouts" element={<Workouts />} />,
+    <Route key="admin-exercise-library" path="workouts/exercise-library" element={<ExerciseLibrary />} />,
+    <Route key="admin-add-exercise" path="workouts/add-exercise" element={<AddExercise />} />,
+    <Route key="admin-workout-programs" path="workouts/workout-programs" element={<WorkoutPrograms />} />,
+    <Route key="admin-create-program" path="workouts/create-program" element={<CreateProgram />} />,
+    <Route key="admin-progress-tracking" path="workouts/progress-tracking" element={<ProgressTracking />} />,
+    <Route key="admin-generate-reports" path="workouts/generate-reports" element={<GenerateReports />} />,
+    
+    <Route key="admin-shop" path="shop" element={<Shop />} />,
+    <Route key="admin-shop-products" path="shop/products" element={<Products />} />,
+    <Route key="admin-shop-add-product" path="shop/add-product" element={<AddProduct />} />,
+    <Route key="admin-shop-edit-product" path="shop/edit-product/:id" element={<EditProduct />} />,
+    <Route key="admin-shop-ecommerce" path="shop/ecommerce" element={<ECommerce />} />,
+    <Route key="admin-shop-member-pos" path="shop/member-pos" element={<MemberPOS />} />,
+    <Route key="admin-shop-settings" path="shop/settings" element={<ShopSettings />} />,
+    
+    <Route key="admin-payments" path="payments" element={<Payments />} />,
+    <Route key="admin-payments-invoices" path="payments/invoices" element={<Invoices />} />,
+    <Route key="admin-payments-methods" path="payments/methods" element={<Methods />} />,
+    <Route key="admin-payments-subscriptions" path="payments/subscriptions" element={<Subscriptions />} />,
+    
+    <Route key="admin-settings" path="settings" element={<Settings />} />,
+    <Route key="admin-settings-member" path="settings/member-defaults" element={<MemberSettings />} />,
+    <Route key="admin-settings-general" path="settings/general" element={<GeneralSettings />} />,
+    <Route key="admin-settings-security" path="settings/security" element={<SecuritySettings />} />,
+    <Route key="admin-settings-hours" path="settings/business-hours" element={<BusinessHours />} />,
+    <Route key="admin-settings-holidays" path="settings/holidays" element={<Holidays />} />,
+    
+    <Route key="admin-reports" path="reports" element={<Reports />} />,
+    <Route key="admin-support" path="support" element={<Support />} />,
+    <Route key="admin-test-accounts" path="test-accounts" element={<TestAccounts />} />,
+    
+    <Route key="admin-member-purchases" path="members/member-purchases" element={<MemberPurchases />} />,
+  ];
 };
 
 export default useAdminRoutes;

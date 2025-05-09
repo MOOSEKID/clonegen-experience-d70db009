@@ -1,20 +1,21 @@
 
 import React from 'react';
-import ProductCard, { Product } from './ProductCard';
+import ProductCard from './ProductCard';
+import { Product } from '@/hooks/useProducts';
 
-interface ProductGridProps {
+type ProductGridProps = {
   products: Product[];
-  addToCart?: (product: Product) => void;
-}
+  addToCart: (product: Product) => void;
+};
 
 const ProductGrid: React.FC<ProductGridProps> = ({ products, addToCart }) => {
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 md:gap-6">
+    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
       {products.map((product) => (
-        <ProductCard 
-          key={product.id} 
-          product={product} 
-          addToCart={addToCart}
+        <ProductCard
+          key={product.id}
+          product={product}
+          onAddToCart={addToCart}
         />
       ))}
     </div>

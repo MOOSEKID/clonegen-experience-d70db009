@@ -536,6 +536,54 @@ export type Database = {
         }
         Relationships: []
       }
+      products: {
+        Row: {
+          category: string
+          created_at: string
+          description: string | null
+          id: string
+          image_url: string | null
+          is_active: boolean
+          is_instore: boolean
+          is_public: boolean
+          name: string
+          price: number
+          sku: string | null
+          stock_count: number
+          updated_at: string
+        }
+        Insert: {
+          category: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          image_url?: string | null
+          is_active?: boolean
+          is_instore?: boolean
+          is_public?: boolean
+          name: string
+          price: number
+          sku?: string | null
+          stock_count?: number
+          updated_at?: string
+        }
+        Update: {
+          category?: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          image_url?: string | null
+          is_active?: boolean
+          is_instore?: boolean
+          is_public?: boolean
+          name?: string
+          price?: number
+          sku?: string | null
+          stock_count?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           active_plan_id: string | null

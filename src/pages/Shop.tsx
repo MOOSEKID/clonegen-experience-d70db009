@@ -1,15 +1,77 @@
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Dumbbell, ShoppingBag, Shirt, Utensils, Filter, Search } from 'lucide-react';
-import { categories, products, getProductsByCategory } from '@/data/shopData';
 import CategoryCard from '@/components/shop/CategoryCard';
 import ProductGrid from '@/components/shop/ProductGrid';
 import { Button } from '@/components/ui/button';
-import { Product } from '@/components/shop/ProductCard';
+import { Product } from '@/hooks/useProducts';
+import { supabase } from '@/integrations/supabase/client';
+
+const categories = [
+  {
+    id: 'supplements',
+    name: 'Supplements',
+    icon: 'Utensils',
+    description: 'Protein powders, vitamins and more',
+    productCount: 0
+  },
+  {
+    id: 'equipment',
+    name: 'Equipment',
+    icon: 'Dumbbell',
+    description: 'Weights, machines and accessories',
+    productCount: 0
+  },
+  {
+    id: 'apparel',
+    name: 'Apparel',
+    icon: 'Shirt',
+    description: 'Gym wear and fitness clothing',
+    productCount: 0
+  },
+];
 
 const ShopPage = () => {
-  const [searchTerm, setSearchTerm] = React.useState('');
-  const [cartItems, setCartItems] = React.useState<Product[]>([]);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [cartItems, setCartItems] = useState<Product[]>([]);
+  const [products, setProducts] = useState<Product[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [categoryCount, setCategoryCount] = useState<Record<string, number>>({});
+  
+  // Fetch products from Supabase
+  useEffect(() => {
+    const fetchProducts = async () => {
+      setIsLoading(true);
+      try {
+        const { data, error } = await supabase
+          .from('products')
+          .select('*')
+          .eq('is_active', true)
+          .eq('is_public', true);
+          
+        if (error) {
+          console.error('Error fetching products:', error);
+          return;
+        }
+        
+        if (data) {
+          setProducts(data as Product[]);
+          // Count products by category
+          const counts: Record<string, number> = {};
+          data.forEach(product => {
+            counts[product.category] = (counts[product.category] || 0) + 1;
+          });
+          setCategoryCount(counts);
+        }
+      } catch (error) {
+        console.error('Error:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    
+    fetchProducts();
+  }, []);
   
   // Function to add products to cart
   const addToCart = (product: Product) => {
@@ -41,11 +103,25 @@ const ShopPage = () => {
     }
   };
 
+  // Get products by category
+  const getProductsByCategory = (categoryId: string) => {
+    return products.filter(product => 
+      product.category.toLowerCase() === categoryId.toLowerCase()
+    );
+  };
+
   // Filter products by search term
   const filteredProducts = products.filter(product => 
     product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    product.description.toLowerCase().includes(searchTerm.toLowerCase())
+    (product.description?.toLowerCase().includes(searchTerm.toLowerCase()) || false)
   );
+
+  // Update category product counts
+  useEffect(() => {
+    categories.forEach(category => {
+      category.productCount = categoryCount[category.name] || 0;
+    });
+  }, [categoryCount]);
 
   return (
     <div className="bg-gym-light min-h-screen pt-24 pb-16">
@@ -108,7 +184,12 @@ const ShopPage = () => {
             </h2>
           </div>
           
-          {filteredProducts.length > 0 ? (
+          {isLoading ? (
+            <div className="text-center py-10">
+              <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-gym-orange mx-auto"></div>
+              <p className="mt-4 text-gray-500">Loading products...</p>
+            </div>
+          ) : filteredProducts.length > 0 ? (
             <ProductGrid products={filteredProducts} addToCart={addToCart} />
           ) : (
             <div className="text-center py-10">
