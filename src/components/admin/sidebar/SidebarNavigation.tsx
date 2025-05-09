@@ -14,7 +14,6 @@ const SidebarNavigation: React.FC = () => {
                 icon: link.icon,
                 text: link.title,
                 href: link.href,
-                // No more subLinks
               }}
             />
           </li>

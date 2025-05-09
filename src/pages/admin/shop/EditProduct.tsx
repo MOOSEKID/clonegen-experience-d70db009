@@ -52,9 +52,12 @@ const EditProduct = () => {
   }
 
   // Get category name safely
-  const categoryName = typeof product.category === 'object' && product.category !== null 
-    ? (product.category.name || '') 
-    : (typeof product.category === 'string' ? product.category : '');
+  let categoryName = '';
+  if (product.category) {
+    categoryName = typeof product.category === 'object' 
+      ? (product.category.name || '') 
+      : product.category;
+  }
 
   // Convert Product to ProductFormData by ensuring all required fields are present
   const productFormData: ProductFormData = {
