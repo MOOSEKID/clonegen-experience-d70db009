@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Route } from 'react-router-dom';
 
@@ -49,6 +48,11 @@ const CreateProgram = React.lazy(() => import('@/pages/admin/workouts/CreateProg
 const ProgressTracking = React.lazy(() => import('@/pages/admin/workouts/ProgressTracking'));
 const WorkoutReports = React.lazy(() => import('@/pages/admin/workouts/GenerateReports'));
 
+// Shop pages
+const ECommerce = React.lazy(() => import('@/pages/admin/shop/ECommerce'));
+const MemberPOS = React.lazy(() => import('@/pages/admin/shop/MemberPOS'));
+const ShopSettings = React.lazy(() => import('@/pages/admin/shop/Settings'));
+
 const useAdminRoutes = () => {
   return (
     <>
@@ -76,6 +80,9 @@ const useAdminRoutes = () => {
       </Route>
       <Route path="content" element={<Content />} />
       <Route path="shop" element={<Shop />} />
+      <Route path="shop/ecommerce" element={<ECommerce />} />
+      <Route path="shop/member-pos" element={<MemberPOS />} />
+      <Route path="shop/settings" element={<ShopSettings />} />
       <Route path="support" element={<Support />} />
       <Route path="test-accounts" element={<TestAccounts />} />
       <Route path="settings" element={<Settings />} />

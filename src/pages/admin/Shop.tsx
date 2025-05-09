@@ -1,18 +1,12 @@
 
-import { useState } from 'react';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import React from 'react';
+import { ShoppingBag, CreditCard, Dumbbell } from 'lucide-react';
 import PlaceholderSection from '@/components/admin/PlaceholderSection';
-import { ShoppingBag, Tag, Package } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
-// This is just a placeholder component
-// In a real app, this would be fetching data from an API
 const AdminShop = () => {
-  const [activeTab, setActiveTab] = useState('products');
+  const navigate = useNavigate();
   
-  const handleTabChange = (value: string) => {
-    setActiveTab(value);
-  };
-
   return (
     <div className="space-y-6">
       <div>
@@ -20,84 +14,62 @@ const AdminShop = () => {
         <p className="text-gray-500">Manage your store products, orders, and promotions</p>
       </div>
       
-      <Tabs defaultValue="products" className="w-full" onValueChange={handleTabChange}>
-        <TabsList className="grid w-full grid-cols-3 mb-8">
-          <TabsTrigger value="products">Products</TabsTrigger>
-          <TabsTrigger value="orders">Orders</TabsTrigger>
-          <TabsTrigger value="promotions">Promotions</TabsTrigger>
-        </TabsList>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        {/* E-Commerce Store Card */}
+        <PlaceholderSection
+          title="E-Commerce Store"
+          icon={<ShoppingBag className="h-6 w-6 text-gym-orange" />}
+          description="Sell your gym products online to the public and logged-in members."
+          ctaText="Manage E-Commerce"
+          onClick={() => navigate('/admin/shop/ecommerce')}
+          features={[
+            "Product catalog management", 
+            "Online checkout with Stripe/MTN MoMo", 
+            "Delivery options", 
+            "Promo code support"
+          ]}
+          className="hover:scale-[1.02] transition-transform"
+        />
         
-        <TabsContent value="products" className="mt-6">
-          <PlaceholderSection 
-            title="Product Management" 
-            description="Here you can manage all your gym products, supplements, and merchandise."
-            ctaText="Add New Product"
-            icon={<Package className="h-6 w-6 text-gym-orange" />}
-            features={[
-              "Inventory Management",
-              "Product Categories",
-              "Price Management",
-              "Product Images"
-            ]}
-          />
-        </TabsContent>
-        
-        <TabsContent value="orders" className="mt-6">
-          <PlaceholderSection 
-            title="Order Management" 
-            description="Track and manage customer orders, process refunds, and check delivery status."
-            ctaText="View All Orders"
-            icon={<ShoppingBag className="h-6 w-6 text-gym-orange" />}
-            features={[
-              "Order Processing",
-              "Payment Status",
-              "Shipping Tracking",
-              "Order History"
-            ]}
-          />
-        </TabsContent>
-        
-        <TabsContent value="promotions" className="mt-6">
-          <PlaceholderSection 
-            title="Promotions & Discounts" 
-            description="Create and manage special offers, discount codes, and promotional campaigns."
-            ctaText="Create Promotion"
-            icon={<Tag className="h-6 w-6 text-gym-orange" />}
-            features={[
-              "Discount Codes",
-              "Bundle Offers",
-              "Seasonal Promotions",
-              "Member-only Deals"
-            ]}
-          />
-        </TabsContent>
-      </Tabs>
+        {/* In-Store POS Card */}
+        <PlaceholderSection
+          title="In-Store Sales / Member Tab"
+          icon={
+            <div className="flex items-center space-x-1">
+              <CreditCard className="h-6 w-6 text-gym-orange" />
+              <Dumbbell className="h-5 w-5 text-gym-orange/70" />
+            </div>
+          }
+          description="Track in-gym purchases and let staff charge items to member accounts."
+          ctaText="Launch POS System"
+          onClick={() => navigate('/admin/shop/member-pos')}
+          features={[
+            "Member search/scan", 
+            "Charge to member tab", 
+            "Track unpaid balances", 
+            "Daily sales summary"
+          ]}
+          className="hover:scale-[1.02] transition-transform"
+        />
+      </div>
       
-      {/* Display different content based on the active tab */}
-      {activeTab && (
-        <div className="bg-white p-6 rounded-lg border border-gray-200 shadow-sm">
-          {activeTab === 'products' && (
-            <div>
-              <h2 className="text-xl font-semibold mb-4">Featured Products</h2>
-              {/* Product management content would go here */}
-            </div>
-          )}
-          
-          {activeTab === 'orders' && (
-            <div>
-              <h2 className="text-xl font-semibold mb-4">Recent Orders</h2>
-              {/* Order management content would go here */}
-            </div>
-          )}
-          
-          {activeTab === 'promotions' && (
-            <div>
-              <h2 className="text-xl font-semibold mb-4">Active Promotions</h2>
-              {/* Promotions management content would go here */}
-            </div>
-          )}
-        </div>
-      )}
+      {/* Settings Card */}
+      <div className="mt-8">
+        <PlaceholderSection
+          title="Shop Settings"
+          icon={<ShoppingBag className="h-6 w-6 text-gym-orange" />}
+          description="Configure your shop settings, discounts, and inventory alerts."
+          ctaText="Manage Settings"
+          onClick={() => navigate('/admin/shop/settings')}
+          features={[
+            "Enable/disable features", 
+            "Set credit limits by membership", 
+            "Configure discounts", 
+            "Inventory management"
+          ]}
+          className="max-w-xl"
+        />
+      </div>
     </div>
   );
 };
