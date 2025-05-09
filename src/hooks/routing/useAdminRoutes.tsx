@@ -23,8 +23,12 @@ const Integrations = lazy(() => import("../../pages/admin/settings/Integrations"
 const Permissions = lazy(() => import("../../pages/admin/settings/Permissions"));
 const MemberDefaults = lazy(() => import("../../pages/admin/settings/MemberDefaults"));
 const Automation = lazy(() => import("../../pages/admin/settings/Automation"));
+// New settings pages
+const ReportsExports = lazy(() => import("../../pages/admin/settings/ReportsExports"));
+const AutomationRules = lazy(() => import("../../pages/admin/settings/AutomationRules"));
+const TestAccounts = lazy(() => import("../../pages/admin/settings/TestAccounts"));
+const CustomMessages = lazy(() => import("../../pages/admin/settings/CustomMessages"));
 const AdminSupport = lazy(() => import("../../pages/admin/Support"));
-const TestAccounts = lazy(() => import("../../pages/admin/TestAccounts"));
 
 // Admin Workout subpages
 const AdminWorkoutPrograms = lazy(() => import("../../pages/admin/workouts/WorkoutPrograms"));
@@ -104,7 +108,7 @@ export const useAdminRoutes = () => {
           <Integrations />
         </Suspense>
       } />
-      {/* New settings routes */}
+      {/* People & Roles settings routes */}
       <Route path="settings/permissions" element={
         <Suspense fallback={<PageLoading />}>
           <Permissions />
@@ -120,8 +124,28 @@ export const useAdminRoutes = () => {
           <Automation />
         </Suspense>
       } />
+      {/* New Advanced settings routes */}
+      <Route path="settings/reports-exports" element={
+        <Suspense fallback={<PageLoading />}>
+          <ReportsExports />
+        </Suspense>
+      } />
+      <Route path="settings/automation-rules" element={
+        <Suspense fallback={<PageLoading />}>
+          <AutomationRules />
+        </Suspense>
+      } />
+      <Route path="settings/test-accounts" element={
+        <Suspense fallback={<PageLoading />}>
+          <TestAccounts />
+        </Suspense>
+      } />
+      <Route path="settings/custom-messages" element={
+        <Suspense fallback={<PageLoading />}>
+          <CustomMessages />
+        </Suspense>
+      } />
       <Route path="support" element={<AdminSupport />} />
-      <Route path="test-accounts" element={<TestAccounts />} />
     </>
   );
 };
