@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { useSettings, SaveState } from '@/hooks/admin/useSettings';
 import SettingsCard from '../SettingsCard';
@@ -9,7 +8,7 @@ import { Switch } from '@/components/ui/switch';
 import FileUpload from '../FileUpload';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
-import { Loader2, Save, RotateCcw, AlertCircle } from 'lucide-react';
+import { Loader2, Save, RotateCcw, AlertCircle, Sun, Moon } from 'lucide-react';
 import { toast } from 'sonner';
 import { PhoneInput } from './PhoneInput';
 import { LogoPreview } from './LogoPreview';
@@ -27,6 +26,7 @@ interface GeneralSettingsData {
   dark_mode_enabled: boolean;
   logo_light_url: string;
   logo_dark_url: string;
+  updated_at?: string; // Add this field to match what we're sending to the API
 }
 
 const GeneralSettings = () => {
@@ -148,10 +148,7 @@ const GeneralSettings = () => {
     }
     
     try {
-      await updateSettings({
-        ...formData,
-        updated_at: new Date().toISOString()
-      });
+      await updateSettings(formData);
       toast.success('Settings saved successfully');
     } catch (err) {
       toast.error('Failed to save settings');
