@@ -21,7 +21,7 @@ const ShopPage = () => {
 
   return (
     <div className="bg-gym-light min-h-screen pt-24 pb-16">
-      <div className="container-custom">
+      <div className="container-custom px-4 sm:px-6 lg:px-8 mx-auto max-w-7xl">
         <ShopHeader />
         <ShopSearch 
           searchTerm={searchTerm} 

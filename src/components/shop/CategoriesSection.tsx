@@ -9,7 +9,7 @@ interface CategoriesSectionProps {
   categoryCount?: Record<string, number>;
 }
 
-const CategoriesSection = ({ categories, categoryCount = {} }: CategoriesSectionProps) => {
+const CategoriesSection: React.FC<CategoriesSectionProps> = ({ categories, categoryCount = {} }: CategoriesSectionProps) => {
   // Get the icon component by name
   const getIconComponent = (iconName: string) => {
     switch (iconName) {

@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { ShoppingCart, ShoppingBag } from 'lucide-react';
 import { Product } from '@/hooks/useProducts';
 import { Badge } from '@/components/ui/badge';
+import { toast } from 'sonner';
 
 type ProductCardProps = {
   product: Product;
@@ -21,6 +22,13 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, onAddToCart }) => {
   const handleAddToCart = (e: React.MouseEvent) => {
     e.preventDefault(); // Prevent navigation when clicking the button
     onAddToCart(product);
+    
+    // Show toast notification
+    toast(`${product.name} added to cart`, {
+      description: "Item successfully added to your cart",
+      position: "top-right",
+      duration: 2000,
+    });
   };
 
   // Get category name (handle both old and new structure)
@@ -37,7 +45,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, onAddToCart }) => {
   }
 
   return (
-    <Link to={`/shop/product/${product.id}`} className="block">
+    <Link to={`/shop/product/${product.id}`} className="block h-full">
       <div className="bg-white rounded-lg overflow-hidden shadow-md transition-all hover:shadow-lg h-full flex flex-col">
         <div className="h-48 overflow-hidden relative">
           {product.image_url ? (
