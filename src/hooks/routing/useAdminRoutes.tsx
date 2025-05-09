@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Route } from "react-router-dom";
 
@@ -39,6 +40,7 @@ import ShopSettings from "../../pages/admin/shop/Settings";
 import Products from "../../pages/admin/shop/Products";
 import AddProduct from "../../pages/admin/shop/AddProduct";
 import EditProduct from "../../pages/admin/shop/EditProduct";
+import Categories from "../../pages/admin/shop/Categories";
 
 const useAdminRoutes = () => {
   return [
@@ -65,6 +67,7 @@ const useAdminRoutes = () => {
     <Route key="admin-shop-products" path="shop/products" element={<Products />} />,
     <Route key="admin-shop-add-product" path="shop/add-product" element={<AddProduct />} />,
     <Route key="admin-shop-edit-product" path="shop/edit-product/:id" element={<EditProduct />} />,
+    <Route key="admin-shop-categories" path="shop/categories" element={<Categories />} />,
     <Route key="admin-shop-ecommerce" path="shop/ecommerce" element={<ECommerce />} />,
     <Route key="admin-shop-member-pos" path="shop/member-pos" element={<MemberPOS />} />,
     <Route key="admin-shop-settings" path="shop/settings" element={<ShopSettings />} />,
