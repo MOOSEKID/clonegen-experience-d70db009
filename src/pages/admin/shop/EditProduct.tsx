@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useProducts, ProductFormData } from '@/hooks/useProducts';
@@ -57,7 +56,7 @@ const EditProduct = () => {
     name: product.name,
     description: product.description || undefined,
     category: typeof product.category === 'object' && product.category !== null 
-      ? product.category.name 
+      ? (product.category.name || '') 
       : (product.category || ''),
     category_id: product.category_id || '',
     price: product.price,
