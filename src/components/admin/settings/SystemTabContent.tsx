@@ -1,7 +1,6 @@
 
 import React from 'react';
 import { Building, Lock, Clock, CalendarDays, Store, DollarSign } from 'lucide-react';
-import { Link } from 'react-router-dom';
 import SettingsCard from './SettingsCard';
 
 const SystemTabContent = () => {
@@ -10,7 +9,8 @@ const SystemTabContent = () => {
       title: "General Settings",
       description: "Branding, contact info, language, appearance",
       icon: <Building className="h-10 w-10 text-gray-400" />,
-      link: "/admin/settings/general"
+      link: "/admin/settings/general",
+      status: null
     },
     {
       title: "Security Settings",
