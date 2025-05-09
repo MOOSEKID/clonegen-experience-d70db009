@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { useSettings, SaveState } from '@/hooks/admin/useSettings';
 import SettingsCard from '../SettingsCard';
@@ -14,7 +13,7 @@ import { toast } from 'sonner';
 import { PhoneInput } from './PhoneInput';
 import { LogoPreview } from './LogoPreview';
 import { languages, currencies, timezones, isValidEmail } from './optionsData';
-import { useMediaQuery } from '@/hooks/use-mobile';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 interface GeneralSettingsData {
   id: string;
@@ -31,7 +30,7 @@ interface GeneralSettingsData {
 
 const GeneralSettings = () => {
   // Get mobile screen size
-  const isMobile = useMediaQuery("(max-width: 768px)");
+  const isMobile = useIsMobile();
   
   const { 
     data: settings, 
