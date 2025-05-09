@@ -46,7 +46,7 @@ export const useCategories = () => {
   };
 
   // Create a new category
-  const createCategory = async (category: Omit<Category, 'id' | 'created_at' | 'updated_at'>): Promise<Category> => {
+  const createCategory = async (category: Omit<Category, 'id' | 'created_at' | 'updated_at' | 'productCount'>): Promise<Category> => {
     const { data, error } = await supabase
       .from('categories')
       .insert([category])
@@ -61,7 +61,7 @@ export const useCategories = () => {
   };
 
   // Update an existing category
-  const updateCategory = async (id: string, category: Partial<Omit<Category, 'id' | 'created_at' | 'updated_at'>>): Promise<Category> => {
+  const updateCategory = async (id: string, category: Partial<Omit<Category, 'id' | 'created_at' | 'updated_at' | 'productCount'>>): Promise<Category> => {
     const { data, error } = await supabase
       .from('categories')
       .update(category)
@@ -112,25 +112,21 @@ export const useCategories = () => {
         toast('Category created successfully');
       },
       onError: (error: Error) => {
-        toast(`Failed to create category: ${error.message}`, {
-          variant: 'destructive'
-        });
+        toast(`Failed to create category: ${error.message}`);
       }
     });
   };
 
   const useUpdateCategoryMutation = () => {
     return useMutation({
-      mutationFn: ({ id, data }: { id: string; data: Partial<Omit<Category, 'id' | 'created_at' | 'updated_at'>>}) => 
+      mutationFn: ({ id, data }: { id: string; data: Partial<Omit<Category, 'id' | 'created_at' | 'updated_at' | 'productCount'>>}) => 
         updateCategory(id, data),
       onSuccess: () => {
         queryClient.invalidateQueries({ queryKey: ['categories'] });
         toast('Category updated successfully');
       },
       onError: (error: Error) => {
-        toast(`Failed to update category: ${error.message}`, {
-          variant: 'destructive'
-        });
+        toast(`Failed to update category: ${error.message}`);
       }
     });
   };
@@ -143,9 +139,7 @@ export const useCategories = () => {
         toast('Category deleted successfully');
       },
       onError: (error: Error) => {
-        toast(`Failed to delete category: ${error.message}`, {
-          variant: 'destructive'
-        });
+        toast(`Failed to delete category: ${error.message}`);
       }
     });
   };

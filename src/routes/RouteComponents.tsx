@@ -1,9 +1,12 @@
+
+import React, { Suspense } from "react";
 import { Outlet, Navigate, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../hooks/useAuth";
 import { useEffect } from "react";
 import Header from "../components/Header";
 import Footer from "../components/Footer";
 import { ErrorBoundary } from "../components/ui/error-boundary";
+import { RouteObject } from "react-router-dom";
 
 // Loading component for suspense fallback
 export const PageLoading = () => (
@@ -120,7 +123,7 @@ export const UserRoute = ({ children }: { children: React.ReactNode }) => {
 };
 
 // Admin shop routes
-export const adminShopRoutes: Route[] = [
+export const adminShopRoutes: RouteObject[] = [
   {
     path: "/admin/shop",
     element: <AdminShop />,

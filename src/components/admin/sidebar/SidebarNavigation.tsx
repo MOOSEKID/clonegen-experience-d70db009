@@ -1,7 +1,7 @@
 
 import React, { useState } from 'react';
 import SidebarLink from './SidebarLink';
-import { sidebarLinks } from './navlinks';
+import { navLinks } from './navlinks';
 
 const SidebarNavigation: React.FC = () => {
   const [openSubMenu, setOpenSubMenu] = useState<string | null>(null);
@@ -13,10 +13,18 @@ const SidebarNavigation: React.FC = () => {
   return (
     <nav className="flex-grow p-4">
       <ul>
-        {sidebarLinks.map((link) => (
-          <li key={link.text} className="mb-1">
+        {navLinks.map((link) => (
+          <li key={link.title} className="mb-1">
             <SidebarLink
-              link={link}
+              link={{
+                icon: link.icon,
+                text: link.title,
+                href: link.href,
+                subLinks: link.subItems?.map(item => ({ 
+                  text: item.title, 
+                  href: item.href 
+                }))
+              }}
               openSubMenu={openSubMenu}
               toggleSubMenu={toggleSubMenu}
             />

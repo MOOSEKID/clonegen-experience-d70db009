@@ -28,8 +28,10 @@ import {
 const categoryFormSchema = z.object({
   name: z.string().min(2, 'Category name is required'),
   description: z.string().optional(),
-  icon: z.string().optional(),
+  icon: z.string(),
 });
+
+type CategoryFormValues = z.infer<typeof categoryFormSchema>;
 
 interface CategoryFormProps {
   initialData?: Category;
@@ -52,7 +54,7 @@ const CategoryForm: React.FC<CategoryFormProps> = ({
   onSubmit,
   isLoading = false,
 }) => {
-  const form = useForm<z.infer<typeof categoryFormSchema>>({
+  const form = useForm<CategoryFormValues>({
     resolver: zodResolver(categoryFormSchema),
     defaultValues: {
       name: initialData?.name || '',
@@ -61,7 +63,7 @@ const CategoryForm: React.FC<CategoryFormProps> = ({
     },
   });
 
-  const handleSubmit = (values: z.infer<typeof categoryFormSchema>) => {
+  const handleSubmit = (values: CategoryFormValues) => {
     onSubmit(values);
   };
 

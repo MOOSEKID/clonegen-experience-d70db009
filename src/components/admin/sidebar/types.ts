@@ -12,3 +12,13 @@ export interface NavLinkProps {
 export interface AdminSidebarProps {
   isOpen: boolean;
 }
+
+export interface NavLink {
+  title: string;
+  href: string;
+  icon: LucideIcon;
+  subItems?: {
+    title: string;
+    href: string;
+  }[];
+}
