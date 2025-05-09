@@ -47,6 +47,11 @@ const AdminContent = lazy(() => import("./pages/admin/Content"));
 const AdminReports = lazy(() => import("./pages/admin/Reports"));
 const AdminSettings = lazy(() => import("./pages/admin/Settings"));
 const GeneralSettings = lazy(() => import("./pages/admin/settings/General"));
+const SecuritySettings = lazy(() => import("./pages/admin/settings/Security"));
+const BusinessHours = lazy(() => import("./pages/admin/settings/BusinessHours"));
+const Holidays = lazy(() => import("./pages/admin/settings/Holidays"));
+const Platform = lazy(() => import("./pages/admin/settings/Platform"));
+const Integrations = lazy(() => import("./pages/admin/settings/Integrations"));
 const AdminSupport = lazy(() => import("./pages/admin/Support"));
 const TestAccounts = lazy(() => import("./pages/admin/TestAccounts"));
 
@@ -218,7 +223,7 @@ const App = () => {
                   <Route path="workout-programs" element={<AdminWorkoutPrograms />} />
                   <Route path="exercises" element={<AdminExerciseLibrary />} />
                   <Route path="progress-tracking" element={<AdminProgressTracking />} />
-                  {/* New workout-related routes */}
+                  {/* Workout-related routes */}
                   <Route path="workouts/create-program" element={<CreateProgram />} />
                   <Route path="workouts/add-exercise" element={<AddExercise />} />
                   <Route path="workouts/generate-reports" element={<GenerateReports />} />
@@ -226,7 +231,36 @@ const App = () => {
                   <Route path="content" element={<AdminContent />} />
                   <Route path="reports" element={<AdminReports />} />
                   <Route path="settings" element={<AdminSettings />} />
-                  <Route path="settings/general" element={<GeneralSettings />} />
+                  <Route path="settings/general" element={
+                    <Suspense fallback={<PageLoading />}>
+                      <GeneralSettings />
+                    </Suspense>
+                  } />
+                  <Route path="settings/security" element={
+                    <Suspense fallback={<PageLoading />}>
+                      <SecuritySettings />
+                    </Suspense>
+                  } />
+                  <Route path="settings/business-hours" element={
+                    <Suspense fallback={<PageLoading />}>
+                      <BusinessHours />
+                    </Suspense>
+                  } />
+                  <Route path="settings/holidays" element={
+                    <Suspense fallback={<PageLoading />}>
+                      <Holidays />
+                    </Suspense>
+                  } />
+                  <Route path="settings/platform" element={
+                    <Suspense fallback={<PageLoading />}>
+                      <Platform />
+                    </Suspense>
+                  } />
+                  <Route path="settings/integrations" element={
+                    <Suspense fallback={<PageLoading />}>
+                      <Integrations />
+                    </Suspense>
+                  } />
                   <Route path="support" element={<AdminSupport />} />
                   <Route path="test-accounts" element={<TestAccounts />} />
                 </Route>
