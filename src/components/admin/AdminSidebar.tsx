@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { cn } from '@/lib/utils';
 import { Link, useLocation } from 'react-router-dom';
@@ -29,7 +30,7 @@ interface AdminSidebarProps {
 }
 
 // Sidebar links configuration
-const sidebarLinks = [
+const sidebarLinks: NavLinkProps[] = [
   {
     icon: LayoutDashboard,
     text: 'Dashboard',
@@ -49,7 +50,6 @@ const sidebarLinks = [
     icon: Dumbbell,
     text: 'Trainers',
     href: '/admin/trainers',
-    // Removed subLinks to make this a direct link
   },
   {
     icon: CreditCard,
