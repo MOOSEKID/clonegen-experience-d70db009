@@ -455,6 +455,471 @@ export type Database = {
         }
         Relationships: []
       }
+      settings_automations: {
+        Row: {
+          created_at: string | null
+          id: string
+          rules: Json | null
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          rules?: Json | null
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          rules?: Json | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      settings_companies_automation: {
+        Row: {
+          auto_generate_reports: boolean | null
+          auto_invoice: boolean | null
+          company_email_signature: string | null
+          created_at: string | null
+          default_notes: string | null
+          id: string
+          invoice_generation_day: number | null
+          invoice_reminder_days: number[] | null
+          invoice_template_id: string | null
+          payment_due_days: number | null
+          report_delivery_day: string | null
+          report_frequency: string | null
+          report_recipients: string | null
+          report_types: string[] | null
+          send_welcome_email: boolean | null
+          updated_at: string | null
+          welcome_email_template: string | null
+        }
+        Insert: {
+          auto_generate_reports?: boolean | null
+          auto_invoice?: boolean | null
+          company_email_signature?: string | null
+          created_at?: string | null
+          default_notes?: string | null
+          id?: string
+          invoice_generation_day?: number | null
+          invoice_reminder_days?: number[] | null
+          invoice_template_id?: string | null
+          payment_due_days?: number | null
+          report_delivery_day?: string | null
+          report_frequency?: string | null
+          report_recipients?: string | null
+          report_types?: string[] | null
+          send_welcome_email?: boolean | null
+          updated_at?: string | null
+          welcome_email_template?: string | null
+        }
+        Update: {
+          auto_generate_reports?: boolean | null
+          auto_invoice?: boolean | null
+          company_email_signature?: string | null
+          created_at?: string | null
+          default_notes?: string | null
+          id?: string
+          invoice_generation_day?: number | null
+          invoice_reminder_days?: number[] | null
+          invoice_template_id?: string | null
+          payment_due_days?: number | null
+          report_delivery_day?: string | null
+          report_frequency?: string | null
+          report_recipients?: string | null
+          report_types?: string[] | null
+          send_welcome_email?: boolean | null
+          updated_at?: string | null
+          welcome_email_template?: string | null
+        }
+        Relationships: []
+      }
+      settings_general: {
+        Row: {
+          contact_email: string | null
+          contact_phone: string | null
+          created_at: string | null
+          currency: string | null
+          dark_mode_enabled: boolean | null
+          default_language: string | null
+          gym_name: string | null
+          id: string
+          logo_dark_url: string | null
+          logo_light_url: string | null
+          timezone: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          contact_email?: string | null
+          contact_phone?: string | null
+          created_at?: string | null
+          currency?: string | null
+          dark_mode_enabled?: boolean | null
+          default_language?: string | null
+          gym_name?: string | null
+          id?: string
+          logo_dark_url?: string | null
+          logo_light_url?: string | null
+          timezone?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          contact_email?: string | null
+          contact_phone?: string | null
+          created_at?: string | null
+          currency?: string | null
+          dark_mode_enabled?: boolean | null
+          default_language?: string | null
+          gym_name?: string | null
+          id?: string
+          logo_dark_url?: string | null
+          logo_light_url?: string | null
+          timezone?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      settings_integrations: {
+        Row: {
+          airtel_api_key: string | null
+          created_at: string | null
+          id: string
+          mtn_api_key: string | null
+          smtp_host: string | null
+          smtp_password: string | null
+          smtp_port: number | null
+          smtp_user: string | null
+          stripe_public_key: string | null
+          stripe_secret_key: string | null
+          test_mode: boolean | null
+          twilio_sid: string | null
+          twilio_token: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          airtel_api_key?: string | null
+          created_at?: string | null
+          id?: string
+          mtn_api_key?: string | null
+          smtp_host?: string | null
+          smtp_password?: string | null
+          smtp_port?: number | null
+          smtp_user?: string | null
+          stripe_public_key?: string | null
+          stripe_secret_key?: string | null
+          test_mode?: boolean | null
+          twilio_sid?: string | null
+          twilio_token?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          airtel_api_key?: string | null
+          created_at?: string | null
+          id?: string
+          mtn_api_key?: string | null
+          smtp_host?: string | null
+          smtp_password?: string | null
+          smtp_port?: number | null
+          smtp_user?: string | null
+          stripe_public_key?: string | null
+          stripe_secret_key?: string | null
+          test_mode?: boolean | null
+          twilio_sid?: string | null
+          twilio_token?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      settings_invoices_templates: {
+        Row: {
+          created_at: string | null
+          id: string
+          templates: Json | null
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          templates?: Json | null
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          templates?: Json | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      settings_members_defaults: {
+        Row: {
+          allow_trial: boolean | null
+          auto_renew: boolean | null
+          created_at: string | null
+          default_currency: string | null
+          default_membership_fee: number | null
+          default_membership_plan: string | null
+          default_payment_method: string | null
+          default_renewal_period: number | null
+          default_signup_fee: number | null
+          id: string
+          require_address: boolean | null
+          require_emergency_contact: boolean | null
+          require_health_info: boolean | null
+          require_photo: boolean | null
+          trial_period_days: number | null
+          updated_at: string | null
+        }
+        Insert: {
+          allow_trial?: boolean | null
+          auto_renew?: boolean | null
+          created_at?: string | null
+          default_currency?: string | null
+          default_membership_fee?: number | null
+          default_membership_plan?: string | null
+          default_payment_method?: string | null
+          default_renewal_period?: number | null
+          default_signup_fee?: number | null
+          id?: string
+          require_address?: boolean | null
+          require_emergency_contact?: boolean | null
+          require_health_info?: boolean | null
+          require_photo?: boolean | null
+          trial_period_days?: number | null
+          updated_at?: string | null
+        }
+        Update: {
+          allow_trial?: boolean | null
+          auto_renew?: boolean | null
+          created_at?: string | null
+          default_currency?: string | null
+          default_membership_fee?: number | null
+          default_membership_plan?: string | null
+          default_payment_method?: string | null
+          default_renewal_period?: number | null
+          default_signup_fee?: number | null
+          id?: string
+          require_address?: boolean | null
+          require_emergency_contact?: boolean | null
+          require_health_info?: boolean | null
+          require_photo?: boolean | null
+          trial_period_days?: number | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      settings_notifications: {
+        Row: {
+          created_at: string | null
+          email_from_address: string | null
+          email_from_name: string | null
+          email_notifications_enabled: boolean | null
+          email_reply_to: string | null
+          email_signature: string | null
+          id: string
+          in_app_notifications_enabled: boolean | null
+          push_notifications_enabled: boolean | null
+          sms_notifications_enabled: boolean | null
+          sms_sender_id: string | null
+          templates: Json | null
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          email_from_address?: string | null
+          email_from_name?: string | null
+          email_notifications_enabled?: boolean | null
+          email_reply_to?: string | null
+          email_signature?: string | null
+          id?: string
+          in_app_notifications_enabled?: boolean | null
+          push_notifications_enabled?: boolean | null
+          sms_notifications_enabled?: boolean | null
+          sms_sender_id?: string | null
+          templates?: Json | null
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          email_from_address?: string | null
+          email_from_name?: string | null
+          email_notifications_enabled?: boolean | null
+          email_reply_to?: string | null
+          email_signature?: string | null
+          id?: string
+          in_app_notifications_enabled?: boolean | null
+          push_notifications_enabled?: boolean | null
+          sms_notifications_enabled?: boolean | null
+          sms_sender_id?: string | null
+          templates?: Json | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      settings_platform: {
+        Row: {
+          created_at: string | null
+          enable_reports: boolean | null
+          enable_shop: boolean | null
+          enable_support: boolean | null
+          enable_test_mode: boolean | null
+          enable_trainers: boolean | null
+          id: string
+          maintenance_mode: boolean | null
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          enable_reports?: boolean | null
+          enable_shop?: boolean | null
+          enable_support?: boolean | null
+          enable_test_mode?: boolean | null
+          enable_trainers?: boolean | null
+          id?: string
+          maintenance_mode?: boolean | null
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          enable_reports?: boolean | null
+          enable_shop?: boolean | null
+          enable_support?: boolean | null
+          enable_test_mode?: boolean | null
+          enable_trainers?: boolean | null
+          id?: string
+          maintenance_mode?: boolean | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      settings_reports_export: {
+        Row: {
+          created_at: string | null
+          export_settings: Json | null
+          id: string
+          scheduled_reports: Json | null
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          export_settings?: Json | null
+          id?: string
+          scheduled_reports?: Json | null
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          export_settings?: Json | null
+          id?: string
+          scheduled_reports?: Json | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      settings_roles: {
+        Row: {
+          created_at: string | null
+          id: string
+          roles: Json | null
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          roles?: Json | null
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          roles?: Json | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      settings_testing_accounts: {
+        Row: {
+          automatically_sync_production_schema: boolean | null
+          created_at: string | null
+          id: string
+          last_test_data_reset: string | null
+          show_test_mode_banner: boolean | null
+          test_accounts: Json | null
+          test_data_reset_frequency: string | null
+          test_mode_banner_color: string | null
+          test_mode_enabled: boolean | null
+          updated_at: string | null
+        }
+        Insert: {
+          automatically_sync_production_schema?: boolean | null
+          created_at?: string | null
+          id?: string
+          last_test_data_reset?: string | null
+          show_test_mode_banner?: boolean | null
+          test_accounts?: Json | null
+          test_data_reset_frequency?: string | null
+          test_mode_banner_color?: string | null
+          test_mode_enabled?: boolean | null
+          updated_at?: string | null
+        }
+        Update: {
+          automatically_sync_production_schema?: boolean | null
+          created_at?: string | null
+          id?: string
+          last_test_data_reset?: string | null
+          show_test_mode_banner?: boolean | null
+          test_accounts?: Json | null
+          test_data_reset_frequency?: string | null
+          test_mode_banner_color?: string | null
+          test_mode_enabled?: boolean | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      settings_ui_messages: {
+        Row: {
+          created_at: string | null
+          custom_messages: Json | null
+          enable_alerts: boolean | null
+          enable_motivational_quotes: boolean | null
+          enable_popup_messages: boolean | null
+          id: string
+          motivational_quotes: Json | null
+          motivational_quotes_frequency: string | null
+          popup_position: string | null
+          popup_timeout_seconds: number | null
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          custom_messages?: Json | null
+          enable_alerts?: boolean | null
+          enable_motivational_quotes?: boolean | null
+          enable_popup_messages?: boolean | null
+          id?: string
+          motivational_quotes?: Json | null
+          motivational_quotes_frequency?: string | null
+          popup_position?: string | null
+          popup_timeout_seconds?: number | null
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          custom_messages?: Json | null
+          enable_alerts?: boolean | null
+          enable_motivational_quotes?: boolean | null
+          enable_popup_messages?: boolean | null
+          id?: string
+          motivational_quotes?: Json | null
+          motivational_quotes_frequency?: string | null
+          popup_position?: string | null
+          popup_timeout_seconds?: number | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       trainer_attendance: {
         Row: {
           check_in_time: string | null

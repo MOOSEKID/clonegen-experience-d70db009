@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
-import { Loader2, Upload, X } from 'lucide-react';
+import { Loader2, Upload, X, FileImage } from 'lucide-react';
 
 interface FileUploadProps {
   bucket: string;
@@ -35,6 +35,19 @@ const FileUpload = ({
     if (!files || files.length === 0) return;
     
     const file = files[0];
+    
+    // Validate file size (max 5MB)
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error('File size exceeds 5MB limit');
+      return;
+    }
+    
+    // Validate file type for images
+    if (accept === 'image/*' && !file.type.startsWith('image/')) {
+      toast.error('Only image files are allowed');
+      return;
+    }
+    
     setIsUploading(true);
     
     try {
@@ -45,11 +58,24 @@ const FileUpload = ({
         reader.readAsDataURL(file);
       }
       
+      // Ensure bucket exists before uploading
+      const { data: bucketData } = await supabase.storage.getBucket(bucket);
+      
+      if (!bucketData) {
+        await supabase.storage.createBucket(bucket, {
+          public: true,
+          fileSizeLimit: 10485760, // 10MB
+        });
+      }
+      
       // Upload to Supabase Storage
-      const filePath = `${path}/${Date.now()}-${file.name}`;
+      const filePath = `${path}/${Date.now()}-${file.name.replace(/[^a-zA-Z0-9.-]/g, '_')}`;
       const { error } = await supabase.storage
         .from(bucket)
-        .upload(filePath, file);
+        .upload(filePath, file, {
+          cacheControl: '3600',
+          upsert: true
+        });
       
       if (error) throw error;
       
@@ -71,10 +97,14 @@ const FileUpload = ({
     if (onReset) onReset();
   };
   
+  const isImageUrl = (url?: string): boolean => {
+    if (!url) return false;
+    return url.match(/\.(jpeg|jpg|gif|png|webp)$/i) !== null || url.startsWith('data:image/');
+  };
+  
   return (
     <div className="space-y-3">
-      {preview && preview.startsWith('data:image') || 
-       (preview && (preview.includes('.png') || preview.includes('.jpg') || preview.includes('.jpeg') || preview.includes('.gif') || preview.includes('.webp'))) ? (
+      {preview && (isImageUrl(preview) ? (
         <div className="relative w-40 h-40 border rounded-md overflow-hidden group">
           <img 
             src={preview} 
@@ -92,7 +122,10 @@ const FileUpload = ({
         </div>
       ) : preview ? (
         <div className="flex items-center justify-between p-2 border rounded-md bg-gray-50">
-          <span className="text-sm truncate max-w-[200px]">{preview.split('/').pop()}</span>
+          <div className="flex items-center">
+            <FileImage size={16} className="text-blue-500 mr-2" />
+            <span className="text-sm truncate max-w-[200px]">{preview.split('/').pop()}</span>
+          </div>
           <button
             type="button"
             onClick={handleReset}
@@ -102,7 +135,7 @@ const FileUpload = ({
             <X size={16} />
           </button>
         </div>
-      ) : null}
+      ) : null)}
       
       <div className="flex items-center gap-2">
         <Button
