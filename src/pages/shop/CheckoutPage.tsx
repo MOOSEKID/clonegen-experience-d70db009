@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
@@ -10,6 +9,7 @@ import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import { ShoppingBag, CheckCircle2, ArrowLeft, Tag } from 'lucide-react';
 import { Separator } from '@/components/ui/separator';
+import { incrementPromoCodeUses } from '@/utils/supabaseUtils';
 
 const CheckoutPage = () => {
   const navigate = useNavigate();
@@ -177,8 +177,7 @@ const CheckoutPage = () => {
       
       // If we have a promo code, increment its uses
       if (promoCodeId) {
-        await supabase
-          .rpc('increment_promo_code_uses', { code_id: promoCodeId });
+        await incrementPromoCodeUses(promoCodeId);
       }
       
       // Update stock counts for all products in the order

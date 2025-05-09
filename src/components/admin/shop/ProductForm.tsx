@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
@@ -46,9 +45,11 @@ const formSchema = z.object({
 interface ProductFormProps {
   product?: Product;
   mode: 'add' | 'edit';
+  onSubmit: (data: ProductFormData) => Promise<void>;
+  isLoading: boolean;
 }
 
-const ProductForm: React.FC<ProductFormProps> = ({ product, mode }) => {
+const ProductForm: React.FC<ProductFormProps> = ({ product, mode, onSubmit, isLoading }) => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const [imageFile, setImageFile] = useState<File | null>(null);
@@ -56,15 +57,6 @@ const ProductForm: React.FC<ProductFormProps> = ({ product, mode }) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [categories, setCategories] = useState<{ id: string, name: string }[]>([]);
   
-  const { 
-    useCreateProductMutation, 
-    useUpdateProductMutation,
-    isUploading
-  } = useProducts();
-  
-  const createProductMutation = useCreateProductMutation();
-  const updateProductMutation = useUpdateProductMutation();
-
   // Fetch categories
   useEffect(() => {
     const fetchCategories = async () => {
@@ -134,7 +126,7 @@ const ProductForm: React.FC<ProductFormProps> = ({ product, mode }) => {
   };
 
   // Handle form submission
-  const onSubmit = async (data: ProductFormData) => {
+  const handleSubmit = async (data: ProductFormData) => {
     try {
       setIsSubmitting(true);
       
@@ -150,20 +142,7 @@ const ProductForm: React.FC<ProductFormProps> = ({ product, mode }) => {
         formData.imageFile = imageFile;
       }
       
-      if (mode === 'add') {
-        if (!formData.image_url && !formData.imageFile) {
-          formData.image_url = null;
-        }
-        
-        await createProductMutation.mutateAsync(formData);
-        navigate('/admin/shop/products');
-      } else if (mode === 'edit' && product) {
-        formData.id = product.id;
-        formData.image_url = formData.imageFile ? undefined : product.image_url;
-        
-        await updateProductMutation.mutateAsync(formData);
-        navigate('/admin/shop/products');
-      }
+      await onSubmit(formData);
     } catch (error) {
       console.error('Error submitting form:', error);
       toast({
@@ -178,7 +157,7 @@ const ProductForm: React.FC<ProductFormProps> = ({ product, mode }) => {
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+      <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {/* Left Column */}
           <div className="space-y-6">
@@ -472,9 +451,9 @@ const ProductForm: React.FC<ProductFormProps> = ({ product, mode }) => {
           <Button 
             type="submit" 
             className="bg-gym-orange hover:bg-gym-orange/90"
-            disabled={isSubmitting || isUploading}
+            disabled={isSubmitting || isLoading}
           >
-            {isSubmitting || isUploading ? 'Saving...' : mode === 'add' ? 'Create Product' : 'Save Changes'}
+            {isSubmitting || isLoading ? 'Saving...' : mode === 'add' ? 'Create Product' : 'Save Changes'}
           </Button>
         </div>
       </form>

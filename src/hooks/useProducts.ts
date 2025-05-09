@@ -11,6 +11,8 @@ export type Product = {
   category: string;
   category_id?: string;
   price: number;
+  member_price?: number | null; // Add member price field
+  is_member_only?: boolean; // Add member-only flag
   image_url: string | null;
   sku: string | null;
   stock_count: number;
@@ -25,15 +27,17 @@ export interface ProductFormData {
   id?: string;
   name: string;
   description?: string;
-  category: string; // Keep this for backward compatibility
+  category: string; 
   category_id: string; 
   price: number;
+  member_price?: number | null; // Add member price field
   sku?: string;
   stock_count: number;
   image_url?: string | null;
   is_active: boolean;
   is_public: boolean;
   is_instore: boolean;
+  is_member_only?: boolean; // Add member-only flag
   imageFile?: File | null;
 }
 

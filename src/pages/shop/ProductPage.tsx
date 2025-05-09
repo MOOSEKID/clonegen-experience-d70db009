@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { ChevronRight, ShoppingCart, ShoppingBag, Share2, Heart, AlertCircle } from 'lucide-react';
@@ -8,7 +7,7 @@ import ProductGrid from '@/components/shop/ProductGrid';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useCart } from '@/contexts/CartContext';
-import ShoppingCart from '@/components/shop/ShoppingCart';
+import CartSidebar from '@/components/shop/ShoppingCart';
 
 // Category mapping to ensure consistent IDs across the application
 const getCategoryId = (categoryName: string): string => {
@@ -293,7 +292,7 @@ const ProductPage = () => {
         </div>
 
         {/* Shopping Cart Sidebar */}
-        <ShoppingCart />
+        <CartSidebar />
       </div>
     </div>
   );

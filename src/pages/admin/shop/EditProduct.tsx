@@ -51,31 +51,6 @@ const EditProduct = () => {
     );
   }
 
-  // Get category name safely with explicit type checks
-  let categoryName = '';
-  if (typeof product.category === 'string') {
-    categoryName = product.category;
-  } else if (product.category && typeof product.category === 'object') {
-    // Use optional chaining with type assertion if we know the object might have a name property
-    categoryName = (product.category as { name?: string }).name || '';
-  }
-
-  // Convert Product to ProductFormData by ensuring all required fields are present
-  const productFormData: ProductFormData = {
-    id: product.id,
-    name: product.name,
-    description: product.description || undefined,
-    category: categoryName,
-    category_id: product.category_id || '',
-    price: product.price,
-    sku: product.sku || undefined,
-    stock_count: product.stock_count,
-    image_url: product.image_url,
-    is_active: product.is_active,
-    is_public: product.is_public,
-    is_instore: product.is_instore
-  };
-
   return (
     <div className="space-y-6">
       <div>
@@ -93,9 +68,10 @@ const EditProduct = () => {
       </div>
 
       <ProductForm
-        initialData={productFormData}
+        product={product}
         onSubmit={handleSubmit}
         isLoading={updateMutation.isPending || isUploading}
+        mode="edit"
       />
     </div>
   );
