@@ -14,21 +14,23 @@ function App() {
   return (
     <OptimizedAuthProvider>
       <AuthProvider>
-        <Router>
-          <Suspense fallback={<LoadingSpinner />}>
-            <Routes>
-              {/* Shop Routes with CartProvider */}
-              <Route path="/" element={<CartProvider><ShopPage /></CartProvider>} />
-              <Route path="/shop" element={<CartProvider><ShopPage /></CartProvider>} />
-              <Route path="/shop/category/:categoryId" element={<CartProvider><CategoryPage /></CartProvider>} />
-              <Route path="/shop/product/:productId" element={<CartProvider><ProductPage /></CartProvider>} />
-              <Route path="/shop/checkout" element={<CartProvider><CheckoutPage /></CartProvider>} />
-              
-              {/* Catch-all route */}
-              <Route path="*" element={<CartProvider><ShopPage /></CartProvider>} />
-            </Routes>
-          </Suspense>
-        </Router>
+        <CartProvider>
+          <Router>
+            <Suspense fallback={<LoadingSpinner />}>
+              <Routes>
+                {/* Shop Routes */}
+                <Route path="/" element={<ShopPage />} />
+                <Route path="/shop" element={<ShopPage />} />
+                <Route path="/shop/category/:categoryId" element={<CategoryPage />} />
+                <Route path="/shop/product/:productId" element={<ProductPage />} />
+                <Route path="/shop/checkout" element={<CheckoutPage />} />
+                
+                {/* Catch-all route */}
+                <Route path="*" element={<ShopPage />} />
+              </Routes>
+            </Suspense>
+          </Router>
+        </CartProvider>
       </AuthProvider>
     </OptimizedAuthProvider>
   );
