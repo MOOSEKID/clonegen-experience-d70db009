@@ -1,7 +1,7 @@
 
 import React, { useEffect, useState } from 'react';
-import { useParams, Link } from 'react-router-dom';
-import { ChevronRight, ShoppingCart, ShoppingBag, Share2, Heart } from 'lucide-react';
+import { useParams, Link, useNavigate } from 'react-router-dom';
+import { ChevronRight, ShoppingCart, ShoppingBag, Share2, Heart, AlertCircle } from 'lucide-react';
 import { getProductById, getProductsByCategory } from '@/data/shopData';
 import { Button } from '@/components/ui/button';
 import { Product } from '@/hooks/useProducts';
@@ -9,23 +9,40 @@ import ProductGrid from '@/components/shop/ProductGrid';
 
 const ProductPage = () => {
   const { productId } = useParams<{ productId: string }>();
+  const navigate = useNavigate();
   const [product, setProduct] = useState<Product | null>(null);
   const [relatedProducts, setRelatedProducts] = useState<Product[]>([]);
   const [quantity, setQuantity] = useState(1);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (productId) {
-      // Get product details
-      const productDetails = getProductById(productId);
-      if (productDetails) {
+    try {
+      if (productId) {
+        setLoading(true);
+        // Get product details
+        const productDetails = getProductById(productId);
+        
+        if (!productDetails) {
+          setError('Product not found');
+          setLoading(false);
+          return;
+        }
+        
         setProduct(productDetails);
         
         // Get related products (from same category)
         const related = getProductsByCategory(productDetails.category)
           .filter(p => p.id !== productId)
           .slice(0, 4);
-        setRelatedProducts(related);
+          
+        setRelatedProducts(related || []);
+        setLoading(false);
       }
+    } catch (err) {
+      console.error('Error loading product data:', err);
+      setError('Failed to load product data');
+      setLoading(false);
     }
   }, [productId]);
 
@@ -34,13 +51,13 @@ const ProductPage = () => {
   };
 
   // Function to add products to cart (placeholder)
-  const addToCart = () => {
-    if (!product) return;
+  const addToCart = (productToAdd: Product | null = product) => {
+    if (!productToAdd) return;
     
     // Show a toast notification
     const toast = document.createElement('div');
     toast.className = 'fixed top-4 right-4 bg-gym-orange text-white px-4 py-2 rounded shadow-lg animate-in fade-in slide-in-from-top-4 z-50';
-    toast.textContent = `${quantity} x ${product.name} added to cart`;
+    toast.textContent = `${quantity} x ${productToAdd.name} added to cart`;
     document.body.appendChild(toast);
     
     setTimeout(() => {
@@ -48,11 +65,38 @@ const ProductPage = () => {
       setTimeout(() => toast.remove(), 300);
     }, 2000);
   };
+  
+  const handleAddToCartClick = () => {
+    addToCart();
+  };
 
-  if (!product) {
+  if (loading) {
     return (
       <div className="bg-gym-light min-h-screen pt-24 pb-16 flex items-center justify-center">
         <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-gym-orange"></div>
+      </div>
+    );
+  }
+
+  if (error || !product) {
+    return (
+      <div className="bg-gym-light min-h-screen pt-24 pb-16">
+        <div className="container-custom">
+          <div className="bg-white p-8 rounded-lg shadow-md text-center">
+            <AlertCircle className="h-12 w-12 text-red-500 mx-auto mb-4" />
+            <h2 className="text-2xl font-bold text-gray-800 mb-2">{error || 'Product Not Found'}</h2>
+            <p className="text-gray-600 mb-6">
+              The product you're looking for doesn't exist or couldn't be loaded.
+            </p>
+            <Link 
+              to="/shop"
+              className="inline-flex items-center bg-gym-orange hover:bg-gym-orange/90 text-white px-6 py-3 rounded-md transition-colors"
+            >
+              <ShoppingBag className="mr-2" size={18} />
+              Back to Shop
+            </Link>
+          </div>
+        </div>
       </div>
     );
   }
@@ -76,11 +120,20 @@ const ProductPage = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             {/* Product Image */}
             <div className="bg-gray-100 p-8 flex items-center justify-center">
-              <img 
-                src={product.image_url || ''} 
-                alt={product.name} 
-                className="max-h-96 object-contain"
-              />
+              {product.image_url ? (
+                <img 
+                  src={product.image_url} 
+                  alt={product.name} 
+                  className="max-h-96 object-contain"
+                  onError={(e) => {
+                    (e.target as HTMLImageElement).src = 'https://via.placeholder.com/400?text=Image+Not+Found';
+                  }}
+                />
+              ) : (
+                <div className="w-full h-96 flex items-center justify-center bg-gray-200">
+                  <ShoppingBag size={64} className="text-gray-400" />
+                </div>
+              )}
             </div>
             
             {/* Product Info */}
@@ -89,7 +142,7 @@ const ProductPage = () => {
               <p className="text-2xl font-bold text-gym-orange mb-4">{formatPrice(product.price)}</p>
               
               <div className="border-t border-b border-gray-200 py-4 my-4">
-                <p className="text-gray-700 leading-relaxed">{product.description}</p>
+                <p className="text-gray-700 leading-relaxed">{product.description || 'No description available'}</p>
               </div>
               
               <div className="mb-6">
@@ -120,7 +173,7 @@ const ProductPage = () => {
                 
                 <div className="flex flex-wrap gap-3">
                   <Button 
-                    onClick={addToCart}
+                    onClick={handleAddToCartClick}
                     className="flex-grow bg-gym-orange hover:bg-gym-orange/90"
                   >
                     <ShoppingCart className="mr-2 h-4 w-4" />
@@ -139,7 +192,12 @@ const ProductPage = () => {
               
               <div className="text-sm text-gray-600">
                 <p>Category: <span className="font-medium text-gym-dark capitalize">{product.category}</span></p>
-                <p>SKU: <span className="font-medium text-gym-dark">{product.id.toUpperCase()}</span></p>
+                <p>SKU: <span className="font-medium text-gym-dark">{product.sku || 'N/A'}</span></p>
+                {product.stock_count !== undefined && (
+                  <p>Availability: <span className={`font-medium ${product.stock_count > 0 ? 'text-green-600' : 'text-red-600'}`}>
+                    {product.stock_count > 0 ? `In Stock (${product.stock_count})` : 'Out of Stock'}
+                  </span></p>
+                )}
               </div>
             </div>
           </div>

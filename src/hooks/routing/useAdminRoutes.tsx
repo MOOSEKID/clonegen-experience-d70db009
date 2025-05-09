@@ -42,7 +42,7 @@ import EditProduct from "../../pages/admin/shop/EditProduct";
 
 const useAdminRoutes = () => {
   return [
-    <Route key="admin-dashboard" path="/" element={<Dashboard />} />,
+    <Route key="admin-dashboard" index element={<Dashboard />} />,
     <Route key="admin-members" path="members" element={<Members />} />,
     <Route key="admin-classes" path="classes" element={<Classes />} />,
     <Route key="admin-content" path="content" element={<Content />} />,
