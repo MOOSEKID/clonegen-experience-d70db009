@@ -893,6 +893,42 @@ export type Database = {
         }
         Relationships: []
       }
+      settings_security: {
+        Row: {
+          created_at: string | null
+          enable_2fa: boolean | null
+          id: string
+          min_password_length: number | null
+          require_numbers: boolean | null
+          require_special_chars: boolean | null
+          require_uppercase: boolean | null
+          session_timeout_minutes: number | null
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          enable_2fa?: boolean | null
+          id?: string
+          min_password_length?: number | null
+          require_numbers?: boolean | null
+          require_special_chars?: boolean | null
+          require_uppercase?: boolean | null
+          session_timeout_minutes?: number | null
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          enable_2fa?: boolean | null
+          id?: string
+          min_password_length?: number | null
+          require_numbers?: boolean | null
+          require_special_chars?: boolean | null
+          require_uppercase?: boolean | null
+          session_timeout_minutes?: number | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       settings_testing_accounts: {
         Row: {
           automatically_sync_production_schema: boolean | null

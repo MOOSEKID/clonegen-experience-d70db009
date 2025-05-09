@@ -1,11 +1,14 @@
 
+import { useState, useEffect } from 'react';
 import { useSettings, SaveState } from '@/hooks/admin/useSettings';
 import SettingsCard from '../SettingsCard';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { Slider } from '@/components/ui/slider';
+import { Loader2, Save, RotateCcw, AlertCircle } from 'lucide-react';
+import { toast } from 'sonner';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 interface SecuritySettingsData {
   id: string;
@@ -15,27 +18,68 @@ interface SecuritySettingsData {
   require_numbers: boolean;
   require_uppercase: boolean;
   session_timeout_minutes: number;
+  updated_at?: string;
 }
 
 const SecuritySettings = () => {
+  const isMobile = useIsMobile();
+  
   const { 
     data: settings, 
     loading, 
     error, 
     updateSettings, 
-    saveState
+    saveState,
+    refresh
   } = useSettings<SecuritySettingsData>({ 
     tableName: 'settings_security' 
   });
   
-  // Handle security setting changes
-  const handleSecurityChange = (field: keyof SecuritySettingsData, value: any) => {
-    updateSettings({ [field]: value });
-  };
+  const [formData, setFormData] = useState<Partial<SecuritySettingsData>>({});
+  const [hasChanges, setHasChanges] = useState<boolean>(false);
 
+  // Initialize form data from settings
+  useEffect(() => {
+    if (settings) {
+      setFormData(settings);
+    }
+  }, [settings]);
+  
+  // Check for changes between form data and original settings
+  useEffect(() => {
+    if (settings && formData) {
+      const changes = Object.keys(formData).some(key => {
+        return formData[key as keyof SecuritySettingsData] !== settings[key as keyof SecuritySettingsData];
+      });
+      
+      setHasChanges(changes);
+    }
+  }, [formData, settings]);
+  
+  const handleInputChange = (field: keyof SecuritySettingsData, value: any) => {
+    setFormData(prev => ({ ...prev, [field]: value }));
+  };
+  
+  const saveChanges = async () => {
+    try {
+      await updateSettings(formData);
+      toast.success('Security settings saved successfully');
+    } catch (err) {
+      toast.error('Failed to save security settings');
+      console.error('Error saving security settings:', err);
+    }
+  };
+  
+  const resetChanges = () => {
+    if (settings) {
+      setFormData(settings);
+      toast.info('Changes have been reset');
+    }
+  };
+  
   if (loading) {
     return (
-      <SettingsCard title="Security Settings" description="Loading settings...">
+      <SettingsCard title="Security Settings" description="Loading...">
         <div className="flex justify-center p-4">
           <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-gym-orange"></div>
         </div>
@@ -50,16 +94,21 @@ const SecuritySettings = () => {
         description="Error loading settings"
         saveState={SaveState.Error}
       >
-        <div className="p-4 bg-red-50 text-red-800 rounded-md">
-          {error?.message || 'Failed to load settings'}
+        <div className="p-4 bg-red-50 text-red-800 rounded-md flex items-start gap-3">
+          <AlertCircle className="h-5 w-5 mt-0.5 flex-shrink-0" />
+          <div>
+            <p className="font-medium">Failed to load security settings</p>
+            <p className="text-sm mt-1">{error?.message || 'Unknown error'}</p>
+            <Button 
+              onClick={() => refresh()} 
+              variant="outline"
+              size="sm"
+              className="mt-3"
+            >
+              Retry
+            </Button>
+          </div>
         </div>
-        <Button 
-          onClick={() => window.location.reload()} 
-          className="mt-4"
-          variant="outline"
-        >
-          Retry
-        </Button>
       </SettingsCard>
     );
   }
@@ -78,8 +127,8 @@ const SecuritySettings = () => {
           </div>
           <Switch
             id="enable_2fa"
-            checked={settings.enable_2fa}
-            onCheckedChange={(checked) => handleSecurityChange('enable_2fa', checked)}
+            checked={formData.enable_2fa || false}
+            onCheckedChange={(checked) => handleInputChange('enable_2fa', checked)}
           />
         </div>
         
@@ -89,15 +138,15 @@ const SecuritySettings = () => {
           <div className="space-y-6">
             <div className="space-y-2">
               <div className="flex items-center justify-between">
-                <Label>Minimum Password Length: {settings.min_password_length} characters</Label>
-                <span className="text-sm">{settings.min_password_length}</span>
+                <Label>Minimum Password Length: {formData.min_password_length} characters</Label>
+                <span className="text-sm">{formData.min_password_length}</span>
               </div>
               <Slider
-                value={[settings.min_password_length]}
+                value={formData.min_password_length ? [formData.min_password_length] : [8]}
                 min={6}
                 max={16}
                 step={1}
-                onValueChange={([value]) => handleSecurityChange('min_password_length', value)}
+                onValueChange={([value]) => handleInputChange('min_password_length', value)}
               />
             </div>
             
@@ -108,8 +157,8 @@ const SecuritySettings = () => {
               </div>
               <Switch
                 id="require_special_chars"
-                checked={settings.require_special_chars}
-                onCheckedChange={(checked) => handleSecurityChange('require_special_chars', checked)}
+                checked={formData.require_special_chars || false}
+                onCheckedChange={(checked) => handleInputChange('require_special_chars', checked)}
               />
             </div>
             
@@ -120,8 +169,8 @@ const SecuritySettings = () => {
               </div>
               <Switch
                 id="require_numbers"
-                checked={settings.require_numbers}
-                onCheckedChange={(checked) => handleSecurityChange('require_numbers', checked)}
+                checked={formData.require_numbers || false}
+                onCheckedChange={(checked) => handleInputChange('require_numbers', checked)}
               />
             </div>
             
@@ -132,8 +181,8 @@ const SecuritySettings = () => {
               </div>
               <Switch
                 id="require_uppercase"
-                checked={settings.require_uppercase}
-                onCheckedChange={(checked) => handleSecurityChange('require_uppercase', checked)}
+                checked={formData.require_uppercase || false}
+                onCheckedChange={(checked) => handleInputChange('require_uppercase', checked)}
               />
             </div>
           </div>
@@ -144,20 +193,45 @@ const SecuritySettings = () => {
           
           <div className="space-y-2">
             <div className="flex items-center justify-between">
-              <Label>Session Timeout: {settings.session_timeout_minutes} minutes</Label>
-              <span className="text-sm">{settings.session_timeout_minutes} min</span>
+              <Label>Session Timeout: {formData.session_timeout_minutes} minutes</Label>
+              <span className="text-sm">{formData.session_timeout_minutes} min</span>
             </div>
             <Slider
-              value={[settings.session_timeout_minutes]}
+              value={formData.session_timeout_minutes ? [formData.session_timeout_minutes] : [60]}
               min={15}
               max={240}
               step={15}
-              onValueChange={([value]) => handleSecurityChange('session_timeout_minutes', value)}
+              onValueChange={([value]) => handleInputChange('session_timeout_minutes', value)}
             />
             <p className="text-sm text-muted-foreground pt-1">
               Users will be automatically logged out after this period of inactivity
             </p>
           </div>
+        </div>
+        
+        <div className={`flex gap-2 justify-end mt-6 ${isMobile ? 'sticky bottom-4 bg-white dark:bg-gray-800 p-4 shadow-md rounded-md z-10' : ''}`}>
+          <Button
+            type="button"
+            variant="outline"
+            onClick={resetChanges}
+            disabled={!hasChanges || saveState === SaveState.Saving}
+          >
+            <RotateCcw className="h-4 w-4 mr-2" />
+            Reset
+          </Button>
+          
+          <Button
+            type="button"
+            disabled={!hasChanges || saveState === SaveState.Saving}
+            onClick={saveChanges}
+          >
+            {saveState === SaveState.Saving ? (
+              <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+            ) : (
+              <Save className="h-4 w-4 mr-2" />
+            )}
+            Save Changes
+          </Button>
         </div>
       </div>
     </SettingsCard>

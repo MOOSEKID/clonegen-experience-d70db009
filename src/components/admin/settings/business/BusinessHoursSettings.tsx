@@ -1,343 +1,277 @@
 
 import { useState, useEffect } from 'react';
+import { useSettings, SaveState } from '@/hooks/admin/useSettings';
 import SettingsCard from '../SettingsCard';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
-import { Input } from '@/components/ui/input';
-import { supabase } from '@/integrations/supabase/client';
+import { Loader2, Save, RotateCcw, AlertCircle } from 'lucide-react';
 import { toast } from 'sonner';
-import { Plus, X } from 'lucide-react';
-import { format } from 'date-fns';
+import { useIsMobile } from '@/hooks/use-mobile';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
-interface BusinessHour {
+interface BusinessHoursData {
   id: string;
   day_of_week: string;
-  open_time: string;
-  close_time: string;
-  is_closed: boolean;
+  open_time: string | null;
+  close_time: string | null;
+  is_closed: boolean | null;
+  updated_at?: string;
 }
 
-interface Holiday {
-  id: string;
-  holiday_name: string;
-  holiday_date: string;
-}
+const daysOfWeek = [
+  'monday',
+  'tuesday',
+  'wednesday',
+  'thursday',
+  'friday',
+  'saturday',
+  'sunday',
+];
+
+const timeOptions = Array.from({ length: 24 * 4 }).map((_, index) => {
+  const hour = Math.floor(index / 4);
+  const minute = (index % 4) * 15;
+  const hourFormatted = hour.toString().padStart(2, '0');
+  const minuteFormatted = minute.toString().padStart(2, '0');
+  return `${hourFormatted}:${minuteFormatted}`;
+});
 
 const BusinessHoursSettings = () => {
-  // Business hours state
-  const [businessHours, setBusinessHours] = useState<BusinessHour[]>([]);
-  const [loadingHours, setLoadingHours] = useState(true);
-  const [savingHours, setSavingHours] = useState<Record<string, string>>({});
+  const isMobile = useIsMobile();
   
-  // Holidays state
-  const [holidays, setHolidays] = useState<Holiday[]>([]);
-  const [loadingHolidays, setLoadingHolidays] = useState(true);
-  const [newHoliday, setNewHoliday] = useState<{name: string, date: string}>({name: '', date: ''});
-  const [savingHoliday, setSavingHoliday] = useState(false);
-
-  // Fetch business hours
-  useEffect(() => {
-    const fetchBusinessHours = async () => {
-      setLoadingHours(true);
-      try {
-        const { data, error } = await supabase
-          .from('settings_business_hours')
-          .select('*')
-          .order('day_of_week', { ascending: true });
-          
-        if (error) {
-          console.error('Error fetching business hours:', error);
-          toast.error('Failed to load business hours');
-          setLoadingHours(false);
-          return;
-        }
-        
-        setBusinessHours(data as unknown as BusinessHour[]);
-      } catch (err: any) {
-        console.error(`Error in fetchData for business hours:`, err);
-        toast.error(`Failed to load business hours: ${err.message}`);
-      } finally {
-        setLoadingHours(false);
-      }
-    };
-    
-    fetchBusinessHours();
-  }, []);
-
-  // Fetch holidays
-  useEffect(() => {
-    const fetchHolidays = async () => {
-      setLoadingHolidays(true);
-      try {
-        const { data, error } = await supabase
-          .from('settings_business_holidays')
-          .select('*')
-          .order('holiday_date', { ascending: true });
-          
-        if (error) {
-          console.error('Error fetching holidays:', error);
-          toast.error('Failed to load holidays');
-          setLoadingHolidays(false);
-          return;
-        }
-        
-        setHolidays(data as unknown as Holiday[]);
-      } catch (err: any) {
-        console.error(`Error in fetchHolidays:`, err);
-        toast.error(`Failed to load holidays: ${err.message}`);
-      } finally {
-        setLoadingHolidays(false);
-      }
-    };
-    
-    fetchHolidays();
-  }, []);
-  
-  // Update business hour
-  const updateBusinessHour = async (id: string, field: string, value: any) => {
-    setSavingHours(prev => ({ ...prev, [id]: 'saving' }));
-    
-    try {
-      const { error } = await supabase
-        .from('settings_business_hours')
-        .update({ [field]: value })
-        .eq('id', id);
-        
-      if (error) throw error;
-      
-      // Update local state
-      setBusinessHours(prev => 
-        prev.map(hour => 
-          hour.id === id ? { ...hour, [field]: value } : hour
-        )
-      );
-      
-      setSavingHours(prev => ({ ...prev, [id]: 'saved' }));
-      
-      // Reset status after delay
-      setTimeout(() => {
-        setSavingHours(prev => ({ ...prev, [id]: 'idle' }));
-      }, 2000);
-      
-    } catch (error: any) {
-      console.error('Error updating business hour:', error);
-      toast.error('Failed to update business hours');
-      setSavingHours(prev => ({ ...prev, [id]: 'error' }));
-    }
-  };
-  
-  // Add new holiday
-  const addHoliday = async () => {
-    if (!newHoliday.name || !newHoliday.date) {
-      toast.error('Please enter both holiday name and date');
-      return;
-    }
-    
-    setSavingHoliday(true);
-    
-    try {
-      const { data, error } = await supabase
-        .from('settings_business_holidays')
-        .insert({
-          holiday_name: newHoliday.name,
-          holiday_date: newHoliday.date
-        })
-        .select();
-        
-      if (error) throw error;
-      
-      if (data && data[0]) {
-        setHolidays(prev => [...prev, data[0] as unknown as Holiday]);
-        setNewHoliday({ name: '', date: '' });
-        toast.success('Holiday added successfully');
-      }
-      
-    } catch (error: any) {
-      console.error('Error adding holiday:', error);
-      toast.error('Failed to add holiday');
-    } finally {
-      setSavingHoliday(false);
-    }
-  };
-  
-  // Delete holiday
-  const deleteHoliday = async (id: string) => {
-    try {
-      const { error } = await supabase
-        .from('settings_business_holidays')
-        .delete()
-        .eq('id', id);
-        
-      if (error) throw error;
-      
-      // Update local state
-      setHolidays(prev => prev.filter(holiday => holiday.id !== id));
-      toast.success('Holiday removed successfully');
-      
-    } catch (error: any) {
-      console.error('Error deleting holiday:', error);
-      toast.error('Failed to remove holiday');
-    }
-  };
-  
-  // Get save state for a specific business hour
-  const getSaveState = (id: string): string => {
-    return savingHours[id] || 'idle';
-  };
-  
-  // Show day name in proper format
-  const formatDayName = (day: string) => {
-    return day.charAt(0).toUpperCase() + day.slice(1);
-  };
-  
-  const daysOrder = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
-  const sortedBusinessHours = [...businessHours].sort((a, b) => {
-    return daysOrder.indexOf(a.day_of_week) - daysOrder.indexOf(b.day_of_week);
+  const { 
+    data: settings, 
+    loading, 
+    error, 
+    updateSettings, 
+    saveState,
+    refresh
+  } = useSettings<BusinessHoursData[]>({ 
+    tableName: 'settings_business_hours' 
   });
+  
+  const [formData, setFormData] = useState<{ [key: string]: BusinessHoursData }>({});
+  const [hasChanges, setHasChanges] = useState<boolean>(false);
 
-  return (
-    <div className="space-y-6">
+  // Initialize form data from settings
+  useEffect(() => {
+    if (settings) {
+      const dataByDay = settings.reduce((acc, setting) => {
+        acc[setting.day_of_week] = setting;
+        return acc;
+      }, {} as { [key: string]: BusinessHoursData });
+      
+      setFormData(dataByDay);
+    }
+  }, [settings]);
+  
+  // Check for changes between form data and original settings
+  useEffect(() => {
+    if (settings && formData) {
+      const changes = settings.some(setting => {
+        const day = setting.day_of_week;
+        const currentData = formData[day];
+        if (!currentData) return false;
+        
+        return (
+          currentData.open_time !== setting.open_time ||
+          currentData.close_time !== setting.close_time ||
+          currentData.is_closed !== setting.is_closed
+        );
+      });
+      
+      setHasChanges(changes);
+    }
+  }, [formData, settings]);
+  
+  const handleToggleDay = (day: string, closed: boolean) => {
+    setFormData(prev => ({
+      ...prev,
+      [day]: {
+        ...prev[day],
+        is_closed: closed
+      }
+    }));
+  };
+  
+  const handleTimeChange = (day: string, type: 'open_time' | 'close_time', value: string) => {
+    setFormData(prev => ({
+      ...prev,
+      [day]: {
+        ...prev[day],
+        [type]: value
+      }
+    }));
+  };
+  
+  const saveChanges = async () => {
+    try {
+      // Save each record individually
+      for (const day of daysOfWeek) {
+        if (formData[day]) {
+          await updateSettings({
+            id: formData[day].id,
+            open_time: formData[day].open_time,
+            close_time: formData[day].close_time,
+            is_closed: formData[day].is_closed
+          });
+        }
+      }
+      
+      toast.success('Business hours saved successfully');
+    } catch (err) {
+      toast.error('Failed to save business hours');
+      console.error('Error saving business hours:', err);
+    }
+  };
+  
+  const resetChanges = () => {
+    if (settings) {
+      const dataByDay = settings.reduce((acc, setting) => {
+        acc[setting.day_of_week] = setting;
+        return acc;
+      }, {} as { [key: string]: BusinessHoursData });
+      
+      setFormData(dataByDay);
+      toast.info('Changes have been reset');
+    }
+  };
+  
+  if (loading) {
+    return (
+      <SettingsCard title="Business Hours" description="Loading...">
+        <div className="flex justify-center p-4">
+          <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-gym-orange"></div>
+        </div>
+      </SettingsCard>
+    );
+  }
+  
+  if (error || !settings) {
+    return (
       <SettingsCard 
         title="Business Hours" 
-        description="Set your gym's opening hours for each day of the week"
+        description="Error loading business hours"
+        saveState={SaveState.Error}
       >
-        {loadingHours ? (
-          <div className="flex justify-center p-4">
-            <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-gym-orange"></div>
-          </div>
-        ) : (
-          <div className="space-y-4">
-            {sortedBusinessHours.map(hour => (
-              <div key={hour.id} className="flex items-center justify-between p-3 border rounded-md bg-gray-50">
-                <div className="flex items-center space-x-3">
-                  <div className="w-32 font-medium">{formatDayName(hour.day_of_week)}</div>
-                  
-                  <Switch
-                    checked={!hour.is_closed}
-                    onCheckedChange={(checked) => {
-                      updateBusinessHour(hour.id, 'is_closed', !checked);
-                    }}
-                  />
-                  
-                  <span className={hour.is_closed ? "text-red-500" : "text-green-500"}>
-                    {hour.is_closed ? "Closed" : "Open"}
-                  </span>
-                </div>
-                
-                {!hour.is_closed && (
-                  <div className="flex items-center space-x-2">
-                    <div className="flex items-center space-x-2">
-                      <Input 
-                        type="time"
-                        value={hour.open_time}
-                        onChange={(e) => updateBusinessHour(hour.id, 'open_time', e.target.value)}
-                        className="w-32"
-                      />
-                      <span>to</span>
-                      <Input 
-                        type="time"
-                        value={hour.close_time}
-                        onChange={(e) => updateBusinessHour(hour.id, 'close_time', e.target.value)}
-                        className="w-32"
-                      />
-                    </div>
-                  </div>
-                )}
-                
-                <div className="w-6">
-                  {getSaveState(hour.id) === 'saving' && (
-                    <div className="animate-spin rounded-full h-4 w-4 border-t-2 border-b-2 border-gym-orange"></div>
-                  )}
-                  {getSaveState(hour.id) === 'saved' && (
-                    <div className="text-green-500">✓</div>
-                  )}
-                  {getSaveState(hour.id) === 'error' && (
-                    <div className="text-red-500">!</div>
-                  )}
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
-      </SettingsCard>
-      
-      <SettingsCard 
-        title="Holidays & Special Closures" 
-        description="Set special holidays and closures"
-      >
-        <div className="space-y-6">
-          <div className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-5 gap-4 items-end">
-              <div className="md:col-span-2 space-y-2">
-                <Label htmlFor="holiday_name">Holiday Name</Label>
-                <Input
-                  id="holiday_name"
-                  value={newHoliday.name}
-                  onChange={(e) => setNewHoliday(prev => ({ ...prev, name: e.target.value }))}
-                  placeholder="e.g. New Year's Day"
-                />
-              </div>
-              <div className="md:col-span-2 space-y-2">
-                <Label htmlFor="holiday_date">Date</Label>
-                <Input
-                  id="holiday_date"
-                  type="date"
-                  value={newHoliday.date}
-                  onChange={(e) => setNewHoliday(prev => ({ ...prev, date: e.target.value }))}
-                />
-              </div>
-              <Button 
-                onClick={addHoliday} 
-                disabled={savingHoliday || !newHoliday.name || !newHoliday.date}
-                className="flex-shrink-0"
-              >
-                {savingHoliday ? (
-                  <div className="animate-spin rounded-full h-4 w-4 border-t-2 border-b-2 border-current"></div>
-                ) : (
-                  <>
-                    <Plus className="mr-1 h-4 w-4" /> Add Holiday
-                  </>
-                )}
-              </Button>
-            </div>
-          </div>
-          
-          <div className="border-t pt-4">
-            <h3 className="font-medium mb-2">Upcoming Holidays</h3>
-            {loadingHolidays ? (
-              <div className="flex justify-center p-4">
-                <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-gym-orange"></div>
-              </div>
-            ) : holidays.length > 0 ? (
-              <div className="space-y-2">
-                {holidays.map(holiday => (
-                  <div key={holiday.id} className="flex items-center justify-between p-3 border rounded-md">
-                    <div>
-                      <div className="font-medium">{holiday.holiday_name}</div>
-                      <div className="text-sm text-muted-foreground">
-                        {new Date(holiday.holiday_date).toLocaleDateString()}
-                      </div>
-                    </div>
-                    <Button 
-                      variant="ghost" 
-                      size="sm"
-                      onClick={() => deleteHoliday(holiday.id)}
-                    >
-                      <X className="h-4 w-4" />
-                    </Button>
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <div className="text-center p-4 text-muted-foreground">
-                No holidays added yet
-              </div>
-            )}
+        <div className="p-4 bg-red-50 text-red-800 rounded-md flex items-start gap-3">
+          <AlertCircle className="h-5 w-5 mt-0.5 flex-shrink-0" />
+          <div>
+            <p className="font-medium">Failed to load business hours</p>
+            <p className="text-sm mt-1">{error?.message || 'Unknown error'}</p>
+            <Button 
+              onClick={() => refresh()} 
+              variant="outline"
+              size="sm"
+              className="mt-3"
+            >
+              Retry
+            </Button>
           </div>
         </div>
       </SettingsCard>
-    </div>
+    );
+  }
+
+  return (
+    <SettingsCard 
+      title="Business Hours" 
+      description="Configure your gym's operating hours"
+      saveState={saveState}
+    >
+      <div className="space-y-6">
+        <div className="grid gap-6">
+          {daysOfWeek.map((day) => {
+            const dayData = formData[day];
+            if (!dayData) return null;
+            
+            return (
+              <div key={day} className="border rounded-md p-4 space-y-4">
+                <div className="flex justify-between items-center">
+                  <h3 className="text-base font-semibold capitalize">{day}</h3>
+                  <div className="flex items-center space-x-2">
+                    <Label htmlFor={`closed-${day}`}>Closed</Label>
+                    <Switch
+                      id={`closed-${day}`}
+                      checked={dayData.is_closed || false}
+                      onCheckedChange={(checked) => handleToggleDay(day, checked)}
+                    />
+                  </div>
+                </div>
+                
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor={`open-${day}`}>Opening Time</Label>
+                    <Select
+                      disabled={dayData.is_closed}
+                      value={dayData.open_time || ''}
+                      onValueChange={(value) => handleTimeChange(day, 'open_time', value)}
+                    >
+                      <SelectTrigger className="w-full">
+                        <SelectValue placeholder="Select opening time" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {timeOptions.map((time) => (
+                          <SelectItem key={`${day}-open-${time}`} value={time}>
+                            {time}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <Label htmlFor={`close-${day}`}>Closing Time</Label>
+                    <Select
+                      disabled={dayData.is_closed}
+                      value={dayData.close_time || ''}
+                      onValueChange={(value) => handleTimeChange(day, 'close_time', value)}
+                    >
+                      <SelectTrigger className="w-full">
+                        <SelectValue placeholder="Select closing time" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {timeOptions.map((time) => (
+                          <SelectItem key={`${day}-close-${time}`} value={time}>
+                            {time}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+        
+        <div className={`flex gap-2 justify-end mt-6 ${isMobile ? 'sticky bottom-4 bg-white dark:bg-gray-800 p-4 shadow-md rounded-md z-10' : ''}`}>
+          <Button
+            type="button"
+            variant="outline"
+            onClick={resetChanges}
+            disabled={!hasChanges || saveState === SaveState.Saving}
+          >
+            <RotateCcw className="h-4 w-4 mr-2" />
+            Reset
+          </Button>
+          
+          <Button
+            type="button"
+            disabled={!hasChanges || saveState === SaveState.Saving}
+            onClick={saveChanges}
+          >
+            {saveState === SaveState.Saving ? (
+              <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+            ) : (
+              <Save className="h-4 w-4 mr-2" />
+            )}
+            Save Changes
+          </Button>
+        </div>
+      </div>
+    </SettingsCard>
   );
 };
 
