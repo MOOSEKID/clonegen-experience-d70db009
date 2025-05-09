@@ -11,6 +11,7 @@ import { QueryProvider } from '@/routes/QueryProvider';
 import MainRoutes from '@/routes/MainRoutes';
 import AdminRoutes from '@/routes/AdminRoutes';
 import DashboardRoutes from '@/routes/DashboardRoutes';
+import ShopRoutes from '@/routes/ShopRoutes';
 
 // Layouts
 const MainLayout = lazy(() => import('@/layouts/MainLayout'));
@@ -31,7 +32,11 @@ function App() {
                 <Routes>
                   {/* Main public routes with MainLayout */}
                   <Route path="/" element={<MainLayout />}>
-                    <Route element={<MainRoutes />} />
+                    {/* Include all main routes */}
+                    <Route path="*" element={<MainRoutes />} />
+                    
+                    {/* Include shop routes */}
+                    <Route>{ShopRoutes()}</Route>
                   </Route>
                   
                   {/* Dashboard routes */}
@@ -40,7 +45,7 @@ function App() {
                       <DashboardLayout />
                     </Suspense>
                   }>
-                    <Route element={<DashboardRoutes />} />
+                    <Route path="*" element={<DashboardRoutes />} />
                   </Route>
                   
                   {/* Admin routes */}
@@ -49,7 +54,7 @@ function App() {
                       <AdminLayout />
                     </Suspense>
                   }>
-                    <Route element={<AdminRoutes />} />
+                    <Route path="*" element={<AdminRoutes />} />
                   </Route>
                   
                   {/* Catch-all route - 404 */}

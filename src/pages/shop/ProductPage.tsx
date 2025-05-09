@@ -21,8 +21,8 @@ import { ShoppingBag } from 'lucide-react';
 import { Alert, AlertDescription as AlertDescriptionUi, AlertTitle } from "@/components/ui/alert"
 import { AlertCircle } from 'lucide-react';
 
-// Typescript interface to ensure proper typing for category object
-interface ProductWithCategory extends Product {
+// Fixed TypeScript interface to properly extend Product
+interface ProductWithCategory extends Omit<Product, 'category'> {
   category?: {
     name: string;
   }
@@ -71,7 +71,13 @@ const ProductPage = () => {
 
   const handleAddToCart = () => {
     if (product) {
-      addToCart(product);
+      // Convert ProductWithCategory to Product before adding to cart
+      const productForCart: Product = {
+        ...product,
+        category: product.category?.name || 'Uncategorized',
+      };
+      
+      addToCart(productForCart);
       toast.success(`${product.name} added to cart`);
     }
   };
