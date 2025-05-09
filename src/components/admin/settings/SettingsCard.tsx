@@ -15,6 +15,7 @@ interface SettingsCardProps {
   link?: string;
   status?: string;
   "aria-label"?: string;
+  icon?: ReactNode; // Added icon property
 }
 
 const SettingsCard = ({
@@ -26,7 +27,8 @@ const SettingsCard = ({
   className = "",
   link,
   status,
-  "aria-label": ariaLabel
+  "aria-label": ariaLabel,
+  icon // Added icon to the destructured props
 }: SettingsCardProps) => {
   const renderSaveIndicator = () => {
     switch (saveState) {
@@ -61,7 +63,10 @@ const SettingsCard = ({
       <Card className={`shadow-sm ${link ? 'hover:border-gym-orange cursor-pointer' : ''} ${className}`}>
         <CardHeader className="pb-4">
           <div className="flex items-center justify-between">
-            <CardTitle className="text-xl">{title}</CardTitle>
+            <div className="flex items-center gap-2">
+              {icon && <div className="flex-shrink-0 p-1 rounded-md bg-primary/10 text-primary">{icon}</div>}
+              <CardTitle className="text-xl">{title}</CardTitle>
+            </div>
             <div className="flex items-center gap-2">
               {saveState !== SaveState.Idle && (
                 <div className="flex items-center justify-center w-6 h-6">

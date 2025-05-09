@@ -64,7 +64,7 @@ export const routeService = {
           const newPage = {
             slug,
             title: route.pageName,
-            type: route.isDynamic ? 'dynamic' : 'system',
+            type: route.isDynamic ? 'dynamic' as const : 'system' as const,
             source_path: route.sourceFilePath,
             visible: true
           };
