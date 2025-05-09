@@ -55,9 +55,13 @@ const EditProduct = () => {
   let categoryName = '';
   if (product.category) {
     // Check if category exists and then determine if it's an object or string
-    categoryName = typeof product.category === 'object' && product.category !== null
-      ? (product.category.name || '') 
-      : String(product.category);
+    if (typeof product.category === 'object' && product.category !== null) {
+      // Access the name property safely
+      categoryName = product.category.name || '';
+    } else {
+      // If it's not an object, convert it to a string
+      categoryName = String(product.category);
+    }
   }
 
   // Convert Product to ProductFormData by ensuring all required fields are present
