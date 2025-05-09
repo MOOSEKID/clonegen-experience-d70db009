@@ -13,6 +13,7 @@ import QuickNavSetup from './QuickNavSetup';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { routeService } from '@/services/cms/routeService';
 import { toast } from 'sonner';
+import RoutesRestorer from './RoutesRestorer';
 
 const RouteSyncManager: React.FC = () => {
   const { routes, isLoading, syncedRoutes } = useRoutes();
