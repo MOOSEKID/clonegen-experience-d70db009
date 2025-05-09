@@ -39,6 +39,7 @@ const Subscriptions = React.lazy(() => import('@/pages/admin/payments/Subscripti
 const TrainerProfiles = React.lazy(() => import('@/pages/admin/trainers/TrainerProfiles'));
 const TrainerPerformance = React.lazy(() => import('@/pages/admin/trainers/PerformanceTracking'));
 const TrainerRatings = React.lazy(() => import('@/pages/admin/trainers/TrainerRatings'));
+const TrainerScheduling = React.lazy(() => import('@/pages/admin/trainers/TrainerScheduling')); // New import
 
 // Workout pages
 const ExerciseLibrary = React.lazy(() => import('@/pages/admin/workouts/ExerciseLibrary'));
@@ -54,11 +55,11 @@ const useAdminRoutes = () => {
       <Route index element={<Dashboard />} />
       <Route path="members" element={<Members />} />
       <Route path="classes" element={<Classes />} />
-      <Route path="trainers" element={<Trainers />}>
-        <Route index element={<TrainerProfiles />} />
-        <Route path="performance" element={<TrainerPerformance />} />
-        <Route path="ratings" element={<TrainerRatings />} />
-      </Route>
+      <Route path="trainers" element={<Trainers />} />
+      <Route path="trainers/profiles" element={<TrainerProfiles />} />
+      <Route path="trainers/performance" element={<TrainerPerformance />} />
+      <Route path="trainers/ratings" element={<TrainerRatings />} />
+      <Route path="trainers/scheduling" element={<TrainerScheduling />} /> {/* New route */}
       <Route path="payments" element={<Payments />}>
         <Route index element={<Invoices />} />
         <Route path="methods" element={<PaymentMethods />} />

@@ -49,20 +49,7 @@ const sidebarLinks = [
     icon: Dumbbell,
     text: 'Trainers',
     href: '/admin/trainers',
-    subLinks: [
-      {
-        text: 'Profiles',
-        href: '/admin/trainers/profiles',
-      },
-      {
-        text: 'Performance',
-        href: '/admin/trainers/performance',
-      },
-      {
-        text: 'Ratings',
-        href: '/admin/trainers/ratings',
-      },
-    ],
+    // Removed subLinks to make this a direct link
   },
   {
     icon: CreditCard,
@@ -202,7 +189,7 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({ isOpen }) => {
           </ul>
         </nav>
 
-        {/* Footer or additional content can go here */}
+        {/* Footer */}
         <div className="p-4 border-t border-white/5 text-center text-white/60 text-sm">
           <p>&copy; {new Date().getFullYear()} Uptown Gym</p>
         </div>
