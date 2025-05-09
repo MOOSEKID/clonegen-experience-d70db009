@@ -14,6 +14,7 @@ const ShopPage = () => {
     cartItems,
     isLoading,
     filteredProducts,
+    error,
     addToCart
   } = useShopProducts();
 
@@ -31,7 +32,8 @@ const ShopPage = () => {
           isLoading={isLoading} 
           filteredProducts={filteredProducts} 
           searchTerm={searchTerm} 
-          addToCart={addToCart} 
+          addToCart={addToCart}
+          error={error}
         />
       </div>
     </div>

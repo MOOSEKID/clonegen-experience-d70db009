@@ -14,7 +14,7 @@ type ProductCardProps = {
 const ProductCard: React.FC<ProductCardProps> = ({ product, onAddToCart }) => {
   // Format price
   const formatPrice = (price: number) => {
-    return `RWF ${price.toLocaleString()}`;
+    return `RWF ${price?.toLocaleString() || 0}`;
   };
 
   // Handle click safely
@@ -34,7 +34,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, onAddToCart }) => {
           {product.image_url ? (
             <img 
               src={product.image_url} 
-              alt={product.name} 
+              alt={product.name || 'Product image'} 
               className="w-full h-full object-cover transition-transform hover:scale-105"
               onError={(e) => {
                 (e.target as HTMLImageElement).src = 'https://via.placeholder.com/400?text=No+Image';

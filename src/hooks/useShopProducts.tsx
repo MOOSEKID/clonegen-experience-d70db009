@@ -3,19 +3,24 @@ import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Product } from '@/hooks/useProducts';
 import { categories } from '@/utils/categoryUtils';
+import { toast } from 'sonner';
 
 export const useShopProducts = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [cartItems, setCartItems] = useState<Product[]>([]);
   const [products, setProducts] = useState<Product[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [categoryCount, setCategoryCount] = useState<Record<string, number>>({});
   
   // Fetch products from Supabase
   useEffect(() => {
     const fetchProducts = async () => {
       setIsLoading(true);
+      setError(null);
+      
       try {
+        console.log('Fetching products from Supabase...');
         const { data, error } = await supabase
           .from('products')
           .select('*')
@@ -24,20 +29,30 @@ export const useShopProducts = () => {
           
         if (error) {
           console.error('Error fetching products:', error);
+          setError('Failed to load products. Please try again later.');
           return;
         }
         
-        if (data) {
+        if (data && data.length > 0) {
+          console.log(`Fetched ${data.length} products successfully`);
           setProducts(data as Product[]);
+          
           // Count products by category
           const counts: Record<string, number> = {};
           data.forEach(product => {
-            counts[product.category] = (counts[product.category] || 0) + 1;
+            if (product.category) {
+              counts[product.category] = (counts[product.category] || 0) + 1;
+            }
           });
           setCategoryCount(counts);
+        } else {
+          console.log('No products found in database');
+          // Set empty array but don't treat as error
+          setProducts([]);
         }
       } catch (error) {
-        console.error('Error:', error);
+        console.error('Unexpected error:', error);
+        setError('An unexpected error occurred. Please try again later.');
       } finally {
         setIsLoading(false);
       }
@@ -61,20 +76,16 @@ export const useShopProducts = () => {
     setCartItems(prev => [...prev, product]);
     
     // Show a toast notification
-    const toast = document.createElement('div');
-    toast.className = 'fixed top-4 right-4 bg-gym-orange text-white px-4 py-2 rounded shadow-lg animate-in fade-in slide-in-from-top-4 z-50';
-    toast.textContent = `${product.name} added to cart`;
-    document.body.appendChild(toast);
-    
-    setTimeout(() => {
-      toast.classList.add('animate-out', 'fade-out', 'slide-out-to-top-4');
-      setTimeout(() => toast.remove(), 300);
-    }, 2000);
+    toast(`${product.name} added to cart`, {
+      description: "Item successfully added to your cart",
+      position: "top-right",
+      duration: 2000,
+    });
   };
 
   // Filter products by search term
   const filteredProducts = products.filter(product => 
-    product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    product.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
     (product.description?.toLowerCase().includes(searchTerm.toLowerCase()) || false)
   );
 
@@ -84,6 +95,7 @@ export const useShopProducts = () => {
     cartItems,
     products,
     isLoading,
+    error,
     filteredProducts,
     addToCart
   };
