@@ -1,23 +1,29 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import ShopHeader from '@/components/shop/ShopHeader';
 import ShopSearch from '@/components/shop/ShopSearch';
 import CategoriesSection from '@/components/shop/CategoriesSection';
 import ProductsSection from '@/components/shop/ProductsSection';
+import ShoppingCart from '@/components/shop/ShoppingCart'; 
+import ShopFilter from '@/components/shop/ShopFilter';
 import { useShopProducts } from '@/hooks/useShopProducts';
+import { useCart } from '@/contexts/CartContext';
 
 const ShopPage = () => {
   const {
     searchTerm,
     setSearchTerm,
-    cartItems,
     isLoading,
     filteredProducts,
     categories,
     categoryCount,
     error,
-    addToCart
+    filters,
+    updateFilters,
+    priceRange
   } = useShopProducts();
+  
+  const { cartItems } = useCart();
 
   return (
     <div className="bg-gym-light min-h-screen pt-24 pb-16">
@@ -32,13 +38,18 @@ const ShopPage = () => {
           categories={categories} 
           categoryCount={categoryCount} 
         />
+        <ShopFilter 
+          categories={categories} 
+          onApplyFilters={updateFilters}
+          initialFilters={filters}
+        />
         <ProductsSection 
           isLoading={isLoading} 
           filteredProducts={filteredProducts} 
           searchTerm={searchTerm} 
-          addToCart={addToCart}
           error={error}
         />
+        <ShoppingCart />
       </div>
     </div>
   );

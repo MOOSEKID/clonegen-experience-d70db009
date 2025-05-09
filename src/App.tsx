@@ -1,85 +1,89 @@
+import React, { Suspense, lazy } from 'react';
+import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
+import { AuthProvider } from '@/contexts/AuthContext';
+import { OptimizedAuthProvider } from '@/contexts/OptimizedAuthContext';
+import { LoadingSpinner } from '@/components/ui/LoadingSpinner';
+import PublicRoute from '@/routes/PublicRoute';
+import PrivateRoute from '@/routes/PrivateRoute';
+import AdminRoute from '@/routes/AdminRoute';
+import DashboardLayout from '@/layouts/DashboardLayout';
+import MainLayout from '@/layouts/MainLayout';
+import useAdminRoutes from '@/hooks/routing/useAdminRoutes';
+import ShopPage from '@/pages/Shop';
+import CategoryPage from '@/pages/shop/CategoryPage';
+import ProductPage from '@/pages/shop/ProductPage';
+import CheckoutPage from '@/pages/shop/CheckoutPage';
+import { CartProvider } from '@/contexts/CartContext';
 
-import { Toaster } from "@/components/ui/toaster";
-import { Toaster as Sonner } from "@/components/ui/sonner";
-import { TooltipProvider } from "@/components/ui/tooltip";
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
-import { AuthProvider } from "./contexts/AuthContext";
-import { ErrorBoundary } from "./components/ui/error-boundary";
-import { useEffect, useState, lazy, Suspense } from "react";
-import AppLoadingScreen from "./components/ui/AppLoadingScreen";
+// Lazy-loaded components
+const Home = lazy(() => import('./pages/Home'));
+const About = lazy(() => import('./pages/About'));
+const Contact = lazy(() => import('./pages/Contact'));
+const Pricing = lazy(() => import('./pages/Pricing'));
+const Auth = lazy(() => import('./pages/Auth'));
+const Dashboard = lazy(() => import('./pages/Dashboard'));
+const Profile = lazy(() => import('./pages/Profile'));
+const Classes = lazy(() => import('./pages/Classes'));
+const ClassDetail = lazy(() => import('./pages/ClassDetail'));
+const Trainers = lazy(() => import('./pages/Trainers'));
+const TrainerDetail = lazy(() => import('./pages/TrainerDetail'));
+const Workouts = lazy(() => import('./pages/Workouts'));
+const WorkoutDetail = lazy(() => import('./pages/WorkoutDetail'));
+const NotFound = lazy(() => import('./pages/NotFound'));
 
-// Layouts and shared components
-import { MainLayout, ErrorFallback, PageLoading, AdminRoute, UserRoute } from "./routes/RouteComponents";
+function App() {
+  const adminRoutes = useAdminRoutes();
 
-// Lazy load layout components
-const AdminLayout = lazy(() => import("./pages/admin/AdminLayout"));
-const DashboardLayout = lazy(() => import("./pages/dashboard/DashboardLayout"));
-
-import { QueryProvider } from "./routes/QueryProvider";
-
-// Import routes hooks directly
-import useMainRoutes from "./hooks/routing/useMainRoutes";
-import useAdminRoutes from "./hooks/routing/useAdminRoutes";
-import useDashboardRoutes from "./hooks/routing/useDashboardRoutes";
-
-const App = () => {
-  const [appReady, setAppReady] = useState(false);
-
-  // Simulate initial app loading and setup
-  useEffect(() => {
-    const timeout = setTimeout(() => {
-      setAppReady(true);
-    }, 800);  // Short delay for loading screen to show
-    
-    return () => clearTimeout(timeout);
-  }, []);
-
-  if (!appReady) {
-    return <AppLoadingScreen message="Starting Uptown Gym..." />;
-  }
-  
   return (
-    <ErrorBoundary fallback={<ErrorFallback />}>
-      <QueryProvider>
-        <AuthProvider>
-          <TooltipProvider>
-            <Toaster />
-            <Sonner />
-            <BrowserRouter>
-              <Routes>
-                {/* Main Routes with Header and Footer */}
-                <Route element={<MainLayout />}>
-                  {useMainRoutes()}
-                </Route>
-                
-                {/* Admin Routes */}
-                <Route path="/admin" element={
-                  <AdminRoute>
-                    <Suspense fallback={<PageLoading />}>
-                      <AdminLayout />
-                    </Suspense>
-                  </AdminRoute>
-                }>
-                  {useAdminRoutes()}
-                </Route>
-                
-                {/* Dashboard Routes */}
-                <Route path="/dashboard" element={
-                  <UserRoute>
-                    <Suspense fallback={<PageLoading />}>
-                      <DashboardLayout />
-                    </Suspense>
-                  </UserRoute>
-                }>
-                  {useDashboardRoutes()}
-                </Route>
-              </Routes>
-            </BrowserRouter>
-          </TooltipProvider>
-        </AuthProvider>
-      </QueryProvider>
-    </ErrorBoundary>
+    <OptimizedAuthProvider>
+      <AuthProvider>
+        <Router>
+          <Suspense fallback={<LoadingSpinner />}>
+            <Routes>
+              {/* Public Routes */}
+              <Route path="/" element={<MainLayout><Home /></MainLayout>} />
+              <Route path="/about" element={<MainLayout><About /></MainLayout>} />
+              <Route path="/contact" element={<MainLayout><Contact /></MainLayout>} />
+              <Route path="/pricing" element={<MainLayout><Pricing /></MainLayout>} />
+              <Route path="/auth" element={<PublicRoute><Auth /></PublicRoute>} />
+
+              {/* Shop Routes */}
+              <Route path="/shop/*" element={
+                <CartProvider>
+                  <Routes>
+                    <Route path="/" element={<ShopPage />} />
+                    <Route path="/category/:categoryId" element={<CategoryPage />} />
+                    <Route path="/product/:productId" element={<ProductPage />} />
+                    <Route path="/checkout" element={<CheckoutPage />} />
+                  </Routes>
+                </CartProvider>
+              } />
+
+              {/* Private Routes */}
+              <Route path="/dashboard" element={<PrivateRoute><DashboardLayout><Dashboard /></DashboardLayout></PrivateRoute>} />
+              <Route path="/profile" element={<PrivateRoute><DashboardLayout><Profile /></DashboardLayout></PrivateRoute>} />
+              <Route path="/classes" element={<PrivateRoute><MainLayout><Classes /></MainLayout></PrivateRoute>} />
+              <Route path="/classes/:classId" element={<PrivateRoute><DashboardLayout><ClassDetail /></DashboardLayout></PrivateRoute>} />
+              <Route path="/trainers" element={<PrivateRoute><MainLayout><Trainers /></MainLayout></PrivateRoute>} />
+              <Route path="/trainers/:trainerId" element={<PrivateRoute><DashboardLayout><TrainerDetail /></DashboardLayout></PrivateRoute>} />
+              <Route path="/workouts" element={<PrivateRoute><DashboardLayout><Workouts /></DashboardLayout></PrivateRoute>} />
+              <Route path="/workouts/:workoutId" element={<PrivateRoute><DashboardLayout><WorkoutDetail /></DashboardLayout></PrivateRoute>} />
+
+              {/* Admin Routes */}
+              <Route path="/admin" element={<AdminRoute><DashboardLayout><Dashboard /></DashboardLayout></AdminRoute>}>
+                {adminRoutes.map((route, index) => (
+                  <React.Fragment key={index}>{route}</React.Fragment>
+                ))}
+              </Route>
+
+              {/* Not Found Route */}
+              <Route path="*" element={<MainLayout><NotFound /></MainLayout>} />
+            </Routes>
+          </Suspense>
+        </Router>
+      </AuthProvider>
+    </OptimizedAuthProvider>
   );
-};
+}
 
 export default App;

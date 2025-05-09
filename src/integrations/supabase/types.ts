@@ -563,6 +563,110 @@ export type Database = {
         }
         Relationships: []
       }
+      order_items: {
+        Row: {
+          created_at: string | null
+          id: string
+          order_id: string
+          product_id: string
+          quantity: number
+          total_price: number
+          unit_price: number
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          order_id: string
+          product_id: string
+          quantity: number
+          total_price: number
+          unit_price: number
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          order_id?: string
+          product_id?: string
+          quantity?: number
+          total_price?: number
+          unit_price?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "order_items_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "order_items_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      orders: {
+        Row: {
+          created_at: string | null
+          customer_email: string
+          customer_name: string
+          customer_phone: string | null
+          delivery_address: string | null
+          discount_amount: number | null
+          id: string
+          payment_method: string | null
+          payment_status: string
+          promo_code_id: string | null
+          status: string
+          total_amount: number
+          updated_at: string | null
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          customer_email: string
+          customer_name: string
+          customer_phone?: string | null
+          delivery_address?: string | null
+          discount_amount?: number | null
+          id?: string
+          payment_method?: string | null
+          payment_status?: string
+          promo_code_id?: string | null
+          status?: string
+          total_amount: number
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          customer_email?: string
+          customer_name?: string
+          customer_phone?: string | null
+          delivery_address?: string | null
+          discount_amount?: number | null
+          id?: string
+          payment_method?: string | null
+          payment_status?: string
+          promo_code_id?: string | null
+          status?: string
+          total_amount?: number
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "orders_promo_code_id_fkey"
+            columns: ["promo_code_id"]
+            isOneToOne: false
+            referencedRelation: "promo_codes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       products: {
         Row: {
           category: string
@@ -573,7 +677,9 @@ export type Database = {
           image_url: string | null
           is_active: boolean
           is_instore: boolean
+          is_member_only: boolean | null
           is_public: boolean
+          member_price: number | null
           name: string
           price: number
           sku: string | null
@@ -589,7 +695,9 @@ export type Database = {
           image_url?: string | null
           is_active?: boolean
           is_instore?: boolean
+          is_member_only?: boolean | null
           is_public?: boolean
+          member_price?: number | null
           name: string
           price: number
           sku?: string | null
@@ -605,7 +713,9 @@ export type Database = {
           image_url?: string | null
           is_active?: boolean
           is_instore?: boolean
+          is_member_only?: boolean | null
           is_public?: boolean
+          member_price?: number | null
           name?: string
           price?: number
           sku?: string | null
@@ -679,6 +789,51 @@ export type Database = {
           subscription_status?: string | null
           updated_at?: string | null
           username?: string | null
+        }
+        Relationships: []
+      }
+      promo_codes: {
+        Row: {
+          code: string
+          created_at: string | null
+          discount_type: string
+          id: string
+          is_active: boolean | null
+          max_uses: number | null
+          min_purchase_amount: number | null
+          updated_at: string | null
+          uses_count: number | null
+          valid_from: string
+          valid_until: string
+          value: number
+        }
+        Insert: {
+          code: string
+          created_at?: string | null
+          discount_type: string
+          id?: string
+          is_active?: boolean | null
+          max_uses?: number | null
+          min_purchase_amount?: number | null
+          updated_at?: string | null
+          uses_count?: number | null
+          valid_from?: string
+          valid_until: string
+          value: number
+        }
+        Update: {
+          code?: string
+          created_at?: string | null
+          discount_type?: string
+          id?: string
+          is_active?: boolean | null
+          max_uses?: number | null
+          min_purchase_amount?: number | null
+          updated_at?: string | null
+          uses_count?: number | null
+          valid_from?: string
+          valid_until?: string
+          value?: number
         }
         Relationships: []
       }

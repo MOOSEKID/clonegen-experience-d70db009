@@ -5,7 +5,8 @@ import { Button } from '@/components/ui/button';
 import { ShoppingCart, ShoppingBag } from 'lucide-react';
 import { Product } from '@/hooks/useProducts';
 import { Badge } from '@/components/ui/badge';
-import { toast } from 'sonner';
+import { useAuth } from '@/hooks/useAuth';
+import { useCart } from '@/contexts/CartContext';
 
 type ProductCardProps = {
   product: Product;
@@ -13,6 +14,14 @@ type ProductCardProps = {
 };
 
 const ProductCard: React.FC<ProductCardProps> = ({ product, onAddToCart }) => {
+  const { user } = useAuth();
+  const { addToCart } = useCart();
+  
+  // Check if product is member-only and user is not a member
+  const isMemberOnly = product.is_member_only;
+  const isMember = user?.role === 'member';
+  const canViewProduct = !isMemberOnly || isMember;
+  
   // Format price
   const formatPrice = (price: number) => {
     return `RWF ${price?.toLocaleString() || 0}`;
@@ -21,14 +30,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, onAddToCart }) => {
   // Handle click safely
   const handleAddToCart = (e: React.MouseEvent) => {
     e.preventDefault(); // Prevent navigation when clicking the button
-    onAddToCart(product);
-    
-    // Show toast notification
-    toast(`${product.name} added to cart`, {
-      description: "Item successfully added to your cart",
-      position: "top-right",
-      duration: 2000,
-    });
+    addToCart(product);
   };
 
   // Get category name (handle both old and new structure)
@@ -40,8 +42,8 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, onAddToCart }) => {
     return product.category || 'Uncategorized';
   };
 
-  if (!product) {
-    return null; // Don't render anything if product is missing
+  if (!product || !canViewProduct) {
+    return null; // Don't render anything if product is missing or user can't view it
   }
 
   return (
@@ -71,6 +73,15 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, onAddToCart }) => {
               </Badge>
             </div>
           )}
+          
+          {/* Member only badge */}
+          {product.is_member_only && (
+            <div className="absolute top-2 left-2">
+              <Badge className="bg-gym-orange">
+                Member Only
+              </Badge>
+            </div>
+          )}
         </div>
         
         <div className="p-4 flex flex-col flex-grow">
@@ -87,7 +98,16 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, onAddToCart }) => {
           </p>
           
           <div className="flex items-center justify-between mt-auto">
-            <span className="text-gym-orange font-bold">{formatPrice(product.price || 0)}</span>
+            <div>
+              {user?.role === 'member' && product.member_price ? (
+                <div>
+                  <span className="text-gym-orange font-bold">{formatPrice(product.member_price)}</span>
+                  <span className="text-gray-400 text-xs line-through ml-2">{formatPrice(product.price)}</span>
+                </div>
+              ) : (
+                <span className="text-gym-orange font-bold">{formatPrice(product.price || 0)}</span>
+              )}
+            </div>
             <Button 
               size="sm" 
               onClick={handleAddToCart}

@@ -6,6 +6,9 @@ import { Button } from '@/components/ui/button';
 import { Product } from '@/hooks/useProducts';
 import ProductGrid from '@/components/shop/ProductGrid';
 import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/hooks/useAuth';
+import { useCart } from '@/contexts/CartContext';
+import ShoppingCart from '@/components/shop/ShoppingCart';
 
 // Category mapping to ensure consistent IDs across the application
 const getCategoryId = (categoryName: string): string => {
@@ -26,6 +29,9 @@ const ProductPage = () => {
   const [quantity, setQuantity] = useState(1);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const { user } = useAuth();
+  const { addToCart } = useCart();
+  const isMember = user?.role === 'member';
 
   useEffect(() => {
     const fetchProductAndRelated = async () => {
@@ -47,17 +53,31 @@ const ProductPage = () => {
           }
           
           const typedProduct = productData as Product;
+          
+          // Check if this is a member-only product and user is not a member
+          if (typedProduct.is_member_only && !isMember) {
+            setError('This product is only available to members');
+            setLoading(false);
+            return;
+          }
+          
           setProduct(typedProduct);
           
           // Get related products (from same category)
-          const { data: relatedData, error: relatedError } = await supabase
+          const relatedQuery = supabase
             .from('products')
             .select('*')
             .eq('category', typedProduct.category)
             .eq('is_active', true)
-            .eq('is_public', true)
             .neq('id', productId)
             .limit(4);
+            
+          // Filter member-only products if user is not a member
+          if (!isMember) {
+            relatedQuery.eq('is_member_only', false);
+          }
+            
+          const { data: relatedData, error: relatedError } = await relatedQuery;
             
           if (relatedError) {
             console.error('Error loading related products:', relatedError);
@@ -75,30 +95,17 @@ const ProductPage = () => {
     };
     
     fetchProductAndRelated();
-  }, [productId]);
+  }, [productId, isMember]);
 
   const formatPrice = (price: number) => {
-    return `${price.toLocaleString()} RWF`;
+    return `RWF ${price.toLocaleString()}`;
   };
 
-  // Function to add products to cart (placeholder)
-  const addToCart = (productToAdd: Product | null = product) => {
-    if (!productToAdd) return;
-    
-    // Show a toast notification
-    const toast = document.createElement('div');
-    toast.className = 'fixed top-4 right-4 bg-gym-orange text-white px-4 py-2 rounded shadow-lg animate-in fade-in slide-in-from-top-4 z-50';
-    toast.textContent = `${quantity} x ${productToAdd.name} added to cart`;
-    document.body.appendChild(toast);
-    
-    setTimeout(() => {
-      toast.classList.add('animate-out', 'fade-out', 'slide-out-to-top-4');
-      setTimeout(() => toast.remove(), 300);
-    }, 2000);
-  };
-  
-  const handleAddToCartClick = () => {
-    addToCart();
+  // Function to add products to cart
+  const handleAddToCart = () => {
+    if (product) {
+      addToCart(product, quantity);
+    }
   };
 
   if (loading) {
@@ -134,6 +141,9 @@ const ProductPage = () => {
 
   // Get the correct category ID for linking
   const categoryId = getCategoryId(product.category);
+  
+  // Determine price based on membership
+  const displayPrice = isMember && product.member_price ? product.member_price : product.price;
 
   return (
     <div className="bg-gym-light min-h-screen pt-24 pb-16">
@@ -172,8 +182,33 @@ const ProductPage = () => {
             
             {/* Product Info */}
             <div className="p-8">
+              <div className="flex gap-2 mb-2">
+                {product.is_member_only && (
+                  <span className="bg-gym-orange text-white text-xs px-2 py-1 rounded-full">
+                    Member Only
+                  </span>
+                )}
+              </div>
+              
               <h1 className="text-3xl font-bold text-gym-dark mb-2">{product.name}</h1>
-              <p className="text-2xl font-bold text-gym-orange mb-4">{formatPrice(product.price)}</p>
+              
+              <div className="mb-4">
+                {isMember && product.member_price ? (
+                  <div className="flex items-center">
+                    <span className="text-2xl font-bold text-gym-orange">
+                      {formatPrice(product.member_price)}
+                    </span>
+                    <span className="ml-2 text-gray-500 line-through">
+                      {formatPrice(product.price)}
+                    </span>
+                    <span className="ml-2 bg-green-100 text-green-800 text-xs px-2 py-1 rounded">
+                      Member Price
+                    </span>
+                  </div>
+                ) : (
+                  <p className="text-2xl font-bold text-gym-orange">{formatPrice(product.price)}</p>
+                )}
+              </div>
               
               <div className="border-t border-b border-gray-200 py-4 my-4">
                 <p className="text-gray-700 leading-relaxed">{product.description || 'No description available'}</p>
@@ -207,7 +242,7 @@ const ProductPage = () => {
                 
                 <div className="flex flex-wrap gap-3">
                   <Button 
-                    onClick={handleAddToCartClick}
+                    onClick={handleAddToCart}
                     className="flex-grow bg-gym-orange hover:bg-gym-orange/90"
                     disabled={product.stock_count <= 0}
                   >
@@ -256,6 +291,9 @@ const ProductPage = () => {
             Continue Shopping
           </Link>
         </div>
+
+        {/* Shopping Cart Sidebar */}
+        <ShoppingCart />
       </div>
     </div>
   );
