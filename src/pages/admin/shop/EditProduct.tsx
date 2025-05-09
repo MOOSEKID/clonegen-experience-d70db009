@@ -51,12 +51,14 @@ const EditProduct = () => {
     );
   }
 
-  // Get category name safely using a properly typed approach
-  const categoryName = typeof product.category === 'string' 
-    ? product.category 
-    : (product.category && typeof product.category === 'object' && 'name' in product.category) 
-      ? product.category.name 
-      : '';
+  // Get category name safely with explicit type checks
+  let categoryName = '';
+  if (typeof product.category === 'string') {
+    categoryName = product.category;
+  } else if (product.category && typeof product.category === 'object') {
+    // Use optional chaining with type assertion if we know the object might have a name property
+    categoryName = (product.category as { name?: string }).name || '';
+  }
 
   // Convert Product to ProductFormData by ensuring all required fields are present
   const productFormData: ProductFormData = {
