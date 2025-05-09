@@ -4,7 +4,7 @@ import { useParams, Link } from 'react-router-dom';
 import { ChevronRight, ShoppingBag } from 'lucide-react';
 import { getProductsByCategory, categories } from '@/data/shopData';
 import ProductGrid from '@/components/shop/ProductGrid';
-import { Product } from '@/components/shop/ProductCard';
+import { Product } from '@/hooks/useProducts';
 
 const CategoryPage = () => {
   const { categoryId } = useParams<{ categoryId: string }>();

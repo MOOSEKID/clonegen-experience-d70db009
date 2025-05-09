@@ -4,7 +4,7 @@ import { useParams, Link } from 'react-router-dom';
 import { ChevronRight, ShoppingCart, ShoppingBag, Share2, Heart } from 'lucide-react';
 import { getProductById, getProductsByCategory } from '@/data/shopData';
 import { Button } from '@/components/ui/button';
-import { Product } from '@/components/shop/ProductCard';
+import { Product } from '@/hooks/useProducts';
 import ProductGrid from '@/components/shop/ProductGrid';
 
 const ProductPage = () => {
@@ -77,7 +77,7 @@ const ProductPage = () => {
             {/* Product Image */}
             <div className="bg-gray-100 p-8 flex items-center justify-center">
               <img 
-                src={product.image} 
+                src={product.image_url || ''} 
                 alt={product.name} 
                 className="max-h-96 object-contain"
               />
