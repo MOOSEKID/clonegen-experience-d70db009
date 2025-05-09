@@ -33,9 +33,9 @@ export function useSettings<T extends Record<string, any>>({
     setError(null);
     
     try {
-      // Most settings tables will have a single row
+      // Use type assertion for the table name to bypass TypeScript check
       const { data: fetchedData, error: fetchError } = await supabase
-        .from(tableName)
+        .from(tableName as any)
         .select('*')
         .limit(1)
         .single();
@@ -68,8 +68,9 @@ export function useSettings<T extends Record<string, any>>({
     setSaveState(SaveState.Saving);
     
     try {
+      // Use type assertion for the table name to bypass TypeScript check
       const { error: updateError } = await supabase
-        .from(tableName)
+        .from(tableName as any)
         .update({ 
           ...newData, 
           updated_at: new Date().toISOString() 
