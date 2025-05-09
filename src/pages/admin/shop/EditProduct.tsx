@@ -51,6 +51,22 @@ const EditProduct = () => {
     );
   }
 
+  // Convert Product to ProductFormData by ensuring all required fields are present
+  const productFormData: ProductFormData = {
+    id: product.id,
+    name: product.name,
+    description: product.description || undefined,
+    category: typeof product.category === 'object' && product.category ? product.category.name : product.category,
+    category_id: product.category_id || '',
+    price: product.price,
+    sku: product.sku || undefined,
+    stock_count: product.stock_count,
+    image_url: product.image_url,
+    is_active: product.is_active,
+    is_public: product.is_public,
+    is_instore: product.is_instore
+  };
+
   return (
     <div className="space-y-6">
       <div>
@@ -68,7 +84,7 @@ const EditProduct = () => {
       </div>
 
       <ProductForm
-        initialData={product}
+        initialData={productFormData}
         onSubmit={handleSubmit}
         isLoading={updateMutation.isPending || isUploading}
       />

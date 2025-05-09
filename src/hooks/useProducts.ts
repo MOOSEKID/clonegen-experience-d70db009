@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { useToast } from '@/components/ui/use-toast';
 import { supabase } from '@/integrations/supabase/client';
@@ -24,7 +25,7 @@ export interface ProductFormData {
   id?: string;
   name: string;
   description?: string;
-  category?: string; // Keep this for backward compatibility
+  category: string; // Keep this for backward compatibility
   category_id: string; 
   price: number;
   sku?: string;
@@ -111,7 +112,7 @@ export const useProducts = () => {
     
     const { data, error } = await supabase
       .from('products')
-      .insert([{ ...productData, image_url: imageUrl }])
+      .insert({ ...productData, image_url: imageUrl })
       .select()
       .single();
 
@@ -192,7 +193,6 @@ export const useProducts = () => {
         toast({
           title: "Error creating product",
           description: error.message || "An error occurred while creating the product.",
-          variant: "destructive",
         });
       }
     });
@@ -213,7 +213,6 @@ export const useProducts = () => {
         toast({
           title: "Error updating product",
           description: error.message || "An error occurred while updating the product.",
-          variant: "destructive",
         });
       }
     });
@@ -233,7 +232,6 @@ export const useProducts = () => {
         toast({
           title: "Error deleting product",
           description: error.message || "An error occurred while deleting the product.",
-          variant: "destructive",
         });
       }
     });

@@ -64,13 +64,13 @@ const CategoryForm: React.FC<CategoryFormProps> = ({
   });
 
   const handleSubmit = (values: CategoryFormValues) => {
-    // Ensure all required fields are present and non-optional
-    const formData = {
+    // Since all fields in CategoryFormValues match the expected output type,
+    // we can pass values directly, as form validation ensures required fields are present
+    onSubmit({
       name: values.name,
       description: values.description || '',
       icon: values.icon
-    };
-    onSubmit(formData);
+    });
   };
 
   return (

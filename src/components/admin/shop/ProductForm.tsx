@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -87,11 +88,14 @@ const ProductForm: React.FC<ProductFormProps> = ({
   };
 
   const handleSubmit = (values: z.infer<typeof productFormSchema>) => {
+    // Ensure all required fields are present and find category name for compatibility
+    const selectedCategory = categories.find(cat => cat.id === values.category_id);
+    
     onSubmit({
       ...values,
       imageFile,
       id: initialData?.id,
-      category: '', // Add empty category to satisfy type requirements
+      category: selectedCategory?.name || '', // Add category name for backward compatibility
     });
   };
 
