@@ -111,12 +111,13 @@ const BusinessHoursSettings = () => {
       for (const day of daysOfWeek) {
         if (formData[day]) {
           const recordData = formData[day];
+          // Need to cast to any here because updateSettings expects a single object, not an array
           await updateSettings({
             id: recordData.id,
             open_time: recordData.open_time,
             close_time: recordData.close_time,
             is_closed: recordData.is_closed
-          });
+          } as any);
         }
       }
       

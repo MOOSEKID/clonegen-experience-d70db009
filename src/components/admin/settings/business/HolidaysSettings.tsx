@@ -119,6 +119,7 @@ const HolidaysSettings = () => {
         if (isNewHoliday) {
           // Create new holiday (omit the temporary ID)
           const { id, ...newHolidayData } = holiday;
+          // Need to cast to any here because updateSettings expects a single object, not an array
           await updateSettings(newHolidayData as any);
         } else {
           // Update existing holiday
@@ -129,11 +130,12 @@ const HolidaysSettings = () => {
               originalHoliday.holiday_name !== holiday.holiday_name ||
               originalHoliday.holiday_date !== holiday.holiday_date
             ) {
+              // Need to cast to any here because updateSettings expects a single object, not an array
               await updateSettings({
                 id: holiday.id,
                 holiday_name: holiday.holiday_name,
                 holiday_date: holiday.holiday_date,
-              });
+              } as any);
             }
           }
         }
@@ -146,7 +148,8 @@ const HolidaysSettings = () => {
           
           if (!stillExists) {
             // Delete this holiday
-            await updateSettings({ id: settingHoliday.id });
+            // Need to cast to any here because updateSettings expects a single object, not an array
+            await updateSettings({ id: settingHoliday.id } as any);
           }
         }
       }
