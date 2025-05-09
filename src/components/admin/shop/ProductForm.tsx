@@ -91,19 +91,21 @@ const ProductForm: React.FC<ProductFormProps> = ({
     // Ensure all required fields are present and find category name for compatibility
     const selectedCategory = categories.find(cat => cat.id === values.category_id);
     
-    // Make sure to include all required fields from ProductFormData
+    // Make sure to include all required fields from ProductFormData with name explicitly included
     onSubmit({
-      ...values, // This already includes the required name, price, etc.
-      id: initialData?.id,
+      name: values.name, // Explicitly include name as it's required
+      description: values.description,
       category: selectedCategory?.name || '',
-      imageFile,
       category_id: values.category_id,
       price: values.price,
       stock_count: values.stock_count,
+      sku: values.sku,
+      image_url: values.image_url,
       is_active: values.is_active,
       is_public: values.is_public,
       is_instore: values.is_instore,
-      // Include any other required fields here
+      id: initialData?.id,
+      imageFile
     });
   };
 
