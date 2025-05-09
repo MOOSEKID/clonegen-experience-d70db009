@@ -1,5 +1,6 @@
 
 import { cmsService, CmsPage } from './cmsService';
+import { toast } from 'sonner';
 
 // Define route discovery interface
 export interface RouteInfo {
@@ -78,6 +79,7 @@ export const routeService = {
       return pages.filter(Boolean) as CmsPage[];
     } catch (error) {
       console.error("Error syncing routes:", error);
+      toast.error("Failed to sync routes with database");
       return [];
     }
   },
@@ -96,6 +98,44 @@ export const routeService = {
       return false;
     } catch (error) {
       console.error("Error bootstrapping CMS pages:", error);
+      return false;
+    }
+  },
+
+  // Force bootstrap even if pages exist - for emergency recovery
+  async forceBootstrapCmsPages(): Promise<boolean> {
+    try {
+      // Skip checking for existing pages and force create all routes
+      const routes = this.getRoutes();
+      
+      // Create all routes as new pages
+      await Promise.all(
+        routes.map(async (route) => {
+          // Create or update page
+          const slug = route.path === '/' ? 'home' : route.path.slice(1);
+          const page = {
+            slug,
+            title: route.pageName,
+            type: route.isDynamic ? 'dynamic' as const : 'system' as const,
+            source_path: route.sourceFilePath,
+            visible: true
+          };
+          
+          // Check if page exists
+          const existingPage = await cmsService.getPageBySlug(slug);
+          
+          if (existingPage) {
+            await cmsService.updatePage(existingPage.id, page);
+          } else {
+            await cmsService.createPage(page);
+          }
+        })
+      );
+      
+      return true;
+    } catch (error) {
+      console.error("Error in force bootstrap CMS pages:", error);
+      toast.error("Failed to restore routes");
       return false;
     }
   }

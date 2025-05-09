@@ -4,23 +4,26 @@ import { Button } from "@/components/ui/button";
 import { routeService } from '@/services/cms/routeService';
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { toast } from 'sonner';
-import { RefreshCcw, Check, AlertCircle } from 'lucide-react';
+import { RefreshCcw, Check, AlertCircle, Trash, ArrowRightLeft } from 'lucide-react';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { useCmsSync } from '@/hooks/cms/useCmsSync';
 import { useRoutes } from '@/hooks/cms/useRoutes';
 import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
+import { useNavItems } from '@/hooks/cms/useNavItems';
 
 /**
  * Emergency component for restoring routes when CMS sync is broken
  */
 const RoutesRestorer = () => {
-  const { syncRoutes, isSyncing } = useCmsSync();
+  const { syncRoutes, forceSync, isSyncing } = useCmsSync();
   const { routes, syncedRoutes } = useRoutes();
+  const { navItems } = useNavItems();
   const [restorationComplete, setRestorationComplete] = useState(false);
   const [progress, setProgress] = useState(0);
   const [restorationError, setRestorationError] = useState<string | null>(null);
-  
+  const [isFullRestore, setIsFullRestore] = useState(false);
+
   // Calculate progress
   useEffect(() => {
     if (!routes.length) return;
@@ -37,30 +40,48 @@ const RoutesRestorer = () => {
     try {
       toast.info("Starting emergency route restoration...");
       setRestorationError(null);
+      setIsFullRestore(false);
       
       // First attempt to bootstrap CMS pages if they don't exist
-      const bootstrapped = await routeService.bootstrapCmsPages();
-      
-      if (bootstrapped) {
-        toast.success("Route bootstrap completed successfully");
-      }
-      
-      // Then trigger a full sync
       syncRoutes(undefined, {
         onSuccess: () => {
-          toast.success("All routes have been restored successfully");
+          toast.success("Routes have been restored successfully");
           setRestorationComplete(true);
         },
         onError: (error) => {
           console.error("Route restoration failed:", error);
-          toast.error("Failed to restore routes. Please try again.");
-          setRestorationError("An error occurred during route restoration");
+          toast.error("Initial restoration failed. Try force restore.");
+          setRestorationError("Standard restoration failed. Please try Force Restore.");
         }
       });
     } catch (error) {
       console.error("Emergency restore error:", error);
       toast.error("Route restoration encountered an error");
       setRestorationError("Route restoration failed with an unexpected error");
+    }
+  };
+
+  const handleForceRestore = async () => {
+    try {
+      toast.info("Starting force route restoration...");
+      setRestorationError(null);
+      setIsFullRestore(true);
+      
+      // Force restore routes even if they exist
+      forceSync(undefined, {
+        onSuccess: () => {
+          toast.success("All routes have been forcefully restored");
+          setRestorationComplete(true);
+        },
+        onError: (error) => {
+          console.error("Force route restoration failed:", error);
+          toast.error("Failed to restore routes. Please contact support.");
+          setRestorationError("Force restore failed. This may require database intervention.");
+        }
+      });
+    } catch (error) {
+      console.error("Force restore error:", error);
+      setRestorationError("Force route restoration failed with an unexpected error");
     }
   };
 
@@ -80,14 +101,19 @@ const RoutesRestorer = () => {
             <AlertTitle>Restoration Complete</AlertTitle>
             <AlertDescription>
               All routes have been successfully restored and synchronized with the CMS database.
+              {navItems.length === 0 && (
+                <p className="mt-2 font-medium">
+                  Next step: Create navigation items using the Quick Navigation Setup above.
+                </p>
+              )}
             </AlertDescription>
           </Alert>
         ) : restorationError ? (
           <Alert variant="destructive">
             <AlertCircle className="h-4 w-4" />
-            <AlertTitle>Restoration Failed</AlertTitle>
+            <AlertTitle>Restoration Issue</AlertTitle>
             <AlertDescription>
-              {restorationError}. Please try again or contact support if the problem persists.
+              {restorationError}
             </AlertDescription>
           </Alert>
         ) : (
@@ -127,18 +153,19 @@ const RoutesRestorer = () => {
           </p>
         )}
       </CardContent>
-      <CardFooter>
+      <CardFooter className="flex flex-col gap-2">
         <Button 
           onClick={handleEmergencyRestore} 
-          disabled={isSyncing || restorationComplete}
+          disabled={isSyncing || (restorationComplete && !restorationError)}
           className="w-full"
+          variant={restorationError ? "outline" : "default"}
         >
-          {isSyncing ? (
+          {isSyncing && !isFullRestore ? (
             <>
               <RefreshCcw className="mr-2 h-4 w-4 animate-spin" />
               Restoring Routes...
             </>
-          ) : restorationComplete ? (
+          ) : restorationComplete && !restorationError ? (
             <>
               <Check className="mr-2 h-4 w-4" />
               Restoration Complete
@@ -146,7 +173,26 @@ const RoutesRestorer = () => {
           ) : (
             <>
               <RefreshCcw className="mr-2 h-4 w-4" />
-              Restore All Routes 
+              Standard Restore 
+            </>
+          )}
+        </Button>
+        
+        <Button 
+          onClick={handleForceRestore}
+          disabled={isSyncing || (restorationComplete && !restorationError)}
+          className="w-full"
+          variant="destructive"
+        >
+          {isSyncing && isFullRestore ? (
+            <>
+              <ArrowRightLeft className="mr-2 h-4 w-4 animate-spin" />
+              Force Restoring...
+            </>
+          ) : (
+            <>
+              <Trash className="mr-2 h-4 w-4" />
+              Force Restore All Routes
             </>
           )}
         </Button>

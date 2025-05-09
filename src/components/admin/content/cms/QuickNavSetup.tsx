@@ -3,15 +3,17 @@ import React, { useState } from 'react';
 import { useCmsPages } from '@/hooks/cms/useCmsPages';
 import { useNavItems } from '@/hooks/cms/useNavItems';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Checkbox } from '@/components/ui/checkbox';
 import { toast } from 'sonner';
-import { Loader2 } from 'lucide-react';
+import { Loader2, RefreshCw, Check } from 'lucide-react';
 
 const QuickNavSetup: React.FC = () => {
   const { pages, isLoading: pagesLoading } = useCmsPages();
-  const { createNavItem, isPending } = useNavItems();
+  const { createNavItem, isPending, navItems } = useNavItems();
   const [selectedPages, setSelectedPages] = useState<string[]>([]);
+  const [processing, setProcessing] = useState(false);
+  const [setupComplete, setSetupComplete] = useState(false);
   
   const mainMenuPages = pages.filter(page => 
     // Filter out pages that should not be in main navigation
@@ -35,6 +37,7 @@ const QuickNavSetup: React.FC = () => {
     }
     
     try {
+      setProcessing(true);
       const selectedPageObjects = pages.filter(page => selectedPages.includes(page.id));
       
       // Create navigation items
@@ -51,9 +54,12 @@ const QuickNavSetup: React.FC = () => {
       
       toast.success(`${selectedPageObjects.length} navigation items created successfully`);
       setSelectedPages([]);
+      setSetupComplete(true);
     } catch (error) {
       console.error("Error creating navigation items:", error);
       toast.error("Failed to create navigation items");
+    } finally {
+      setProcessing(false);
     }
   };
   
@@ -65,70 +71,138 @@ const QuickNavSetup: React.FC = () => {
     }
   };
   
+  // Automatically select common pages for convenience
+  const handleSelectCommonPages = () => {
+    const commonSlugs = ['home', 'shop', 'membership', 'classes', 'blogs', 'contact-us'];
+    const commonPageIds = pages
+      .filter(page => commonSlugs.includes(page.slug))
+      .map(page => page.id);
+    
+    setSelectedPages(commonPageIds);
+  };
+  
+  // Show success message if we already have navigation items
+  if (navItems.length > 0 && !setupComplete) {
+    return (
+      <Card className="border-green-200 bg-green-50">
+        <CardHeader>
+          <CardTitle className="flex items-center">
+            <Check className="mr-2 h-5 w-5 text-green-500" />
+            Navigation Setup Complete
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <p>Your site navigation has been set up with {navItems.length} navigation items.</p>
+          <p className="mt-2">Visit your home page to see the navigation in action.</p>
+        </CardContent>
+      </Card>
+    );
+  }
+  
   if (pagesLoading) {
-    return <div className="p-8 text-center">Loading pages...</div>;
+    return (
+      <Card>
+        <CardContent className="p-8 text-center">
+          <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4 text-primary" />
+          <p>Loading pages...</p>
+        </CardContent>
+      </Card>
+    );
   }
   
   return (
     <Card>
       <CardHeader>
         <CardTitle>Quick Navigation Setup</CardTitle>
+        <CardDescription>
+          Set up your site navigation by selecting pages to include in the main menu
+        </CardDescription>
       </CardHeader>
       <CardContent>
-        <p className="mb-4">Select pages to add to the main navigation:</p>
-        
-        {mainMenuPages.length > 0 && (
-          <div className="flex items-center space-x-2 mb-4">
-            <Checkbox 
-              id="select-all"
-              checked={selectedPages.length === mainMenuPages.length && mainMenuPages.length > 0}
-              onCheckedChange={handleSelectAll}
-            />
-            <label 
-              htmlFor="select-all"
-              className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+        {setupComplete ? (
+          <div className="py-4 text-center space-y-4">
+            <div className="mx-auto rounded-full bg-green-100 p-3 w-12 h-12 flex items-center justify-center">
+              <Check className="h-6 w-6 text-green-600" />
+            </div>
+            <h3 className="text-lg font-medium">Navigation Created Successfully!</h3>
+            <p className="text-muted-foreground">
+              Your site navigation has been set up. Visit your home page to see it in action.
+            </p>
+            <Button 
+              onClick={() => window.location.href = '/'}
+              className="mt-2"
             >
-              Select All
-            </label>
+              View Site
+            </Button>
           </div>
+        ) : (
+          <>
+            <p className="mb-4">Select pages to add to the main navigation:</p>
+            
+            <div className="flex flex-wrap gap-2 mb-4">
+              <Button 
+                variant="outline" 
+                size="sm" 
+                onClick={handleSelectAll}
+              >
+                {selectedPages.length === mainMenuPages.length && mainMenuPages.length > 0 
+                  ? "Deselect All" 
+                  : "Select All"
+                }
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleSelectCommonPages}
+              >
+                <RefreshCw className="mr-2 h-3 w-3" />
+                Select Common Pages
+              </Button>
+            </div>
+            
+            <div className="space-y-2 mb-6">
+              {mainMenuPages.length > 0 ? (
+                mainMenuPages.map(page => (
+                  <div key={page.id} className="flex items-center space-x-2 p-2 rounded hover:bg-muted">
+                    <Checkbox 
+                      id={`page-${page.id}`}
+                      checked={selectedPages.includes(page.id)}
+                      onCheckedChange={(checked) => handleSelectPage(page.id, checked === true)}
+                    />
+                    <label 
+                      htmlFor={`page-${page.id}`}
+                      className="flex flex-1 text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                    >
+                      {page.title}
+                      <span className="ml-2 text-xs text-muted-foreground">
+                        ({page.slug === 'home' ? '/' : `/${page.slug}`})
+                      </span>
+                    </label>
+                  </div>
+                ))
+              ) : (
+                <div className="p-4 text-center border rounded-md bg-muted">
+                  <p className="text-gray-500 text-sm">No eligible pages found. Please sync routes first.</p>
+                </div>
+              )}
+            </div>
+            
+            <Button 
+              onClick={handleCreateNavItems} 
+              disabled={selectedPages.length === 0 || isPending || processing}
+              className="w-full"
+            >
+              {(isPending || processing) ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Creating...
+                </>
+              ) : (
+                'Create Navigation Items'
+              )}
+            </Button>
+          </>
         )}
-        
-        <div className="space-y-2 mb-6">
-          {mainMenuPages.length > 0 ? (
-            mainMenuPages.map(page => (
-              <div key={page.id} className="flex items-center space-x-2">
-                <Checkbox 
-                  id={`page-${page.id}`}
-                  checked={selectedPages.includes(page.id)}
-                  onCheckedChange={(checked) => handleSelectPage(page.id, checked === true)}
-                />
-                <label 
-                  htmlFor={`page-${page.id}`}
-                  className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-                >
-                  {page.title}
-                </label>
-              </div>
-            ))
-          ) : (
-            <p className="text-gray-500 text-sm">No eligible pages found. Please sync routes first.</p>
-          )}
-        </div>
-        
-        <Button 
-          onClick={handleCreateNavItems} 
-          disabled={selectedPages.length === 0 || isPending}
-          className="w-full"
-        >
-          {isPending ? (
-            <>
-              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              Creating...
-            </>
-          ) : (
-            'Create Navigation Items'
-          )}
-        </Button>
       </CardContent>
     </Card>
   );
