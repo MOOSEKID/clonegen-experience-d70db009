@@ -476,6 +476,60 @@ export type Database = {
         }
         Relationships: []
       }
+      settings_business_holidays: {
+        Row: {
+          created_at: string | null
+          holiday_date: string
+          holiday_name: string
+          id: string
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          holiday_date: string
+          holiday_name: string
+          id?: string
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          holiday_date?: string
+          holiday_name?: string
+          id?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      settings_business_hours: {
+        Row: {
+          close_time: string | null
+          created_at: string | null
+          day_of_week: string
+          id: string
+          is_closed: boolean | null
+          open_time: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          close_time?: string | null
+          created_at?: string | null
+          day_of_week: string
+          id?: string
+          is_closed?: boolean | null
+          open_time?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          close_time?: string | null
+          created_at?: string | null
+          day_of_week?: string
+          id?: string
+          is_closed?: boolean | null
+          open_time?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       settings_companies_automation: {
         Row: {
           auto_generate_reports: boolean | null

@@ -1,6 +1,5 @@
 
 import { useState, useEffect } from 'react';
-import { useSettings, SaveState } from '@/hooks/admin/useSettings';
 import SettingsCard from '../SettingsCard';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
@@ -29,7 +28,7 @@ const BusinessHoursSettings = () => {
   // Business hours state
   const [businessHours, setBusinessHours] = useState<BusinessHour[]>([]);
   const [loadingHours, setLoadingHours] = useState(true);
-  const [savingHours, setSavingHours] = useState<Record<string, SaveState>>({});
+  const [savingHours, setSavingHours] = useState<Record<string, string>>({});
   
   // Holidays state
   const [holidays, setHolidays] = useState<Holiday[]>([]);
@@ -54,7 +53,7 @@ const BusinessHoursSettings = () => {
           return;
         }
         
-        setBusinessHours(data as BusinessHour[]);
+        setBusinessHours(data as unknown as BusinessHour[]);
       } catch (err: any) {
         console.error(`Error in fetchData for business hours:`, err);
         toast.error(`Failed to load business hours: ${err.message}`);
@@ -83,7 +82,7 @@ const BusinessHoursSettings = () => {
           return;
         }
         
-        setHolidays(data as Holiday[]);
+        setHolidays(data as unknown as Holiday[]);
       } catch (err: any) {
         console.error(`Error in fetchHolidays:`, err);
         toast.error(`Failed to load holidays: ${err.message}`);
@@ -97,7 +96,7 @@ const BusinessHoursSettings = () => {
   
   // Update business hour
   const updateBusinessHour = async (id: string, field: string, value: any) => {
-    setSavingHours(prev => ({ ...prev, [id]: SaveState.Saving }));
+    setSavingHours(prev => ({ ...prev, [id]: 'saving' }));
     
     try {
       const { error } = await supabase
@@ -114,17 +113,17 @@ const BusinessHoursSettings = () => {
         )
       );
       
-      setSavingHours(prev => ({ ...prev, [id]: SaveState.Saved }));
+      setSavingHours(prev => ({ ...prev, [id]: 'saved' }));
       
       // Reset status after delay
       setTimeout(() => {
-        setSavingHours(prev => ({ ...prev, [id]: SaveState.Idle }));
+        setSavingHours(prev => ({ ...prev, [id]: 'idle' }));
       }, 2000);
       
     } catch (error: any) {
       console.error('Error updating business hour:', error);
       toast.error('Failed to update business hours');
-      setSavingHours(prev => ({ ...prev, [id]: SaveState.Error }));
+      setSavingHours(prev => ({ ...prev, [id]: 'error' }));
     }
   };
   
@@ -149,7 +148,7 @@ const BusinessHoursSettings = () => {
       if (error) throw error;
       
       if (data && data[0]) {
-        setHolidays(prev => [...prev, data[0] as Holiday]);
+        setHolidays(prev => [...prev, data[0] as unknown as Holiday]);
         setNewHoliday({ name: '', date: '' });
         toast.success('Holiday added successfully');
       }
@@ -183,8 +182,8 @@ const BusinessHoursSettings = () => {
   };
   
   // Get save state for a specific business hour
-  const getSaveState = (id: string): SaveState => {
-    return savingHours[id] || SaveState.Idle;
+  const getSaveState = (id: string): string => {
+    return savingHours[id] || 'idle';
   };
   
   // Show day name in proper format
@@ -247,13 +246,13 @@ const BusinessHoursSettings = () => {
                 )}
                 
                 <div className="w-6">
-                  {getSaveState(hour.id) === SaveState.Saving && (
+                  {getSaveState(hour.id) === 'saving' && (
                     <div className="animate-spin rounded-full h-4 w-4 border-t-2 border-b-2 border-gym-orange"></div>
                   )}
-                  {getSaveState(hour.id) === SaveState.Saved && (
+                  {getSaveState(hour.id) === 'saved' && (
                     <div className="text-green-500">✓</div>
                   )}
-                  {getSaveState(hour.id) === SaveState.Error && (
+                  {getSaveState(hour.id) === 'error' && (
                     <div className="text-red-500">!</div>
                   )}
                 </div>
