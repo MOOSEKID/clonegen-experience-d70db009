@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -92,6 +91,7 @@ const ProductForm: React.FC<ProductFormProps> = ({
       ...values,
       imageFile,
       id: initialData?.id,
+      category: '', // Add empty category to satisfy type requirements
     });
   };
 

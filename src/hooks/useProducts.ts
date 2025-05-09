@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { useToast } from '@/components/ui/use-toast';
 import { supabase } from '@/integrations/supabase/client';
@@ -21,10 +20,21 @@ export type Product = {
   updated_at: string;
 };
 
-export type ProductFormData = Omit<Product, 'id' | 'created_at' | 'updated_at'> & {
+export interface ProductFormData {
   id?: string;
+  name: string;
+  description?: string;
+  category?: string; // Keep this for backward compatibility
+  category_id: string; 
+  price: number;
+  sku?: string;
+  stock_count: number;
+  image_url?: string | null;
+  is_active: boolean;
+  is_public: boolean;
+  is_instore: boolean;
   imageFile?: File | null;
-};
+}
 
 export const useProducts = () => {
   const { toast } = useToast();

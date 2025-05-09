@@ -64,7 +64,13 @@ const CategoryForm: React.FC<CategoryFormProps> = ({
   });
 
   const handleSubmit = (values: CategoryFormValues) => {
-    onSubmit(values);
+    // Ensure all required fields are present and non-optional
+    const formData = {
+      name: values.name,
+      description: values.description || '',
+      icon: values.icon
+    };
+    onSubmit(formData);
   };
 
   return (
