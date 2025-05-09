@@ -20,10 +20,17 @@ const CMSTabContent: React.FC = () => {
   // Bootstrap CMS data when component loads
   useEffect(() => {
     const bootstrapCMS = async () => {
-      // Check if we need to bootstrap pages
-      if (pages.length === 0) {
-        await routeService.bootstrapCmsPages();
-        toast.success("CMS pages bootstrapped successfully");
+      try {
+        // Check if we need to bootstrap pages
+        if (pages.length === 0) {
+          const result = await routeService.bootstrapCmsPages();
+          if (result) {
+            toast.success("CMS pages bootstrapped successfully");
+          }
+        }
+      } catch (err) {
+        console.error("Error bootstrapping CMS:", err);
+        toast.error("Failed to bootstrap CMS pages");
       }
     };
     

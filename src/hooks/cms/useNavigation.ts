@@ -22,20 +22,25 @@ export const useNavigation = (): NavigationData => {
   } = useQuery({
     queryKey: ['cms', 'navigation'],
     queryFn: async () => {
-      // First, get all nav items
-      const items = await cmsService.getNavItems();
-      
-      // Then get all pages to link with nav items
-      const pages = await cmsService.getPages();
-      
-      // Associate pages with nav items
-      return items.map(item => {
-        if (item.linked_page_id) {
-          const linkedPage = pages.find(page => page.id === item.linked_page_id);
-          return { ...item, linked_page: linkedPage };
-        }
-        return item;
-      }) as NavItemWithPage[];
+      try {
+        // First, get all nav items
+        const items = await cmsService.getNavItems();
+        
+        // Then get all pages to link with nav items
+        const pages = await cmsService.getPages();
+        
+        // Associate pages with nav items
+        return items.map(item => {
+          if (item.linked_page_id) {
+            const linkedPage = pages.find(page => page.id === item.linked_page_id);
+            return { ...item, linked_page: linkedPage };
+          }
+          return item;
+        }) as NavItemWithPage[];
+      } catch (err) {
+        console.error('Navigation data fetch error:', err);
+        return [];
+      }
     }
   });
 
