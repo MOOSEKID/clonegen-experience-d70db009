@@ -52,7 +52,7 @@ export const useShopProducts = () => {
           console.log(`Fetched ${productsData.length} products successfully`);
           setProducts(productsData as Product[]);
           
-          // Count products by category
+          // Count products by category - Initialize the map before using it
           const countsByCategoryMap: Record<string, number> = {};
           productsData.forEach(product => {
             if (product.category_id) {
@@ -67,6 +67,7 @@ export const useShopProducts = () => {
 
         // Process categories data
         if (categoriesData) {
+          const countsByCategoryMap = categoryCount; // Use the state value
           const categoriesWithCounts = categoriesData.map(category => ({
             ...category,
             productCount: countsByCategoryMap[category.id] || 0
