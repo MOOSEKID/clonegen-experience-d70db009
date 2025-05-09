@@ -29,9 +29,16 @@ export const PhoneInput = ({
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newValue = e.target.value;
-    const newIsValid = newValue ? isValidRwandanPhone(newValue) : !required;
+    
+    // Auto-format to Rwandan format
+    let formattedValue = newValue;
+    if (newValue.startsWith('0') && newValue.length > 1) {
+      formattedValue = '+25' + newValue.substring(1);
+    }
+    
+    const newIsValid = formattedValue ? isValidRwandanPhone(formattedValue) : !required;
     setIsValid(newIsValid);
-    onChange(newValue, newIsValid);
+    onChange(formattedValue, newIsValid);
   };
 
   return (

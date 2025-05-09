@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { useSettings, SaveState } from '@/hooks/admin/useSettings';
 import SettingsCard from '../SettingsCard';
@@ -49,6 +50,7 @@ const GeneralSettings = () => {
   const [isValid, setIsValid] = useState<boolean>(true);
   const [validationErrors, setValidationErrors] = useState<Record<string, string>>({});
   const [previewDarkMode, setPreviewDarkMode] = useState<boolean>(false);
+  const [isTestingDarkMode, setIsTestingDarkMode] = useState<boolean>(false);
   
   // Initialize form data from settings
   useEffect(() => {
@@ -77,14 +79,34 @@ const GeneralSettings = () => {
   const handleInputChange = (field: keyof GeneralSettingsData, value: any) => {
     setFormData(prev => ({ ...prev, [field]: value }));
     
-    // Validate email field
-    if (field === 'contact_email' && value) {
-      const emailValid = isValidEmail(value);
-      setValidationErrors(prev => ({
-        ...prev,
-        contact_email: emailValid ? '' : 'Please enter a valid email address'
-      }));
+    // Validate fields
+    validateField(field, value);
+  };
+  
+  // Validate a specific field
+  const validateField = (field: keyof GeneralSettingsData, value: any) => {
+    const errors: Record<string, string> = { ...validationErrors };
+    
+    switch (field) {
+      case 'gym_name':
+        if (!value) {
+          errors.gym_name = 'Gym name is required';
+        } else {
+          delete errors.gym_name;
+        }
+        break;
+        
+      case 'contact_email':
+        if (value && !isValidEmail(value)) {
+          errors.contact_email = 'Please enter a valid email address';
+        } else {
+          delete errors.contact_email;
+        }
+        break;
     }
+    
+    setValidationErrors(errors);
+    setIsValid(Object.keys(errors).length === 0);
   };
   
   // Handle phone input change with validation
@@ -126,10 +148,14 @@ const GeneralSettings = () => {
     }
     
     try {
-      await updateSettings(formData);
+      await updateSettings({
+        ...formData,
+        updated_at: new Date().toISOString()
+      });
       toast.success('Settings saved successfully');
     } catch (err) {
       toast.error('Failed to save settings');
+      console.error('Error saving settings:', err);
     }
   };
   
@@ -138,14 +164,33 @@ const GeneralSettings = () => {
     if (settings) {
       setFormData(settings);
       setValidationErrors({});
-      toast.info('Changes reset');
+      setPreviewDarkMode(settings.dark_mode_enabled || false);
+      toast.info('Changes have been reset');
     }
   };
   
-  // Test dark mode
+  // Toggle dark mode preview
   const toggleDarkModePreview = () => {
     setPreviewDarkMode(prev => !prev);
   };
+  
+  // Test dark mode (doesn't affect form data)
+  const handleTestDarkMode = () => {
+    setIsTestingDarkMode(prev => !prev);
+    document.documentElement.classList.toggle('dark', !isTestingDarkMode);
+    toast.info(isTestingDarkMode ? 'Light mode preview' : 'Dark mode preview', {
+      description: 'This is just a preview. Save changes to apply permanently.'
+    });
+  };
+  
+  useEffect(() => {
+    // Cleanup dark mode test when component unmounts
+    return () => {
+      if (isTestingDarkMode) {
+        document.documentElement.classList.remove('dark');
+      }
+    };
+  }, [isTestingDarkMode]);
   
   if (loading) {
     return (
@@ -204,7 +249,7 @@ const GeneralSettings = () => {
             </AccordionItem>
             
             <AccordionItem value="preferences">
-              <AccordionTrigger className="text-base font-medium">Preferences</AccordionTrigger>
+              <AccordionTrigger className="text-base font-medium">System Preferences</AccordionTrigger>
               <AccordionContent>
                 {renderPreferenceFields()}
               </AccordionContent>
@@ -223,7 +268,7 @@ const GeneralSettings = () => {
             </div>
             
             <div className="space-y-6">
-              <h3 className="text-base font-medium">Preferences</h3>
+              <h3 className="text-base font-medium">System Preferences</h3>
               {renderPreferenceFields()}
             </div>
           </>
@@ -231,7 +276,7 @@ const GeneralSettings = () => {
       </div>
 
       {/* Save & Reset Buttons */}
-      <div className={`flex gap-2 justify-end mt-6 ${isMobile ? 'sticky bottom-4 bg-white p-2 shadow-md rounded-md' : ''}`}>
+      <div className={`flex gap-2 justify-end mt-6 ${isMobile ? 'sticky bottom-4 bg-white dark:bg-gray-800 p-4 shadow-md rounded-md z-10' : ''}`}>
         <Button
           type="button"
           variant="outline"
@@ -253,6 +298,15 @@ const GeneralSettings = () => {
             <Save className="h-4 w-4 mr-2" />
           )}
           Save Changes
+        </Button>
+        
+        <Button 
+          type="button" 
+          variant="secondary"
+          onClick={handleTestDarkMode}
+        >
+          {isTestingDarkMode ? <Sun className="h-4 w-4 mr-2" /> : <Moon className="h-4 w-4 mr-2" />}
+          Test {isTestingDarkMode ? 'Light' : 'Dark'} Mode
         </Button>
       </div>
     </>
@@ -302,6 +356,9 @@ const GeneralSettings = () => {
             onChange={handlePhoneChange}
             placeholder="+250781234567"
           />
+          {validationErrors.contact_phone && (
+            <p className="text-xs text-red-500">{validationErrors.contact_phone}</p>
+          )}
         </div>
       </div>
     </div>
@@ -315,11 +372,14 @@ const GeneralSettings = () => {
           <FileUpload 
             bucket="settings"
             path="logos"
+            maxSizeMB={2}
             currentFilePath={formData.logo_light_url || ''}
             onUploadComplete={(filePath) => handleInputChange('logo_light_url', filePath)}
+            onReset={() => handleInputChange('logo_light_url', '')}
             label="Upload Light Logo"
             accept="image/*"
           />
+          <p className="text-xs text-gray-500">Recommended size: 200 x 80px. JPG, PNG, or SVG. Max 2MB.</p>
         </div>
         
         <div className="space-y-3">
@@ -327,11 +387,14 @@ const GeneralSettings = () => {
           <FileUpload 
             bucket="settings"
             path="logos"
+            maxSizeMB={2}
             currentFilePath={formData.logo_dark_url || ''}
             onUploadComplete={(filePath) => handleInputChange('logo_dark_url', filePath)}
+            onReset={() => handleInputChange('logo_dark_url', '')}
             label="Upload Dark Logo"
             accept="image/*"
           />
+          <p className="text-xs text-gray-500">Recommended size: 200 x 80px. JPG, PNG, or SVG. Max 2MB.</p>
         </div>
       </div>
       
@@ -345,7 +408,6 @@ const GeneralSettings = () => {
       </div>
       
       <div className="flex items-center space-x-2 pt-2">
-        <Label htmlFor="dark_mode_enabled">Enable Dark Mode</Label>
         <Switch
           id="dark_mode_enabled"
           checked={formData.dark_mode_enabled || false}
@@ -353,6 +415,7 @@ const GeneralSettings = () => {
             handleInputChange('dark_mode_enabled', checked);
           }}
         />
+        <Label htmlFor="dark_mode_enabled">Enable Dark Mode by Default</Label>
       </div>
     </div>
   );
@@ -362,7 +425,7 @@ const GeneralSettings = () => {
       <div className="space-y-2">
         <Label htmlFor="currency">Currency</Label>
         <Select 
-          value={formData.currency || ''} 
+          value={formData.currency || 'RWF'} 
           onValueChange={(value) => handleInputChange('currency', value)}
         >
           <SelectTrigger className="w-full">
@@ -381,7 +444,7 @@ const GeneralSettings = () => {
       <div className="space-y-2">
         <Label htmlFor="default_language">Default Language</Label>
         <Select 
-          value={formData.default_language || ''} 
+          value={formData.default_language || 'en'} 
           onValueChange={(value) => handleInputChange('default_language', value)}
         >
           <SelectTrigger className="w-full">
@@ -400,7 +463,7 @@ const GeneralSettings = () => {
       <div className="space-y-2">
         <Label htmlFor="timezone">Timezone</Label>
         <Select 
-          value={formData.timezone || ''} 
+          value={formData.timezone || 'Africa/Kigali'} 
           onValueChange={(value) => handleInputChange('timezone', value)}
         >
           <SelectTrigger className="w-full">
@@ -421,7 +484,7 @@ const GeneralSettings = () => {
   return (
     <SettingsCard 
       title="General Settings" 
-      description="Configure your gym's basic information"
+      description="Configure your gym's basic information and appearance"
       saveState={saveState}
     >
       {renderFormContent()}

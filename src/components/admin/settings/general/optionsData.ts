@@ -28,8 +28,9 @@ export const timezones = [
 
 // Rwandan phone number validation
 export const isValidRwandanPhone = (phone: string): boolean => {
-  const rwandanPhoneRegex = /^(?:\+250|0)?(7[238]\d{7})$/;
-  return rwandanPhoneRegex.test(phone);
+  // Accept formats: +250xxxxxxxxx, 250xxxxxxxxx, or 07xxxxxxxx
+  const rwandanPhoneRegex = /^(?:\+250|250)?7[238]\d{7}$/;
+  return rwandanPhoneRegex.test(phone.replace(/\s/g, ''));
 };
 
 // Email validation

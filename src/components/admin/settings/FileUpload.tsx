@@ -14,6 +14,7 @@ interface FileUploadProps {
   onReset?: () => void;
   accept?: string;
   label?: string;
+  maxSizeMB?: number;
 }
 
 const FileUpload = ({
@@ -23,7 +24,8 @@ const FileUpload = ({
   onUploadComplete,
   onReset,
   accept = 'image/*',
-  label = 'Upload File'
+  label = 'Upload File',
+  maxSizeMB = 2
 }: FileUploadProps) => {
   const [isUploading, setIsUploading] = useState(false);
   const [preview, setPreview] = useState<string | null>(
@@ -35,16 +37,23 @@ const FileUpload = ({
     if (!files || files.length === 0) return;
     
     const file = files[0];
+    const fileExtension = file.name.split('.').pop()?.toLowerCase();
     
-    // Validate file size (max 5MB)
-    if (file.size > 5 * 1024 * 1024) {
-      toast.error('File size exceeds 5MB limit');
+    // Validate file size
+    if (file.size > maxSizeMB * 1024 * 1024) {
+      toast.error(`File size exceeds ${maxSizeMB}MB limit`);
       return;
     }
     
     // Validate file type for images
     if (accept === 'image/*' && !file.type.startsWith('image/')) {
       toast.error('Only image files are allowed');
+      return;
+    }
+    
+    // Validate file extension
+    if (accept === 'image/*' && !['jpg', 'jpeg', 'png', 'svg'].includes(fileExtension || '')) {
+      toast.error('Only JPG, PNG, and SVG files are allowed');
       return;
     }
     
@@ -58,19 +67,9 @@ const FileUpload = ({
         reader.readAsDataURL(file);
       }
       
-      // Ensure bucket exists before uploading
-      const { data: bucketData } = await supabase.storage.getBucket(bucket);
-      
-      if (!bucketData) {
-        await supabase.storage.createBucket(bucket, {
-          public: true,
-          fileSizeLimit: 10485760, // 10MB
-        });
-      }
-      
       // Upload to Supabase Storage
       const filePath = `${path}/${Date.now()}-${file.name.replace(/[^a-zA-Z0-9.-]/g, '_')}`;
-      const { error } = await supabase.storage
+      const { error, data } = await supabase.storage
         .from(bucket)
         .upload(filePath, file, {
           cacheControl: '3600',
@@ -80,8 +79,8 @@ const FileUpload = ({
       if (error) throw error;
       
       // Get the public URL
-      const { data } = supabase.storage.from(bucket).getPublicUrl(filePath);
-      onUploadComplete(data.publicUrl);
+      const { data: publicUrlData } = supabase.storage.from(bucket).getPublicUrl(filePath);
+      onUploadComplete(publicUrlData.publicUrl);
       toast.success('File uploaded successfully');
       
     } catch (error: any) {
@@ -99,7 +98,7 @@ const FileUpload = ({
   
   const isImageUrl = (url?: string): boolean => {
     if (!url) return false;
-    return url.match(/\.(jpeg|jpg|gif|png|webp)$/i) !== null || url.startsWith('data:image/');
+    return url.match(/\.(jpeg|jpg|gif|png|svg|webp)$/i) !== null || url.startsWith('data:image/');
   };
   
   return (
@@ -165,6 +164,7 @@ const FileUpload = ({
           className="hidden"
           disabled={isUploading}
         />
+        {isUploading && <span className="text-xs text-gray-500">Uploading file, please wait...</span>}
       </div>
     </div>
   );
