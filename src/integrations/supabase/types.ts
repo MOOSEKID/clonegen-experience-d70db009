@@ -257,6 +257,147 @@ export type Database = {
           },
         ]
       }
+      cms_content_blocks: {
+        Row: {
+          content: Json
+          created_at: string | null
+          dynamic_source: string | null
+          id: string
+          is_dynamic: boolean
+          is_editable: boolean
+          order_index: number
+          page_id: string
+          type: string
+          updated_at: string | null
+        }
+        Insert: {
+          content?: Json
+          created_at?: string | null
+          dynamic_source?: string | null
+          id?: string
+          is_dynamic?: boolean
+          is_editable?: boolean
+          order_index?: number
+          page_id: string
+          type: string
+          updated_at?: string | null
+        }
+        Update: {
+          content?: Json
+          created_at?: string | null
+          dynamic_source?: string | null
+          id?: string
+          is_dynamic?: boolean
+          is_editable?: boolean
+          order_index?: number
+          page_id?: string
+          type?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "cms_content_blocks_page_id_fkey"
+            columns: ["page_id"]
+            isOneToOne: false
+            referencedRelation: "cms_pages"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      cms_nav_items: {
+        Row: {
+          created_at: string | null
+          external_url: string | null
+          id: string
+          label: string
+          linked_page_id: string | null
+          nav_group: string | null
+          order_index: number
+          updated_at: string | null
+          visible: boolean
+        }
+        Insert: {
+          created_at?: string | null
+          external_url?: string | null
+          id?: string
+          label: string
+          linked_page_id?: string | null
+          nav_group?: string | null
+          order_index?: number
+          updated_at?: string | null
+          visible?: boolean
+        }
+        Update: {
+          created_at?: string | null
+          external_url?: string | null
+          id?: string
+          label?: string
+          linked_page_id?: string | null
+          nav_group?: string | null
+          order_index?: number
+          updated_at?: string | null
+          visible?: boolean
+        }
+        Relationships: [
+          {
+            foreignKeyName: "cms_nav_items_linked_page_id_fkey"
+            columns: ["linked_page_id"]
+            isOneToOne: false
+            referencedRelation: "cms_pages"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      cms_pages: {
+        Row: {
+          created_at: string | null
+          id: string
+          meta_description: string | null
+          meta_keywords: string | null
+          parent_id: string | null
+          slug: string
+          source_path: string | null
+          title: string
+          type: string
+          updated_at: string | null
+          visible: boolean
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          meta_description?: string | null
+          meta_keywords?: string | null
+          parent_id?: string | null
+          slug: string
+          source_path?: string | null
+          title: string
+          type?: string
+          updated_at?: string | null
+          visible?: boolean
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          meta_description?: string | null
+          meta_keywords?: string | null
+          parent_id?: string | null
+          slug?: string
+          source_path?: string | null
+          title?: string
+          type?: string
+          updated_at?: string | null
+          visible?: boolean
+        }
+        Relationships: [
+          {
+            foreignKeyName: "cms_pages_parent_id_fkey"
+            columns: ["parent_id"]
+            isOneToOne: false
+            referencedRelation: "cms_pages"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       gym_locations: {
         Row: {
           capacity: number | null

@@ -1,10 +1,10 @@
 
+import React from 'react';
 import { Menu, X } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { ErrorBoundary } from './ui/error-boundary';
 import { useHeaderState } from '@/hooks/useHeaderState';
 import { 
-  getNavItems, 
   getServiceItems, 
   getCompanyItems, 
   getDashboardItem, 
@@ -12,9 +12,9 @@ import {
 } from '@/data/headerNavData';
 
 // Import components
-import DesktopNav from './header/DesktopNav';
-import MobileMenu from './header/MobileMenu';
 import Logo from './header/Logo';
+import MobileMenu from './header/MobileMenu';
+import DesktopNavWithCMS from './header/DesktopNavWithCMS';
 
 const Header = () => {
   const {
@@ -31,7 +31,6 @@ const Header = () => {
   } = useHeaderState();
 
   // Get navigation data
-  const navItems = getNavItems();
   const serviceItems = getServiceItems();
   const companyItems = getCompanyItems();
   const dashboardItem = getDashboardItem(handleDashboardClick);
@@ -48,16 +47,9 @@ const Header = () => {
         <div className="container-custom flex items-center justify-between">
           <Logo />
 
-          <DesktopNav 
-            navItems={navItems}
-            serviceItems={serviceItems}
-            companyItems={companyItems}
+          <DesktopNavWithCMS 
             dashboardItem={dashboardItem}
             authItems={authItems}
-            isServicesDropdownOpen={isServicesDropdownOpen}
-            setIsServicesDropdownOpen={setIsServicesDropdownOpen}
-            isCompanyDropdownOpen={isCompanyDropdownOpen}
-            setIsCompanyDropdownOpen={setIsCompanyDropdownOpen}
             isLoggedIn={isAuthenticated}
           />
 
@@ -71,7 +63,7 @@ const Header = () => {
 
           <MobileMenu 
             isOpen={isMenuOpen}
-            navItems={navItems}
+            navItems={[]}
             serviceItems={serviceItems}
             companyItems={companyItems}
             dashboardItem={dashboardItem}

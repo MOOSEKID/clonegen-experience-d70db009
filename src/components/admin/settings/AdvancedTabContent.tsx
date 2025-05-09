@@ -1,56 +1,46 @@
 
 import React from 'react';
-import { Download, Zap, TestTube, MessageSquare } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import SettingsCard from './SettingsCard';
+import { Settings, TestTube, Bot, FileBarChart, Database } from 'lucide-react';
 
 const AdvancedTabContent = () => {
-  const advancedCards = [
-    {
-      title: "Reports & Exports",
-      description: "Set scheduled exports (email, storage)",
-      icon: <Download className="h-10 w-10 text-gray-400" />,
-      link: "/admin/settings/reports-exports",
-      ariaLabel: "Configure reports and scheduled exports settings"
-    },
-    {
-      title: "Automation Rules",
-      description: "Trigger-based logic (e.g. 'new member → send email')",
-      icon: <Zap className="h-10 w-10 text-gray-400" />,
-      link: "/admin/settings/automation-rules",
-      ariaLabel: "Configure automation rules and triggers"
-    },
-    {
-      title: "Test Account Settings",
-      description: "Control test environment, user access",
-      icon: <TestTube className="h-10 w-10 text-gray-400" />,
-      link: "/admin/settings/test-accounts",
-      ariaLabel: "Manage test accounts and test environment settings"
-    },
-    {
-      title: "Custom Messages",
-      description: "Add motivational popups or app banners",
-      icon: <MessageSquare className="h-10 w-10 text-gray-400" />,
-      link: "/admin/settings/custom-messages",
-      ariaLabel: "Configure custom messages and notifications"
-    }
-  ];
-
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-      {advancedCards.map((card, index) => (
-        <SettingsCard 
-          key={index}
-          title={card.title}
-          description={card.description}
-          link={card.link}
-          aria-label={card.ariaLabel}
-        >
-          <div className="flex flex-col items-center justify-center py-6">
-            {card.icon}
-            <p className="mt-4 text-sm text-gray-500">Click to manage</p>
-          </div>
-        </SettingsCard>
-      ))}
+    <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+      <SettingsCard
+        title="Automation Rules"
+        description="Configure automated actions based on triggers"
+        icon={<Bot className="h-5 w-5" />}
+        link="/admin/settings/automation-rules"
+      />
+      
+      <SettingsCard
+        title="Test Accounts"
+        description="Manage test accounts for development"
+        icon={<TestTube className="h-5 w-5" />}
+        link="/admin/settings/test-accounts"
+      />
+      
+      <SettingsCard
+        title="Reports & Exports"
+        description="Configure report generation and export formats"
+        icon={<FileBarChart className="h-5 w-5" />}
+        link="/admin/settings/reports-exports"
+      />
+      
+      <SettingsCard
+        title="Custom Messages"
+        description="Configure system messages and notifications"
+        icon={<Settings className="h-5 w-5" />}
+        link="/admin/settings/custom-messages"
+      />
+
+      <SettingsCard
+        title="CMS"
+        description="Manage website content, pages, and navigation"
+        icon={<Database className="h-5 w-5" />}
+        link="/admin/settings/cms"
+      />
     </div>
   );
 };

@@ -1,151 +1,95 @@
 
-import { Suspense, lazy } from "react";
-import { PageLoading } from "../../routes/RouteComponents";
-import { Route } from "react-router-dom";
+import React from 'react';
+import { Route } from 'react-router-dom';
 
-// Admin pages - Lazy loaded
-const AdminDashboard = lazy(() => import("../../pages/admin/Dashboard"));
-const AdminMembers = lazy(() => import("../../pages/admin/Members"));
-const AdminClasses = lazy(() => import("../../pages/admin/Classes"));
-const AdminTrainers = lazy(() => import("../../pages/admin/Trainers"));
-const AdminPayments = lazy(() => import("../../pages/admin/Payments"));
-const AdminWorkouts = lazy(() => import("../../pages/admin/Workouts"));
-const AdminShop = lazy(() => import("../../pages/admin/Shop"));
-const AdminContent = lazy(() => import("../../pages/admin/Content"));
-const AdminReports = lazy(() => import("../../pages/admin/Reports"));
-const AdminSettings = lazy(() => import("../../pages/admin/Settings"));
-const GeneralSettings = lazy(() => import("../../pages/admin/settings/General"));
-const SecuritySettings = lazy(() => import("../../pages/admin/settings/Security"));
-const BusinessHours = lazy(() => import("../../pages/admin/settings/BusinessHours"));
-const Holidays = lazy(() => import("../../pages/admin/settings/Holidays"));
-const Platform = lazy(() => import("../../pages/admin/settings/Platform"));
-const Integrations = lazy(() => import("../../pages/admin/settings/Integrations"));
-const Permissions = lazy(() => import("../../pages/admin/settings/Permissions"));
-const MemberDefaults = lazy(() => import("../../pages/admin/settings/MemberDefaults"));
-const Automation = lazy(() => import("../../pages/admin/settings/Automation"));
-// New settings pages
-const ReportsExports = lazy(() => import("../../pages/admin/settings/ReportsExports"));
-const AutomationRules = lazy(() => import("../../pages/admin/settings/AutomationRules"));
-const TestAccounts = lazy(() => import("../../pages/admin/settings/TestAccounts"));
-const CustomMessages = lazy(() => import("../../pages/admin/settings/CustomMessages"));
-const AdminSupport = lazy(() => import("../../pages/admin/Support"));
+// Admin pages
+import Dashboard from '@/pages/admin/Dashboard';
+import Members from '@/pages/admin/Members';
+import Classes from '@/pages/admin/Classes';
+import Trainers from '@/pages/admin/Trainers';
+import Payments from '@/pages/admin/Payments';
+import Reports from '@/pages/admin/Reports';
+import Workouts from '@/pages/admin/Workouts';
+import Content from '@/pages/admin/Content';
+import Shop from '@/pages/admin/Shop';
+import Support from '@/pages/admin/Support';
+import TestAccounts from '@/pages/admin/TestAccounts';
+import Settings from '@/pages/admin/Settings';
 
-// Admin Workout subpages
-const AdminWorkoutPrograms = lazy(() => import("../../pages/admin/workouts/WorkoutPrograms"));
-const AdminExerciseLibrary = lazy(() => import("../../pages/admin/workouts/ExerciseLibrary"));
-const AdminProgressTracking = lazy(() => import("../../pages/admin/workouts/ProgressTracking"));
-const AddExercise = lazy(() => import("../../pages/admin/workouts/AddExercise"));
-const CreateProgram = lazy(() => import("../../pages/admin/workouts/CreateProgram"));
-const GenerateReports = lazy(() => import("../../pages/admin/workouts/GenerateReports"));
+// Settings pages
+import GeneralSettings from '@/pages/admin/settings/General';
+import BusinessHoursSettings from '@/pages/admin/settings/BusinessHours';
+import HolidaysSettings from '@/pages/admin/settings/Holidays';
+import SecuritySettings from '@/pages/admin/settings/Security';
+import PlatformSettings from '@/pages/admin/settings/Platform';
+import IntegrationsSettings from '@/pages/admin/settings/Integrations';
+import UserPermissionsSettings from '@/pages/admin/settings/Permissions';
+import MemberDefaultsSettings from '@/pages/admin/settings/MemberDefaults';
+import CompanyAutomationSettings from '@/pages/admin/settings/Automation';
+import AutomationRulesSettings from '@/pages/admin/settings/AutomationRules';
+import TestingAccountsSettings from '@/pages/admin/settings/TestAccounts';
+import CMSSettings from '@/pages/admin/settings/CMS';
 
-// Trainer subpages
-const TrainerProfiles = lazy(() => import("../../pages/admin/trainers/TrainerProfiles"));
-const PerformanceTracking = lazy(() => import("../../pages/admin/trainers/PerformanceTracking"));
-const TrainerRatings = lazy(() => import("../../pages/admin/trainers/TrainerRatings"));
+// Payment pages
+const Invoices = React.lazy(() => import('@/pages/admin/payments/Invoices'));
+const PaymentMethods = React.lazy(() => import('@/pages/admin/payments/Methods'));
+const Subscriptions = React.lazy(() => import('@/pages/admin/payments/Subscriptions'));
 
-// Payment subpages
-const Subscriptions = lazy(() => import("../../pages/admin/payments/Subscriptions"));
-const Invoices = lazy(() => import("../../pages/admin/payments/Invoices"));
-const PaymentMethods = lazy(() => import("../../pages/admin/payments/Methods"));
+// Trainer pages
+const TrainerProfiles = React.lazy(() => import('@/pages/admin/trainers/TrainerProfiles'));
+const TrainerPerformance = React.lazy(() => import('@/pages/admin/trainers/PerformanceTracking'));
+const TrainerRatings = React.lazy(() => import('@/pages/admin/trainers/TrainerRatings'));
 
-/**
- * Hook to provide admin routes for the application
- * @returns JSX elements containing the routes
- */
-export const useAdminRoutes = () => {
+// Workout pages
+const ExerciseLibrary = React.lazy(() => import('@/pages/admin/workouts/ExerciseLibrary'));
+const WorkoutPrograms = React.lazy(() => import('@/pages/admin/workouts/WorkoutPrograms'));
+const AddExercise = React.lazy(() => import('@/pages/admin/workouts/AddExercise'));
+const CreateProgram = React.lazy(() => import('@/pages/admin/workouts/CreateProgram'));
+const ProgressTracking = React.lazy(() => import('@/pages/admin/workouts/ProgressTracking'));
+const WorkoutReports = React.lazy(() => import('@/pages/admin/workouts/GenerateReports'));
+
+const useAdminRoutes = () => {
   return (
     <>
-      <Route index element={<AdminDashboard />} />
-      <Route path="members" element={<AdminMembers />} />
-      <Route path="classes" element={<AdminClasses />} />
-      <Route path="trainers" element={<AdminTrainers />} />
-      <Route path="trainers/profiles" element={<TrainerProfiles />} />
-      <Route path="trainers/performance" element={<PerformanceTracking />} />
-      <Route path="trainers/ratings" element={<TrainerRatings />} />
-      <Route path="payments" element={<AdminPayments />} />
-      <Route path="payments/subscriptions" element={<Subscriptions />} />
-      <Route path="payments/invoices" element={<Invoices />} />
-      <Route path="payments/methods" element={<PaymentMethods />} />
-      <Route path="workouts" element={<AdminWorkouts />} />
-      <Route path="workout-programs" element={<AdminWorkoutPrograms />} />
-      <Route path="exercises" element={<AdminExerciseLibrary />} />
-      <Route path="progress-tracking" element={<AdminProgressTracking />} />
-      {/* Workout-related routes */}
-      <Route path="workouts/create-program" element={<CreateProgram />} />
-      <Route path="workouts/add-exercise" element={<AddExercise />} />
-      <Route path="workouts/generate-reports" element={<GenerateReports />} />
-      <Route path="shop" element={<AdminShop />} />
-      <Route path="content" element={<AdminContent />} />
-      <Route path="reports" element={<AdminReports />} />
-      <Route path="settings" element={<AdminSettings />} />
-      <Route path="settings/general" element={
-        <Suspense fallback={<PageLoading />}>
-          <GeneralSettings />
-        </Suspense>
-      } />
-      <Route path="settings/security" element={
-        <Suspense fallback={<PageLoading />}>
-          <SecuritySettings />
-        </Suspense>
-      } />
-      <Route path="settings/business-hours" element={
-        <Suspense fallback={<PageLoading />}>
-          <BusinessHours />
-        </Suspense>
-      } />
-      <Route path="settings/holidays" element={
-        <Suspense fallback={<PageLoading />}>
-          <Holidays />
-        </Suspense>
-      } />
-      <Route path="settings/platform" element={
-        <Suspense fallback={<PageLoading />}>
-          <Platform />
-        </Suspense>
-      } />
-      <Route path="settings/integrations" element={
-        <Suspense fallback={<PageLoading />}>
-          <Integrations />
-        </Suspense>
-      } />
-      {/* People & Roles settings routes */}
-      <Route path="settings/permissions" element={
-        <Suspense fallback={<PageLoading />}>
-          <Permissions />
-        </Suspense>
-      } />
-      <Route path="settings/member-defaults" element={
-        <Suspense fallback={<PageLoading />}>
-          <MemberDefaults />
-        </Suspense>
-      } />
-      <Route path="settings/automation" element={
-        <Suspense fallback={<PageLoading />}>
-          <Automation />
-        </Suspense>
-      } />
-      {/* New Advanced settings routes */}
-      <Route path="settings/reports-exports" element={
-        <Suspense fallback={<PageLoading />}>
-          <ReportsExports />
-        </Suspense>
-      } />
-      <Route path="settings/automation-rules" element={
-        <Suspense fallback={<PageLoading />}>
-          <AutomationRules />
-        </Suspense>
-      } />
-      <Route path="settings/test-accounts" element={
-        <Suspense fallback={<PageLoading />}>
-          <TestAccounts />
-        </Suspense>
-      } />
-      <Route path="settings/custom-messages" element={
-        <Suspense fallback={<PageLoading />}>
-          <CustomMessages />
-        </Suspense>
-      } />
-      <Route path="support" element={<AdminSupport />} />
+      <Route index element={<Dashboard />} />
+      <Route path="members" element={<Members />} />
+      <Route path="classes" element={<Classes />} />
+      <Route path="trainers" element={<Trainers />}>
+        <Route index element={<TrainerProfiles />} />
+        <Route path="performance" element={<TrainerPerformance />} />
+        <Route path="ratings" element={<TrainerRatings />} />
+      </Route>
+      <Route path="payments" element={<Payments />}>
+        <Route index element={<Invoices />} />
+        <Route path="methods" element={<PaymentMethods />} />
+        <Route path="subscriptions" element={<Subscriptions />} />
+      </Route>
+      <Route path="reports" element={<Reports />} />
+      <Route path="workouts" element={<Workouts />}>
+        <Route index element={<ExerciseLibrary />} />
+        <Route path="programs" element={<WorkoutPrograms />} />
+        <Route path="add-exercise" element={<AddExercise />} />
+        <Route path="create-program" element={<CreateProgram />} />
+        <Route path="progress" element={<ProgressTracking />} />
+        <Route path="reports" element={<WorkoutReports />} />
+      </Route>
+      <Route path="content" element={<Content />} />
+      <Route path="shop" element={<Shop />} />
+      <Route path="support" element={<Support />} />
+      <Route path="test-accounts" element={<TestAccounts />} />
+      <Route path="settings" element={<Settings />} />
+      <Route path="settings/general" element={<GeneralSettings />} />
+      <Route path="settings/business-hours" element={<BusinessHoursSettings />} />
+      <Route path="settings/holidays" element={<HolidaysSettings />} />
+      <Route path="settings/security" element={<SecuritySettings />} />
+      <Route path="settings/platform" element={<PlatformSettings />} />
+      <Route path="settings/integrations" element={<IntegrationsSettings />} />
+      <Route path="settings/permissions" element={<UserPermissionsSettings />} />
+      <Route path="settings/member-defaults" element={<MemberDefaultsSettings />} />
+      <Route path="settings/company-automation" element={<CompanyAutomationSettings />} />
+      <Route path="settings/automation-rules" element={<AutomationRulesSettings />} />
+      <Route path="settings/test-accounts" element={<TestingAccountsSettings />} />
+      <Route path="settings/cms" element={<CMSSettings />} />
     </>
   );
 };
