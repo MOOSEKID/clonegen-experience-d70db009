@@ -2,7 +2,7 @@
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider } from "./contexts/AuthContext";
 import { ErrorBoundary } from "./components/ui/error-boundary";
 import { useEffect, useState, lazy, Suspense } from "react";
@@ -11,16 +11,16 @@ import AppLoadingScreen from "./components/ui/AppLoadingScreen";
 // Layouts and shared components
 import { MainLayout, ErrorFallback, PageLoading, AdminRoute, UserRoute } from "./routes/RouteComponents";
 
-// Import route components
-import MainRoutes from "./routes/MainRoutes";
-import AdminRoutes from "./routes/AdminRoutes";
-import DashboardRoutes from "./routes/DashboardRoutes";
-
 // Lazy load layout components
 const AdminLayout = lazy(() => import("./pages/admin/AdminLayout"));
 const DashboardLayout = lazy(() => import("./pages/dashboard/DashboardLayout"));
 
 import { QueryProvider } from "./routes/QueryProvider";
+
+// Import routes hooks directly
+import useMainRoutes from "./hooks/routing/useMainRoutes";
+import useAdminRoutes from "./hooks/routing/useAdminRoutes";
+import useDashboardRoutes from "./hooks/routing/useDashboardRoutes";
 
 const App = () => {
   const [appReady, setAppReady] = useState(false);
@@ -49,7 +49,7 @@ const App = () => {
               <Routes>
                 {/* Main Routes with Header and Footer */}
                 <Route element={<MainLayout />}>
-                  <MainRoutes />
+                  {useMainRoutes()}
                 </Route>
                 
                 {/* Admin Routes */}
@@ -60,7 +60,7 @@ const App = () => {
                     </Suspense>
                   </AdminRoute>
                 }>
-                  <AdminRoutes />
+                  {useAdminRoutes()}
                 </Route>
                 
                 {/* Dashboard Routes */}
@@ -71,7 +71,7 @@ const App = () => {
                     </Suspense>
                   </UserRoute>
                 }>
-                  <DashboardRoutes />
+                  {useDashboardRoutes()}
                 </Route>
               </Routes>
             </BrowserRouter>
