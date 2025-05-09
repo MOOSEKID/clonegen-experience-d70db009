@@ -6,30 +6,7 @@ import ProductGrid from '@/components/shop/ProductGrid';
 import { Button } from '@/components/ui/button';
 import { Product } from '@/hooks/useProducts';
 import { supabase } from '@/integrations/supabase/client';
-
-const categories = [
-  {
-    id: 'supplements',
-    name: 'Supplements',
-    icon: 'Utensils',
-    description: 'Protein powders, vitamins and more',
-    productCount: 0
-  },
-  {
-    id: 'equipment',
-    name: 'Equipment',
-    icon: 'Dumbbell',
-    description: 'Weights, machines and accessories',
-    productCount: 0
-  },
-  {
-    id: 'apparel',
-    name: 'Apparel',
-    icon: 'Shirt',
-    description: 'Gym wear and fitness clothing',
-    productCount: 0
-  },
-];
+import { categories } from '@/utils/categoryUtils';
 
 const ShopPage = () => {
   const [searchTerm, setSearchTerm] = useState('');
@@ -111,15 +88,9 @@ const ShopPage = () => {
 
   // Update category product counts
   useEffect(() => {
-    categories.forEach(category => {
-      // Convert category.id to proper case for matching with database
-      const formattedCategoryName = 
-        category.id === 'supplements' ? 'Supplements' :
-        category.id === 'equipment' ? 'Equipment' :
-        category.id === 'apparel' ? 'Apparel' : category.id;
-      
+    categories.forEach(category => {      
       // Set the count from the database or 0 if none found
-      category.productCount = categoryCount[formattedCategoryName] || 0;
+      category.productCount = categoryCount[category.dbName] || 0;
     });
   }, [categoryCount]);
 
@@ -168,7 +139,7 @@ const ShopPage = () => {
                 key={category.id}
                 id={category.id}
                 name={category.name}
-                icon={getIconComponent(category.icon)}
+                icon={getIconComponent(category.id === 'supplements' ? 'Utensils' : category.id === 'equipment' ? 'Dumbbell' : 'Shirt')}
                 description={category.description}
                 productCount={category.productCount}
               />

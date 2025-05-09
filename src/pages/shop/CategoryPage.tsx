@@ -28,6 +28,11 @@ const categories = [
   }
 ];
 
+// Utility function to find a category regardless of case
+const findCategoryById = (categoryId: string) => {
+  return categories.find(cat => cat.id.toLowerCase() === categoryId.toLowerCase());
+};
+
 const CategoryPage = () => {
   const { categoryId } = useParams<{ categoryId: string }>();
   const [products, setProducts] = useState<Product[]>([]);
@@ -41,8 +46,8 @@ const CategoryPage = () => {
         if (categoryId) {
           setLoading(true);
           
-          // Get category details
-          const categoryDetails = categories.find(cat => cat.id === categoryId);
+          // Get category details using case-insensitive matching
+          const categoryDetails = findCategoryById(categoryId);
           
           if (!categoryDetails) {
             setError('Category not found');

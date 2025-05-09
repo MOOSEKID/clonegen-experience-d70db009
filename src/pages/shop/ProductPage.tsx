@@ -7,6 +7,17 @@ import { Product } from '@/hooks/useProducts';
 import ProductGrid from '@/components/shop/ProductGrid';
 import { supabase } from '@/integrations/supabase/client';
 
+// Category mapping to ensure consistent IDs across the application
+const getCategoryId = (categoryName: string): string => {
+  const categoryMap: {[key: string]: string} = {
+    'Supplements': 'supplements',
+    'Equipment': 'equipment',
+    'Apparel': 'apparel'
+  };
+  
+  return categoryMap[categoryName] || categoryName.toLowerCase();
+};
+
 const ProductPage = () => {
   const { productId } = useParams<{ productId: string }>();
   const navigate = useNavigate();
@@ -121,6 +132,9 @@ const ProductPage = () => {
     );
   }
 
+  // Get the correct category ID for linking
+  const categoryId = getCategoryId(product.category);
+
   return (
     <div className="bg-gym-light min-h-screen pt-24 pb-16">
       <div className="container-custom">
@@ -128,7 +142,7 @@ const ProductPage = () => {
         <div className="flex items-center gap-2 mb-6 text-sm text-gray-600">
           <Link to="/shop" className="hover:text-gym-orange">Shop</Link>
           <ChevronRight size={14} />
-          <Link to={`/shop/category/${product.category.toLowerCase()}`} className="hover:text-gym-orange">
+          <Link to={`/shop/category/${categoryId}`} className="hover:text-gym-orange">
             {product.category}
           </Link>
           <ChevronRight size={14} />
