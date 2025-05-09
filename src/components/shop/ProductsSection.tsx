@@ -4,29 +4,22 @@ import ProductGrid from '@/components/shop/ProductGrid';
 import { Product } from '@/hooks/useProducts';
 import { AlertCircle } from 'lucide-react';
 import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
-import { useCart } from '@/contexts/CartContext';
 
 interface ProductsSectionProps {
   isLoading: boolean;
   filteredProducts: Product[];
   searchTerm: string;
+  addToCart: (product: Product) => void;
   error: string | null;
 }
 
-const ProductsSection = ({ isLoading, filteredProducts, searchTerm, error }: ProductsSectionProps) => {
-  const { addToCart } = useCart();
-  
+const ProductsSection = ({ isLoading, filteredProducts, searchTerm, addToCart, error }: ProductsSectionProps) => {
   return (
     <div className="mb-16">
       <div className="flex items-center justify-between gap-3 mb-6">
         <h2 className="text-2xl md:text-3xl font-bold text-gym-dark">
           {searchTerm ? 'Search Results' : 'Featured Products'}
         </h2>
-        {filteredProducts.length > 0 && (
-          <span className="text-gray-500">
-            {filteredProducts.length} {filteredProducts.length === 1 ? 'product' : 'products'} found
-          </span>
-        )}
       </div>
       
       {error ? (

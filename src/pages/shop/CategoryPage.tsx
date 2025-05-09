@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { ChevronRight, ShoppingBag, AlertCircle } from 'lucide-react';
@@ -7,7 +8,6 @@ import { supabase } from '@/integrations/supabase/client';
 import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
 import { Category } from '@/hooks/useCategories';
 import { toast } from 'sonner';
-import { useCart } from '@/contexts/CartContext';
 
 const CategoryPage = () => {
   const { categoryId } = useParams<{ categoryId: string }>();
@@ -15,7 +15,6 @@ const CategoryPage = () => {
   const [category, setCategory] = useState<Category | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const { addToCart } = useCart();
 
   useEffect(() => {
     const fetchCategoryDetails = async () => {
@@ -67,6 +66,16 @@ const CategoryPage = () => {
     
     fetchCategoryDetails();
   }, [categoryId]);
+
+  // Function to add products to cart
+  const addToCart = (product: Product) => {
+    // Show a toast notification
+    toast(`${product.name} added to cart`, {
+      description: "Item added to your shopping cart",
+      position: "top-right",
+      duration: 2000
+    });
+  };
 
   if (loading) {
     return (

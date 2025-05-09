@@ -35,7 +35,6 @@ const AddProduct = () => {
       <ProductForm
         onSubmit={handleSubmit}
         isLoading={createMutation.isPending || isUploading}
-        mode="add"
       />
     </div>
   );

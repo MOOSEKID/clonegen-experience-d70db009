@@ -1,85 +1,104 @@
 
 import React, { useEffect, useState } from 'react';
-import { useParams, Link } from 'react-router-dom';
-import { ChevronRight } from 'lucide-react';
-import CartDisplay from '@/components/shop/ShoppingCart'; // Renamed import to avoid conflict
-import { Product } from '@/hooks/useProducts';
-import { supabase } from '@/integrations/supabase/client';
+import { useParams, Link, useNavigate } from 'react-router-dom';
+import { ChevronRight, ShoppingCart, ShoppingBag, Share2, Heart, AlertCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { useAuth } from '@/hooks/useAuth';
-import { useCart } from '@/contexts/CartContext';
-import { toast } from 'sonner';
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card"
-import { ShoppingBag } from 'lucide-react';
-import { Alert, AlertDescription as AlertDescriptionUi, AlertTitle } from "@/components/ui/alert"
-import { AlertCircle } from 'lucide-react';
+import { Product } from '@/hooks/useProducts';
+import ProductGrid from '@/components/shop/ProductGrid';
+import { supabase } from '@/integrations/supabase/client';
 
-// Fixed TypeScript interface to properly extend Product
-interface ProductWithCategory extends Omit<Product, 'category'> {
-  category?: {
-    name: string;
-  }
-}
+// Category mapping to ensure consistent IDs across the application
+const getCategoryId = (categoryName: string): string => {
+  const categoryMap: {[key: string]: string} = {
+    'Supplements': 'supplements',
+    'Equipment': 'equipment',
+    'Apparel': 'apparel'
+  };
+  
+  return categoryMap[categoryName] || categoryName.toLowerCase();
+};
 
 const ProductPage = () => {
   const { productId } = useParams<{ productId: string }>();
-  const [product, setProduct] = useState<ProductWithCategory | null>(null);
+  const navigate = useNavigate();
+  const [product, setProduct] = useState<Product | null>(null);
+  const [relatedProducts, setRelatedProducts] = useState<Product[]>([]);
+  const [quantity, setQuantity] = useState(1);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const { user } = useAuth();
-  const { addToCart } = useCart();
 
   useEffect(() => {
-    const fetchProduct = async () => {
+    const fetchProductAndRelated = async () => {
       try {
-        setLoading(true);
-        setError(null);
-
         if (productId) {
-          const { data, error } = await supabase
+          setLoading(true);
+          
+          // Get product details from database
+          const { data: productData, error: productError } = await supabase
             .from('products')
-            .select('*, category:categories(name)')
+            .select('*')
             .eq('id', productId)
             .single();
-
-          if (error) {
-            console.error('Error fetching product:', error);
-            setError('Failed to load product');
-          } else if (data) {
-            setProduct(data as ProductWithCategory);
-          } else {
+          
+          if (productError) {
             setError('Product not found');
+            setLoading(false);
+            return;
           }
+          
+          const typedProduct = productData as Product;
+          setProduct(typedProduct);
+          
+          // Get related products (from same category)
+          const { data: relatedData, error: relatedError } = await supabase
+            .from('products')
+            .select('*')
+            .eq('category', typedProduct.category)
+            .eq('is_active', true)
+            .eq('is_public', true)
+            .neq('id', productId)
+            .limit(4);
+            
+          if (relatedError) {
+            console.error('Error loading related products:', relatedError);
+          } else {
+            setRelatedProducts(relatedData || []);
+          }
+          
+          setLoading(false);
         }
       } catch (err) {
-        console.error('Error loading product:', err);
-        setError('Failed to load product');
-      } finally {
+        console.error('Error loading product data:', err);
+        setError('Failed to load product data');
         setLoading(false);
       }
     };
-
-    fetchProduct();
+    
+    fetchProductAndRelated();
   }, [productId]);
 
-  const handleAddToCart = () => {
-    if (product) {
-      // Convert ProductWithCategory to Product before adding to cart
-      const productForCart: Product = {
-        ...product,
-        category: product.category?.name || 'Uncategorized',
-      };
-      
-      addToCart(productForCart);
-      toast.success(`${product.name} added to cart`);
-    }
+  const formatPrice = (price: number) => {
+    return `${price.toLocaleString()} RWF`;
+  };
+
+  // Function to add products to cart (placeholder)
+  const addToCart = (productToAdd: Product | null = product) => {
+    if (!productToAdd) return;
+    
+    // Show a toast notification
+    const toast = document.createElement('div');
+    toast.className = 'fixed top-4 right-4 bg-gym-orange text-white px-4 py-2 rounded shadow-lg animate-in fade-in slide-in-from-top-4 z-50';
+    toast.textContent = `${quantity} x ${productToAdd.name} added to cart`;
+    document.body.appendChild(toast);
+    
+    setTimeout(() => {
+      toast.classList.add('animate-out', 'fade-out', 'slide-out-to-top-4');
+      setTimeout(() => toast.remove(), 300);
+    }, 2000);
+  };
+  
+  const handleAddToCartClick = () => {
+    addToCart();
   };
 
   if (loading) {
@@ -94,29 +113,27 @@ const ProductPage = () => {
     return (
       <div className="bg-gym-light min-h-screen pt-24 pb-16">
         <div className="container-custom">
-          <div className="bg-white p-8 rounded-lg shadow-md">
-            <Alert variant="destructive" className="mb-6">
-              <AlertCircle className="h-4 w-4" />
-              <AlertTitle>Error</AlertTitle>
-              <AlertDescriptionUi>{error || 'Product not found'}</AlertDescriptionUi>
-            </Alert>
-            <div className="text-center mt-6">
-              <Link
-                to="/shop"
-                className="inline-flex items-center bg-gym-orange hover:bg-gym-orange/90 text-white px-6 py-3 rounded-md transition-colors"
-              >
-                <ShoppingBag className="mr-2" size={18} />
-                Back to Shop
-              </Link>
-            </div>
+          <div className="bg-white p-8 rounded-lg shadow-md text-center">
+            <AlertCircle className="h-12 w-12 text-red-500 mx-auto mb-4" />
+            <h2 className="text-2xl font-bold text-gray-800 mb-2">{error || 'Product Not Found'}</h2>
+            <p className="text-gray-600 mb-6">
+              The product you're looking for doesn't exist or couldn't be loaded.
+            </p>
+            <Link 
+              to="/shop"
+              className="inline-flex items-center bg-gym-orange hover:bg-gym-orange/90 text-white px-6 py-3 rounded-md transition-colors"
+            >
+              <ShoppingBag className="mr-2" size={18} />
+              Back to Shop
+            </Link>
           </div>
         </div>
       </div>
     );
   }
 
-  const price = user?.role === 'member' && product.member_price ? product.member_price : product.price;
-  const categoryName = product.category?.name || 'Uncategorized';
+  // Get the correct category ID for linking
+  const categoryId = getCategoryId(product.category);
 
   return (
     <div className="bg-gym-light min-h-screen pt-24 pb-16">
@@ -125,45 +142,120 @@ const ProductPage = () => {
         <div className="flex items-center gap-2 mb-6 text-sm text-gray-600">
           <Link to="/shop" className="hover:text-gym-orange">Shop</Link>
           <ChevronRight size={14} />
-          <Link to={`/shop/category/${product.category_id}`} className="hover:text-gym-orange">{categoryName}</Link>
+          <Link to={`/shop/category/${categoryId}`} className="hover:text-gym-orange">
+            {product.category}
+          </Link>
           <ChevronRight size={14} />
           <span className="font-semibold text-gym-orange">{product.name}</span>
         </div>
 
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-2xl font-bold">{product.name}</CardTitle>
-            <CardDescription>{product.description}</CardDescription>
-          </CardHeader>
-          <CardContent className="grid gap-4 md:grid-cols-2">
-            <div className="flex justify-center items-center">
+        {/* Product Details */}
+        <div className="bg-white rounded-lg shadow-md overflow-hidden mb-12">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            {/* Product Image */}
+            <div className="bg-gray-100 p-8 flex items-center justify-center">
               {product.image_url ? (
-                <img
-                  src={product.image_url}
-                  alt={product.name}
-                  className="max-h-96 max-w-md rounded-md"
+                <img 
+                  src={product.image_url} 
+                  alt={product.name} 
+                  className="max-h-96 object-contain"
+                  onError={(e) => {
+                    (e.target as HTMLImageElement).src = 'https://via.placeholder.com/400?text=Image+Not+Found';
+                  }}
                 />
               ) : (
-                <div className="h-48 w-48 bg-gray-200 flex items-center justify-center">
-                  <ShoppingBag className="h-12 w-12 text-gray-500" />
+                <div className="w-full h-96 flex items-center justify-center bg-gray-200">
+                  <ShoppingBag size={64} className="text-gray-400" />
                 </div>
               )}
             </div>
-            <div className="space-y-2">
-              <p className="text-gray-600">Category: {categoryName}</p>
-              <p className="text-gray-600">Price: RWF {price?.toLocaleString()}</p>
-              <p className="text-gray-600">Stock: {product.stock_count}</p>
+            
+            {/* Product Info */}
+            <div className="p-8">
+              <h1 className="text-3xl font-bold text-gym-dark mb-2">{product.name}</h1>
+              <p className="text-2xl font-bold text-gym-orange mb-4">{formatPrice(product.price)}</p>
+              
+              <div className="border-t border-b border-gray-200 py-4 my-4">
+                <p className="text-gray-700 leading-relaxed">{product.description || 'No description available'}</p>
+              </div>
+              
+              <div className="mb-6">
+                <div className="flex items-center gap-4 mb-6">
+                  <span className="text-gray-700">Quantity:</span>
+                  <div className="flex border border-gray-300 rounded-md">
+                    <button 
+                      className="px-3 py-1 border-r border-gray-300"
+                      onClick={() => setQuantity(q => Math.max(1, q - 1))}
+                    >
+                      -
+                    </button>
+                    <input 
+                      type="number"
+                      value={quantity}
+                      onChange={(e) => setQuantity(Math.max(1, parseInt(e.target.value) || 1))}
+                      min={1}
+                      className="w-12 text-center focus:outline-none"
+                    />
+                    <button 
+                      className="px-3 py-1 border-l border-gray-300"
+                      onClick={() => setQuantity(q => q + 1)}
+                    >
+                      +
+                    </button>
+                  </div>
+                </div>
+                
+                <div className="flex flex-wrap gap-3">
+                  <Button 
+                    onClick={handleAddToCartClick}
+                    className="flex-grow bg-gym-orange hover:bg-gym-orange/90"
+                    disabled={product.stock_count <= 0}
+                  >
+                    <ShoppingCart className="mr-2 h-4 w-4" />
+                    {product.stock_count > 0 ? 'Add to Cart' : 'Out of Stock'}
+                  </Button>
+                  
+                  <Button variant="outline" className="p-2">
+                    <Heart className="h-5 w-5" />
+                  </Button>
+                  
+                  <Button variant="outline" className="p-2">
+                    <Share2 className="h-5 w-5" />
+                  </Button>
+                </div>
+              </div>
+              
+              <div className="text-sm text-gray-600">
+                <p>Category: <span className="font-medium text-gym-dark capitalize">{product.category}</span></p>
+                <p>SKU: <span className="font-medium text-gym-dark">{product.sku || 'N/A'}</span></p>
+                {product.stock_count !== undefined && (
+                  <p>Availability: <span className={`font-medium ${product.stock_count > 0 ? 'text-green-600' : 'text-red-600'}`}>
+                    {product.stock_count > 0 ? `In Stock (${product.stock_count})` : 'Out of Stock'}
+                  </span></p>
+                )}
+              </div>
             </div>
-          </CardContent>
-          <CardFooter className="flex justify-between items-center">
-            <Button onClick={handleAddToCart} className="bg-gym-orange hover:bg-gym-orange/90 text-white">
-              Add to Cart
-            </Button>
-            <Link to="/shop" className="text-gym-orange hover:underline">
-              Back to Shop
-            </Link>
-          </CardFooter>
-        </Card>
+          </div>
+        </div>
+        
+        {/* Related Products */}
+        {relatedProducts.length > 0 && (
+          <div className="mb-12">
+            <h2 className="text-2xl font-bold text-gym-dark mb-6">Related Products</h2>
+            <ProductGrid products={relatedProducts} addToCart={addToCart} />
+          </div>
+        )}
+
+        {/* Back to Shop Button */}
+        <div className="mt-12 text-center">
+          <Link 
+            to="/shop"
+            className="inline-flex items-center bg-gym-orange hover:bg-gym-orange/90 text-white px-6 py-3 rounded-md transition-colors"
+          >
+            <ShoppingBag className="mr-2" size={18} />
+            Continue Shopping
+          </Link>
+        </div>
       </div>
     </div>
   );

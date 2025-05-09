@@ -8,12 +8,11 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/comp
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { RefreshCcw, Check, X, FileSymlink, Navigation, ArrowRight, AlertTriangle } from 'lucide-react';
+import { RefreshCcw, Check, X, FileSymlink, Navigation, ArrowRight } from 'lucide-react';
 import QuickNavSetup from './QuickNavSetup';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { routeService } from '@/services/cms/routeService';
 import { toast } from 'sonner';
-import RoutesRestorer from './RoutesRestorer';
 
 const RouteSyncManager: React.FC = () => {
   const { routes, isLoading, syncedRoutes } = useRoutes();
@@ -22,24 +21,16 @@ const RouteSyncManager: React.FC = () => {
   const [lastSyncTime, setLastSyncTime] = useState<Date | null>(null);
   const [showQuickSetup, setShowQuickSetup] = useState(false);
   const [bootstrapped, setBootstrapped] = useState(false);
-  const [showEmergencyTools, setShowEmergencyTools] = useState(false);
-  const [resyncAttempted, setResyncAttempted] = useState(false);
 
   useEffect(() => {
     // Check if we need to bootstrap pages on first load
     const checkBootstrap = async () => {
-      try {
-        const bootstrapNeeded = await routeService.bootstrapCmsPages();
-        setBootstrapped(bootstrapNeeded);
-        
-        if (bootstrapNeeded) {
-          setLastSyncTime(new Date());
-          toast.success("Routes automatically synced on first load");
-        }
-      } catch (error) {
-        console.error("Error checking bootstrap status:", error);
-        toast.error("Unable to check route status. Please try manual sync.");
-        setShowEmergencyTools(true);
+      const bootstrapNeeded = await routeService.bootstrapCmsPages();
+      setBootstrapped(bootstrapNeeded);
+      
+      if (bootstrapNeeded) {
+        setLastSyncTime(new Date());
+        toast.success("Routes automatically synced on first load");
       }
     };
     
@@ -51,45 +42,13 @@ const RouteSyncManager: React.FC = () => {
     if (syncedRoutes.length > 0 && navItems.length === 0) {
       setShowQuickSetup(true);
     }
-    
-    // Show emergency tools if we have no synced routes after initial load
-    if (resyncAttempted && syncedRoutes.length === 0 && routes.length > 0) {
-      setShowEmergencyTools(true);
-      toast.error("Route sync failed. Please use Emergency Tools to restore routes.");
-    }
-  }, [syncedRoutes.length, navItems.length, routes.length, resyncAttempted]);
+  }, [syncedRoutes.length, navItems.length]);
 
   const handleSync = () => {
     syncRoutes(undefined, {
       onSuccess: () => {
         setLastSyncTime(new Date());
         setShowQuickSetup(true);
-        setResyncAttempted(true);
-        toast.success("Routes successfully synchronized");
-        
-        // Add a toast encouraging the user to set up navigation
-        if (navItems.length === 0) {
-          toast.info("Now set up your navigation using Quick Navigation Setup below");
-        } else {
-          // If navigation already exists, offer to visit the site
-          toast.success("Your site should now be restored! Redirecting to home page...", {
-            action: {
-              label: "View Site",
-              onClick: () => window.location.href = "/",
-            },
-          });
-          
-          // Auto redirect after 2 seconds if navigation items already exist
-          setTimeout(() => {
-            window.location.href = "/";
-          }, 2000);
-        }
-      },
-      onError: (error) => {
-        console.error("Sync error:", error);
-        toast.error("Route sync failed. Try using Emergency Tools.");
-        setShowEmergencyTools(true);
-        setResyncAttempted(true);
       }
     });
   };
@@ -97,26 +56,10 @@ const RouteSyncManager: React.FC = () => {
   const syncedCount = syncedRoutes.length;
   const totalRoutes = routes.length;
   const allSynced = syncedCount === totalRoutes && totalRoutes > 0;
-  
-  // Show alert if no routes are synced
-  const showNoRoutesAlert = syncedCount === 0 && totalRoutes > 0 && !isLoading;
 
   return (
     <TooltipProvider>
       <div className="space-y-6">
-        {/* Warning Alert for Failed Routes */}
-        {showNoRoutesAlert && (
-          <Alert variant="destructive" className="mb-4 border-red-400">
-            <AlertTriangle className="h-4 w-4" />
-            <AlertTitle>Route Synchronization Issue Detected</AlertTitle>
-            <AlertDescription>
-              No routes are currently synced. Your site may be in fallback mode. 
-              Please click "Sync Routes" or use the Emergency Tools to restore your routes.
-            </AlertDescription>
-          </Alert>
-        )}
-
-        {/* Main Card */}
         <Card>
           <CardHeader className="pb-3">
             <div className="flex justify-between items-center">
@@ -126,25 +69,14 @@ const RouteSyncManager: React.FC = () => {
                   Detect and sync frontend routes with the CMS database
                 </CardDescription>
               </div>
-              <div className="flex gap-2">
-                <Button 
-                  variant="outline" 
-                  onClick={() => setShowEmergencyTools(!showEmergencyTools)}
-                  className="text-amber-600 border-amber-300"
-                  size="sm"
-                >
-                  {showEmergencyTools ? "Hide Emergency Tools" : "Emergency Tools"}
-                </Button>
-                <Button 
-                  onClick={handleSync} 
-                  disabled={isSyncing}
-                  className="flex items-center gap-2"
-                  variant={showNoRoutesAlert ? "destructive" : "default"}
-                >
-                  <RefreshCcw className={`h-4 w-4 ${isSyncing ? "animate-spin" : ""}`} />
-                  {isSyncing ? "Syncing..." : "Sync Routes"}
-                </Button>
-              </div>
+              <Button 
+                onClick={handleSync} 
+                disabled={isSyncing}
+                className="flex items-center gap-2"
+              >
+                <RefreshCcw className={`h-4 w-4 ${isSyncing ? "animate-spin" : ""}`} />
+                {isSyncing ? "Syncing..." : "Sync Routes"}
+              </Button>
             </div>
             {lastSyncTime && (
               <p className="text-xs text-gray-500 mt-2">
@@ -153,7 +85,6 @@ const RouteSyncManager: React.FC = () => {
             )}
           </CardHeader>
 
-          {/* Route Table */}
           <CardContent className="p-0">
             <Table>
               <TableHeader>
@@ -232,30 +163,11 @@ const RouteSyncManager: React.FC = () => {
           <CardFooter className="pt-6">
             <div className="text-sm text-muted-foreground">
               {syncedCount} of {totalRoutes} routes synced with CMS
-              {syncedCount === 0 && totalRoutes > 0 && (
-                <span className="ml-2 text-red-500 font-medium">
-                  - Action required!
-                </span>
-              )}
             </div>
           </CardFooter>
         </Card>
       
-        {/* Emergency restoration component - always show if there are no synced routes */}
-        {(showEmergencyTools || (syncedCount === 0 && totalRoutes > 0 && !isLoading)) && (
-          <div className="border-l-4 border-amber-500 pl-4">
-            <h3 className="text-amber-800 font-semibold mb-2">Emergency Route Recovery</h3>
-            <p className="text-sm text-amber-700 mb-4">
-              Use these tools to restore your site's navigation and routing when experiencing issues.
-            </p>
-            <div className="mt-4">
-              <RoutesRestorer />
-            </div>
-          </div>
-        )}
-        
-        {/* Quick Nav Setup */}
-        {(showQuickSetup || navItems.length === 0) && syncedRoutes.length > 0 && (
+        {showQuickSetup && (
           <>
             <Alert className="bg-blue-50 border-blue-200">
               <Navigation className="h-4 w-4 text-blue-500" />
@@ -276,7 +188,7 @@ const RouteSyncManager: React.FC = () => {
           </>
         )}
 
-        {allSynced && !showQuickSetup && navItems.length === 0 && (
+        {allSynced && !showQuickSetup && (
           <Button 
             onClick={() => setShowQuickSetup(true)}
             variant="outline"
@@ -287,7 +199,7 @@ const RouteSyncManager: React.FC = () => {
           </Button>
         )}
         
-        {navItems.length > 0 && !bootstrapped && syncedRoutes.length > 0 && (
+        {navItems.length > 0 && !bootstrapped && (
           <Alert className="bg-green-50 border-green-200">
             <Check className="h-4 w-4 text-green-500" />
             <AlertTitle>CMS Setup Complete</AlertTitle>

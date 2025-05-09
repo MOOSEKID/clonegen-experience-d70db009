@@ -1,76 +1,85 @@
 
-import React, { Suspense, lazy } from 'react';
-import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
-import { AuthProvider } from '@/contexts/AuthContext';
-import { OptimizedAuthProvider } from '@/contexts/OptimizedAuthContext';
-import { LoadingSpinner } from '@/components/ui/LoadingSpinner';
-import { CartProvider } from '@/contexts/CartContext';
-import { QueryProvider } from '@/routes/QueryProvider';
+import { Toaster } from "@/components/ui/toaster";
+import { Toaster as Sonner } from "@/components/ui/sonner";
+import { TooltipProvider } from "@/components/ui/tooltip";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { AuthProvider } from "./contexts/AuthContext";
+import { ErrorBoundary } from "./components/ui/error-boundary";
+import { useEffect, useState, lazy, Suspense } from "react";
+import AppLoadingScreen from "./components/ui/AppLoadingScreen";
 
-// Route components
-import MainRoutes from '@/routes/MainRoutes';
-import AdminRoutes from '@/routes/AdminRoutes';
-import DashboardRoutes from '@/routes/DashboardRoutes';
-import ShopRoutes from '@/routes/ShopRoutes';
+// Layouts and shared components
+import { MainLayout, ErrorFallback, PageLoading, AdminRoute, UserRoute } from "./routes/RouteComponents";
 
-// Layouts
-const MainLayout = lazy(() => import('@/layouts/MainLayout'));
-const AdminLayout = lazy(() => import('@/layouts/AdminLayout'));
-const DashboardLayout = lazy(() => import('@/layouts/DashboardLayout'));
+// Lazy load layout components
+const AdminLayout = lazy(() => import("./pages/admin/AdminLayout"));
+const DashboardLayout = lazy(() => import("./pages/dashboard/DashboardLayout"));
 
-// Not Found page
-const NotFound = lazy(() => import('@/pages/NotFound'));
+import { QueryProvider } from "./routes/QueryProvider";
 
-function App() {
+// Import routes hooks directly
+import useMainRoutes from "./hooks/routing/useMainRoutes";
+import useAdminRoutes from "./hooks/routing/useAdminRoutes";
+import useDashboardRoutes from "./hooks/routing/useDashboardRoutes";
+
+const App = () => {
+  const [appReady, setAppReady] = useState(false);
+
+  // Simulate initial app loading and setup
+  useEffect(() => {
+    const timeout = setTimeout(() => {
+      setAppReady(true);
+    }, 800);  // Short delay for loading screen to show
+    
+    return () => clearTimeout(timeout);
+  }, []);
+
+  if (!appReady) {
+    return <AppLoadingScreen message="Starting Uptown Gym..." />;
+  }
+  
   return (
-    <QueryProvider>
-      <OptimizedAuthProvider>
+    <ErrorBoundary fallback={<ErrorFallback />}>
+      <QueryProvider>
         <AuthProvider>
-          <CartProvider>
-            <Router>
-              <Suspense fallback={<LoadingSpinner />}>
-                <Routes>
-                  {/* Main public routes with MainLayout */}
-                  <Route path="/" element={<MainLayout />}>
-                    {/* Include all main routes */}
-                    <Route path="*" element={<MainRoutes />} />
-                    
-                    {/* Include shop routes */}
-                    <Route>{ShopRoutes()}</Route>
-                  </Route>
-                  
-                  {/* Dashboard routes */}
-                  <Route path="/dashboard/*" element={
-                    <Suspense fallback={<LoadingSpinner />}>
-                      <DashboardLayout />
-                    </Suspense>
-                  }>
-                    <Route path="*" element={<DashboardRoutes />} />
-                  </Route>
-                  
-                  {/* Admin routes */}
-                  <Route path="/admin/*" element={
-                    <Suspense fallback={<LoadingSpinner />}>
+          <TooltipProvider>
+            <Toaster />
+            <Sonner />
+            <BrowserRouter>
+              <Routes>
+                {/* Main Routes with Header and Footer */}
+                <Route element={<MainLayout />}>
+                  {useMainRoutes()}
+                </Route>
+                
+                {/* Admin Routes */}
+                <Route path="/admin" element={
+                  <AdminRoute>
+                    <Suspense fallback={<PageLoading />}>
                       <AdminLayout />
                     </Suspense>
-                  }>
-                    <Route path="*" element={<AdminRoutes />} />
-                  </Route>
-                  
-                  {/* Catch-all route - 404 */}
-                  <Route path="*" element={
-                    <Suspense fallback={<LoadingSpinner />}>
-                      <NotFound />
+                  </AdminRoute>
+                }>
+                  {useAdminRoutes()}
+                </Route>
+                
+                {/* Dashboard Routes */}
+                <Route path="/dashboard" element={
+                  <UserRoute>
+                    <Suspense fallback={<PageLoading />}>
+                      <DashboardLayout />
                     </Suspense>
-                  } />
-                </Routes>
-              </Suspense>
-            </Router>
-          </CartProvider>
+                  </UserRoute>
+                }>
+                  {useDashboardRoutes()}
+                </Route>
+              </Routes>
+            </BrowserRouter>
+          </TooltipProvider>
         </AuthProvider>
-      </OptimizedAuthProvider>
-    </QueryProvider>
+      </QueryProvider>
+    </ErrorBoundary>
   );
-}
+};
 
 export default App;
