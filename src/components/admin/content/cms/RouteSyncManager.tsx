@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useCmsSync } from '@/hooks/cms/useCmsSync';
 import { useRoutes } from '@/hooks/cms/useRoutes';
@@ -67,6 +66,24 @@ const RouteSyncManager: React.FC = () => {
         setShowQuickSetup(true);
         setResyncAttempted(true);
         toast.success("Routes successfully synchronized");
+        
+        // Add a toast encouraging the user to set up navigation
+        if (navItems.length === 0) {
+          toast.info("Now set up your navigation using Quick Navigation Setup below");
+        } else {
+          // If navigation already exists, offer to visit the site
+          toast.success("Your site should now be restored! Redirecting to home page...", {
+            action: {
+              label: "View Site",
+              onClick: () => window.location.href = "/",
+            },
+          });
+          
+          // Auto redirect after 2 seconds if navigation items already exist
+          setTimeout(() => {
+            window.location.href = "/";
+          }, 2000);
+        }
       },
       onError: (error) => {
         console.error("Sync error:", error);

@@ -25,6 +25,15 @@ export const useCmsSync = () => {
       queryClient.invalidateQueries({ queryKey: ['cms', 'pages'] });
       queryClient.invalidateQueries({ queryKey: ['cms', 'navigation'] });
       toast.success("Routes forcefully restored");
+      
+      // Auto redirect to home page after successful force sync
+      setTimeout(() => {
+        window.location.href = '/';
+      }, 1500);
+    },
+    onError: (error) => {
+      console.error("Force sync error:", error);
+      toast.error("Force sync failed. Please contact support.");
     }
   });
 

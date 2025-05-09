@@ -1,5 +1,4 @@
-
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useCmsPages } from '@/hooks/cms/useCmsPages';
 import { useNavItems } from '@/hooks/cms/useNavItems';
 import { Button } from '@/components/ui/button';
@@ -81,6 +80,18 @@ const QuickNavSetup: React.FC = () => {
     setSelectedPages(commonPageIds);
   };
   
+  // Automatically redirect to home page when complete
+  useEffect(() => {
+    if (setupComplete) {
+      const timer = setTimeout(() => {
+        toast.success("Redirecting to home page to view your restored site...");
+        window.location.href = '/';
+      }, 3000);
+      
+      return () => clearTimeout(timer);
+    }
+  }, [setupComplete]);
+  
   // Show success message if we already have navigation items
   if (navItems.length > 0 && !setupComplete) {
     return (
@@ -93,7 +104,14 @@ const QuickNavSetup: React.FC = () => {
         </CardHeader>
         <CardContent>
           <p>Your site navigation has been set up with {navItems.length} navigation items.</p>
-          <p className="mt-2">Visit your home page to see the navigation in action.</p>
+          <div className="mt-4">
+            <Button 
+              onClick={() => window.location.href = '/'}
+              className="flex items-center gap-2"
+            >
+              Visit Your Home Page
+            </Button>
+          </div>
         </CardContent>
       </Card>
     );

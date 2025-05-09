@@ -6,24 +6,32 @@ import { cn } from '@/lib/utils';
 import HeaderDropdown from './HeaderDropdown';
 import { getNavItems, getServiceItems, getCompanyItems } from '@/data/headerNavData';
 import { toast } from 'sonner';
+import { useQueryClient } from '@tanstack/react-query';
 
 const DynamicNavigation: React.FC = () => {
   const { mainItems, dropdowns, isLoading, error } = useNavigation();
   const [useFallback, setUseFallback] = useState(false);
+  const queryClient = useQueryClient();
 
   // Determine if we should use fallback navigation
   useEffect(() => {
     if ((mainItems.length === 0 && !isLoading) || error) {
       setUseFallback(true);
-      if (process.env.NODE_ENV === 'development') {
-        console.log('Using fallback navigation due to:', 
-          mainItems.length === 0 ? 'No items' : 'Error', 
-          error);
-      }
+      console.log('Using fallback navigation due to:', 
+        mainItems.length === 0 ? 'No navigation items found' : 'Error loading navigation', 
+        error);
+      
+      // Auto-retry once after 2 seconds in case the CMS is still initializing
+      const timer = setTimeout(() => {
+        queryClient.invalidateQueries({ queryKey: ['cms', 'navigation'] });
+        queryClient.invalidateQueries({ queryKey: ['cms', 'pages'] });
+      }, 2000);
+      
+      return () => clearTimeout(timer);
     } else {
       setUseFallback(false);
     }
-  }, [mainItems.length, isLoading, error]);
+  }, [mainItems.length, isLoading, error, queryClient]);
 
   // If we're still loading and don't know yet, show nothing
   if (isLoading) {

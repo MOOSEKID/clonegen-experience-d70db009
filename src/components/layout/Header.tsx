@@ -14,6 +14,7 @@ import {
 // Import components
 import Logo from '../header/Logo';
 import MobileMenu from '../header/MobileMenu';
+import DynamicNavigation from '../header/DynamicNavigation';
 import DesktopNavWithCMS from '../header/DesktopNavWithCMS';
 
 const Header = () => {
@@ -37,7 +38,7 @@ const Header = () => {
   const authItems = getAuthItems(isAuthenticated, handleLogout);
 
   return (
-    <ErrorBoundary>
+    <ErrorBoundary fallback={<div className="w-full bg-red-100 p-4 text-center text-red-700">Error loading header</div>}>
       <header 
         className={cn(
           'fixed top-0 left-0 right-0 z-50 transition-all duration-300 w-full',
@@ -72,6 +73,8 @@ const Header = () => {
           />
         </div>
       </header>
+      {/* Add spacing to prevent content from appearing under fixed header */}
+      <div className={cn('w-full', isScrolled ? 'h-16' : 'h-20')} />
     </ErrorBoundary>
   );
 };
