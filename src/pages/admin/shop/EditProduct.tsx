@@ -51,14 +51,17 @@ const EditProduct = () => {
     );
   }
 
+  // Get category name safely
+  const categoryName = typeof product.category === 'object' && product.category !== null 
+    ? (product.category.name || '') 
+    : (typeof product.category === 'string' ? product.category : '');
+
   // Convert Product to ProductFormData by ensuring all required fields are present
   const productFormData: ProductFormData = {
     id: product.id,
     name: product.name,
     description: product.description || undefined,
-    category: typeof product.category === 'object' && product.category !== null 
-      ? (product.category.name || '') 
-      : (typeof product.category === 'string' ? product.category : ''),
+    category: categoryName,
     category_id: product.category_id || '',
     price: product.price,
     sku: product.sku || undefined,

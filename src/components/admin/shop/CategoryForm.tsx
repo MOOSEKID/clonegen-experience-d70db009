@@ -15,7 +15,6 @@ import {
   FormLabel,
   FormMessage,
 } from '@/components/ui/form';
-import { Category } from '@/hooks/useCategories';
 import {
   Select,
   SelectContent,
@@ -23,30 +22,28 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import { Loader2 } from 'lucide-react';
 
 // Define the form validation schema
 const categoryFormSchema = z.object({
   name: z.string().min(2, 'Category name is required'),
   description: z.string().optional(),
-  icon: z.string(),
+  icon: z.string().optional(),
 });
 
 type CategoryFormValues = z.infer<typeof categoryFormSchema>;
 
 interface CategoryFormProps {
-  initialData?: Category;
-  onSubmit: (data: Omit<Category, 'id' | 'created_at' | 'updated_at' | 'productCount'>) => void;
+  initialData?: CategoryFormValues & { id?: string };
+  onSubmit: (data: CategoryFormValues) => void;
   isLoading?: boolean;
 }
 
-// Available icons
-const availableIcons = [
-  { value: 'Utensils', label: 'Utensils (Supplements)' },
-  { value: 'Dumbbell', label: 'Dumbbell (Equipment)' },
-  { value: 'Shirt', label: 'Shirt (Apparel)' },
-  { value: 'ShoppingBag', label: 'Shopping Bag (General)' },
-  { value: 'Heart', label: 'Heart (Health)' },
-  { value: 'Star', label: 'Star (Featured)' },
+const iconOptions = [
+  { value: 'ShoppingBag', label: 'Shopping Bag' },
+  { value: 'Dumbbell', label: 'Dumbbell' },
+  { value: 'Shirt', label: 'Shirt' },
+  { value: 'Utensils', label: 'Utensils' },
 ];
 
 const CategoryForm: React.FC<CategoryFormProps> = ({
@@ -63,19 +60,9 @@ const CategoryForm: React.FC<CategoryFormProps> = ({
     },
   });
 
-  const handleSubmit = (values: CategoryFormValues) => {
-    // Since all fields in CategoryFormValues match the expected output type,
-    // we can pass values directly, as form validation ensures required fields are present
-    onSubmit({
-      name: values.name,
-      description: values.description || '',
-      icon: values.icon
-    });
-  };
-
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
+      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
         <FormField
           control={form.control}
           name="name"
@@ -83,7 +70,7 @@ const CategoryForm: React.FC<CategoryFormProps> = ({
             <FormItem>
               <FormLabel>Category Name</FormLabel>
               <FormControl>
-                <Input placeholder="Category name" {...field} />
+                <Input placeholder="Enter category name" {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -105,7 +92,7 @@ const CategoryForm: React.FC<CategoryFormProps> = ({
                 />
               </FormControl>
               <FormDescription>
-                A short description of the category shown to customers
+                A brief description of this product category
               </FormDescription>
               <FormMessage />
             </FormItem>
@@ -128,7 +115,7 @@ const CategoryForm: React.FC<CategoryFormProps> = ({
                   </SelectTrigger>
                 </FormControl>
                 <SelectContent>
-                  {availableIcons.map((icon) => (
+                  {iconOptions.map((icon) => (
                     <SelectItem key={icon.value} value={icon.value}>
                       {icon.label}
                     </SelectItem>
@@ -136,7 +123,7 @@ const CategoryForm: React.FC<CategoryFormProps> = ({
                 </SelectContent>
               </Select>
               <FormDescription>
-                Icon to represent this category
+                Choose an icon to represent this category
               </FormDescription>
               <FormMessage />
             </FormItem>
@@ -147,7 +134,7 @@ const CategoryForm: React.FC<CategoryFormProps> = ({
           <Button
             type="button"
             variant="outline"
-            onClick={() => window.history.back()}
+            onClick={() => form.reset()}
             disabled={isLoading}
           >
             Cancel
@@ -155,10 +142,10 @@ const CategoryForm: React.FC<CategoryFormProps> = ({
           <Button type="submit" disabled={isLoading}>
             {isLoading ? (
               <>
-                <span className="loading loading-spinner loading-sm mr-2"></span>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                 Saving...
               </>
-            ) : initialData ? (
+            ) : initialData?.id ? (
               'Update Category'
             ) : (
               'Create Category'

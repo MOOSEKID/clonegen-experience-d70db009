@@ -1,12 +1,19 @@
 
-import { ReactNode } from 'react';
-import { LucideIcon } from 'lucide-react';
+import { LucideIcon } from "lucide-react";
 
 export interface NavLinkProps {
-  icon: LucideIcon;
   text: string;
   href: string;
-  subLinks?: { text: string; href: string }[];
+  icon: LucideIcon;
+  subLinks?: {
+    text: string;
+    href: string;
+  }[];
+}
+
+export interface SubLinkProps {
+  text: string;
+  href: string;
 }
 
 export interface AdminSidebarProps {
@@ -17,8 +24,5 @@ export interface NavLink {
   title: string;
   href: string;
   icon: LucideIcon;
-  subItems?: {
-    title: string;
-    href: string;
-  }[];
+  subItems?: NavLink[];
 }

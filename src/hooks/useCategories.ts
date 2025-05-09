@@ -1,12 +1,12 @@
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
-import { toast } from 'sonner';
+import { useToast } from '@/components/ui/use-toast';
 
 export type Category = {
   id: string;
   name: string;
-  description: string;
+  description: string | null;
   icon: string | null;
   created_at: string;
   updated_at: string;
@@ -14,15 +14,16 @@ export type Category = {
 };
 
 export const useCategories = () => {
+  const { toast } = useToast();
   const queryClient = useQueryClient();
-  
+
   // Fetch all categories
-  const fetchCategories = async (): Promise<Category[]> => {
+  const fetchCategories = async () => {
     const { data, error } = await supabase
       .from('categories')
       .select('*')
       .order('name');
-      
+
     if (error) {
       throw new Error(error.message);
     }
@@ -30,77 +31,60 @@ export const useCategories = () => {
     return data as Category[];
   };
 
-  // Fetch a single category by ID
-  const fetchCategoryById = async (id: string): Promise<Category> => {
-    const { data, error } = await supabase
-      .from('categories')
-      .select('*')
-      .eq('id', id)
-      .single();
-      
-    if (error) {
-      throw new Error(error.message);
-    }
-    
-    return data as Category;
-  };
-
   // Create a new category
-  const createCategory = async (category: Omit<Category, 'id' | 'created_at' | 'updated_at' | 'productCount'>): Promise<Category> => {
+  const createCategory = async (formData: Omit<Category, 'id' | 'created_at' | 'updated_at'>) => {
     const { data, error } = await supabase
       .from('categories')
-      .insert([category])
+      .insert(formData)
       .select()
       .single();
-      
+
     if (error) {
       throw new Error(error.message);
     }
     
-    return data as Category;
+    return data;
   };
 
   // Update an existing category
-  const updateCategory = async (id: string, category: Partial<Omit<Category, 'id' | 'created_at' | 'updated_at' | 'productCount'>>): Promise<Category> => {
-    const { data, error } = await supabase
+  const updateCategory = async ({ 
+    id, 
+    data 
+  }: { 
+    id: string; 
+    data: Partial<Omit<Category, 'id' | 'created_at' | 'updated_at'>> 
+  }) => {
+    const { data: updatedData, error } = await supabase
       .from('categories')
-      .update(category)
+      .update(data)
       .eq('id', id)
       .select()
       .single();
-      
+
     if (error) {
       throw new Error(error.message);
     }
     
-    return data as Category;
+    return updatedData;
   };
 
   // Delete a category
-  const deleteCategory = async (id: string): Promise<void> => {
+  const deleteCategory = async (id: string) => {
     const { error } = await supabase
       .from('categories')
       .delete()
       .eq('id', id);
-      
+
     if (error) {
       throw new Error(error.message);
     }
   };
 
-  // Hooks
+  // React Query hooks
   const useCategoriesQuery = () => {
     return useQuery({
       queryKey: ['categories'],
-      queryFn: fetchCategories
-    });
-  };
-
-  const useCategoryQuery = (id: string) => {
-    return useQuery({
-      queryKey: ['category', id],
-      queryFn: () => fetchCategoryById(id),
-      enabled: !!id
+      queryFn: fetchCategories,
     });
   };
 
@@ -109,24 +93,37 @@ export const useCategories = () => {
       mutationFn: createCategory,
       onSuccess: () => {
         queryClient.invalidateQueries({ queryKey: ['categories'] });
-        toast('Category created successfully');
+        toast({
+          title: "Category created",
+          description: "The category has been successfully created.",
+        });
       },
-      onError: (error: Error) => {
-        toast(`Failed to create category: ${error.message}`);
+      onError: (error: any) => {
+        toast({
+          title: "Error creating category",
+          description: error.message || "An error occurred while creating the category.",
+          variant: "destructive"
+        });
       }
     });
   };
 
   const useUpdateCategoryMutation = () => {
     return useMutation({
-      mutationFn: ({ id, data }: { id: string; data: Partial<Omit<Category, 'id' | 'created_at' | 'updated_at' | 'productCount'>>}) => 
-        updateCategory(id, data),
+      mutationFn: updateCategory,
       onSuccess: () => {
         queryClient.invalidateQueries({ queryKey: ['categories'] });
-        toast('Category updated successfully');
+        toast({
+          title: "Category updated",
+          description: "The category has been successfully updated.",
+        });
       },
-      onError: (error: Error) => {
-        toast(`Failed to update category: ${error.message}`);
+      onError: (error: any) => {
+        toast({
+          title: "Error updating category",
+          description: error.message || "An error occurred while updating the category.",
+          variant: "destructive"
+        });
       }
     });
   };
@@ -136,19 +133,25 @@ export const useCategories = () => {
       mutationFn: deleteCategory,
       onSuccess: () => {
         queryClient.invalidateQueries({ queryKey: ['categories'] });
-        toast('Category deleted successfully');
+        toast({
+          title: "Category deleted",
+          description: "The category has been successfully deleted.",
+        });
       },
-      onError: (error: Error) => {
-        toast(`Failed to delete category: ${error.message}`);
+      onError: (error: any) => {
+        toast({
+          title: "Error deleting category",
+          description: error.message || "An error occurred while deleting the category.",
+          variant: "destructive"
+        });
       }
     });
   };
 
   return {
     useCategoriesQuery,
-    useCategoryQuery,
     useCreateCategoryMutation,
     useUpdateCategoryMutation,
-    useDeleteCategoryMutation
+    useDeleteCategoryMutation,
   };
 };
