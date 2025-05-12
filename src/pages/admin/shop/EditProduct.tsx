@@ -51,13 +51,19 @@ const EditProduct = () => {
     );
   }
 
-  // Get category name safely with explicit type checks
+  // Get category name from either string or object
   let categoryName = '';
+  let categoryId = '';
+  
   if (typeof product.category === 'string') {
     categoryName = product.category;
   } else if (product.category && typeof product.category === 'object') {
     // Use optional chaining with type assertion if we know the object might have a name property
     categoryName = (product.category as { name?: string }).name || '';
+  }
+  
+  if (product.category_id) {
+    categoryId = product.category_id;
   }
 
   // Convert Product to ProductFormData by ensuring all required fields are present
@@ -66,7 +72,7 @@ const EditProduct = () => {
     name: product.name,
     description: product.description || undefined,
     category: categoryName,
-    category_id: product.category_id || '',
+    category_id: categoryId,
     price: product.price,
     sku: product.sku || undefined,
     stock_count: product.stock_count,

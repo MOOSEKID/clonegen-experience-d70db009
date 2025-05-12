@@ -25,7 +25,7 @@ export const useShopProducts = () => {
         console.log('Fetching products from Supabase...');
         const { data: productsData, error: productsError } = await supabase
           .from('products')
-          .select('*, category:categories(id, name)')
+          .select('*, categories(id, name, slug, description, icon)')
           .eq('is_active', true)
           .eq('is_public', true);
           
@@ -39,6 +39,7 @@ export const useShopProducts = () => {
         const { data: categoriesData, error: categoriesError } = await supabase
           .from('categories')
           .select('*')
+          .eq('is_active', true)
           .order('name');
 
         if (categoriesError) {

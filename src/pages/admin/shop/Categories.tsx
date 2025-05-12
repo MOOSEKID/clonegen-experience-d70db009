@@ -36,7 +36,12 @@ import {
   ShoppingBag,
   Dumbbell,
   Shirt,
-  Utensils
+  Utensils,
+  Star,
+  StarOff,
+  Eye,
+  CheckCircle2,
+  XCircle
 } from 'lucide-react';
 import {
   AlertDialog,
@@ -57,11 +62,21 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Switch } from "@/components/ui/switch";
+import { Badge } from "@/components/ui/badge";
 
 const Categories = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const [searchQuery, setSearchQuery] = useState('');
+  const [statusFilter, setStatusFilter] = useState('all');
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
@@ -71,13 +86,17 @@ const Categories = () => {
     useCategoriesQuery, 
     useCreateCategoryMutation,
     useUpdateCategoryMutation,
-    useDeleteCategoryMutation
+    useDeleteCategoryMutation,
+    useToggleCategoryStatusMutation,
+    useToggleCategoryFeatureMutation
   } = useCategories();
   
   const { data: categories = [], isLoading } = useCategoriesQuery();
   const createMutation = useCreateCategoryMutation();
   const updateMutation = useUpdateCategoryMutation();
   const deleteMutation = useDeleteCategoryMutation();
+  const toggleStatusMutation = useToggleCategoryStatusMutation();
+  const toggleFeatureMutation = useToggleCategoryFeatureMutation();
 
   const handleCreateCategory = (formData: any) => {
     createMutation.mutate(formData, {
@@ -124,6 +143,34 @@ const Categories = () => {
     });
   };
 
+  const handleToggleCategoryStatus = (id: string, currentStatus: boolean) => {
+    toggleStatusMutation.mutate(
+      { id, is_active: !currentStatus },
+      {
+        onSuccess: () => {
+          toast({
+            title: currentStatus ? "Category deactivated" : "Category activated",
+            description: `The category is now ${currentStatus ? 'inactive' : 'active'}.`
+          });
+        }
+      }
+    );
+  };
+
+  const handleToggleCategoryFeature = (id: string, currentStatus: boolean) => {
+    toggleFeatureMutation.mutate(
+      { id, featured: !currentStatus },
+      {
+        onSuccess: () => {
+          toast({
+            title: currentStatus ? "Category unfeatured" : "Category featured",
+            description: `The category is now ${currentStatus ? 'not featured' : 'featured'}.`
+          });
+        }
+      }
+    );
+  };
+
   const openEditDialog = (category: any) => {
     setSelectedCategory(category);
     setIsEditDialogOpen(true);
@@ -147,18 +194,31 @@ const Categories = () => {
     }
   };
 
-  // Filter categories based on search query
-  const filteredCategories = categories.filter((category) =>
-    category.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    (category.description?.toLowerCase().includes(searchQuery.toLowerCase()) || false)
-  );
+  const viewInShop = (slug: string) => {
+    // Open in a new tab
+    window.open(`/shop/category/${slug}`, '_blank');
+  };
+
+  // Filter categories based on search query and status filter
+  const filteredCategories = categories.filter((category) => {
+    const matchesSearch = 
+      category.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      (category.description?.toLowerCase().includes(searchQuery.toLowerCase()) || false) ||
+      (category.slug.toLowerCase().includes(searchQuery.toLowerCase()));
+    
+    if (statusFilter === 'all') return matchesSearch;
+    if (statusFilter === 'active') return matchesSearch && category.is_active;
+    if (statusFilter === 'inactive') return matchesSearch && !category.is_active;
+    
+    return matchesSearch;
+  });
 
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-2xl font-bold">Categories</h1>
-          <p className="text-gray-500">Manage product categories for your shop</p>
+          <h1 className="text-2xl font-bold">Category Management</h1>
+          <p className="text-gray-500">Organize product categories used in the public shop</p>
         </div>
         <Button 
           onClick={() => setIsAddDialogOpen(true)}
@@ -179,6 +239,19 @@ const Categories = () => {
             onChange={(e) => setSearchQuery(e.target.value)}
           />
         </div>
+        <Select
+          defaultValue="all"
+          onValueChange={(value) => setStatusFilter(value)}
+        >
+          <SelectTrigger className="w-[180px]">
+            <SelectValue placeholder="Status" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">All Categories</SelectItem>
+            <SelectItem value="active">Active Only</SelectItem>
+            <SelectItem value="inactive">Inactive Only</SelectItem>
+          </SelectContent>
+        </Select>
       </div>
 
       <Card>
@@ -195,22 +268,25 @@ const Categories = () => {
                 <TableRow>
                   <TableHead>Icon</TableHead>
                   <TableHead>Name</TableHead>
+                  <TableHead>Slug</TableHead>
                   <TableHead>Description</TableHead>
                   <TableHead>Products</TableHead>
-                  <TableHead className="w-[80px]"></TableHead>
+                  <TableHead>Status</TableHead>
+                  <TableHead>Featured</TableHead>
+                  <TableHead className="w-[100px]"></TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {isLoading ? (
                   <TableRow>
-                    <TableCell colSpan={5} className="h-24 text-center">
+                    <TableCell colSpan={8} className="h-24 text-center">
                       <Loader2 className="h-6 w-6 animate-spin mx-auto" />
                       <span className="mt-2 text-sm text-gray-500">Loading categories...</span>
                     </TableCell>
                   </TableRow>
                 ) : filteredCategories.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={5} className="h-24 text-center">
+                    <TableCell colSpan={8} className="h-24 text-center">
                       <p className="text-gray-500">No categories found</p>
                     </TableCell>
                   </TableRow>
@@ -223,10 +299,35 @@ const Categories = () => {
                         </div>
                       </TableCell>
                       <TableCell className="font-medium">{category.name}</TableCell>
+                      <TableCell className="font-mono text-sm text-gray-500">
+                        {category.slug}
+                      </TableCell>
                       <TableCell className="max-w-xs truncate">
                         {category.description}
                       </TableCell>
-                      <TableCell>{category.productCount || 0}</TableCell>
+                      <TableCell>
+                        <Badge variant="outline">{category.productCount || 0}</Badge>
+                      </TableCell>
+                      <TableCell>
+                        <Switch
+                          checked={category.is_active}
+                          onCheckedChange={() => handleToggleCategoryStatus(category.id, category.is_active)}
+                          className="data-[state=checked]:bg-green-500"
+                        />
+                      </TableCell>
+                      <TableCell>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleToggleCategoryFeature(category.id, category.featured)}
+                        >
+                          {category.featured ? (
+                            <Star className="h-4 w-4 text-yellow-500" />
+                          ) : (
+                            <StarOff className="h-4 w-4 text-gray-400" />
+                          )}
+                        </Button>
+                      </TableCell>
                       <TableCell>
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>
@@ -239,10 +340,15 @@ const Categories = () => {
                               <PenLine className="mr-2 h-4 w-4" />
                               Edit
                             </DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => viewInShop(category.slug)}>
+                              <Eye className="mr-2 h-4 w-4" />
+                              View in Shop
+                            </DropdownMenuItem>
                             <DropdownMenuSeparator />
                             <DropdownMenuItem 
                               onClick={() => openDeleteDialog(category)}
                               className="text-red-600"
+                              disabled={category.productCount > 0}
                             >
                               <Trash2 className="mr-2 h-4 w-4" />
                               Delete
@@ -301,7 +407,12 @@ const Categories = () => {
             <AlertDialogTitle>Delete Category</AlertDialogTitle>
             <AlertDialogDescription>
               Are you sure you want to delete the category "{selectedCategory?.name}"? 
-              This action cannot be undone and may affect products associated with this category.
+              This action cannot be undone.
+              {selectedCategory?.productCount > 0 && (
+                <div className="mt-2 p-2 bg-amber-50 border border-amber-200 rounded-md text-amber-600">
+                  This category has {selectedCategory.productCount} products. You must reassign or delete these products before deleting this category.
+                </div>
+              )}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
@@ -309,7 +420,7 @@ const Categories = () => {
             <AlertDialogAction
               onClick={handleDeleteCategory}
               className="bg-red-500 hover:bg-red-600"
-              disabled={deleteMutation.isPending}
+              disabled={deleteMutation.isPending || (selectedCategory?.productCount > 0)}
             >
               {deleteMutation.isPending ? (
                 <>

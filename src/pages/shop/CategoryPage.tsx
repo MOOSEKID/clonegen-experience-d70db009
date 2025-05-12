@@ -8,9 +8,10 @@ import { supabase } from '@/integrations/supabase/client';
 import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
 import { Category } from '@/hooks/useCategories';
 import { toast } from 'sonner';
+import ProductsSection from '@/components/shop/ProductsSection';
 
 const CategoryPage = () => {
-  const { categoryId } = useParams<{ categoryId: string }>();
+  const { slug } = useParams<{ slug: string }>();
   const [products, setProducts] = useState<Product[]>([]);
   const [category, setCategory] = useState<Category | null>(null);
   const [loading, setLoading] = useState(true);
@@ -19,15 +20,16 @@ const CategoryPage = () => {
   useEffect(() => {
     const fetchCategoryDetails = async () => {
       try {
-        if (categoryId) {
+        if (slug) {
           setLoading(true);
           setError(null);
           
-          // Get category details
+          // Get category details using the slug
           const { data: categoryData, error: categoryError } = await supabase
             .from('categories')
             .select('*')
-            .eq('id', categoryId)
+            .eq('slug', slug)
+            .eq('is_active', true)
             .single();
             
           if (categoryError) {
@@ -43,7 +45,7 @@ const CategoryPage = () => {
           const { data: productsData, error: productsError } = await supabase
             .from('products')
             .select('*')
-            .eq('category_id', categoryId)
+            .eq('category_id', categoryData.id)
             .eq('is_active', true)
             .eq('is_public', true);
             
@@ -65,7 +67,7 @@ const CategoryPage = () => {
     };
     
     fetchCategoryDetails();
-  }, [categoryId]);
+  }, [slug]);
 
   // Function to add products to cart
   const addToCart = (product: Product) => {
@@ -128,22 +130,14 @@ const CategoryPage = () => {
         </div>
 
         {/* Products Grid */}
-        {products.length > 0 ? (
-          <ProductGrid products={products} addToCart={addToCart} />
-        ) : (
-          <div className="text-center py-10 bg-white/50 rounded-lg shadow-sm">
-            <p className="text-gray-600 mb-6">
-              No products available in this category yet.
-            </p>
-            <Link 
-              to="/shop"
-              className="inline-flex items-center bg-gym-orange hover:bg-gym-orange/90 text-white px-6 py-3 rounded-md transition-colors"
-            >
-              <ShoppingBag className="mr-2" size={18} />
-              Browse all products
-            </Link>
-          </div>
-        )}
+        <ProductsSection
+          isLoading={false}
+          filteredProducts={products}
+          searchTerm=""
+          addToCart={addToCart}
+          error={null}
+          categoryName={category.name}
+        />
 
         {/* Back to Shop Button */}
         <div className="mt-12 text-center">

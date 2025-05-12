@@ -19,6 +19,9 @@ const ShopPage = () => {
     addToCart
   } = useShopProducts();
 
+  // Get featured products for showcase
+  const featuredProducts = filteredProducts.slice(0, 8); // Just show first 8 for now
+
   return (
     <div className="bg-gym-light min-h-screen pt-24 pb-16">
       <div className="container-custom px-4 sm:px-6 lg:px-8 mx-auto max-w-7xl">
@@ -34,7 +37,7 @@ const ShopPage = () => {
         />
         <ProductsSection 
           isLoading={isLoading} 
-          filteredProducts={filteredProducts} 
+          filteredProducts={searchTerm ? filteredProducts : featuredProducts}
           searchTerm={searchTerm} 
           addToCart={addToCart}
           error={error}

@@ -11,14 +11,26 @@ interface ProductsSectionProps {
   searchTerm: string;
   addToCart: (product: Product) => void;
   error: string | null;
+  title?: string;
+  categoryName?: string;
 }
 
-const ProductsSection = ({ isLoading, filteredProducts, searchTerm, addToCart, error }: ProductsSectionProps) => {
+const ProductsSection = ({ 
+  isLoading, 
+  filteredProducts, 
+  searchTerm, 
+  addToCart, 
+  error,
+  title,
+  categoryName
+}: ProductsSectionProps) => {
+  const displayTitle = title || (searchTerm ? 'Search Results' : (categoryName || 'Featured Products'));
+  
   return (
     <div className="mb-16">
       <div className="flex items-center justify-between gap-3 mb-6">
         <h2 className="text-2xl md:text-3xl font-bold text-gym-dark">
-          {searchTerm ? 'Search Results' : 'Featured Products'}
+          {displayTitle}
         </h2>
       </div>
       
@@ -40,9 +52,11 @@ const ProductsSection = ({ isLoading, filteredProducts, searchTerm, addToCart, e
           <p className="text-gray-500">
             {searchTerm 
               ? `No products found matching "${searchTerm}". Try a different search term.` 
-              : "No products are currently available."}
+              : categoryName
+                ? `No products found in the "${categoryName}" category.`
+                : "No products are currently available."}
           </p>
-          {searchTerm && (
+          {(searchTerm || categoryName) && (
             <button 
               onClick={() => window.location.href = '/shop'}
               className="mt-4 px-4 py-2 bg-gym-orange text-white rounded-md hover:bg-gym-orange/90"

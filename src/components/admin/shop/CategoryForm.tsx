@@ -23,12 +23,16 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Loader2 } from 'lucide-react';
+import { Switch } from '@/components/ui/switch';
 
 // Define the form validation schema
 const categoryFormSchema = z.object({
   name: z.string().min(2, 'Category name is required'),
+  slug: z.string().optional(),
   description: z.string().optional(),
   icon: z.string().optional(),
+  is_active: z.boolean().default(true),
+  featured: z.boolean().default(false)
 });
 
 type CategoryFormValues = z.infer<typeof categoryFormSchema>;
@@ -55,10 +59,23 @@ const CategoryForm: React.FC<CategoryFormProps> = ({
     resolver: zodResolver(categoryFormSchema),
     defaultValues: {
       name: initialData?.name || '',
+      slug: initialData?.slug || '',
       description: initialData?.description || '',
       icon: initialData?.icon || 'ShoppingBag',
+      is_active: initialData?.is_active ?? true,
+      featured: initialData?.featured ?? false
     },
   });
+
+  // Generate slug from name
+  const handleNameChange = (name: string) => {
+    if (!initialData?.slug && form.getValues('slug') === '') {
+      const slug = name.toLowerCase()
+        .replace(/[^a-z0-9]+/g, '-')
+        .replace(/(^-|-$)/g, '');
+      form.setValue('slug', slug);
+    }
+  };
 
   return (
     <Form {...form}>
@@ -70,8 +87,37 @@ const CategoryForm: React.FC<CategoryFormProps> = ({
             <FormItem>
               <FormLabel>Category Name</FormLabel>
               <FormControl>
-                <Input placeholder="Enter category name" {...field} />
+                <Input 
+                  placeholder="Enter category name" 
+                  {...field} 
+                  onChange={(e) => {
+                    field.onChange(e);
+                    handleNameChange(e.target.value);
+                  }}
+                />
               </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="slug"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Slug</FormLabel>
+              <FormControl>
+                <Input 
+                  placeholder="Enter category slug" 
+                  {...field} 
+                  value={field.value || ''}
+                  className="font-mono"
+                />
+              </FormControl>
+              <FormDescription>
+                URL-friendly version of the name. Auto-generated but can be customized.
+              </FormDescription>
               <FormMessage />
             </FormItem>
           )}
@@ -130,6 +176,50 @@ const CategoryForm: React.FC<CategoryFormProps> = ({
           )}
         />
 
+        <div className="flex flex-col gap-6 sm:flex-row sm:gap-8">
+          <FormField
+            control={form.control}
+            name="is_active"
+            render={({ field }) => (
+              <FormItem className="flex flex-row items-center justify-between gap-2 rounded-lg border p-4">
+                <div className="space-y-0.5">
+                  <FormLabel className="text-base">Active Status</FormLabel>
+                  <FormDescription>
+                    Make this category visible in the shop
+                  </FormDescription>
+                </div>
+                <FormControl>
+                  <Switch
+                    checked={field.value}
+                    onCheckedChange={field.onChange}
+                  />
+                </FormControl>
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="featured"
+            render={({ field }) => (
+              <FormItem className="flex flex-row items-center justify-between gap-2 rounded-lg border p-4">
+                <div className="space-y-0.5">
+                  <FormLabel className="text-base">Featured</FormLabel>
+                  <FormDescription>
+                    Highlight this category on the shop page
+                  </FormDescription>
+                </div>
+                <FormControl>
+                  <Switch
+                    checked={field.value}
+                    onCheckedChange={field.onChange}
+                  />
+                </FormControl>
+              </FormItem>
+            )}
+          />
+        </div>
+
         <div className="flex justify-end space-x-2">
           <Button
             type="button"
@@ -137,7 +227,7 @@ const CategoryForm: React.FC<CategoryFormProps> = ({
             onClick={() => form.reset()}
             disabled={isLoading}
           >
-            Cancel
+            Reset
           </Button>
           <Button type="submit" disabled={isLoading}>
             {isLoading ? (
