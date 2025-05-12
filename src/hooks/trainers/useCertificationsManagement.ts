@@ -10,7 +10,13 @@ export const useCertificationsManagement = () => {
     try {
       const { data, error } = await supabase
         .from('trainer_certifications')
-        .insert(certification)
+        .insert({
+          trainer_id: certification.trainer_id,
+          certification_name: certification.certification_name,
+          issuing_organization: certification.issuing_organization,
+          issue_date: certification.issue_date,
+          expiry_date: certification.expiry_date
+        })
         .select()
         .single();
         

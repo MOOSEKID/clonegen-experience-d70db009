@@ -10,7 +10,12 @@ export const useAvailabilityManagement = () => {
     try {
       const { data, error } = await supabase
         .from('trainer_availability')
-        .insert(availability)
+        .insert({
+          trainer_id: availability.trainer_id,
+          day_of_week: availability.day_of_week,
+          start_time: availability.start_time,
+          end_time: availability.end_time
+        })
         .select()
         .single();
         
@@ -18,7 +23,7 @@ export const useAvailabilityManagement = () => {
       
       toast({
         title: "Availability added",
-        description: "Availability has been added successfully."
+        description: "Availability schedule has been added successfully."
       });
       
       return data;
@@ -44,7 +49,7 @@ export const useAvailabilityManagement = () => {
       
       toast({
         title: "Availability deleted",
-        description: "Availability has been removed successfully."
+        description: "Availability schedule has been removed successfully."
       });
       
       return true;

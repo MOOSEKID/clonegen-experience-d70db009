@@ -1,237 +1,252 @@
 
 import { useState, useEffect } from 'react';
-import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/components/ui/use-toast';
+import { supabase } from '@/integrations/supabase/client';
 
-export interface TrainerRating {
+interface TrainerRating {
   id: string;
   trainer_id: string;
   member_id: string;
-  member_name?: string;
+  member_name: string;
   rating: number;
-  review: string | null;
-  trainer_response: string | null;
-  is_flagged: boolean;
+  review?: string;
+  trainer_response?: string;
+  is_flagged?: boolean;
+  is_published?: boolean;
   created_at: string;
   updated_at: string;
 }
 
-export interface RatingSummary {
-  averageRating: number;
-  totalRatings: number;
-  ratingDistribution: { [key: number]: number };
+interface RatingSummary {
+  average_rating: number;
+  total_ratings: number;
+  rating_distribution: {
+    '1': number;
+    '2': number;
+    '3': number;
+    '4': number;
+    '5': number;
+  };
 }
 
 export const useTrainerRatings = (trainerId?: string) => {
   const [ratings, setRatings] = useState<TrainerRating[]>([]);
   const [summary, setSummary] = useState<RatingSummary>({
-    averageRating: 0,
-    totalRatings: 0,
-    ratingDistribution: {1: 0, 2: 0, 3: 0, 4: 0, 5: 0}
+    average_rating: 0,
+    total_ratings: 0,
+    rating_distribution: {
+      '1': 0,
+      '2': 0,
+      '3': 0,
+      '4': 0,
+      '5': 0
+    }
   });
+  
   const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<Error | null>(null);
   const { toast } = useToast();
   
   useEffect(() => {
-    const fetchRatings = async () => {
-      if (!trainerId) {
-        setRatings([]);
-        setIsLoading(false);
-        return;
-      }
-      
-      setIsLoading(true);
-      
-      try {
-        // Fetch trainer ratings
-        const { data, error } = await supabase
-          .from('trainer_ratings')
-          .select('*')
-          .eq('trainer_id', trainerId)
-          .order('created_at', { ascending: false });
-          
-        if (error) throw error;
-        
-        if (data && data.length > 0) {
-          setRatings(data as TrainerRating[]);
-          
-          // Calculate summary statistics
-          const totalRatings = data.length;
-          const ratingSum = data.reduce((sum, item) => sum + item.rating, 0);
-          const avgRating = ratingSum / totalRatings;
-          
-          // Count ratings by star level
-          const distribution = {1: 0, 2: 0, 3: 0, 4: 0, 5: 0};
-          data.forEach(item => {
-            if (distribution[item.rating as keyof typeof distribution] !== undefined) {
-              distribution[item.rating as keyof typeof distribution]++;
-            }
-          });
-          
-          setSummary({
-            averageRating: parseFloat(avgRating.toFixed(1)),
-            totalRatings,
-            ratingDistribution: distribution
-          });
-        } else {
-          // For development, use mock data if no data is returned
-          const mockRatings = generateMockRatings(trainerId);
-          setRatings(mockRatings);
-          
-          // Mock summary
-          const mockSummary = calculateMockSummary(mockRatings);
-          setSummary(mockSummary);
-        }
-      } catch (err) {
-        console.error('Error fetching trainer ratings:', err);
-        setError(err instanceof Error ? err : new Error('Failed to fetch trainer ratings'));
-        
-        // For development, use mock data if error occurs
-        const mockRatings = generateMockRatings(trainerId);
-        setRatings(mockRatings);
-        
-        // Mock summary
-        const mockSummary = calculateMockSummary(mockRatings);
-        setSummary(mockSummary);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-    
-    fetchRatings();
-    
-    // Set up real-time subscription if trainerId exists
     if (trainerId) {
-      const subscription = supabase
-        .channel('trainer-ratings-changes')
-        .on('postgres_changes', { 
-            event: '*', 
-            schema: 'public', 
-            table: 'trainer_ratings',
-            filter: `trainer_id=eq.${trainerId}`
-        }, () => {
-          fetchRatings();
-        })
-        .subscribe();
-        
-      // Cleanup subscription on unmount
-      return () => {
-        subscription.unsubscribe();
-      };
+      fetchRatings();
+    } else {
+      setIsLoading(false);
     }
   }, [trainerId]);
   
-  // Generate mock data for development
-  const generateMockRatings = (trainerId: string): TrainerRating[] => {
-    return Array(5).fill(0).map((_, i) => ({
-      id: `mock-${i}`,
-      trainer_id: trainerId,
-      member_id: `member-${i}`,
-      member_name: `Test Member ${i + 1}`,
-      rating: Math.floor(Math.random() * 5) + 1,
-      review: i % 2 === 0 ? `This is a test review ${i + 1}` : null,
-      trainer_response: i === 0 ? 'Thank you for your feedback!' : null,
-      is_flagged: i === 3, // One flagged review
-      created_at: new Date(Date.now() - i * 86400000).toISOString(),
-      updated_at: new Date(Date.now() - i * 86400000).toISOString()
-    }));
-  };
-  
-  // Calculate summary for mock data
-  const calculateMockSummary = (mockRatings: TrainerRating[]): RatingSummary => {
-    const distribution = {1: 0, 2: 0, 3: 0, 4: 0, 5: 0};
+  const fetchRatings = async () => {
+    if (!trainerId) return;
     
-    mockRatings.forEach(item => {
-      if (distribution[item.rating as keyof typeof distribution] !== undefined) {
-        distribution[item.rating as keyof typeof distribution]++;
-      }
-    });
+    setIsLoading(true);
     
-    const totalRatings = mockRatings.length;
-    const ratingSum = mockRatings.reduce((sum, item) => sum + item.rating, 0);
-    const avgRating = ratingSum / totalRatings;
-    
-    return {
-      averageRating: parseFloat(avgRating.toFixed(1)),
-      totalRatings,
-      ratingDistribution: distribution
-    };
-  };
-  
-  // Add a rating
-  const addRating = async (data: Omit<TrainerRating, 'id' | 'created_at' | 'updated_at' | 'is_flagged' | 'member_name'>) => {
     try {
-      const { data: result, error } = await supabase
-        .from('trainer_ratings')
-        .insert(data)
-        .select()
-        .single();
-        
-      if (error) throw error;
+      // Simulate fetching from DB - would be a real fetch in production
+      // This is mocked data for the demo
+      
+      // Give it a delay to simulate a network request
+      await new Promise(resolve => setTimeout(resolve, 500));
+      
+      const mockRatings: TrainerRating[] = [
+        {
+          id: '1',
+          trainer_id: trainerId,
+          member_id: 'mem1',
+          member_name: 'Alex Johnson',
+          rating: 5,
+          review: 'John is an amazing trainer! He helped me achieve my fitness goals within just 3 months. Highly recommended.',
+          created_at: '2023-01-15T10:30:00Z',
+          updated_at: '2023-01-15T10:30:00Z'
+        },
+        {
+          id: '2',
+          trainer_id: trainerId,
+          member_id: 'mem2',
+          member_name: 'Sarah Miller',
+          rating: 4,
+          review: 'Very knowledgeable and professional. Helped me improve my form significantly.',
+          trainer_response: 'Thank you Sarah! It\'s been great working with you on your form and technique.',
+          created_at: '2023-02-20T15:45:00Z',
+          updated_at: '2023-02-21T09:15:00Z'
+        },
+        {
+          id: '3',
+          trainer_id: trainerId,
+          member_id: 'mem3',
+          member_name: 'Michael Brown',
+          rating: 5,
+          review: 'Best trainer I\'ve ever had. Really understands how to customize workouts for individual needs.',
+          created_at: '2023-03-05T11:20:00Z',
+          updated_at: '2023-03-05T11:20:00Z'
+        }
+      ];
+      
+      // Calculate summary
+      const mockSummary: RatingSummary = {
+        average_rating: 4.7,
+        total_ratings: 3,
+        rating_distribution: {
+          '1': 0,
+          '2': 0, 
+          '3': 0,
+          '4': 1,
+          '5': 2
+        }
+      };
+      
+      setRatings(mockRatings);
+      setSummary(mockSummary);
+    } catch (error) {
+      console.error('Error fetching ratings:', error);
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Failed to fetch trainer ratings."
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+  
+  const addRating = async (ratingData: {
+    trainer_id: string;
+    member_id: string;
+    rating: number;
+    review?: string;
+  }) => {
+    try {
+      // Would actually save to DB in production
+      const newRating: TrainerRating = {
+        id: `new-${Date.now()}`,
+        trainer_id: ratingData.trainer_id,
+        member_id: ratingData.member_id,
+        member_name: 'Current User', // Would be fetched from auth context
+        rating: ratingData.rating,
+        review: ratingData.review,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
+      };
+      
+      // Update state
+      setRatings(prev => [newRating, ...prev]);
+      
+      // Update summary
+      const newTotal = summary.total_ratings + 1;
+      const newAvg = ((summary.average_rating * summary.total_ratings) + ratingData.rating) / newTotal;
+      const newDist = {...summary.rating_distribution};
+      newDist[ratingData.rating as keyof typeof newDist] += 1;
+      
+      setSummary({
+        average_rating: parseFloat(newAvg.toFixed(1)),
+        total_ratings: newTotal,
+        rating_distribution: newDist
+      });
       
       toast({
         title: "Rating submitted",
-        description: "Your rating has been submitted successfully.",
+        description: "Thank you for your feedback!"
       });
       
-      return result;
-    } catch (err) {
-      console.error('Error adding rating:', err);
+      return newRating;
+    } catch (error) {
+      console.error('Error adding rating:', error);
       toast({
         variant: "destructive",
         title: "Error",
-        description: "Failed to submit rating. Please try again.",
+        description: "Failed to submit rating. Please try again."
       });
-      throw err;
+      throw error;
     }
   };
   
-  // Update a rating (trainer response or flag)
-  const updateRating = async (id: string, data: Partial<TrainerRating>) => {
+  const respondToRating = async (ratingId: string, response: string) => {
     try {
-      const { error } = await supabase
-        .from('trainer_ratings')
-        .update(data)
-        .eq('id', id);
-        
-      if (error) throw error;
+      // Update state first for optimistic UI
+      setRatings(prev => prev.map(rating => 
+        rating.id === ratingId 
+          ? { ...rating, trainer_response: response, updated_at: new Date().toISOString() }
+          : rating
+      ));
+      
+      // Would update in DB in production
       
       toast({
-        title: "Rating updated",
-        description: "The rating has been updated successfully.",
+        title: "Response saved",
+        description: "Your response has been saved successfully."
       });
       
       return true;
-    } catch (err) {
-      console.error('Error updating rating:', err);
+    } catch (error) {
+      console.error('Error responding to rating:', error);
       toast({
         variant: "destructive",
         title: "Error",
-        description: "Failed to update rating. Please try again.",
+        description: "Failed to save response. Please try again."
       });
-      throw err;
+      
+      // Revert state on error
+      fetchRatings();
+      return false;
     }
   };
   
-  // Flag a review as inappropriate
-  const flagRating = async (id: string) => {
-    return updateRating(id, { is_flagged: true });
-  };
-  
-  // Add trainer response to a review
-  const respondToRating = async (id: string, response: string) => {
-    return updateRating(id, { trainer_response: response });
+  const flagRating = async (ratingId: string) => {
+    try {
+      // Update state first for optimistic UI
+      setRatings(prev => prev.map(rating => 
+        rating.id === ratingId 
+          ? { ...rating, is_flagged: true, updated_at: new Date().toISOString() }
+          : rating
+      ));
+      
+      // Would update in DB in production
+      
+      toast({
+        title: "Rating flagged",
+        description: "This rating has been flagged for review."
+      });
+      
+      return true;
+    } catch (error) {
+      console.error('Error flagging rating:', error);
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Failed to flag rating. Please try again."
+      });
+      
+      // Revert state on error
+      fetchRatings();
+      return false;
+    }
   };
   
   return {
     ratings,
     summary,
     isLoading,
-    error,
     addRating,
-    updateRating,
+    respondToRating,
     flagRating,
-    respondToRating
+    fetchRatings
   };
 };

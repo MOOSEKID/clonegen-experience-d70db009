@@ -1,6 +1,12 @@
 
-import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbSeparator } from "@/components/ui/breadcrumb";
-import UserPermissionsSettings from "@/components/admin/settings/people/UserPermissionsSettings";
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbSeparator,
+} from "@/components/ui/breadcrumb";
+import PermissionsSettings from "@/components/admin/settings/people/PermissionsSettings";
 
 const Permissions = () => {
   return (
@@ -17,16 +23,16 @@ const Permissions = () => {
             </BreadcrumbItem>
             <BreadcrumbSeparator />
             <BreadcrumbItem>
-              <span className="font-medium">User Permissions</span>
+              <span className="font-medium">Permissions</span>
             </BreadcrumbItem>
           </BreadcrumbList>
         </Breadcrumb>
         
         <h1 className="text-2xl font-bold text-gray-800 mt-4">User Permissions</h1>
-        <p className="text-gray-500 mb-6">Configure user roles and access levels for your gym staff</p>
+        <p className="text-gray-500 mb-6">Manage roles and permissions for staff access</p>
       </div>
 
-      <UserPermissionsSettings />
+      <PermissionsSettings />
     </div>
   );
 };
