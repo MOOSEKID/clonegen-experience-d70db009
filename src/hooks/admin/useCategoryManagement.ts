@@ -1,5 +1,5 @@
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import { Category } from '@/hooks/useCategories';
@@ -11,7 +11,7 @@ export const useCategoryManagement = () => {
   const [error, setError] = useState<Error | null>(null);
 
   // Fetch categories from Supabase
-  const fetchCategories = async () => {
+  const fetchCategories = useCallback(async () => {
     setLoading(true);
     setError(null);
     
@@ -34,10 +34,10 @@ export const useCategoryManagement = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
   
   // Create a new category
-  const createCategory = async (categoryData: Omit<Category, 'id' | 'created_at' | 'updated_at'>) => {
+  const createCategory = async (categoryData: Omit<Category, 'id' | 'created_at' | 'updated_at' | 'productCount'>) => {
     setSubmitting(true);
     setError(null);
     
@@ -50,9 +50,18 @@ export const useCategoryManagement = () => {
           .replace(/[^\w-]+/g, '');
       }
       
+      // Get current user ID for creator tracking
+      const { data: { session } } = await supabase.auth.getSession();
+      const userId = session?.user?.id;
+      
+      const finalData = {
+        ...categoryData,
+        created_by: userId
+      };
+      
       const { data, error: createError } = await supabase
         .from('categories')
-        .insert(categoryData)
+        .insert(finalData)
         .select()
         .single();
 
@@ -77,7 +86,7 @@ export const useCategoryManagement = () => {
   };
   
   // Update an existing category
-  const updateCategory = async (id: string, categoryData: Partial<Omit<Category, 'id' | 'created_at' | 'updated_at'>>) => {
+  const updateCategory = async (id: string, categoryData: Partial<Omit<Category, 'id' | 'created_at' | 'updated_at' | 'productCount'>>) => {
     setSubmitting(true);
     setError(null);
     
@@ -90,9 +99,18 @@ export const useCategoryManagement = () => {
           .replace(/[^\w-]+/g, '');
       }
       
+      // Get current user ID for tracking who updated
+      const { data: { session } } = await supabase.auth.getSession();
+      const userId = session?.user?.id;
+      
+      const finalData = {
+        ...categoryData,
+        updated_by: userId
+      };
+      
       const { error: updateError } = await supabase
         .from('categories')
-        .update(categoryData)
+        .update(finalData)
         .eq('id', id);
 
       if (updateError) {
@@ -135,7 +153,7 @@ export const useCategoryManagement = () => {
       }
       
       if (count && count > 0) {
-        toast.error('Cannot delete category that is used by products');
+        toast.error(`Cannot delete category that is used by ${count} product${count > 1 ? 's' : ''}. Please reassign products first.`);
         return false;
       }
 
@@ -163,11 +181,21 @@ export const useCategoryManagement = () => {
       setSubmitting(false);
     }
   };
+
+  // Toggle category active status
+  const toggleCategoryStatus = async (id: string, isActive: boolean) => {
+    return updateCategory(id, { is_active: isActive });
+  };
+
+  // Toggle category featured status
+  const toggleCategoryFeatured = async (id: string, isFeatured: boolean) => {
+    return updateCategory(id, { featured: isFeatured });
+  };
   
   // Load categories on component mount
   useEffect(() => {
     fetchCategories();
-  }, []);
+  }, [fetchCategories]);
 
   return {
     categories,
@@ -177,6 +205,8 @@ export const useCategoryManagement = () => {
     createCategory,
     updateCategory,
     deleteCategory,
+    toggleCategoryStatus,
+    toggleCategoryFeatured,
     refresh: fetchCategories
   };
 };

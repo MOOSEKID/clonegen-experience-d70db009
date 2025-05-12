@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -10,11 +11,13 @@ import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { AlertCircle, Loader2 } from 'lucide-react';
+import { AlertCircle, Loader2, Upload } from 'lucide-react';
 import { Category } from '@/hooks/useCategories';
 import { useNavigate } from 'react-router-dom';
 import { useCategoryManagement } from '@/hooks/admin/useCategoryManagement';
 import { useProductManagement } from '@/hooks/admin/useProductManagement';
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
 
 // Form validation schema
 const productFormSchema = z.object({
@@ -42,8 +45,12 @@ type ProductFormProps = {
 
 export const ProductForm = ({ initialData, productId, mode = 'create' }: ProductFormProps) => {
   const navigate = useNavigate();
-  const { categories, loading: categoriesLoading } = useCategoryManagement();
+  const { categories, loading: categoriesLoading, error: categoriesError } = useCategoryManagement();
   const { createProduct, updateProduct, submitting, error } = useProductManagement();
+  
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [uploading, setUploading] = useState(false);
+  const [imagePreview, setImagePreview] = useState<string | null>(initialData?.image_url || null);
   
   // Set up form with validation
   const form = useForm<ProductFormValues>({
@@ -64,11 +71,69 @@ export const ProductForm = ({ initialData, productId, mode = 'create' }: Product
     }
   });
   
+  // Handle image upload
+  const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (!e.target.files || e.target.files.length === 0) {
+      return;
+    }
+    
+    const file = e.target.files[0];
+    setImageFile(file);
+    
+    // Create image preview
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      setImagePreview(reader.result as string);
+    };
+    reader.readAsDataURL(file);
+  };
+  
+  const uploadImage = async (): Promise<string | null> => {
+    if (!imageFile) return null;
+    
+    setUploading(true);
+    try {
+      const fileExt = imageFile.name.split('.').pop();
+      const fileName = `${Math.random().toString(36).substring(2, 15)}_${Date.now()}.${fileExt}`;
+      const filePath = `product-images/${fileName}`;
+      
+      const { error: uploadError } = await supabase.storage
+        .from('product-images')
+        .upload(filePath, imageFile);
+        
+      if (uploadError) {
+        throw uploadError;
+      }
+      
+      const { data } = supabase.storage
+        .from('product-images')
+        .getPublicUrl(filePath);
+        
+      return data.publicUrl;
+    } catch (error) {
+      console.error('Error uploading image:', error);
+      toast.error('Failed to upload product image');
+      return null;
+    } finally {
+      setUploading(false);
+    }
+  };
+  
   async function onSubmit(values: ProductFormValues) {
+    // First upload image if there's a new one
+    let finalImageUrl = values.image_url;
+    if (imageFile) {
+      const uploadedUrl = await uploadImage();
+      if (uploadedUrl) {
+        finalImageUrl = uploadedUrl;
+      }
+    }
+    
     if (mode === 'create') {
       // Make sure name is explicitly defined as non-optional when creating product data
       const productData = {
         ...values,
+        image_url: finalImageUrl,
         name: values.name, // Explicitly include name to satisfy TypeScript
         price: values.price, // Explicitly include required fields
         stock_count: values.stock_count, // Explicitly include required fields
@@ -76,25 +141,41 @@ export const ProductForm = ({ initialData, productId, mode = 'create' }: Product
         is_public: values.is_public, 
         is_instore: values.is_instore,
         category: categories.find(c => c.id === values.category_id)?.name || '',
+        created_by: (await supabase.auth.getSession())?.data?.session?.user?.id
       };
       
       const result = await createProduct(productData);
       if (result) {
+        toast.success('Product created successfully!');
         navigate('/admin/shop/products');
       }
     } else if (mode === 'edit' && productId) {
       // When updating, also include the category field
       const updateData = {
         ...values,
+        image_url: finalImageUrl,
         name: values.name, // Explicitly include name to satisfy TypeScript
         category: categories.find(c => c.id === values.category_id)?.name || '',
+        updated_by: (await supabase.auth.getSession())?.data?.session?.user?.id
       };
       
       const success = await updateProduct(productId, updateData);
       if (success) {
+        toast.success('Product updated successfully!');
         navigate('/admin/shop/products');
       }
     }
+  }
+
+  if (categoriesError) {
+    return (
+      <Alert variant="destructive" className="mb-6">
+        <AlertCircle className="h-4 w-4" />
+        <AlertDescription>
+          Error loading categories: {categoriesError.message}
+        </AlertDescription>
+      </Alert>
+    );
   }
 
   return (
@@ -271,20 +352,52 @@ export const ProductForm = ({ initialData, productId, mode = 'create' }: Product
                 )}
               />
               
-              <FormField
-                control={form.control}
-                name="image_url"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Image URL</FormLabel>
-                    <FormControl>
-                      <Input placeholder="https://example.com/image.jpg" {...field} />
-                    </FormControl>
-                    <FormDescription>Image for displaying the product</FormDescription>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+              <div className="space-y-3">
+                <FormField
+                  control={form.control}
+                  name="image_url"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Image</FormLabel>
+                      <div className="flex flex-col space-y-3">
+                        <Input 
+                          type="file" 
+                          accept="image/*"
+                          onChange={handleImageChange}
+                          className="hidden"
+                          id="product-image"
+                        />
+                        <label 
+                          htmlFor="product-image"
+                          className="flex items-center gap-2 px-4 py-2 bg-primary/10 hover:bg-primary/20 text-primary rounded-md cursor-pointer w-fit"
+                        >
+                          <Upload size={16} />
+                          <span>Upload Image</span>
+                        </label>
+                        <Input 
+                          placeholder="Or enter image URL" 
+                          {...field}
+                          className="mt-2" 
+                        />
+                        {(imagePreview || field.value) && (
+                          <div className="mt-3 relative w-32 h-32 border rounded overflow-hidden">
+                            <img 
+                              src={imagePreview || field.value} 
+                              alt="Product preview" 
+                              className="w-full h-full object-cover"
+                              onError={(e) => {
+                                (e.target as HTMLImageElement).src = 'https://placehold.co/200x200?text=No+Image';
+                              }}
+                            />
+                          </div>
+                        )}
+                      </div>
+                      <FormDescription>Image for displaying the product</FormDescription>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
             </div>
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4">
@@ -375,12 +488,12 @@ export const ProductForm = ({ initialData, productId, mode = 'create' }: Product
               </Button>
               <Button 
                 type="submit" 
-                disabled={submitting}
+                disabled={submitting || uploading}
               >
-                {submitting ? (
+                {(submitting || uploading) ? (
                   <>
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    {mode === 'create' ? 'Creating...' : 'Updating...'}
+                    {uploading ? 'Uploading...' : mode === 'create' ? 'Creating...' : 'Updating...'}
                   </>
                 ) : (
                   mode === 'create' ? 'Create Product' : 'Update Product'

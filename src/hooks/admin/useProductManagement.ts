@@ -1,4 +1,5 @@
-import { useState, useEffect } from 'react';
+
+import { useState, useEffect, useCallback } from 'react';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import { Product } from '@/hooks/useProducts';
@@ -18,9 +19,12 @@ export type ProductCreateData = {
   is_public: boolean;
   is_instore: boolean;
   is_member_only?: boolean;
+  created_by?: string;
 };
 
-export type ProductUpdateData = Partial<ProductCreateData>;
+export type ProductUpdateData = Partial<ProductCreateData> & {
+  updated_by?: string;
+};
 
 export const useProductManagement = (productId?: string) => {
   const [product, setProduct] = useState<Product | null>(null);
@@ -31,7 +35,7 @@ export const useProductManagement = (productId?: string) => {
   const navigate = useNavigate();
 
   // Fetch all products
-  const fetchProducts = async () => {
+  const fetchProducts = useCallback(async () => {
     setLoading(true);
     setError(null);
     
@@ -54,10 +58,10 @@ export const useProductManagement = (productId?: string) => {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
   // Fetch a single product by ID
-  const fetchProduct = async (id: string) => {
+  const fetchProduct = useCallback(async (id: string) => {
     setLoading(true);
     setError(null);
     
@@ -81,7 +85,7 @@ export const useProductManagement = (productId?: string) => {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
   
   // Create a new product
   const createProduct = async (productData: ProductCreateData) => {
@@ -89,6 +93,11 @@ export const useProductManagement = (productId?: string) => {
     setError(null);
     
     try {
+      // Make sure category_id exists - it's required in our updated schema
+      if (!productData.category_id) {
+        throw new Error("Category is required");
+      }
+      
       const { data, error: createError } = await supabase
         .from('products')
         .insert(productData)
@@ -107,7 +116,7 @@ export const useProductManagement = (productId?: string) => {
     } catch (err: any) {
       console.error('Error in createProduct:', err);
       setError(err);
-      toast.error('Failed to create product');
+      toast.error('Failed to create product: ' + (err.message || 'Unknown error'));
       return null;
     } finally {
       setSubmitting(false);
@@ -143,7 +152,7 @@ export const useProductManagement = (productId?: string) => {
     } catch (err: any) {
       console.error('Error in updateProduct:', err);
       setError(err);
-      toast.error('Failed to update product');
+      toast.error('Failed to update product: ' + (err.message || 'Unknown error'));
       return false;
     } finally {
       setSubmitting(false);
@@ -191,7 +200,7 @@ export const useProductManagement = (productId?: string) => {
     if (productId) {
       fetchProduct(productId);
     }
-  }, [productId]);
+  }, [productId, fetchProduct]);
 
   return {
     product,

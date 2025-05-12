@@ -13,7 +13,7 @@ const EditProduct = () => {
     if (id && !product) {
       fetchProduct(id);
     }
-  }, [id]);
+  }, [id, product, fetchProduct]);
   
   if (loading) {
     return (

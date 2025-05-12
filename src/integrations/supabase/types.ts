@@ -12,6 +12,7 @@ export type Database = {
       categories: {
         Row: {
           created_at: string
+          created_by: string | null
           description: string | null
           featured: boolean | null
           icon: string | null
@@ -20,9 +21,11 @@ export type Database = {
           name: string
           slug: string
           updated_at: string
+          updated_by: string | null
         }
         Insert: {
           created_at?: string
+          created_by?: string | null
           description?: string | null
           featured?: boolean | null
           icon?: string | null
@@ -31,9 +34,11 @@ export type Database = {
           name: string
           slug: string
           updated_at?: string
+          updated_by?: string | null
         }
         Update: {
           created_at?: string
+          created_by?: string | null
           description?: string | null
           featured?: boolean | null
           icon?: string | null
@@ -42,6 +47,7 @@ export type Database = {
           name?: string
           slug?: string
           updated_at?: string
+          updated_by?: string | null
         }
         Relationships: []
       }
@@ -464,6 +470,33 @@ export type Database = {
         }
         Relationships: []
       }
+      member_tabs: {
+        Row: {
+          amount: number
+          created_at: string
+          id: string
+          is_paid: boolean | null
+          member_id: string
+          updated_at: string
+        }
+        Insert: {
+          amount?: number
+          created_at?: string
+          id?: string
+          is_paid?: boolean | null
+          member_id: string
+          updated_at?: string
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          id?: string
+          is_paid?: boolean | null
+          member_id?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       members: {
         Row: {
           accountenabled: boolean | null
@@ -679,8 +712,9 @@ export type Database = {
       products: {
         Row: {
           category: string
-          category_id: string | null
+          category_id: string
           created_at: string
+          created_by: string | null
           description: string | null
           id: string
           image_url: string | null
@@ -694,11 +728,13 @@ export type Database = {
           sku: string | null
           stock_count: number
           updated_at: string
+          updated_by: string | null
         }
         Insert: {
           category: string
-          category_id?: string | null
+          category_id: string
           created_at?: string
+          created_by?: string | null
           description?: string | null
           id?: string
           image_url?: string | null
@@ -712,11 +748,13 @@ export type Database = {
           sku?: string | null
           stock_count?: number
           updated_at?: string
+          updated_by?: string | null
         }
         Update: {
           category?: string
-          category_id?: string | null
+          category_id?: string
           created_at?: string
+          created_by?: string | null
           description?: string | null
           id?: string
           image_url?: string | null
@@ -730,6 +768,7 @@ export type Database = {
           sku?: string | null
           stock_count?: number
           updated_at?: string
+          updated_by?: string | null
         }
         Relationships: [
           {
@@ -845,6 +884,92 @@ export type Database = {
           value?: number
         }
         Relationships: []
+      }
+      sale_items: {
+        Row: {
+          created_at: string
+          id: string
+          price_per_unit: number
+          product_id: string
+          quantity: number
+          sale_id: string
+          total_price: number
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          price_per_unit: number
+          product_id: string
+          quantity?: number
+          sale_id: string
+          total_price: number
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          price_per_unit?: number
+          product_id?: string
+          quantity?: number
+          sale_id?: string
+          total_price?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "sale_items_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "sale_items_sale_id_fkey"
+            columns: ["sale_id"]
+            isOneToOne: false
+            referencedRelation: "sales"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      sales: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          id: string
+          member_id: string | null
+          member_tab_id: string | null
+          payment_method: string | null
+          total_amount: number
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          member_id?: string | null
+          member_tab_id?: string | null
+          payment_method?: string | null
+          total_amount?: number
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          member_id?: string | null
+          member_tab_id?: string | null
+          payment_method?: string | null
+          total_amount?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "sales_member_tab_id_fkey"
+            columns: ["member_tab_id"]
+            isOneToOne: false
+            referencedRelation: "member_tabs"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       settings_automations: {
         Row: {
