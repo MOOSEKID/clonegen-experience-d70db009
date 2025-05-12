@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { ChevronRight } from 'lucide-react';
+import { ChevronRight, Home } from 'lucide-react';
 
 interface ProductBreadcrumbProps {
   categoryId: string;
@@ -15,15 +15,32 @@ const ProductBreadcrumb: React.FC<ProductBreadcrumbProps> = ({
   productName 
 }) => {
   return (
-    <div className="flex items-center gap-2 mb-6 text-sm text-gray-600">
-      <Link to="/shop" className="hover:text-gym-orange">Shop</Link>
-      <ChevronRight size={14} />
-      <Link to={`/shop/category/${categoryId}`} className="hover:text-gym-orange">
-        {categoryName}
+    <nav className="flex items-center text-sm text-gray-500 mb-8">
+      <Link to="/" className="flex items-center hover:text-gym-orange transition-colors">
+        <Home size={16} className="mr-1" />
+        Home
       </Link>
-      <ChevronRight size={14} />
-      <span className="font-semibold text-gym-orange">{productName}</span>
-    </div>
+      <ChevronRight size={14} className="mx-2" />
+      
+      <Link to="/shop" className="hover:text-gym-orange transition-colors">
+        Shop
+      </Link>
+      <ChevronRight size={14} className="mx-2" />
+      
+      {categoryName && (
+        <>
+          <Link 
+            to={`/shop/category/${categoryId}`} 
+            className="hover:text-gym-orange transition-colors"
+          >
+            {categoryName}
+          </Link>
+          <ChevronRight size={14} className="mx-2" />
+        </>
+      )}
+      
+      <span className="text-gray-900 font-medium">{productName}</span>
+    </nav>
   );
 };
 

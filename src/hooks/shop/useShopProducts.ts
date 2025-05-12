@@ -6,7 +6,6 @@ import { useProductFetching } from './useProductFetching';
 import { useCategoryFetching } from './useCategoryFetching';
 import { useCart } from './useCart';
 import { ShopFilters, CategoryWithChildren } from './shopTypes';
-import { toast } from 'sonner';
 
 export const useShopProducts = () => {
   const [searchTerm, setSearchTerm] = useState('');
@@ -20,7 +19,15 @@ export const useShopProducts = () => {
   
   const { fetchProducts } = useProductFetching();
   const { fetchCategories } = useCategoryFetching();
-  const { cartItems, addToCart, removeFromCart, clearCart, cartItemsCount } = useCart();
+  const { 
+    cartItems, 
+    addToCart, 
+    removeFromCart, 
+    updateQuantity, 
+    clearCart, 
+    cartItemsCount,
+    cartTotal 
+  } = useCart();
 
   // Load products and categories on initial render
   useEffect(() => {
@@ -74,6 +81,7 @@ export const useShopProducts = () => {
     setSearchTerm,
     cartItems,
     cartItemsCount,
+    cartTotal,
     products,
     categories,
     hierarchicalCategories,
@@ -81,6 +89,7 @@ export const useShopProducts = () => {
     error,
     addToCart,
     removeFromCart,
+    updateQuantity,
     clearCart,
     categoryCount,
     filters,

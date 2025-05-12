@@ -10,7 +10,7 @@ import ProductInfo from '@/components/shop/product-page/ProductInfo';
 import ProductErrorState from '@/components/shop/product-page/ProductErrorState';
 import RelatedProducts from '@/components/shop/product-page/RelatedProducts';
 import LoadingSpinner from '@/components/shop/product-page/LoadingSpinner';
-import { toast } from 'sonner';
+import { useCart } from '@/hooks/shop/useCart';
 
 const ProductPage = () => {
   const { productId } = useParams<{ productId: string }>();
@@ -19,6 +19,9 @@ const ProductPage = () => {
   const [quantity, setQuantity] = useState(1);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  
+  // Use the cart hook
+  const { addToCart } = useCart();
 
   useEffect(() => {
     const fetchProductAndRelated = async () => {
@@ -70,16 +73,11 @@ const ProductPage = () => {
     fetchProductAndRelated();
   }, [productId]);
 
-  // Function to add products to cart
-  const addToCart = (productToAdd: Product | null = product) => {
-    if (!productToAdd) return;
-    
-    // Show toast notification
-    toast(`${quantity} x ${productToAdd.name} added to cart`, {
-      description: "Item successfully added to your cart",
-      position: "top-right",
-      duration: 2000,
-    });
+  // Function to handle adding product to cart
+  const handleAddToCart = () => {
+    if (product) {
+      addToCart(product, quantity);
+    }
   };
 
   if (loading) {
@@ -130,16 +128,19 @@ const ProductPage = () => {
               productName={product.name} 
             />
             
-            {/* Product Info */}
+            {/* Product Info with quantity control */}
             <ProductInfo 
               product={product} 
-              onAddToCart={() => addToCart(product)} 
+              onAddToCart={handleAddToCart} 
             />
           </div>
         </div>
         
         {/* Related Products */}
-        <RelatedProducts products={relatedProducts} addToCart={addToCart} />
+        <RelatedProducts 
+          products={relatedProducts} 
+          addToCart={(product) => addToCart(product, 1)} 
+        />
 
         {/* Back to Shop Button */}
         <div className="mt-12 text-center">

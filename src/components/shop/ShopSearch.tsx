@@ -2,18 +2,18 @@
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Filter, Search, ShoppingBag } from 'lucide-react';
-import { Product } from '@/hooks/useProducts';
 import { useNavigate } from 'react-router-dom';
-import { toast } from 'sonner';
+import { CartItem } from '@/hooks/shop/useCart';
 
 interface ShopSearchProps {
   searchTerm: string;
   setSearchTerm: (term: string) => void;
-  cartItems: Product[];
+  cartItems: CartItem[];
+  cartItemsCount: number;
   onFilterToggle?: () => void;
 }
 
-const ShopSearch = ({ searchTerm, setSearchTerm, cartItems, onFilterToggle }: ShopSearchProps) => {
+const ShopSearch = ({ searchTerm, setSearchTerm, cartItems, cartItemsCount, onFilterToggle }: ShopSearchProps) => {
   const navigate = useNavigate();
   
   const handleSubmit = (e: React.FormEvent) => {
@@ -23,8 +23,7 @@ const ShopSearch = ({ searchTerm, setSearchTerm, cartItems, onFilterToggle }: Sh
   };
   
   const handleCartClick = () => {
-    // Navigate to cart page (to be implemented later)
-    toast.info("Cart page coming soon!");
+    navigate('/shop/cart');
   };
 
   return (
@@ -55,7 +54,7 @@ const ShopSearch = ({ searchTerm, setSearchTerm, cartItems, onFilterToggle }: Sh
           onClick={handleCartClick}
         >
           <ShoppingBag size={18} /> 
-          Cart ({cartItems.length})
+          Cart ({cartItemsCount})
         </Button>
       </form>
     </div>

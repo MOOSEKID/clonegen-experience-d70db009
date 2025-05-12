@@ -5,13 +5,13 @@ import ShopSearch from '@/components/shop/ShopSearch';
 import CategoriesSection from '@/components/shop/CategoriesSection';
 import ProductsSection from '@/components/shop/ProductsSection';
 import { useShopProducts } from '@/hooks/shop/useShopProducts';
-import { toast } from 'sonner';
 
 const ShopPage = () => {
   const {
     searchTerm,
     setSearchTerm,
     cartItems,
+    cartItemsCount,
     products,
     isLoading,
     categories,
@@ -56,6 +56,7 @@ const ShopPage = () => {
           searchTerm={searchTerm} 
           setSearchTerm={setSearchTerm} 
           cartItems={cartItems}
+          cartItemsCount={cartItemsCount}
           onFilterToggle={handleFilterToggle}
         />
         <CategoriesSection 
