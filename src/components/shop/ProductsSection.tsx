@@ -1,9 +1,8 @@
-
 import React from 'react';
 import { Product } from '@/hooks/useProducts';
 import { ShopFilters } from '@/hooks/shop/shopTypes';
 import ProductsHeader from './product-section/ProductsHeader';
-import ProductsGrid from './product-section/ProductsGrid';
+import ProductGrid from './ProductGrid';
 import ProductSkeletons from './product-section/ProductSkeletons';
 import ProductFilters from './product-section/ProductFilters';
 import EmptyProductState from './product-section/EmptyProductState';
@@ -85,7 +84,7 @@ const ProductsSection: React.FC<ProductSectionProps> = ({
       {filteredProducts.length === 0 ? (
         <EmptyProductState searchTerm={searchTerm} />
       ) : (
-        <ProductsGrid 
+        <ProductGrid 
           products={filteredProducts} 
           addToCart={addToCart} 
         />
