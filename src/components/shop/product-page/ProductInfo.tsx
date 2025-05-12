@@ -28,6 +28,18 @@ const ProductInfo: React.FC<ProductInfoProps> = ({ product, onAddToCart }) => {
     onAddToCart();
   };
 
+  // Safely get category name, handling both string and object types
+  const getCategoryName = () => {
+    if (!product.category) return 'Uncategorized';
+    
+    if (typeof product.category === 'string') {
+      return product.category;
+    }
+    
+    // Handle object category (ensuring it has a name property)
+    return product.category.name || 'Uncategorized';
+  };
+
   return (
     <div className="p-6">
       <h1 className="text-2xl sm:text-3xl font-bold text-gray-800 mb-2">
@@ -103,7 +115,7 @@ const ProductInfo: React.FC<ProductInfoProps> = ({ product, onAddToCart }) => {
             <div>SKU: {product.sku}</div>
           )}
           
-          <div>Category: {typeof product.category === 'string' ? product.category : product.category?.name}</div>
+          <div>Category: {getCategoryName()}</div>
         </div>
       </div>
     </div>
