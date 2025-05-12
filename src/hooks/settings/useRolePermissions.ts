@@ -60,8 +60,8 @@ export const useRolePermissions = () => {
         console.log('No roles found or error fetching roles');
         setRoles([]);
       } else if (data) {
-        // Parse the JSON roles from the database
-        const parsedRoles = data.roles ? (data.roles as Role[]) : [];
+        // Parse the JSON roles from the database with proper type casting
+        const parsedRoles = data.roles ? (JSON.parse(JSON.stringify(data.roles)) as Role[]) : [];
         setRoles(parsedRoles);
       } else {
         setRoles([]);
@@ -87,7 +87,7 @@ export const useRolePermissions = () => {
       setRoles(prevRoles => [...prevRoles, newRole]);
       
       // Update in database
-      const { data, error } = await supabase
+      const { error } = await supabase
         .from('settings_roles')
         .upsert({ 
           id: crypto.randomUUID(), 
