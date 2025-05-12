@@ -11,16 +11,16 @@ const ShopPage = () => {
     searchTerm,
     setSearchTerm,
     cartItems,
+    products, // Use products directly, not filteredProducts
     isLoading,
-    filteredProducts,
     categories,
     categoryCount,
     error,
     addToCart
   } = useShopProducts();
 
-  // Get featured products for showcase
-  const featuredProducts = filteredProducts.slice(0, 8); // Just show first 8 for now
+  // Just display the products based on current filters
+  const featuredProducts = products.slice(0, 8); // Just show first 8 for now
 
   return (
     <div className="bg-gym-light min-h-screen pt-24 pb-16">
@@ -37,7 +37,7 @@ const ShopPage = () => {
         />
         <ProductsSection 
           isLoading={isLoading} 
-          filteredProducts={searchTerm ? filteredProducts : featuredProducts}
+          filteredProducts={searchTerm ? products : featuredProducts}
           searchTerm={searchTerm} 
           addToCart={addToCart}
           error={error}

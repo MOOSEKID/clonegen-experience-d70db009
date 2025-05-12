@@ -11,7 +11,7 @@ export type ProductCreateData = {
   price: number;
   member_price?: number;
   stock_count: number;
-  category_id?: string;
+  category_id: string; // Changed from optional to required
   category: string; // Keep this for backward compatibility
   sku?: string;
   image_url?: string;
