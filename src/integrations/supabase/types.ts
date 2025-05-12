@@ -1401,6 +1401,63 @@ export type Database = {
         }
         Relationships: []
       }
+      shop_settings: {
+        Row: {
+          created_at: string
+          credit_limit: number | null
+          default_currency: string | null
+          email_low_stock: boolean | null
+          enable_ecommerce: boolean | null
+          enable_guest_checkout: boolean | null
+          enable_inventory: boolean | null
+          enable_member_tab: boolean | null
+          enable_mtn: boolean | null
+          enable_pos: boolean | null
+          enable_stripe: boolean | null
+          hide_out_of_stock: boolean | null
+          id: string
+          low_stock_threshold: number | null
+          show_member_discounts: boolean | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          credit_limit?: number | null
+          default_currency?: string | null
+          email_low_stock?: boolean | null
+          enable_ecommerce?: boolean | null
+          enable_guest_checkout?: boolean | null
+          enable_inventory?: boolean | null
+          enable_member_tab?: boolean | null
+          enable_mtn?: boolean | null
+          enable_pos?: boolean | null
+          enable_stripe?: boolean | null
+          hide_out_of_stock?: boolean | null
+          id?: string
+          low_stock_threshold?: number | null
+          show_member_discounts?: boolean | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          credit_limit?: number | null
+          default_currency?: string | null
+          email_low_stock?: boolean | null
+          enable_ecommerce?: boolean | null
+          enable_guest_checkout?: boolean | null
+          enable_inventory?: boolean | null
+          enable_member_tab?: boolean | null
+          enable_mtn?: boolean | null
+          enable_pos?: boolean | null
+          enable_stripe?: boolean | null
+          hide_out_of_stock?: boolean | null
+          id?: string
+          low_stock_threshold?: number | null
+          show_member_discounts?: boolean | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       trainer_attendance: {
         Row: {
           check_in_time: string | null
