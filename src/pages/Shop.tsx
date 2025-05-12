@@ -1,10 +1,9 @@
-
 import React, { useState, useEffect } from 'react';
 import ShopHeader from '@/components/shop/ShopHeader';
 import ShopSearch from '@/components/shop/ShopSearch';
 import CategoriesSection from '@/components/shop/CategoriesSection';
 import ProductsSection from '@/components/shop/ProductsSection';
-import { useShopProducts } from '@/hooks/useShopProducts';
+import { useShopProducts } from '@/hooks/shop/useShopProducts';
 
 const ShopPage = () => {
   const {
