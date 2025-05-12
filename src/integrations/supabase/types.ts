@@ -1865,8 +1865,16 @@ export type Database = {
         Args: { user_id: string }
         Returns: string
       }
+      get_user_role_safe: {
+        Args: Record<PropertyKey, never>
+        Returns: string
+      }
       is_admin: {
         Args: { user_id: string }
+        Returns: boolean
+      }
+      is_admin_safe: {
+        Args: Record<PropertyKey, never>
         Returns: boolean
       }
     }

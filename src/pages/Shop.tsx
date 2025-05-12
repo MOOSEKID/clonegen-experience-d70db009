@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import ShopHeader from '@/components/shop/ShopHeader';
 import ShopSearch from '@/components/shop/ShopSearch';
 import CategoriesSection from '@/components/shop/CategoriesSection';
@@ -11,16 +11,33 @@ const ShopPage = () => {
     searchTerm,
     setSearchTerm,
     cartItems,
-    products, // Use products directly, not filteredProducts
+    products,
     isLoading,
     categories,
     categoryCount,
     error,
-    addToCart
+    addToCart,
+    filters,
+    updateFilters
   } = useShopProducts();
 
-  // Just display the products based on current filters
-  const featuredProducts = products.slice(0, 8); // Just show first 8 for now
+  // Handle category selection
+  const handleCategorySelect = (categorySlug?: string) => {
+    updateFilters({ category: categorySlug });
+  };
+
+  // Handle price range filtering
+  const handlePriceFilterChange = (min: number, max: number) => {
+    updateFilters({ 
+      minPrice: min > 0 ? min : undefined,
+      maxPrice: max > 0 ? max : undefined 
+    });
+  };
+
+  // Handle sorting
+  const handleSortChange = (sortOption: string) => {
+    updateFilters({ sortBy: sortOption as any });
+  };
 
   return (
     <div className="bg-gym-light min-h-screen pt-24 pb-16">
@@ -33,14 +50,19 @@ const ShopPage = () => {
         />
         <CategoriesSection 
           categories={categories} 
-          categoryCount={categoryCount} 
+          categoryCount={categoryCount}
+          selectedCategory={filters.category} 
+          onCategorySelect={handleCategorySelect}
         />
         <ProductsSection 
           isLoading={isLoading} 
-          filteredProducts={searchTerm ? products : featuredProducts}
+          filteredProducts={products}
           searchTerm={searchTerm} 
           addToCart={addToCart}
           error={error}
+          onSortChange={handleSortChange}
+          onPriceFilterChange={handlePriceFilterChange}
+          currentFilters={filters}
         />
       </div>
     </div>

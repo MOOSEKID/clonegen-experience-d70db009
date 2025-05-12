@@ -30,6 +30,8 @@ export const useShopProducts = () => {
     setError(null);
     
     try {
+      console.log('Fetching products with filters:', filters);
+      
       // Start building the query
       let query = supabase
         .from('products')
