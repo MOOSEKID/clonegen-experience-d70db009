@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -135,10 +136,20 @@ export const ProductForm = ({ initialData, productId, mode = 'create' }: Product
     }
     
     if (mode === 'create') {
-      // Ensure all required fields are present for product creation
+      // Ensure all required fields are explicitly included for product creation
       const productData = {
-        ...values,
+        name: values.name, // Explicitly include required fields
+        description: values.description,
+        price: values.price,
+        member_price: values.member_price,
+        stock_count: values.stock_count,
+        category_id: values.category_id, // Required field
+        sku: values.sku,
         image_url: finalImageUrl,
+        is_active: values.is_active,
+        is_public: values.is_public,
+        is_instore: values.is_instore,
+        is_member_only: values.is_member_only,
         category: categories.find(c => c.id === values.category_id)?.name || '',
         created_by: (await supabase.auth.getSession())?.data?.session?.user?.id
       };
@@ -149,10 +160,20 @@ export const ProductForm = ({ initialData, productId, mode = 'create' }: Product
         navigate('/admin/shop/products');
       }
     } else if (mode === 'edit' && productId) {
-      // When updating, include all fields from the form
+      // When updating, include all required fields from the form
       const updateData = {
-        ...values,
+        name: values.name, // Explicitly include required fields
+        description: values.description,
+        price: values.price,
+        member_price: values.member_price,
+        stock_count: values.stock_count,
+        category_id: values.category_id, // Required field
+        sku: values.sku,
         image_url: finalImageUrl,
+        is_active: values.is_active,
+        is_public: values.is_public,
+        is_instore: values.is_instore,
+        is_member_only: values.is_member_only,
         category: categories.find(c => c.id === values.category_id)?.name || '',
         updated_by: (await supabase.auth.getSession())?.data?.session?.user?.id
       };
