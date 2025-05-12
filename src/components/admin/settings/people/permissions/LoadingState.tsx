@@ -1,33 +1,12 @@
 
 import React from 'react';
-import { Skeleton } from "@/components/ui/skeleton";
+import { Loader2 } from 'lucide-react';
 
-const LoadingState = () => {
+const LoadingState: React.FC = () => {
   return (
-    <div className="space-y-6">
-      <div className="flex justify-between items-center mb-6">
-        <Skeleton className="h-10 w-48" />
-        <Skeleton className="h-10 w-32" />
-      </div>
-      
-      <div className="bg-white rounded-lg shadow overflow-hidden">
-        <div className="p-4 border-b">
-          <Skeleton className="h-6 w-32" />
-        </div>
-        
-        {[1, 2, 3].map((idx) => (
-          <div key={idx} className="p-4 border-b flex justify-between items-center">
-            <div className="space-y-2">
-              <Skeleton className="h-6 w-40" />
-              <Skeleton className="h-4 w-64" />
-            </div>
-            <div className="flex space-x-2">
-              <Skeleton className="h-8 w-8 rounded-full" />
-              <Skeleton className="h-8 w-8 rounded-full" />
-            </div>
-          </div>
-        ))}
-      </div>
+    <div className="bg-white p-8 rounded-lg shadow-sm flex flex-col items-center justify-center min-h-[300px]">
+      <Loader2 className="h-10 w-10 text-gym-orange animate-spin mb-4" />
+      <p className="text-gray-500">Loading permissions settings...</p>
     </div>
   );
 };

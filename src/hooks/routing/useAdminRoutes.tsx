@@ -41,6 +41,15 @@ import Products from "../../pages/admin/shop/Products";
 import AddProduct from "../../pages/admin/shop/AddProduct";
 import EditProduct from "../../pages/admin/shop/EditProduct";
 import Categories from "../../pages/admin/shop/Categories";
+import Permissions from "../../pages/admin/settings/Permissions";
+import Notifications from "../../pages/admin/settings/Notifications";
+import InvoiceTemplates from "../../pages/admin/settings/InvoiceTemplates";
+import CompanyAutomation from "../../pages/admin/settings/CompanyAutomation";
+import Platform from "../../pages/admin/settings/Platform";
+import Integrations from "../../pages/admin/settings/Integrations";
+import CMS from "../../pages/admin/settings/CMS";
+import AutomationRules from "../../pages/admin/settings/AutomationRules";
+import CustomMessages from "../../pages/admin/settings/CustomMessages";
 
 const useAdminRoutes = () => {
   return [
@@ -83,6 +92,15 @@ const useAdminRoutes = () => {
     <Route key="admin-settings-security" path="settings/security" element={<SecuritySettings />} />,
     <Route key="admin-settings-hours" path="settings/business-hours" element={<BusinessHours />} />,
     <Route key="admin-settings-holidays" path="settings/holidays" element={<Holidays />} />,
+    <Route key="admin-settings-permissions" path="settings/permissions" element={<Permissions />} />,
+    <Route key="admin-settings-notifications" path="settings/notifications" element={<Notifications />} />,
+    <Route key="admin-settings-invoice-templates" path="settings/invoice-templates" element={<InvoiceTemplates />} />,
+    <Route key="admin-settings-company-automation" path="settings/company-automation" element={<CompanyAutomation />} />,
+    <Route key="admin-settings-platform" path="settings/platform" element={<Platform />} />,
+    <Route key="admin-settings-integrations" path="settings/integrations" element={<Integrations />} />,
+    <Route key="admin-settings-cms" path="settings/cms" element={<CMS />} />,
+    <Route key="admin-settings-automation-rules" path="settings/automation-rules" element={<AutomationRules />} />,
+    <Route key="admin-settings-custom-messages" path="settings/custom-messages" element={<CustomMessages />} />,
     
     <Route key="admin-reports" path="reports" element={<Reports />} />,
     <Route key="admin-support" path="support" element={<Support />} />,

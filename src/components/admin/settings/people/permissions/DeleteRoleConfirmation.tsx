@@ -1,15 +1,8 @@
 
 import React from 'react';
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
+import { AlertTriangle } from 'lucide-react';
 import { Role } from '../UserPermissionsSettings';
 
 interface DeleteRoleConfirmationProps {
@@ -19,37 +12,34 @@ interface DeleteRoleConfirmationProps {
   role: Role | null;
 }
 
-const DeleteRoleConfirmation: React.FC<DeleteRoleConfirmationProps> = ({
-  isOpen,
-  onClose,
-  onConfirm,
-  role
-}) => {
+const DeleteRoleConfirmation: React.FC<DeleteRoleConfirmationProps> = ({ isOpen, onClose, onConfirm, role }) => {
   if (!role) return null;
-  
+
   return (
-    <AlertDialog open={isOpen} onOpenChange={onClose}>
-      <AlertDialogContent>
-        <AlertDialogHeader>
-          <AlertDialogTitle>Delete Role: {role.name}</AlertDialogTitle>
-          <AlertDialogDescription>
-            Are you sure you want to delete this role? This action cannot be undone.
-            <p className="mt-2 text-yellow-600 font-medium">
-              Warning: If this role is assigned to any users, they will lose these permissions.
-            </p>
-          </AlertDialogDescription>
-        </AlertDialogHeader>
-        <AlertDialogFooter>
-          <AlertDialogCancel>Cancel</AlertDialogCancel>
-          <AlertDialogAction
-            onClick={onConfirm}
-            className="bg-red-500 hover:bg-red-600"
-          >
-            Delete
-          </AlertDialogAction>
-        </AlertDialogFooter>
-      </AlertDialogContent>
-    </AlertDialog>
+    <Dialog open={isOpen} onOpenChange={onClose}>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle className="flex items-center gap-2 text-red-500">
+            <AlertTriangle className="h-5 w-5" />
+            Delete Role
+          </DialogTitle>
+          <DialogDescription>
+            Are you sure you want to delete the role "{role.name}"? This action cannot be undone.
+          </DialogDescription>
+        </DialogHeader>
+        
+        <div className="py-4">
+          <p className="text-sm text-gray-500">
+            Any users assigned to this role will need to be reassigned to another role.
+          </p>
+        </div>
+        
+        <DialogFooter>
+          <Button variant="outline" onClick={onClose}>Cancel</Button>
+          <Button variant="destructive" onClick={onConfirm}>Delete Role</Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   );
 };
 

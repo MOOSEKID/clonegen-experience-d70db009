@@ -23,7 +23,7 @@ const PeopleTabContent = () => {
       title: "Company Automation",
       description: "Control attendance exports, invoice schedules",
       icon: <BarChart className="h-10 w-10 text-gray-400" />,
-      link: "/admin/settings/automation",
+      link: "/admin/settings/company-automation",
       ariaLabel: "Configure company automation settings"
     },
     {

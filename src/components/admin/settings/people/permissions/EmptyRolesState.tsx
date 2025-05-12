@@ -1,7 +1,7 @@
 
 import React from 'react';
-import { Button } from "@/components/ui/button";
-import { Shield } from 'lucide-react';
+import { Shield, Plus } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 
 interface EmptyRolesStateProps {
   onCreateRole: () => void;
@@ -9,19 +9,16 @@ interface EmptyRolesStateProps {
 
 const EmptyRolesState: React.FC<EmptyRolesStateProps> = ({ onCreateRole }) => {
   return (
-    <div className="bg-gray-50 rounded-lg border border-dashed border-gray-300 p-8 text-center">
-      <div className="flex flex-col items-center justify-center space-y-4">
-        <div className="bg-gray-100 p-3 rounded-full">
-          <Shield className="h-10 w-10 text-gray-400" />
-        </div>
-        <h3 className="text-lg font-medium">No User Roles Defined</h3>
-        <p className="text-gray-500 max-w-md">
-          Create your first role to start managing permissions. Define who can access what in your gym management system.
-        </p>
-        <Button onClick={onCreateRole} className="mt-4">
-          Create First Role
-        </Button>
-      </div>
+    <div className="bg-white border border-gray-200 rounded-lg p-8 text-center flex flex-col items-center space-y-4">
+      <Shield className="h-16 w-16 text-gray-300 mb-2" />
+      <h3 className="text-xl font-medium text-gray-700">No Roles Created Yet</h3>
+      <p className="text-gray-500 max-w-md mx-auto mb-4">
+        Create roles to manage permissions for different staff members. Each role can have specific access levels to different parts of the system.
+      </p>
+      <Button onClick={onCreateRole} className="mt-2">
+        <Plus className="mr-2 h-4 w-4" />
+        Create First Role
+      </Button>
     </div>
   );
 };

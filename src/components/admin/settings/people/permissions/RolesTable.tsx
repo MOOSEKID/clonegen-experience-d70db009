@@ -1,9 +1,8 @@
 
 import React from 'react';
-import { Button } from "@/components/ui/button";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Button } from '@/components/ui/button';
+import { Edit, Trash, Plus, Users } from 'lucide-react';
 import { Role } from '../UserPermissionsSettings';
-import { PlusCircle, Edit, Trash2 } from 'lucide-react';
 
 interface RolesTableProps {
   roles: Role[];
@@ -13,63 +12,46 @@ interface RolesTableProps {
 }
 
 const RolesTable: React.FC<RolesTableProps> = ({ roles, onEditRole, onDeleteRole, onCreateRole }) => {
-  // Helper to format permissions for display
-  const formatPermissions = (permissions: string[]): string => {
-    if (permissions.length === 0) return 'No permissions';
-    if (permissions.length <= 3) return permissions.join(', ');
-    return `${permissions.slice(0, 2).join(', ')} and ${permissions.length - 2} more...`;
-  };
-
   return (
-    <div>
-      <div className="flex justify-between items-center mb-6">
-        <h3 className="text-lg font-medium">User Roles</h3>
-        <Button onClick={onCreateRole} className="flex items-center gap-2">
-          <PlusCircle className="h-4 w-4" />
-          <span>Add Role</span>
+    <div className="bg-white border border-gray-200 rounded-lg overflow-hidden">
+      <div className="flex justify-between items-center p-4 border-b">
+        <h3 className="font-medium text-lg">User Roles</h3>
+        <Button onClick={onCreateRole} size="sm">
+          <Plus className="mr-2 h-4 w-4" />
+          Add Role
         </Button>
       </div>
       
-      <div className="rounded-md border bg-white">
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead className="w-[200px]">Role Name</TableHead>
-              <TableHead>Permissions</TableHead>
-              <TableHead className="w-[100px] text-right">Actions</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {roles.map((role) => (
-              <TableRow key={role.id}>
-                <TableCell className="font-medium">{role.name}</TableCell>
-                <TableCell className="text-sm text-gray-500">
-                  {formatPermissions(role.permissions)}
-                </TableCell>
-                <TableCell className="text-right">
-                  <div className="flex justify-end gap-2">
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => onEditRole(role)}
-                      aria-label={`Edit ${role.name} role`}
-                    >
-                      <Edit className="h-4 w-4" />
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => onDeleteRole(role)}
-                      aria-label={`Delete ${role.name} role`}
-                    >
-                      <Trash2 className="h-4 w-4 text-red-500" />
-                    </Button>
-                  </div>
-                </TableCell>
-              </TableRow>
+      <div className="overflow-x-auto">
+        <table className="w-full">
+          <thead className="bg-gray-50 text-left">
+            <tr>
+              <th className="px-4 py-3 text-sm font-medium text-gray-500">Role Name</th>
+              <th className="px-4 py-3 text-sm font-medium text-gray-500">Permissions</th>
+              <th className="px-4 py-3 text-sm font-medium text-gray-500">Actions</th>
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-gray-200">
+            {roles.map(role => (
+              <tr key={role.id} className="hover:bg-gray-50">
+                <td className="px-4 py-3 font-medium">{role.name}</td>
+                <td className="px-4 py-3 text-sm text-gray-600">
+                  {role.permissions.length} permissions granted
+                </td>
+                <td className="px-4 py-3 text-sm flex space-x-2">
+                  <Button variant="outline" size="sm" onClick={() => onEditRole(role)}>
+                    <Edit className="h-4 w-4 mr-1" />
+                    Edit
+                  </Button>
+                  <Button variant="outline" size="sm" className="text-red-500 border-red-200 hover:bg-red-50 hover:text-red-600" onClick={() => onDeleteRole(role)}>
+                    <Trash className="h-4 w-4 mr-1" />
+                    Delete
+                  </Button>
+                </td>
+              </tr>
             ))}
-          </TableBody>
-        </Table>
+          </tbody>
+        </table>
       </div>
     </div>
   );

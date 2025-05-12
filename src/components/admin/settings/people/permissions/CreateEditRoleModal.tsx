@@ -1,59 +1,12 @@
 
 import React, { useState, useEffect } from 'react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Checkbox } from "@/components/ui/checkbox";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Label } from '@/components/ui/label';
 import { Role } from '../UserPermissionsSettings';
-
-interface PermissionGroup {
-  name: string;
-  permissions: {
-    id: string;
-    label: string;
-  }[];
-}
-
-// Define permission groups
-const permissionGroups: PermissionGroup[] = [
-  {
-    name: "Members",
-    permissions: [
-      { id: "view_members", label: "View members" },
-      { id: "edit_members", label: "Edit members" },
-      { id: "delete_members", label: "Delete members" },
-      { id: "add_members", label: "Add members" }
-    ]
-  },
-  {
-    name: "Payments",
-    permissions: [
-      { id: "view_payments", label: "View payments" },
-      { id: "manage_plans", label: "Manage plans" },
-      { id: "issue_refunds", label: "Issue refunds" },
-      { id: "view_reports", label: "View financial reports" }
-    ]
-  },
-  {
-    name: "Content",
-    permissions: [
-      { id: "view_content", label: "View content" },
-      { id: "publish_blogs", label: "Publish blogs" },
-      { id: "edit_pages", label: "Edit pages" },
-      { id: "manage_media", label: "Manage media" }
-    ]
-  },
-  {
-    name: "Settings",
-    permissions: [
-      { id: "view_settings", label: "View settings" },
-      { id: "change_permissions", label: "Change permissions" },
-      { id: "update_config", label: "Update configuration" },
-      { id: "manage_integrations", label: "Manage integrations" }
-    ]
-  },
-];
 
 interface CreateEditRoleModalProps {
   isOpen: boolean;
@@ -63,18 +16,41 @@ interface CreateEditRoleModalProps {
   existingRoles: Role[];
 }
 
-const CreateEditRoleModal: React.FC<CreateEditRoleModalProps> = ({
-  isOpen,
-  onClose,
-  onSave,
-  role,
-  existingRoles
-}) => {
+// Available permissions by module
+const permissionGroups = [
+  {
+    name: 'Members',
+    permissions: ['view_members', 'create_members', 'edit_members', 'delete_members']
+  },
+  {
+    name: 'Classes',
+    permissions: ['view_classes', 'create_classes', 'edit_classes', 'delete_classes']
+  },
+  {
+    name: 'Trainers',
+    permissions: ['view_trainers', 'create_trainers', 'edit_trainers', 'delete_trainers']
+  },
+  {
+    name: 'Shop',
+    permissions: ['view_products', 'create_products', 'edit_products', 'delete_products', 'process_sales']
+  },
+  {
+    name: 'Reports',
+    permissions: ['view_reports', 'export_reports']
+  },
+  {
+    name: 'Settings',
+    permissions: ['view_settings', 'edit_settings']
+  }
+];
+
+const CreateEditRoleModal: React.FC<CreateEditRoleModalProps> = ({ isOpen, onClose, onSave, role, existingRoles }) => {
   const [name, setName] = useState('');
   const [selectedPermissions, setSelectedPermissions] = useState<string[]>([]);
+  const [activeTab, setActiveTab] = useState('Members');
   const [nameError, setNameError] = useState('');
 
-  // Initialize form when editing
+  // Initialize form when editing a role
   useEffect(() => {
     if (role) {
       setName(role.name);
@@ -86,32 +62,29 @@ const CreateEditRoleModal: React.FC<CreateEditRoleModalProps> = ({
     setNameError('');
   }, [role, isOpen]);
 
-  const handlePermissionToggle = (permissionId: string) => {
-    setSelectedPermissions(current => 
-      current.includes(permissionId)
-        ? current.filter(id => id !== permissionId)
-        : [...current, permissionId]
-    );
+  const handleTogglePermission = (permission: string) => {
+    setSelectedPermissions(prev => {
+      if (prev.includes(permission)) {
+        return prev.filter(p => p !== permission);
+      } else {
+        return [...prev, permission];
+      }
+    });
   };
 
-  const handleSubmit = () => {
+  const handleSave = () => {
     // Validate name
     if (!name.trim()) {
       setNameError('Role name is required');
       return;
     }
 
-    // Check for duplicate names (when creating or renaming)
-    const isDuplicate = existingRoles.some(
-      r => r.name.toLowerCase() === name.toLowerCase() && r.id !== (role?.id || '')
-    );
-
-    if (isDuplicate) {
+    // Check for duplicate name when creating new role
+    if (!role?.id && existingRoles.some(r => r.name.toLowerCase() === name.toLowerCase())) {
       setNameError('A role with this name already exists');
       return;
     }
 
-    // Save role
     onSave({
       id: role?.id || '',
       name: name.trim(),
@@ -121,64 +94,66 @@ const CreateEditRoleModal: React.FC<CreateEditRoleModalProps> = ({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-md">
+      <DialogContent className="sm:max-w-[600px]">
         <DialogHeader>
           <DialogTitle>{role ? 'Edit Role' : 'Create New Role'}</DialogTitle>
         </DialogHeader>
         
         <div className="space-y-6 py-4">
-          {/* Role name input */}
           <div className="space-y-2">
-            <Label htmlFor="roleName">Role Name</Label>
+            <Label htmlFor="role-name">Role Name</Label>
             <Input
-              id="roleName"
+              id="role-name"
               value={name}
-              onChange={e => {
+              onChange={(e) => {
                 setName(e.target.value);
                 setNameError('');
               }}
               placeholder="Enter role name"
               className={nameError ? 'border-red-500' : ''}
             />
-            {nameError && <p className="text-sm text-red-500">{nameError}</p>}
+            {nameError && <p className="text-red-500 text-sm">{nameError}</p>}
           </div>
           
-          {/* Permissions section */}
-          <div className="space-y-4">
+          <div className="space-y-2">
             <Label>Permissions</Label>
-            
-            {permissionGroups.map((group) => (
-              <fieldset key={group.name} className="space-y-2 border rounded-md p-4">
-                <legend className="text-sm font-medium px-2">{group.name}</legend>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                  {group.permissions.map((permission) => (
-                    <div key={permission.id} className="flex items-center space-x-2">
-                      <Checkbox
-                        id={permission.id}
-                        checked={selectedPermissions.includes(permission.id)}
-                        onCheckedChange={() => handlePermissionToggle(permission.id)}
-                      />
-                      <Label
-                        htmlFor={permission.id}
-                        className="text-sm cursor-pointer"
-                      >
-                        {permission.label}
-                      </Label>
-                    </div>
-                  ))}
-                </div>
-              </fieldset>
-            ))}
+            <Tabs value={activeTab} onValueChange={setActiveTab}>
+              <TabsList className="grid grid-cols-3 mb-4">
+                {permissionGroups.slice(0, 6).map(group => (
+                  <TabsTrigger key={group.name} value={group.name}>
+                    {group.name}
+                  </TabsTrigger>
+                ))}
+              </TabsList>
+              
+              {permissionGroups.map(group => (
+                <TabsContent key={group.name} value={group.name} className="space-y-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {group.permissions.map(permission => (
+                      <div key={permission} className="flex items-center space-x-2">
+                        <Checkbox
+                          id={permission}
+                          checked={selectedPermissions.includes(permission)}
+                          onCheckedChange={() => handleTogglePermission(permission)}
+                        />
+                        <label
+                          htmlFor={permission}
+                          className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer"
+                        >
+                          {permission.split('_').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ')}
+                        </label>
+                      </div>
+                    ))}
+                  </div>
+                </TabsContent>
+              ))}
+            </Tabs>
           </div>
         </div>
         
-        <DialogFooter className="sm:justify-between">
-          <Button variant="outline" onClick={onClose}>
-            Cancel
-          </Button>
-          <Button onClick={handleSubmit}>
-            {role ? 'Update Role' : 'Create Role'}
-          </Button>
+        <DialogFooter>
+          <Button variant="outline" onClick={onClose}>Cancel</Button>
+          <Button onClick={handleSave}>{role ? 'Update Role' : 'Create Role'}</Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
