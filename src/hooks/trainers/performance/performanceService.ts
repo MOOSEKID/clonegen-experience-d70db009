@@ -1,15 +1,15 @@
 
 import { PerformanceMetrics, ClassAttendance } from './types';
 
-// Simulated data service for trainer performance metrics
-export const fetchTrainerPerformance = async (trainerId: string) => {
+// Simulated data service for staff performance metrics
+export const fetchStaffPerformance = async (staffId: string) => {
   // Simulate API delay
   await new Promise(resolve => setTimeout(resolve, 800));
   
   // Mock data for performance metrics
   const performanceMetrics: PerformanceMetrics = {
-    id: `perf-${trainerId}`,
-    trainerId,
+    id: `perf-${staffId}`,
+    staffId,
     period: 'monthly',
     classes_taught: 45,
     private_sessions: 32,
@@ -42,7 +42,7 @@ export const fetchTrainerPerformance = async (trainerId: string) => {
     date: new Date(Date.now() - (i * 86400000)).toISOString().split('T')[0],
     time: ['08:00', '12:30', '17:00', '19:30'][i % 4],
     duration: [45, 60, 90][i % 3],
-    trainer_id: trainerId,
+    staff_id: staffId,
     expected_attendance: 12,
     actual_attendance: Math.floor(Math.random() * 5) + 7, // 7-12 attendees
     attendance_rate: Math.floor(Math.random() * 30) + 70 // 70-100%
@@ -69,3 +69,6 @@ function generateMonthlySessions() {
   
   return result;
 }
+
+// For backward compatibility
+export const fetchTrainerPerformance = fetchStaffPerformance;

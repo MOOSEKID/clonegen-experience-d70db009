@@ -1,7 +1,7 @@
 
 export interface PerformanceMetrics {
   id: string;
-  trainerId: string;
+  staffId: string;
   period: string; // 'weekly', 'monthly', 'yearly'
   classes_taught: number;
   private_sessions: number;
@@ -33,7 +33,7 @@ export interface ClassAttendance {
   date: string;
   time: string;
   duration: number;
-  trainer_id: string;
+  staff_id: string;
   expected_attendance: number;
   actual_attendance: number;
   attendance_rate: number;

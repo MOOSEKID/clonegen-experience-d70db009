@@ -1,17 +1,17 @@
 
 import { useToast } from '@/components/ui/use-toast';
 import { supabase } from '@/integrations/supabase/client';
-import { TrainerCertification } from './types';
+import { StaffCertification } from './types';
 
 export const useCertificationsManagement = () => {
   const { toast } = useToast();
   
-  const addCertification = async (certification: Omit<TrainerCertification, 'id'>) => {
+  const addCertification = async (certification: Omit<StaffCertification, 'id'>) => {
     try {
       const { data, error } = await supabase
-        .from('trainer_certifications')
+        .from('staff_certifications')
         .insert({
-          trainer_id: certification.trainer_id,
+          staff_id: certification.staff_id,
           certification_name: certification.certification_name,
           issuing_organization: certification.issuing_organization,
           issue_date: certification.issue_date,
@@ -42,7 +42,7 @@ export const useCertificationsManagement = () => {
   const deleteCertification = async (id: string) => {
     try {
       const { error } = await supabase
-        .from('trainer_certifications')
+        .from('staff_certifications')
         .delete()
         .eq('id', id);
         

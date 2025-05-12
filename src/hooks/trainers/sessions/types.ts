@@ -1,7 +1,7 @@
 
 export interface ClientSession {
   id: string;
-  trainer_id: string;
+  staff_id: string;
   client_id: string;
   session_date: string;
   start_time: string;
@@ -14,11 +14,11 @@ export interface ClientSession {
   created_at: string;
   updated_at: string;
   client_name?: string;
-  trainer_name?: string;
+  staff_name?: string;
 }
 
 export interface ClientSessionInput {
-  trainer_id: string;
+  staff_id: string;
   client_id: string;
   session_date: string;
   start_time?: string;

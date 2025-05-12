@@ -1,17 +1,17 @@
 
 import { useToast } from '@/components/ui/use-toast';
 import { supabase } from '@/integrations/supabase/client';
-import { TrainerAvailability } from './types';
+import { StaffAvailability } from './types';
 
 export const useAvailabilityManagement = () => {
   const { toast } = useToast();
   
-  const addAvailability = async (availability: Omit<TrainerAvailability, 'id'>) => {
+  const addAvailability = async (availability: Omit<StaffAvailability, 'id'>) => {
     try {
       const { data, error } = await supabase
-        .from('trainer_availability')
+        .from('staff_availability')
         .insert({
-          trainer_id: availability.trainer_id,
+          staff_id: availability.staff_id,
           day_of_week: availability.day_of_week,
           start_time: availability.start_time,
           end_time: availability.end_time
@@ -41,7 +41,7 @@ export const useAvailabilityManagement = () => {
   const deleteAvailability = async (id: string) => {
     try {
       const { error } = await supabase
-        .from('trainer_availability')
+        .from('staff_availability')
         .delete()
         .eq('id', id);
         

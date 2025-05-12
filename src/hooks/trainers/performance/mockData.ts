@@ -1,10 +1,10 @@
 
 import { PerformanceMetrics, ClassAttendance } from './types';
 
-export const generateMockPerformanceMetrics = (trainerId?: string): PerformanceMetrics => {
+export const generateMockPerformanceMetrics = (staffId?: string): PerformanceMetrics => {
   return {
-    id: trainerId || 'mock-id',
-    trainerId: trainerId || 'mock-trainer-id',
+    id: staffId || 'mock-id',
+    staffId: staffId || 'mock-staff-id',
     period: 'monthly',
     classes_taught: 156,
     private_sessions: 45,
@@ -37,7 +37,7 @@ export const generateMockPerformanceMetrics = (trainerId?: string): PerformanceM
   };
 };
 
-export const generateMockAttendanceData = (trainerId?: string): any[] => {
+export const generateMockAttendanceData = (staffId?: string): any[] => {
   return [
     {
       id: '1',
@@ -46,7 +46,7 @@ export const generateMockAttendanceData = (trainerId?: string): any[] => {
       date: 'Mon, June 10',
       time: '08:00',
       duration: 45,
-      trainer_id: trainerId || 'trainer-1',
+      staff_id: staffId || 'staff-1',
       expected_attendance: 12,
       actual_attendance: 10,
       attendance_rate: 83
@@ -58,7 +58,7 @@ export const generateMockAttendanceData = (trainerId?: string): any[] => {
       date: 'Wed, June 12',
       time: '10:00',
       duration: 60,
-      trainer_id: trainerId || 'trainer-1',
+      staff_id: staffId || 'staff-1',
       expected_attendance: 15,
       actual_attendance: 14,
       attendance_rate: 93
@@ -70,7 +70,7 @@ export const generateMockAttendanceData = (trainerId?: string): any[] => {
       date: 'Fri, June 14',
       time: '17:00',
       duration: 50,
-      trainer_id: trainerId || 'trainer-1',
+      staff_id: staffId || 'staff-1',
       expected_attendance: 10,
       actual_attendance: 7,
       attendance_rate: 70
@@ -82,7 +82,7 @@ export const generateMockAttendanceData = (trainerId?: string): any[] => {
       date: 'Mon, June 17',
       time: '19:00',
       duration: 45,
-      trainer_id: trainerId || 'trainer-1',
+      staff_id: staffId || 'staff-1',
       expected_attendance: 8,
       actual_attendance: 8,
       attendance_rate: 100
@@ -94,7 +94,7 @@ export const generateMockAttendanceData = (trainerId?: string): any[] => {
       date: 'Wed, June 19',
       time: '18:00',
       duration: 45,
-      trainer_id: trainerId || 'trainer-1',
+      staff_id: staffId || 'staff-1',
       expected_attendance: 18,
       actual_attendance: 12,
       attendance_rate: 67
