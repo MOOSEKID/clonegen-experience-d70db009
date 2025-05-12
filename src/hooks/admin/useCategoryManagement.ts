@@ -3,9 +3,11 @@ import { useState, useEffect, useCallback } from 'react';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import { Category } from '@/hooks/useCategories';
+import { CategoryWithChildren } from '@/hooks/shop/shopTypes';
 
 export const useCategoryManagement = () => {
   const [categories, setCategories] = useState<Category[]>([]);
+  const [hierarchicalCategories, setHierarchicalCategories] = useState<CategoryWithChildren[]>([]);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<Error | null>(null);
@@ -18,7 +20,7 @@ export const useCategoryManagement = () => {
     try {
       const { data, error: fetchError } = await supabase
         .from('categories')
-        .select('*')
+        .select('*, parent:parent_id(*)')
         .order('name');
 
       if (fetchError) {
@@ -28,6 +30,36 @@ export const useCategoryManagement = () => {
       }
       
       setCategories(data || []);
+      
+      // Build hierarchical structure
+      const mainCategories: CategoryWithChildren[] = [];
+      const categoryMap = new Map<string, CategoryWithChildren>();
+      
+      // First pass: create a map of all categories
+      data?.forEach(category => {
+        categoryMap.set(category.id, { ...category, children: [] });
+      });
+      
+      // Second pass: build the tree structure
+      data?.forEach(category => {
+        const categoryWithChildren = categoryMap.get(category.id);
+        if (categoryWithChildren) {
+          if (!category.parent_id) {
+            mainCategories.push(categoryWithChildren);
+          } else {
+            const parentCategory = categoryMap.get(category.parent_id);
+            if (parentCategory) {
+              parentCategory.children = parentCategory.children || [];
+              parentCategory.children.push(categoryWithChildren);
+            } else {
+              // If parent doesn't exist, treat as main category
+              mainCategories.push(categoryWithChildren);
+            }
+          }
+        }
+      });
+      
+      setHierarchicalCategories(mainCategories);
     } catch (err: any) {
       console.error('Unexpected error fetching categories:', err);
       setError(err);
@@ -99,6 +131,39 @@ export const useCategoryManagement = () => {
           .replace(/[^\w-]+/g, '');
       }
       
+      // Check for circular reference when updating parent_id
+      if (categoryData.parent_id) {
+        if (categoryData.parent_id === id) {
+          toast.error("A category cannot be its own parent");
+          setSubmitting(false);
+          return false;
+        }
+        
+        // Check if this would create a circular reference in the hierarchy
+        let parentId = categoryData.parent_id;
+        let depth = 0;
+        const maxDepth = 10; // Safety limit to prevent infinite loops
+        
+        while (parentId && depth < maxDepth) {
+          const { data: parentCategory } = await supabase
+            .from('categories')
+            .select('parent_id')
+            .eq('id', parentId)
+            .single();
+            
+          if (!parentCategory) break;
+          
+          if (parentCategory.parent_id === id) {
+            toast.error("This would create a circular reference in the category hierarchy");
+            setSubmitting(false);
+            return false;
+          }
+          
+          parentId = parentCategory.parent_id;
+          depth++;
+        }
+      }
+      
       // Get current user ID for tracking who updated
       const { data: { session } } = await supabase.auth.getSession();
       const userId = session?.user?.id;
@@ -133,13 +198,37 @@ export const useCategoryManagement = () => {
     }
   };
   
+  // Check if a category has child categories
+  const hasChildCategories = async (id: string) => {
+    const { count, error } = await supabase
+      .from('categories')
+      .select('*', { count: 'exact', head: true })
+      .eq('parent_id', id);
+      
+    if (error) {
+      console.error('Error checking for child categories:', error);
+      return false;
+    }
+    
+    return count ? count > 0 : false;
+  };
+  
   // Delete a category
   const deleteCategory = async (id: string) => {
     setSubmitting(true);
     setError(null);
     
     try {
-      // Check if category is used in any products - now properly using category_id
+      // Check if category has child categories
+      const childCategories = await hasChildCategories(id);
+      
+      if (childCategories) {
+        toast.error(`Cannot delete category that has sub-categories. Please reassign or delete the sub-categories first.`);
+        setSubmitting(false);
+        return false;
+      }
+    
+      // Check if category is used in any products
       const { count, error: countError } = await supabase
         .from('products')
         .select('*', { count: 'exact', head: true })
@@ -199,6 +288,7 @@ export const useCategoryManagement = () => {
 
   return {
     categories,
+    hierarchicalCategories,
     loading,
     submitting,
     error,
@@ -207,6 +297,7 @@ export const useCategoryManagement = () => {
     deleteCategory,
     toggleCategoryStatus,
     toggleCategoryFeatured,
+    hasChildCategories,
     refresh: fetchCategories
   };
 };

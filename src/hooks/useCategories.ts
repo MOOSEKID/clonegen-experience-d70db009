@@ -2,6 +2,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/components/ui/use-toast';
+import { CategoryWithChildren } from './shop/shopTypes';
 
 export type Category = {
   id: string;
@@ -13,6 +14,7 @@ export type Category = {
   featured: boolean;
   created_at: string;
   updated_at: string;
+  parent_id: string | null;
   productCount?: number;
 };
 

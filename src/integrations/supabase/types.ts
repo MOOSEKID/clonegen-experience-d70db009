@@ -19,6 +19,7 @@ export type Database = {
           id: string
           is_active: boolean | null
           name: string
+          parent_id: string | null
           slug: string
           updated_at: string
           updated_by: string | null
@@ -32,6 +33,7 @@ export type Database = {
           id?: string
           is_active?: boolean | null
           name: string
+          parent_id?: string | null
           slug: string
           updated_at?: string
           updated_by?: string | null
@@ -45,11 +47,20 @@ export type Database = {
           id?: string
           is_active?: boolean | null
           name?: string
+          parent_id?: string | null
           slug?: string
           updated_at?: string
           updated_by?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "categories_parent_id_fkey"
+            columns: ["parent_id"]
+            isOneToOne: false
+            referencedRelation: "categories"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       class_enrollments: {
         Row: {

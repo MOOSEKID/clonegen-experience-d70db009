@@ -1,31 +1,42 @@
 
 import React, { useState } from 'react';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Switch } from '@/components/ui/switch';
-import { Textarea } from '@/components/ui/textarea';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
-import { Edit, Plus, Loader2, Tag, Trash2 } from 'lucide-react';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Edit, Plus, Loader2, Tag, Trash2, ChevronRight, ChevronDown } from 'lucide-react';
 import { useCategoryManagement } from '@/hooks/admin/useCategoryManagement';
 import { Category } from '@/hooks/useCategories';
+import { CategoryWithChildren } from '@/hooks/shop/shopTypes';
+import CategoryForm from '@/components/admin/shop/CategoryForm';
+import { Badge } from '@/components/ui/badge';
 
 const Categories = () => {
-  const { categories, loading, submitting, createCategory, updateCategory, deleteCategory } = useCategoryManagement();
+  const { 
+    categories, 
+    hierarchicalCategories,
+    loading, 
+    submitting, 
+    createCategory, 
+    updateCategory, 
+    deleteCategory,
+    hasChildCategories 
+  } = useCategoryManagement();
+  
   const [showAddDialog, setShowAddDialog] = useState(false);
   const [showEditDialog, setShowEditDialog] = useState(false);
   const [currentCategory, setCurrentCategory] = useState<Category | null>(null);
+  const [expandedCategories, setExpandedCategories] = useState<Record<string, boolean>>({});
+  const [viewMode, setViewMode] = useState<'flat' | 'hierarchical'>('hierarchical');
   const [formData, setFormData] = useState({
     name: '',
     slug: '',
     description: '',
+    icon: '',
     is_active: true,
     featured: false,
-    icon: ''
+    parent_id: null as string | null
   });
 
   // Reset form when dialog opens/closes
@@ -36,7 +47,8 @@ const Categories = () => {
       description: '',
       is_active: true,
       featured: false,
-      icon: ''
+      icon: '',
+      parent_id: null
     });
   };
 
@@ -49,15 +61,14 @@ const Categories = () => {
       description: category.description || '',
       is_active: category.is_active ?? true,
       featured: category.featured ?? false,
-      icon: category.icon || ''
+      icon: category.icon || '',
+      parent_id: category.parent_id || null
     });
     setShowEditDialog(true);
   };
 
   // Handle add category form submission
-  const handleAddSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    
+  const handleAddSubmit = async (formData: typeof formData) => {
     const result = await createCategory(formData);
     if (result) {
       setShowAddDialog(false);
@@ -66,9 +77,7 @@ const Categories = () => {
   };
   
   // Handle edit category form submission  
-  const handleEditSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    
+  const handleEditSubmit = async (formData: typeof formData) => {
     if (!currentCategory) return;
     
     const result = await updateCategory(currentCategory.id, formData);
@@ -89,16 +98,105 @@ const Categories = () => {
     }
   };
   
-  // Generate slug from name
-  const generateSlug = (name: string) => {
-    const slug = name.toLowerCase()
-      .replace(/\s+/g, '-')
-      .replace(/[^\w-]+/g, '')
-      .replace(/--+/g, '-')
-      .replace(/^-+/, '')
-      .replace(/-+$/, '');
-      
-    setFormData(prev => ({...prev, slug}));
+  // Toggle category expansion in hierarchical view
+  const toggleCategoryExpand = (categoryId: string) => {
+    setExpandedCategories(prev => ({
+      ...prev,
+      [categoryId]: !prev[categoryId]
+    }));
+  };
+
+  // Render a hierarchical category row
+  const renderCategoryRow = (category: CategoryWithChildren, level = 0) => {
+    const hasChildren = category.children && category.children.length > 0;
+    const isExpanded = expandedCategories[category.id] ?? false;
+    
+    return (
+      <React.Fragment key={category.id}>
+        <TableRow>
+          <TableCell className="font-medium">
+            <div className="flex items-center">
+              <div style={{ width: `${level * 24}px` }} /> {/* Indentation */}
+              {hasChildren && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="p-0 h-6 w-6 mr-1"
+                  onClick={() => toggleCategoryExpand(category.id)}
+                >
+                  {isExpanded ? (
+                    <ChevronDown className="h-4 w-4" />
+                  ) : (
+                    <ChevronRight className="h-4 w-4" />
+                  )}
+                </Button>
+              )}
+              {level > 0 && !hasChildren && <div className="w-6 mr-1" />}
+              <span>{category.name}</span>
+              {level > 0 && (
+                <Badge variant="outline" className="ml-2 text-xs">
+                  Sub-category
+                </Badge>
+              )}
+            </div>
+          </TableCell>
+          <TableCell>{category.slug}</TableCell>
+          <TableCell>
+            <span className={`px-2 py-1 rounded-full text-xs ${category.is_active ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'}`}>
+              {category.is_active ? 'Active' : 'Inactive'}
+            </span>
+          </TableCell>
+          <TableCell>
+            {category.featured ? (
+              <span className="px-2 py-1 rounded-full text-xs bg-blue-100 text-blue-800">Featured</span>
+            ) : '—'}
+          </TableCell>
+          <TableCell className="text-right space-x-2">
+            <Button 
+              variant="ghost" 
+              size="sm"
+              onClick={() => handleEdit(category)}
+            >
+              <Edit className="h-4 w-4" />
+              <span className="sr-only">Edit</span>
+            </Button>
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <Button 
+                  variant="ghost" 
+                  size="sm"
+                  onClick={() => setCurrentCategory(category)}
+                >
+                  <Trash2 className="h-4 w-4 text-red-600" />
+                  <span className="sr-only">Delete</span>
+                </Button>
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    This action cannot be undone. This will permanently delete the category
+                    "{currentCategory?.name}" and remove it from our servers.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>Cancel</AlertDialogCancel>
+                  <AlertDialogAction 
+                    onClick={handleDeleteConfirm}
+                    className="bg-red-600 hover:bg-red-700"
+                  >
+                    Delete
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
+          </TableCell>
+        </TableRow>
+        {hasChildren && isExpanded && (
+          category.children?.map(child => renderCategoryRow(child, level + 1))
+        )}
+      </React.Fragment>
+    );
   };
   
   return (
@@ -108,102 +206,45 @@ const Categories = () => {
           <h1 className="text-2xl font-bold text-gray-800">Product Categories</h1>
           <p className="text-gray-500">Manage your product categories and organization</p>
         </div>
-        <Dialog open={showAddDialog} onOpenChange={setShowAddDialog}>
-          <DialogTrigger asChild>
-            <Button className="bg-gym-orange hover:bg-gym-orange/90" onClick={resetForm}>
-              <Plus className="mr-2 h-4 w-4" />
-              Add Category
+        <div className="flex gap-2">
+          <div className="flex rounded-lg border p-1">
+            <Button
+              variant={viewMode === 'flat' ? 'default' : 'ghost'}
+              size="sm"
+              onClick={() => setViewMode('flat')}
+            >
+              Flat View
             </Button>
-          </DialogTrigger>
-          <DialogContent className="sm:max-w-[550px]">
-            <form onSubmit={handleAddSubmit}>
+            <Button
+              variant={viewMode === 'hierarchical' ? 'default' : 'ghost'}
+              size="sm"
+              onClick={() => setViewMode('hierarchical')}
+            >
+              Tree View
+            </Button>
+          </div>
+          <Dialog open={showAddDialog} onOpenChange={setShowAddDialog}>
+            <DialogTrigger asChild>
+              <Button className="bg-gym-orange hover:bg-gym-orange/90" onClick={resetForm}>
+                <Plus className="mr-2 h-4 w-4" />
+                Add Category
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="sm:max-w-[550px]">
               <DialogHeader>
                 <DialogTitle>Add New Category</DialogTitle>
                 <DialogDescription>
                   Create a new product category to organize your inventory.
                 </DialogDescription>
               </DialogHeader>
-              <div className="grid gap-4 py-4">
-                <div className="grid grid-cols-4 items-center gap-4">
-                  <Label htmlFor="name" className="text-right">Name</Label>
-                  <Input 
-                    id="name" 
-                    value={formData.name} 
-                    onChange={(e) => {
-                      setFormData({...formData, name: e.target.value});
-                      if (e.target.value && !formData.slug) {
-                        generateSlug(e.target.value);
-                      }
-                    }} 
-                    className="col-span-3" 
-                    required 
-                  />
-                </div>
-                <div className="grid grid-cols-4 items-center gap-4">
-                  <Label htmlFor="slug" className="text-right">Slug</Label>
-                  <Input 
-                    id="slug" 
-                    value={formData.slug} 
-                    onChange={(e) => setFormData({...formData, slug: e.target.value})} 
-                    className="col-span-3" 
-                    required 
-                  />
-                </div>
-                <div className="grid grid-cols-4 items-center gap-4">
-                  <Label htmlFor="description" className="text-right">Description</Label>
-                  <Textarea 
-                    id="description" 
-                    value={formData.description} 
-                    onChange={(e) => setFormData({...formData, description: e.target.value})} 
-                    className="col-span-3" 
-                  />
-                </div>
-                <div className="grid grid-cols-4 items-center gap-4">
-                  <Label htmlFor="icon" className="text-right">Icon</Label>
-                  <Input 
-                    id="icon" 
-                    value={formData.icon} 
-                    onChange={(e) => setFormData({...formData, icon: e.target.value})} 
-                    className="col-span-3" 
-                    placeholder="CSS class name or icon name" 
-                  />
-                </div>
-                <div className="grid grid-cols-4 items-center gap-4">
-                  <div className="text-right">Options</div>
-                  <div className="col-span-3 space-y-4">
-                    <div className="flex items-center justify-between border p-3 rounded-md">
-                      <Label htmlFor="is_active">Active Category</Label>
-                      <Switch 
-                        id="is_active" 
-                        checked={formData.is_active} 
-                        onCheckedChange={(checked) => setFormData({...formData, is_active: checked})}
-                      />
-                    </div>
-                    <div className="flex items-center justify-between border p-3 rounded-md">
-                      <Label htmlFor="featured">Featured Category</Label>
-                      <Switch 
-                        id="featured" 
-                        checked={formData.featured} 
-                        onCheckedChange={(checked) => setFormData({...formData, featured: checked})}
-                      />
-                    </div>
-                  </div>
-                </div>
-              </div>
-              <DialogFooter>
-                <Button type="button" variant="outline" onClick={() => setShowAddDialog(false)}>Cancel</Button>
-                <Button type="submit" disabled={submitting}>
-                  {submitting ? (
-                    <>
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      Saving...
-                    </>
-                  ) : "Create Category"}
-                </Button>
-              </DialogFooter>
-            </form>
-          </DialogContent>
-        </Dialog>
+              <CategoryForm 
+                onSubmit={handleAddSubmit} 
+                isLoading={submitting}
+                categories={categories}
+              />
+            </DialogContent>
+          </Dialog>
+        </div>
       </div>
       
       <Card>
@@ -240,62 +281,75 @@ const Categories = () => {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {categories.map((category) => (
-                    <TableRow key={category.id}>
-                      <TableCell className="font-medium">{category.name}</TableCell>
-                      <TableCell>{category.slug}</TableCell>
-                      <TableCell>
-                        <span className={`px-2 py-1 rounded-full text-xs ${category.is_active ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'}`}>
-                          {category.is_active ? 'Active' : 'Inactive'}
-                        </span>
-                      </TableCell>
-                      <TableCell>
-                        {category.featured ? (
-                          <span className="px-2 py-1 rounded-full text-xs bg-blue-100 text-blue-800">Featured</span>
-                        ) : '—'}
-                      </TableCell>
-                      <TableCell className="text-right space-x-2">
-                        <Button 
-                          variant="ghost" 
-                          size="sm"
-                          onClick={() => handleEdit(category)}
-                        >
-                          <Edit className="h-4 w-4" />
-                          <span className="sr-only">Edit</span>
-                        </Button>
-                        <AlertDialog>
-                          <AlertDialogTrigger asChild>
-                            <Button 
-                              variant="ghost" 
-                              size="sm"
-                              onClick={() => setCurrentCategory(category)}
-                            >
-                              <Trash2 className="h-4 w-4 text-red-600" />
-                              <span className="sr-only">Delete</span>
-                            </Button>
-                          </AlertDialogTrigger>
-                          <AlertDialogContent>
-                            <AlertDialogHeader>
-                              <AlertDialogTitle>Are you sure?</AlertDialogTitle>
-                              <AlertDialogDescription>
-                                This action cannot be undone. This will permanently delete the category
-                                "{currentCategory?.name}" and remove it from our servers.
-                              </AlertDialogDescription>
-                            </AlertDialogHeader>
-                            <AlertDialogFooter>
-                              <AlertDialogCancel>Cancel</AlertDialogCancel>
-                              <AlertDialogAction 
-                                onClick={handleDeleteConfirm}
-                                className="bg-red-600 hover:bg-red-700"
+                  {viewMode === 'hierarchical' ? (
+                    hierarchicalCategories.map(category => renderCategoryRow(category))
+                  ) : (
+                    categories.map(category => (
+                      <TableRow key={category.id}>
+                        <TableCell className="font-medium">
+                          <div className="flex items-center">
+                            <span>{category.name}</span>
+                            {category.parent_id && (
+                              <Badge variant="outline" className="ml-2 text-xs">
+                                Sub-category
+                              </Badge>
+                            )}
+                          </div>
+                        </TableCell>
+                        <TableCell>{category.slug}</TableCell>
+                        <TableCell>
+                          <span className={`px-2 py-1 rounded-full text-xs ${category.is_active ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'}`}>
+                            {category.is_active ? 'Active' : 'Inactive'}
+                          </span>
+                        </TableCell>
+                        <TableCell>
+                          {category.featured ? (
+                            <span className="px-2 py-1 rounded-full text-xs bg-blue-100 text-blue-800">Featured</span>
+                          ) : '—'}
+                        </TableCell>
+                        <TableCell className="text-right space-x-2">
+                          <Button 
+                            variant="ghost" 
+                            size="sm"
+                            onClick={() => handleEdit(category)}
+                          >
+                            <Edit className="h-4 w-4" />
+                            <span className="sr-only">Edit</span>
+                          </Button>
+                          <AlertDialog>
+                            <AlertDialogTrigger asChild>
+                              <Button 
+                                variant="ghost" 
+                                size="sm"
+                                onClick={() => setCurrentCategory(category)}
                               >
-                                Delete
-                              </AlertDialogAction>
-                            </AlertDialogFooter>
-                          </AlertDialogContent>
-                        </AlertDialog>
-                      </TableCell>
-                    </TableRow>
-                  ))}
+                                <Trash2 className="h-4 w-4 text-red-600" />
+                                <span className="sr-only">Delete</span>
+                              </Button>
+                            </AlertDialogTrigger>
+                            <AlertDialogContent>
+                              <AlertDialogHeader>
+                                <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                                <AlertDialogDescription>
+                                  This action cannot be undone. This will permanently delete the category
+                                  "{currentCategory?.name}" and remove it from our servers.
+                                </AlertDialogDescription>
+                              </AlertDialogHeader>
+                              <AlertDialogFooter>
+                                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                <AlertDialogAction 
+                                  onClick={handleDeleteConfirm}
+                                  className="bg-red-600 hover:bg-red-700"
+                                >
+                                  Delete
+                                </AlertDialogAction>
+                              </AlertDialogFooter>
+                            </AlertDialogContent>
+                          </AlertDialog>
+                        </TableCell>
+                      </TableRow>
+                    ))
+                  )}
                 </TableBody>
               </Table>
             </div>
@@ -306,89 +360,18 @@ const Categories = () => {
       {/* Edit Dialog */}
       <Dialog open={showEditDialog} onOpenChange={setShowEditDialog}>
         <DialogContent className="sm:max-w-[550px]">
-          <form onSubmit={handleEditSubmit}>
-            <DialogHeader>
-              <DialogTitle>Edit Category</DialogTitle>
-              <DialogDescription>
-                Update the details for this product category.
-              </DialogDescription>
-            </DialogHeader>
-            <div className="grid gap-4 py-4">
-              <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="edit-name" className="text-right">Name</Label>
-                <Input 
-                  id="edit-name" 
-                  value={formData.name} 
-                  onChange={(e) => {
-                    setFormData({...formData, name: e.target.value});
-                  }} 
-                  className="col-span-3" 
-                  required 
-                />
-              </div>
-              <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="edit-slug" className="text-right">Slug</Label>
-                <Input 
-                  id="edit-slug" 
-                  value={formData.slug} 
-                  onChange={(e) => setFormData({...formData, slug: e.target.value})} 
-                  className="col-span-3" 
-                  required 
-                />
-              </div>
-              <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="edit-description" className="text-right">Description</Label>
-                <Textarea 
-                  id="edit-description" 
-                  value={formData.description} 
-                  onChange={(e) => setFormData({...formData, description: e.target.value})} 
-                  className="col-span-3" 
-                />
-              </div>
-              <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="edit-icon" className="text-right">Icon</Label>
-                <Input 
-                  id="edit-icon" 
-                  value={formData.icon} 
-                  onChange={(e) => setFormData({...formData, icon: e.target.value})} 
-                  className="col-span-3" 
-                  placeholder="CSS class name or icon name" 
-                />
-              </div>
-              <div className="grid grid-cols-4 items-center gap-4">
-                <div className="text-right">Options</div>
-                <div className="col-span-3 space-y-4">
-                  <div className="flex items-center justify-between border p-3 rounded-md">
-                    <Label htmlFor="edit-is_active">Active Category</Label>
-                    <Switch 
-                      id="edit-is_active" 
-                      checked={formData.is_active} 
-                      onCheckedChange={(checked) => setFormData({...formData, is_active: checked})}
-                    />
-                  </div>
-                  <div className="flex items-center justify-between border p-3 rounded-md">
-                    <Label htmlFor="edit-featured">Featured Category</Label>
-                    <Switch 
-                      id="edit-featured" 
-                      checked={formData.featured} 
-                      onCheckedChange={(checked) => setFormData({...formData, featured: checked})}
-                    />
-                  </div>
-                </div>
-              </div>
-            </div>
-            <DialogFooter>
-              <Button type="button" variant="outline" onClick={() => setShowEditDialog(false)}>Cancel</Button>
-              <Button type="submit" disabled={submitting}>
-                {submitting ? (
-                  <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Updating...
-                  </>
-                ) : "Update Category"}
-              </Button>
-            </DialogFooter>
-          </form>
+          <DialogHeader>
+            <DialogTitle>Edit Category</DialogTitle>
+            <DialogDescription>
+              Update the details for this product category.
+            </DialogDescription>
+          </DialogHeader>
+          <CategoryForm 
+            initialData={formData}
+            onSubmit={handleEditSubmit}
+            isLoading={submitting}
+            categories={categories}
+          />
         </DialogContent>
       </Dialog>
     </div>

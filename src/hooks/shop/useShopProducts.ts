@@ -5,7 +5,8 @@ import { Category } from '@/hooks/useCategories';
 import { useProductFetching } from './useProductFetching';
 import { useCategoryFetching } from './useCategoryFetching';
 import { useCart } from './useCart';
-import { ShopFilters } from './shopTypes';
+import { ShopFilters, CategoryWithChildren } from './shopTypes';
+import { toast } from 'sonner';
 
 export const useShopProducts = () => {
   const [searchTerm, setSearchTerm] = useState('');
@@ -13,6 +14,7 @@ export const useShopProducts = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [categories, setCategories] = useState<Category[]>([]);
+  const [hierarchicalCategories, setHierarchicalCategories] = useState<CategoryWithChildren[]>([]);
   const [categoryCount, setCategoryCount] = useState<Record<string, number>>({});
   const [filters, setFilters] = useState<ShopFilters>({});
   
@@ -26,6 +28,7 @@ export const useShopProducts = () => {
       try {
         const categoryData = await fetchCategories();
         setCategories(categoryData.categories);
+        setHierarchicalCategories(categoryData.hierarchicalCategories || []);
         setCategoryCount(categoryData.categoryCount);
       } catch (err) {
         console.error('Error loading categories:', err);
@@ -73,6 +76,7 @@ export const useShopProducts = () => {
     cartItemsCount,
     products,
     categories,
+    hierarchicalCategories,
     isLoading,
     error,
     addToCart,

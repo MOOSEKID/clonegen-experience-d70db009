@@ -29,7 +29,7 @@ const ProductPage = () => {
           // Get product details from database
           const { data: productData, error: productError } = await supabase
             .from('products')
-            .select('*, categories(id, name, slug)')
+            .select('*, category:categories(*)')
             .eq('id', productId)
             .single();
           
@@ -97,7 +97,7 @@ const ProductPage = () => {
   }
 
   // Get the category information safely
-  const categoryInfo = product.categories || { id: product.category_id, name: product.category, slug: product.category?.toLowerCase() };
+  const categoryInfo = product.category || { id: product.category_id, name: product.category, slug: product.category?.toLowerCase() };
   const categoryId = categoryInfo.slug || (product.category_id || '').toString();
   const categoryName = categoryInfo.name || product.category || 'Products';
 

@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Filter, Search, ShoppingBag } from 'lucide-react';
 import { Product } from '@/hooks/useProducts';
 import { useNavigate } from 'react-router-dom';
+import { toast } from 'sonner';
 
 interface ShopSearchProps {
   searchTerm: string;

@@ -15,6 +15,7 @@ const ShopPage = () => {
     products,
     isLoading,
     categories,
+    hierarchicalCategories,
     categoryCount,
     error,
     addToCart,
@@ -59,6 +60,7 @@ const ShopPage = () => {
         />
         <CategoriesSection 
           categories={categories} 
+          hierarchicalCategories={hierarchicalCategories}
           categoryCount={categoryCount}
           selectedCategory={filters.category} 
           onCategorySelect={handleCategorySelect}

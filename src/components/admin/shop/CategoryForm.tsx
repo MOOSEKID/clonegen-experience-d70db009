@@ -24,6 +24,7 @@ import {
 } from '@/components/ui/select';
 import { Loader2 } from 'lucide-react';
 import { Switch } from '@/components/ui/switch';
+import { Category } from '@/hooks/useCategories';
 
 // Define the form validation schema
 const categoryFormSchema = z.object({
@@ -32,7 +33,8 @@ const categoryFormSchema = z.object({
   description: z.string().optional(),
   icon: z.string().optional(),
   is_active: z.boolean().default(true),
-  featured: z.boolean().default(false)
+  featured: z.boolean().default(false),
+  parent_id: z.string().nullable().optional()
 });
 
 type CategoryFormValues = z.infer<typeof categoryFormSchema>;
@@ -41,6 +43,7 @@ interface CategoryFormProps {
   initialData?: CategoryFormValues & { id?: string };
   onSubmit: (data: CategoryFormValues) => void;
   isLoading?: boolean;
+  categories?: Category[];
 }
 
 const iconOptions = [
@@ -54,6 +57,7 @@ const CategoryForm: React.FC<CategoryFormProps> = ({
   initialData,
   onSubmit,
   isLoading = false,
+  categories = [],
 }) => {
   const form = useForm<CategoryFormValues>({
     resolver: zodResolver(categoryFormSchema),
@@ -63,7 +67,8 @@ const CategoryForm: React.FC<CategoryFormProps> = ({
       description: initialData?.description || '',
       icon: initialData?.icon || 'ShoppingBag',
       is_active: initialData?.is_active ?? true,
-      featured: initialData?.featured ?? false
+      featured: initialData?.featured ?? false,
+      parent_id: initialData?.parent_id || null
     },
   });
 
@@ -76,6 +81,11 @@ const CategoryForm: React.FC<CategoryFormProps> = ({
       form.setValue('slug', slug);
     }
   };
+
+  // Filter out the current category from parent options to prevent self-reference
+  const parentCategoryOptions = categories.filter(cat => 
+    !initialData?.id || cat.id !== initialData.id
+  );
 
   return (
     <Form {...form}>
@@ -117,6 +127,38 @@ const CategoryForm: React.FC<CategoryFormProps> = ({
               </FormControl>
               <FormDescription>
                 URL-friendly version of the name. Auto-generated but can be customized.
+              </FormDescription>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="parent_id"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Parent Category</FormLabel>
+              <Select
+                onValueChange={(value) => field.onChange(value || null)}
+                value={field.value || undefined}
+              >
+                <FormControl>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select a parent category (optional)" />
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent>
+                  <SelectItem value="">None (Main Category)</SelectItem>
+                  {parentCategoryOptions.map((category) => (
+                    <SelectItem key={category.id} value={category.id}>
+                      {category.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <FormDescription>
+                Optional: Make this a sub-category by selecting a parent
               </FormDescription>
               <FormMessage />
             </FormItem>

@@ -9,6 +9,7 @@ export type ShopFilters = {
   sortBy?: 'name' | 'price-asc' | 'price-desc' | 'newest';
   search?: string;
   memberOnly?: boolean;
+  parentCategory?: string;
 };
 
 export type ShopProductsState = {
@@ -20,4 +21,8 @@ export type ShopProductsState = {
   categories: Category[];
   categoryCount: Record<string, number>;
   filters: ShopFilters;
+};
+
+export type CategoryWithChildren = Category & {
+  children?: CategoryWithChildren[];
 };

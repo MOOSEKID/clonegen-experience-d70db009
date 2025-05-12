@@ -1,4 +1,3 @@
-
 import { useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Product } from '@/hooks/useProducts';
@@ -9,7 +8,7 @@ export const useProductFetching = () => {
     try {
       let query = supabase
         .from('products')
-        .select('*, categories(id, name, slug)')
+        .select('*, category:categories(*)')
         .eq('is_active', true)
         .eq('is_public', true);
 
@@ -25,7 +24,20 @@ export const useProductFetching = () => {
             .single();
             
           if (categoryData) {
-            query = query.eq('category_id', categoryData.id);
+            // Check if this category has subcategories
+            const { data: subcategories } = await supabase
+              .from('categories')
+              .select('id')
+              .eq('parent_id', categoryData.id);
+              
+            if (subcategories && subcategories.length > 0) {
+              // If there are subcategories, include them in the filter
+              const subcategoryIds = subcategories.map(sub => sub.id);
+              query = query.in('category_id', [categoryData.id, ...subcategoryIds]);
+            } else {
+              // Otherwise, just filter by the selected category
+              query = query.eq('category_id', categoryData.id);
+            }
           }
         }
 
