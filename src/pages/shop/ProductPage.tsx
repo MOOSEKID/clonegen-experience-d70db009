@@ -97,9 +97,19 @@ const ProductPage = () => {
   }
 
   // Get the category information safely
-  const categoryInfo = product.category || { id: product.category_id, name: product.category, slug: product.category?.toLowerCase() };
-  const categoryId = categoryInfo.slug || (product.category_id || '').toString();
-  const categoryName = categoryInfo.name || product.category || 'Products';
+  const categoryInfo = product.category || { id: product.category_id, name: '', slug: '' };
+  
+  // Handle both string and object types for category
+  let categoryId = '';
+  let categoryName = '';
+  
+  if (typeof categoryInfo === 'string') {
+    categoryId = product.category_id || '';
+    categoryName = categoryInfo;
+  } else {
+    categoryId = categoryInfo.slug || (product.category_id || '').toString();
+    categoryName = categoryInfo.name || '';
+  }
 
   return (
     <div className="bg-gym-light min-h-screen pt-24 pb-16">

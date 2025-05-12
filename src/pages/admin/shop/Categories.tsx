@@ -12,6 +12,17 @@ import { CategoryWithChildren } from '@/hooks/shop/shopTypes';
 import CategoryForm from '@/components/admin/shop/CategoryForm';
 import { Badge } from '@/components/ui/badge';
 
+// Define the form data type separately to avoid circular reference
+type CategoryFormData = {
+  name: string;
+  slug: string;
+  description: string;
+  icon: string;
+  is_active: boolean;
+  featured: boolean;
+  parent_id: string | null;
+};
+
 const Categories = () => {
   const { 
     categories, 
@@ -29,14 +40,14 @@ const Categories = () => {
   const [currentCategory, setCurrentCategory] = useState<Category | null>(null);
   const [expandedCategories, setExpandedCategories] = useState<Record<string, boolean>>({});
   const [viewMode, setViewMode] = useState<'flat' | 'hierarchical'>('hierarchical');
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<CategoryFormData>({
     name: '',
     slug: '',
     description: '',
     icon: '',
     is_active: true,
     featured: false,
-    parent_id: null as string | null
+    parent_id: null
   });
 
   // Reset form when dialog opens/closes
@@ -68,7 +79,7 @@ const Categories = () => {
   };
 
   // Handle add category form submission
-  const handleAddSubmit = async (formData: typeof formData) => {
+  const handleAddSubmit = async (formData: CategoryFormData) => {
     const result = await createCategory(formData);
     if (result) {
       setShowAddDialog(false);
@@ -77,7 +88,7 @@ const Categories = () => {
   };
   
   // Handle edit category form submission  
-  const handleEditSubmit = async (formData: typeof formData) => {
+  const handleEditSubmit = async (formData: CategoryFormData) => {
     if (!currentCategory) return;
     
     const result = await updateCategory(currentCategory.id, formData);
