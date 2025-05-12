@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -120,6 +119,12 @@ export const ProductForm = ({ initialData, productId, mode = 'create' }: Product
   };
   
   async function onSubmit(values: ProductFormValues) {
+    // Make sure category_id is defined (this is now a required field)
+    if (!values.category_id) {
+      toast.error('Category is required');
+      return;
+    }
+
     // First upload image if there's a new one
     let finalImageUrl = values.image_url;
     if (imageFile) {
@@ -130,16 +135,10 @@ export const ProductForm = ({ initialData, productId, mode = 'create' }: Product
     }
     
     if (mode === 'create') {
-      // Make sure name is explicitly defined as non-optional when creating product data
+      // Ensure all required fields are present for product creation
       const productData = {
         ...values,
         image_url: finalImageUrl,
-        name: values.name, // Explicitly include name to satisfy TypeScript
-        price: values.price, // Explicitly include required fields
-        stock_count: values.stock_count, // Explicitly include required fields
-        is_active: values.is_active,
-        is_public: values.is_public, 
-        is_instore: values.is_instore,
         category: categories.find(c => c.id === values.category_id)?.name || '',
         created_by: (await supabase.auth.getSession())?.data?.session?.user?.id
       };
@@ -150,11 +149,10 @@ export const ProductForm = ({ initialData, productId, mode = 'create' }: Product
         navigate('/admin/shop/products');
       }
     } else if (mode === 'edit' && productId) {
-      // When updating, also include the category field
+      // When updating, include all fields from the form
       const updateData = {
         ...values,
         image_url: finalImageUrl,
-        name: values.name, // Explicitly include name to satisfy TypeScript
         category: categories.find(c => c.id === values.category_id)?.name || '',
         updated_by: (await supabase.auth.getSession())?.data?.session?.user?.id
       };
