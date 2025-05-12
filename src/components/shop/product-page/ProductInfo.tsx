@@ -10,6 +10,13 @@ interface ProductInfoProps {
   onAddToCart: () => void;
 }
 
+// Define a type for the category when it's an object
+interface CategoryObject {
+  id?: string;
+  name?: string;
+  slug?: string;
+}
+
 const ProductInfo: React.FC<ProductInfoProps> = ({ product, onAddToCart }) => {
   const [quantity, setQuantity] = useState(1);
 
@@ -36,8 +43,9 @@ const ProductInfo: React.FC<ProductInfoProps> = ({ product, onAddToCart }) => {
       return product.category;
     }
     
-    // Handle object category (ensuring it has a name property)
-    return product.category.name || 'Uncategorized';
+    // Cast to CategoryObject type to handle the object case
+    const categoryObj = product.category as CategoryObject;
+    return categoryObj.name || 'Uncategorized';
   };
 
   return (
