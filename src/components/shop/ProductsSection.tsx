@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Product } from '@/hooks/useProducts';
-import { ShopFilters } from '@/hooks/useShopProducts';
+import { ShopFilters } from '@/hooks/shop/shopTypes';
 import ProductsHeader from './product-section/ProductsHeader';
 import ProductsGrid from './product-section/ProductsGrid';
 import ProductSkeletons from './product-section/ProductSkeletons';
