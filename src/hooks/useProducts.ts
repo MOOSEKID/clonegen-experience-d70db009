@@ -11,12 +11,14 @@ export type Product = {
   category: string;
   category_id?: string;
   price: number;
+  member_price: number | null;
   image_url: string | null;
   sku: string | null;
   stock_count: number;
   is_active: boolean;
   is_public: boolean;
   is_instore: boolean;
+  is_member_only: boolean;
   created_at: string;
   updated_at: string;
 };
@@ -34,6 +36,8 @@ export interface ProductFormData {
   is_active: boolean;
   is_public: boolean;
   is_instore: boolean;
+  is_member_only?: boolean;
+  member_price?: number;
   imageFile?: File | null;
 }
 

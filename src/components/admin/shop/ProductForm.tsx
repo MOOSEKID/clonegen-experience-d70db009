@@ -67,12 +67,24 @@ export const ProductForm = ({ initialData, productId, mode = 'create' }: Product
   
   async function onSubmit(values: ProductFormValues) {
     if (mode === 'create') {
-      const result = await createProduct(values);
+      // When creating a product, add the category field for backward compatibility
+      const productData = {
+        ...values,
+        category: categories.find(c => c.id === values.category_id)?.name || '',
+      };
+      
+      const result = await createProduct(productData);
       if (result) {
         navigate('/admin/shop/products');
       }
     } else if (mode === 'edit' && productId) {
-      const success = await updateProduct(productId, values);
+      // When updating, also include the category field
+      const updateData = {
+        ...values,
+        category: categories.find(c => c.id === values.category_id)?.name || '',
+      };
+      
+      const success = await updateProduct(productId, updateData);
       if (success) {
         navigate('/admin/shop/products');
       }

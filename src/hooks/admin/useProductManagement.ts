@@ -1,11 +1,25 @@
-
 import { useState, useEffect } from 'react';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import { Product } from '@/hooks/useProducts';
 import { useNavigate } from 'react-router-dom';
 
-export type ProductCreateData = Omit<Product, 'id' | 'created_at' | 'updated_at'>;
+export type ProductCreateData = {
+  name: string;
+  description?: string;
+  price: number;
+  member_price?: number;
+  stock_count: number;
+  category_id?: string;
+  category: string; // Keep this for backward compatibility
+  sku?: string;
+  image_url?: string;
+  is_active: boolean;
+  is_public: boolean;
+  is_instore: boolean;
+  is_member_only?: boolean;
+};
+
 export type ProductUpdateData = Partial<ProductCreateData>;
 
 export const useProductManagement = (productId?: string) => {

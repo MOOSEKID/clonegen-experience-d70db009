@@ -54,7 +54,7 @@ const EditProduct = () => {
           name: product.name,
           description: product.description || '',
           price: product.price,
-          member_price: product.member_price,
+          member_price: product.member_price || undefined,
           stock_count: product.stock_count,
           category_id: product.category_id || '',
           sku: product.sku || '',
