@@ -1,14 +1,12 @@
-
 import React, { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { ChevronRight, ShoppingBag, AlertCircle } from 'lucide-react';
-import ProductGrid from '@/components/shop/ProductGrid';
+import ProductsSection from '@/components/shop/ProductsSection';
 import { Product } from '@/hooks/useProducts';
 import { supabase } from '@/integrations/supabase/client';
 import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
 import { Category } from '@/hooks/useCategories';
 import { toast } from 'sonner';
-import ProductsSection from '@/components/shop/ProductsSection';
 
 const CategoryPage = () => {
   const { slug } = useParams<{ slug: string }>();
