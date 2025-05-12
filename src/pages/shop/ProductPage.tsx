@@ -12,17 +12,6 @@ import RelatedProducts from '@/components/shop/product-page/RelatedProducts';
 import LoadingSpinner from '@/components/shop/product-page/LoadingSpinner';
 import { toast } from 'sonner';
 
-// Category mapping to ensure consistent IDs across the application
-const getCategoryId = (categoryName: string): string => {
-  const categoryMap: {[key: string]: string} = {
-    'Supplements': 'supplements',
-    'Equipment': 'equipment',
-    'Apparel': 'apparel'
-  };
-  
-  return categoryMap[categoryName] || categoryName.toLowerCase();
-};
-
 const ProductPage = () => {
   const { productId } = useParams<{ productId: string }>();
   const [product, setProduct] = useState<Product | null>(null);
@@ -40,7 +29,7 @@ const ProductPage = () => {
           // Get product details from database
           const { data: productData, error: productError } = await supabase
             .from('products')
-            .select('*')
+            .select('*, categories(id, name, slug)')
             .eq('id', productId)
             .single();
           
@@ -53,11 +42,11 @@ const ProductPage = () => {
           const typedProduct = productData as Product;
           setProduct(typedProduct);
           
-          // Get related products (from same category)
+          // Get related products from same category
           const { data: relatedData, error: relatedError } = await supabase
             .from('products')
             .select('*')
-            .eq('category', typedProduct.category)
+            .eq('category_id', typedProduct.category_id)
             .eq('is_active', true)
             .eq('is_public', true)
             .neq('id', productId)
@@ -107,8 +96,10 @@ const ProductPage = () => {
     );
   }
 
-  // Get the correct category ID for linking
-  const categoryId = getCategoryId(product.category);
+  // Get the category information safely
+  const categoryInfo = product.categories || { id: product.category_id, name: product.category, slug: product.category?.toLowerCase() };
+  const categoryId = categoryInfo.slug || (product.category_id || '').toString();
+  const categoryName = categoryInfo.name || product.category || 'Products';
 
   return (
     <div className="bg-gym-light min-h-screen pt-24 pb-16">
@@ -116,7 +107,7 @@ const ProductPage = () => {
         {/* Breadcrumb */}
         <ProductBreadcrumb 
           categoryId={categoryId} 
-          categoryName={product.category}
+          categoryName={categoryName}
           productName={product.name}
         />
 

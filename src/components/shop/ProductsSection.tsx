@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Product } from '@/hooks/useProducts';
 import { ShopFilters } from '@/hooks/shop/shopTypes';
@@ -18,6 +19,8 @@ interface ProductSectionProps {
   onPriceFilterChange?: (min: number, max: number) => void;
   currentFilters?: ShopFilters;
   categoryName?: string;
+  showFilters?: boolean;
+  setShowFilters?: (show: boolean) => void;
 }
 
 const ProductsSection: React.FC<ProductSectionProps> = ({ 
@@ -29,11 +32,12 @@ const ProductsSection: React.FC<ProductSectionProps> = ({
   onSortChange,
   onPriceFilterChange,
   currentFilters,
-  categoryName
+  categoryName,
+  showFilters = false,
+  setShowFilters
 }) => {
   // For price slider
   const [priceRange, setPriceRange] = React.useState<number[]>([0, 50000]);
-  const [showFilters, setShowFilters] = React.useState(false);
 
   // Get min/max price for all products
   const allPrices = filteredProducts.map(product => product.price);

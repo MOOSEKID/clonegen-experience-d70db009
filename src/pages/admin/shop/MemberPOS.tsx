@@ -5,9 +5,29 @@ import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { CreditCard, Search, User, BarChart } from 'lucide-react';
 import { Input } from '@/components/ui/input';
+import { toast } from 'sonner';
 
 const MemberPOS = () => {
   const [searchQuery, setSearchQuery] = useState('');
+  const [isProcessingSale, setIsProcessingSale] = useState(false);
+  
+  const handleNewSale = () => {
+    setIsProcessingSale(true);
+    // In a real implementation, this would navigate to a sale creation form
+    toast.info("New sale functionality coming soon!");
+    setTimeout(() => setIsProcessingSale(false), 1000);
+  };
+  
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!searchQuery.trim()) {
+      toast.warning("Please enter a search term");
+      return;
+    }
+    
+    toast.info(`Searching for member: ${searchQuery}`);
+    // In a real implementation, this would search for a member
+  };
   
   return (
     <div className="space-y-6">
@@ -19,9 +39,11 @@ const MemberPOS = () => {
         <Button
           variant="default"
           className="bg-gym-orange hover:bg-gym-orange/90"
+          onClick={handleNewSale}
+          disabled={isProcessingSale}
         >
           <CreditCard className="mr-2 h-4 w-4" />
-          New Sale
+          {isProcessingSale ? 'Processing...' : 'New Sale'}
         </Button>
       </div>
       
@@ -34,7 +56,7 @@ const MemberPOS = () => {
           <CardDescription>Search for a member to charge items to their tab</CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="flex gap-4">
+          <form onSubmit={handleSearch} className="flex gap-4">
             <div className="relative flex-grow">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={18} />
               <Input 
@@ -45,9 +67,9 @@ const MemberPOS = () => {
                 className="pl-10"
               />
             </div>
-            <Button variant="outline">Scan Card</Button>
-            <Button variant="default" className="bg-gym-orange hover:bg-gym-orange/90">Search</Button>
-          </div>
+            <Button variant="outline" type="button">Scan Card</Button>
+            <Button variant="default" type="submit" className="bg-gym-orange hover:bg-gym-orange/90">Search</Button>
+          </form>
         </CardContent>
       </Card>
       

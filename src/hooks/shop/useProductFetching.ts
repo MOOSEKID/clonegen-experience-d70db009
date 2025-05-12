@@ -5,75 +5,85 @@ import { Product } from '@/hooks/useProducts';
 import { ShopFilters } from './shopTypes';
 
 export const useProductFetching = () => {
-  const fetchProducts = useCallback(async (filters: ShopFilters = {}) => {
+  const fetchProducts = useCallback(async (filters?: ShopFilters) => {
     try {
-      console.log('Fetching products with filters:', filters);
-      
-      // Start building the query
       let query = supabase
         .from('products')
-        .select('*, categories(id, name, slug, description, icon, featured)')
+        .select('*, categories(id, name, slug)')
         .eq('is_active', true)
         .eq('is_public', true);
 
-      // Apply filters
-      if (filters.category) {
-        // Join with categories to filter by slug
-        query = query.eq('categories.slug', filters.category);
-      }
-      
-      if (filters.minPrice !== undefined) {
-        query = query.gte('price', filters.minPrice);
-      }
-      
-      if (filters.maxPrice !== undefined) {
-        query = query.lte('price', filters.maxPrice);
-      }
-      
-      if (filters.memberOnly) {
-        query = query.eq('is_member_only', true);
-      }
-      
-      if (filters.search) {
-        query = query.ilike('name', `%${filters.search}%`);
-      }
-      
-      // Apply sorting
-      if (filters.sortBy) {
-        switch (filters.sortBy) {
-          case 'name':
-            query = query.order('name', { ascending: true });
-            break;
-          case 'price-asc':
-            query = query.order('price', { ascending: true });
-            break;
-          case 'price-desc':
-            query = query.order('price', { ascending: false });
-            break;
-          case 'newest':
-            query = query.order('created_at', { ascending: false });
-            break;
-          default:
-            query = query.order('name', { ascending: true });
+      // Apply filters if provided
+      if (filters) {
+        // Filter by category
+        if (filters.category) {
+          // First, get the category ID from the slug
+          const { data: categoryData } = await supabase
+            .from('categories')
+            .select('id')
+            .eq('slug', filters.category)
+            .single();
+            
+          if (categoryData) {
+            query = query.eq('category_id', categoryData.id);
+          }
         }
-      } else {
-        // Default sort
-        query = query.order('name', { ascending: true });
+
+        // Filter by price range
+        if (filters.minPrice !== undefined) {
+          query = query.gte('price', filters.minPrice);
+        }
+        
+        if (filters.maxPrice !== undefined) {
+          query = query.lte('price', filters.maxPrice);
+        }
+
+        // Filter by search term
+        if (filters.search) {
+          query = query.ilike('name', `%${filters.search}%`);
+        }
+
+        // Filter by member-only products
+        if (filters.memberOnly) {
+          query = query.eq('is_member_only', true);
+        }
+
+        // Apply sorting
+        if (filters.sortBy) {
+          switch (filters.sortBy) {
+            case 'price-asc':
+              query = query.order('price', { ascending: true });
+              break;
+            case 'price-desc':
+              query = query.order('price', { ascending: false });
+              break;
+            case 'newest':
+              query = query.order('created_at', { ascending: false });
+              break;
+            case 'name':
+              query = query.order('name', { ascending: true });
+              break;
+            default:
+              // Default sorting by name
+              query = query.order('name', { ascending: true });
+          }
+        } else {
+          // Default sorting
+          query = query.order('name', { ascending: true });
+        }
       }
-      
-      const { data: productsData, error: productsError } = await query;
-      
-      if (productsError) {
-        console.error('Error fetching products:', productsError);
+
+      const { data, error } = await query;
+
+      if (error) {
+        console.error('Error fetching products:', error);
         throw new Error('Failed to load products. Please try again later.');
       }
-      
-      console.log(`Fetched ${productsData?.length || 0} products successfully`);
-      return productsData as Product[] || [];
-      
+
+      return data as Product[];
     } catch (error) {
       console.error('Unexpected error:', error);
-      throw new Error('An unexpected error occurred. Please try again later.');
+      throw error;
     }
   }, []);
 

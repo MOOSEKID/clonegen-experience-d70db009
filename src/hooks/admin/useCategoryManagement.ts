@@ -139,7 +139,7 @@ export const useCategoryManagement = () => {
     setError(null);
     
     try {
-      // Check if category is used in any products
+      // Check if category is used in any products - now properly using category_id
       const { count, error: countError } = await supabase
         .from('products')
         .select('*', { count: 'exact', head: true })

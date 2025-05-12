@@ -18,7 +18,7 @@ export const useShopProducts = () => {
   
   const { fetchProducts } = useProductFetching();
   const { fetchCategories } = useCategoryFetching();
-  const { cartItems, addToCart } = useCart();
+  const { cartItems, addToCart, removeFromCart, clearCart, cartItemsCount } = useCart();
 
   // Load products and categories on initial render
   useEffect(() => {
@@ -70,11 +70,14 @@ export const useShopProducts = () => {
     searchTerm,
     setSearchTerm,
     cartItems,
+    cartItemsCount,
     products,
     categories,
     isLoading,
     error,
     addToCart,
+    removeFromCart,
+    clearCart,
     categoryCount,
     filters,
     updateFilters

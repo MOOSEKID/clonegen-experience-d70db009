@@ -1,9 +1,11 @@
-import React, { useState, useEffect } from 'react';
+
+import React, { useState } from 'react';
 import ShopHeader from '@/components/shop/ShopHeader';
 import ShopSearch from '@/components/shop/ShopSearch';
 import CategoriesSection from '@/components/shop/CategoriesSection';
 import ProductsSection from '@/components/shop/ProductsSection';
 import { useShopProducts } from '@/hooks/shop/useShopProducts';
+import { toast } from 'sonner';
 
 const ShopPage = () => {
   const {
@@ -19,6 +21,8 @@ const ShopPage = () => {
     filters,
     updateFilters
   } = useShopProducts();
+  
+  const [showFilters, setShowFilters] = useState(false);
 
   // Handle category selection
   const handleCategorySelect = (categorySlug?: string) => {
@@ -37,6 +41,11 @@ const ShopPage = () => {
   const handleSortChange = (sortOption: string) => {
     updateFilters({ sortBy: sortOption as any });
   };
+  
+  // Handle filter toggle
+  const handleFilterToggle = () => {
+    setShowFilters(prev => !prev);
+  };
 
   return (
     <div className="bg-gym-light min-h-screen pt-24 pb-16">
@@ -45,7 +54,8 @@ const ShopPage = () => {
         <ShopSearch 
           searchTerm={searchTerm} 
           setSearchTerm={setSearchTerm} 
-          cartItems={cartItems} 
+          cartItems={cartItems}
+          onFilterToggle={handleFilterToggle}
         />
         <CategoriesSection 
           categories={categories} 
@@ -62,6 +72,10 @@ const ShopPage = () => {
           onSortChange={handleSortChange}
           onPriceFilterChange={handlePriceFilterChange}
           currentFilters={filters}
+          categoryName={filters.category ? 
+            categories.find(c => c.slug === filters.category)?.name : undefined}
+          showFilters={showFilters}
+          setShowFilters={setShowFilters}
         />
       </div>
     </div>
