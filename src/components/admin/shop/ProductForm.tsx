@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -67,9 +66,15 @@ export const ProductForm = ({ initialData, productId, mode = 'create' }: Product
   
   async function onSubmit(values: ProductFormValues) {
     if (mode === 'create') {
-      // When creating a product, add the category field for backward compatibility
+      // Make sure name is explicitly defined as non-optional when creating product data
       const productData = {
         ...values,
+        name: values.name, // Explicitly include name to satisfy TypeScript
+        price: values.price, // Explicitly include required fields
+        stock_count: values.stock_count, // Explicitly include required fields
+        is_active: values.is_active,
+        is_public: values.is_public, 
+        is_instore: values.is_instore,
         category: categories.find(c => c.id === values.category_id)?.name || '',
       };
       
@@ -81,6 +86,7 @@ export const ProductForm = ({ initialData, productId, mode = 'create' }: Product
       // When updating, also include the category field
       const updateData = {
         ...values,
+        name: values.name, // Explicitly include name to satisfy TypeScript
         category: categories.find(c => c.id === values.category_id)?.name || '',
       };
       
