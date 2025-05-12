@@ -28,9 +28,10 @@ interface ProductSectionProps {
   searchTerm: string;
   error: string | null;
   addToCart: (product: Product) => void;
-  onSortChange: (sortOption: string) => void;
-  onPriceFilterChange: (min: number, max: number) => void;
-  currentFilters: ShopFilters;
+  onSortChange?: (sortOption: string) => void;
+  onPriceFilterChange?: (min: number, max: number) => void;
+  currentFilters?: ShopFilters;
+  categoryName?: string;
 }
 
 const ProductsSection: React.FC<ProductSectionProps> = ({ 
@@ -41,7 +42,8 @@ const ProductsSection: React.FC<ProductSectionProps> = ({
   addToCart,
   onSortChange,
   onPriceFilterChange,
-  currentFilters
+  currentFilters,
+  categoryName
 }) => {
   // For price slider
   const [priceRange, setPriceRange] = React.useState<number[]>([0, 50000]);
@@ -56,7 +58,9 @@ const ProductsSection: React.FC<ProductSectionProps> = ({
   };
 
   const applyPriceFilter = () => {
-    onPriceFilterChange(priceRange[0], priceRange[1]);
+    if (onPriceFilterChange) {
+      onPriceFilterChange(priceRange[0], priceRange[1]);
+    }
   };
 
   if (isLoading) {
@@ -95,7 +99,7 @@ const ProductsSection: React.FC<ProductSectionProps> = ({
     <div className="mt-8">
       <div className="flex justify-between items-center mb-4">
         <h2 className="text-xl font-semibold">
-          {searchTerm ? `Search Results: "${searchTerm}"` : "Products"}
+          {categoryName ? categoryName : searchTerm ? `Search Results: "${searchTerm}"` : "Products"}
           {filteredProducts.length > 0 && (
             <span className="text-sm font-normal text-gray-500 ml-2">
               ({filteredProducts.length} {filteredProducts.length === 1 ? 'product' : 'products'})
@@ -103,43 +107,47 @@ const ProductsSection: React.FC<ProductSectionProps> = ({
           )}
         </h2>
         <div className="flex gap-2">
-          <Button 
-            variant="outline" 
-            size="sm" 
-            className="flex items-center gap-1"
-            onClick={() => setShowFilters(!showFilters)}
-          >
-            <Filter className="h-4 w-4" />
-            Filters
-          </Button>
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="outline" size="sm" className="flex items-center gap-1">
-                <ArrowUpDown className="h-4 w-4" />
-                Sort
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuLabel>Sort By</DropdownMenuLabel>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem onClick={() => onSortChange('name')}>
-                Name (A-Z)
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => onSortChange('price-asc')}>
-                Price: Low to High
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => onSortChange('price-desc')}>
-                Price: High to Low
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => onSortChange('newest')}>
-                Newest First
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
+          {onPriceFilterChange && (
+            <Button 
+              variant="outline" 
+              size="sm" 
+              className="flex items-center gap-1"
+              onClick={() => setShowFilters(!showFilters)}
+            >
+              <Filter className="h-4 w-4" />
+              Filters
+            </Button>
+          )}
+          {onSortChange && (
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" size="sm" className="flex items-center gap-1">
+                  <ArrowUpDown className="h-4 w-4" />
+                  Sort
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuLabel>Sort By</DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={() => onSortChange('name')}>
+                  Name (A-Z)
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => onSortChange('price-asc')}>
+                  Price: Low to High
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => onSortChange('price-desc')}>
+                  Price: High to Low
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => onSortChange('newest')}>
+                  Newest First
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          )}
         </div>
       </div>
       
-      {showFilters && (
+      {showFilters && onPriceFilterChange && (
         <div className="mb-6 p-4 border rounded-lg bg-white">
           <Accordion type="single" collapsible className="w-full">
             <AccordionItem value="price">
