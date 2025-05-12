@@ -19,7 +19,7 @@ const TrainerRatings = () => {
   const navigate = useNavigate();
   const { trainers, isLoading: isLoadingTrainers } = useTrainersData();
   const [selectedTrainerId, setSelectedTrainerId] = useState<string | undefined>(undefined);
-  const { ratings, summary, isLoading: isLoadingRatings, respondToRating, flagRating } = useTrainerRatings(selectedTrainerId);
+  const { ratings, summary, isLoading: isLoadingRatings, respondToRating, flagRating, addRating } = useTrainerRatings(selectedTrainerId);
   
   const [isAddRatingOpen, setIsAddRatingOpen] = useState(false);
   const [selectedRatingId, setSelectedRatingId] = useState<string | null>(null);
@@ -140,7 +140,7 @@ const TrainerRatings = () => {
             memberId="current-member-id" // In a real app, this would be the logged-in member's ID
             onSubmit={async (data) => {
               try {
-                await useTrainerRatings().addRating(data);
+                await addRating(data);
                 setIsAddRatingOpen(false);
               } catch (error) {
                 console.error("Error adding rating:", error);

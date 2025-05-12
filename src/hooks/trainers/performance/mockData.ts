@@ -21,12 +21,12 @@ export const generateMockPerformanceMetrics = (trainerId?: string): PerformanceM
     averageAttendance: 85,
     clientRetentionRate: 78,
     monthlySessions: [
-      { month: 'Jan', count: 18 },
-      { month: 'Feb', count: 20 },
-      { month: 'Mar', count: 22 },
-      { month: 'Apr', count: 19 },
-      { month: 'May', count: 24 },
-      { month: 'Jun', count: 28 }
+      { date: 'Jan', sessions: 18 },
+      { date: 'Feb', sessions: 20 },
+      { date: 'Mar', sessions: 22 },
+      { date: 'Apr', sessions: 19 },
+      { date: 'May', sessions: 24 },
+      { date: 'Jun', sessions: 28 }
     ],
     completionRate: 95,
     assignedClients: 12,
@@ -37,41 +37,66 @@ export const generateMockPerformanceMetrics = (trainerId?: string): PerformanceM
   };
 };
 
-export const generateMockAttendanceData = (trainerId?: string): ClassAttendance[] => {
+export const generateMockAttendanceData = (trainerId?: string): any[] => {
   return [
     {
+      id: '1',
+      class_id: 'class-1',
       class_name: 'Morning HIIT',
-      class_date: 'Mon, June 10',
-      enrolled_count: 12,
-      attended_count: 10,
+      date: 'Mon, June 10',
+      time: '08:00',
+      duration: 45,
+      trainer_id: trainerId || 'trainer-1',
+      expected_attendance: 12,
+      actual_attendance: 10,
       attendance_rate: 83
     },
     {
+      id: '2',
+      class_id: 'class-2',
       class_name: 'Power Yoga',
-      class_date: 'Wed, June 12',
-      enrolled_count: 15,
-      attended_count: 14,
+      date: 'Wed, June 12',
+      time: '10:00',
+      duration: 60,
+      trainer_id: trainerId || 'trainer-1',
+      expected_attendance: 15,
+      actual_attendance: 14,
       attendance_rate: 93
     },
     {
+      id: '3',
+      class_id: 'class-3',
       class_name: 'Kickboxing',
-      class_date: 'Fri, June 14',
-      enrolled_count: 10,
-      attended_count: 7,
+      date: 'Fri, June 14',
+      time: '17:00',
+      duration: 50,
+      trainer_id: trainerId || 'trainer-1',
+      expected_attendance: 10,
+      actual_attendance: 7,
       attendance_rate: 70
     },
     {
+      id: '4',
+      class_id: 'class-4',
       class_name: 'Core Strength',
-      class_date: 'Mon, June 17',
-      enrolled_count: 8,
-      attended_count: 8,
+      date: 'Mon, June 17',
+      time: '19:00',
+      duration: 45,
+      trainer_id: trainerId || 'trainer-1',
+      expected_attendance: 8,
+      actual_attendance: 8,
       attendance_rate: 100
     },
     {
+      id: '5',
+      class_id: 'class-5',
       class_name: 'Spin Class',
-      class_date: 'Wed, June 19',
-      enrolled_count: 18,
-      attended_count: 12,
+      date: 'Wed, June 19',
+      time: '18:00',
+      duration: 45,
+      trainer_id: trainerId || 'trainer-1',
+      expected_attendance: 18,
+      actual_attendance: 12,
       attendance_rate: 67
     }
   ];

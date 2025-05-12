@@ -9,7 +9,12 @@ import { TrainerRating } from "@/hooks/trainers/useTrainerRatings";
 interface AddRatingFormProps {
   trainerId: string;
   memberId: string;
-  onSubmit: (data: Omit<TrainerRating, 'id' | 'created_at' | 'updated_at' | 'is_flagged' | 'member_name'>) => Promise<void>;
+  onSubmit: (data: {
+    trainer_id: string;
+    member_id: string;
+    rating: number;
+    review?: string | null;
+  }) => Promise<void>;
   onCancel?: () => void;
 }
 
@@ -32,8 +37,7 @@ const AddRatingForm = ({
         trainer_id: trainerId,
         member_id: memberId,
         rating,
-        review: review.trim() === '' ? null : review,
-        trainer_response: null
+        review: review.trim() === '' ? null : review
       });
       
       // Reset form after successful submission

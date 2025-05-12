@@ -60,7 +60,9 @@ export const useRolePermissions = () => {
         console.log('No roles found or error fetching roles');
         setRoles([]);
       } else if (data) {
-        setRoles(data.roles || []);
+        // Parse the JSON roles from the database
+        const parsedRoles = data.roles ? (data.roles as Role[]) : [];
+        setRoles(parsedRoles);
       } else {
         setRoles([]);
       }
@@ -73,10 +75,10 @@ export const useRolePermissions = () => {
     }
   };
 
-  const createRole = async (role: Omit<Role, 'id'>) => {
+  const createRole = async (roleData: { name: string; description: string }) => {
     try {
       const newRole: Role = {
-        ...role,
+        ...roleData,
         id: crypto.randomUUID(),
         permissions: [],
       };
@@ -87,7 +89,10 @@ export const useRolePermissions = () => {
       // Update in database
       const { data, error } = await supabase
         .from('settings_roles')
-        .upsert({ id: crypto.randomUUID(), roles: [...roles, newRole] })
+        .upsert({ 
+          id: crypto.randomUUID(), 
+          roles: JSON.stringify([...roles, newRole]) 
+        })
         .select()
         .single();
       
@@ -95,7 +100,7 @@ export const useRolePermissions = () => {
       
       toast({
         title: "Role created",
-        description: `The role "${role.name}" has been created successfully.`,
+        description: `The role "${roleData.name}" has been created successfully.`,
       });
       
       return true;
@@ -125,7 +130,7 @@ export const useRolePermissions = () => {
       // Update in database
       const { error } = await supabase
         .from('settings_roles')
-        .update({ roles: updatedRoles })
+        .update({ roles: JSON.stringify(updatedRoles) })
         .eq('id', roleId);
       
       if (error) throw error;
@@ -159,7 +164,7 @@ export const useRolePermissions = () => {
       // Update in database
       const { error } = await supabase
         .from('settings_roles')
-        .update({ roles: updatedRoles })
+        .update({ roles: JSON.stringify(updatedRoles) })
         .eq('id', crypto.randomUUID());
       
       if (error) throw error;
@@ -196,7 +201,7 @@ export const useRolePermissions = () => {
       // Update in database
       const { error } = await supabase
         .from('settings_roles')
-        .update({ roles: updatedRoles })
+        .update({ roles: JSON.stringify(updatedRoles) })
         .eq('id', crypto.randomUUID());
       
       if (error) throw error;

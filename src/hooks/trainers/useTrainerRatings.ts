@@ -3,24 +3,24 @@ import { useState, useEffect } from 'react';
 import { useToast } from '@/components/ui/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 
-interface TrainerRating {
+export interface TrainerRating {
   id: string;
   trainer_id: string;
   member_id: string;
   member_name: string;
   rating: number;
-  review?: string;
-  trainer_response?: string;
+  review?: string | null;
+  trainer_response?: string | null;
   is_flagged?: boolean;
   is_published?: boolean;
   created_at: string;
   updated_at: string;
 }
 
-interface RatingSummary {
-  average_rating: number;
-  total_ratings: number;
-  rating_distribution: {
+export interface RatingSummary {
+  averageRating: number;
+  totalRatings: number;
+  ratingDistribution: {
     '1': number;
     '2': number;
     '3': number;
@@ -32,9 +32,9 @@ interface RatingSummary {
 export const useTrainerRatings = (trainerId?: string) => {
   const [ratings, setRatings] = useState<TrainerRating[]>([]);
   const [summary, setSummary] = useState<RatingSummary>({
-    average_rating: 0,
-    total_ratings: 0,
-    rating_distribution: {
+    averageRating: 0,
+    totalRatings: 0,
+    ratingDistribution: {
       '1': 0,
       '2': 0,
       '3': 0,
@@ -102,9 +102,9 @@ export const useTrainerRatings = (trainerId?: string) => {
       
       // Calculate summary
       const mockSummary: RatingSummary = {
-        average_rating: 4.7,
-        total_ratings: 3,
-        rating_distribution: {
+        averageRating: 4.7,
+        totalRatings: 3,
+        ratingDistribution: {
           '1': 0,
           '2': 0, 
           '3': 0,
@@ -131,7 +131,7 @@ export const useTrainerRatings = (trainerId?: string) => {
     trainer_id: string;
     member_id: string;
     rating: number;
-    review?: string;
+    review?: string | null;
   }) => {
     try {
       // Would actually save to DB in production
@@ -150,15 +150,17 @@ export const useTrainerRatings = (trainerId?: string) => {
       setRatings(prev => [newRating, ...prev]);
       
       // Update summary
-      const newTotal = summary.total_ratings + 1;
-      const newAvg = ((summary.average_rating * summary.total_ratings) + ratingData.rating) / newTotal;
-      const newDist = {...summary.rating_distribution};
-      newDist[ratingData.rating as keyof typeof newDist] += 1;
+      const newTotal = summary.totalRatings + 1;
+      const newAvg = ((summary.averageRating * summary.totalRatings) + ratingData.rating) / newTotal;
+      const newDist = {...summary.ratingDistribution};
+      // Convert number to string key
+      const ratingKey = String(ratingData.rating) as keyof typeof newDist;
+      newDist[ratingKey] += 1;
       
       setSummary({
-        average_rating: parseFloat(newAvg.toFixed(1)),
-        total_ratings: newTotal,
-        rating_distribution: newDist
+        averageRating: parseFloat(newAvg.toFixed(1)),
+        totalRatings: newTotal,
+        ratingDistribution: newDist
       });
       
       toast({
