@@ -76,7 +76,7 @@ export const useMainRoutes = () => {
           <ShopPage />
         </Suspense>
       } />
-      <Route path="/shop/category/:categoryId" element={
+      <Route path="/shop/category/:slug" element={
         <Suspense fallback={<PageLoading />}>
           <CategoryPage />
         </Suspense>

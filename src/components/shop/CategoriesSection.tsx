@@ -21,7 +21,14 @@ const CategoriesSection = ({ categories, categoryCount }: CategoriesSectionProps
     });
     
   if (activeCategories.length === 0) {
-    return null;
+    return (
+      <div className="mb-12">
+        <h2 className="text-2xl md:text-3xl font-bold text-gym-dark mb-6">Categories</h2>
+        <div className="bg-white/50 rounded-lg shadow-sm p-8 text-center">
+          <p className="text-gray-500">No product categories available yet.</p>
+        </div>
+      </div>
+    );
   }
 
   return (
@@ -32,7 +39,7 @@ const CategoriesSection = ({ categories, categoryCount }: CategoriesSectionProps
           <CategoryCard 
             key={category.id} 
             category={category} 
-            productCount={category.productCount || 0} 
+            productCount={categoryCount[category.id] || 0} 
           />
         ))}
       </div>

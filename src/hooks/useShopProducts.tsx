@@ -25,7 +25,7 @@ export const useShopProducts = () => {
         console.log('Fetching products from Supabase...');
         const { data: productsData, error: productsError } = await supabase
           .from('products')
-          .select('*, categories(id, name, slug, description, icon)')
+          .select('*, categories(id, name, slug, description, icon, featured)')
           .eq('is_active', true)
           .eq('is_public', true);
           
@@ -53,7 +53,7 @@ export const useShopProducts = () => {
           console.log(`Fetched ${productsData.length} products successfully`);
           setProducts(productsData as Product[]);
           
-          // Count products by category - Initialize the map before using it
+          // Count products by category
           const countsByCategoryMap: Record<string, number> = {};
           productsData.forEach(product => {
             if (product.category_id) {
