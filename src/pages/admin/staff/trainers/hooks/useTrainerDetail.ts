@@ -23,7 +23,7 @@ export const useTrainerDetail = (id: string | undefined) => {
         
         // Fetch trainer basic info
         const { data: trainerData, error: trainerError } = await supabase
-          .from('trainers')
+          .from('trainer_profiles')
           .select('*')
           .eq('id', id)
           .single();
@@ -49,37 +49,37 @@ export const useTrainerDetail = (id: string | undefined) => {
         // Map trainer data to StaffProfile format
         const staffProfile: StaffProfile = {
           id: trainerData.id,
-          full_name: trainerData.name,
-          email: trainerData.email,
-          phone: trainerData.phone,
+          full_name: trainerData.name || '',
+          email: trainerData.email || '',
+          phone: trainerData.phone || '',
           role: 'trainer',
-          photo_url: trainerData.profilepicture,
-          status: trainerData.status,
+          photo_url: trainerData.profilepicture || '',
+          status: trainerData.status || 'Active',
           specialties: trainerData.specialization || [],
-          bio: trainerData.bio,
-          hire_date: trainerData.hiredate,
+          bio: trainerData.bio || '',
+          hire_date: trainerData.hiredate || '',
           // Default values for potentially missing experience fields
           experience_years: undefined,
           experience_level: undefined,
           // Convert certifications and availability to StaffProfile format
-          certifications: certifications.map(cert => ({
+          certifications: (certifications || []).map(cert => ({
             ...convertTrainerCertToStaffCert(cert),
             staff_id: cert.trainer_id
           })) as StaffCertification[],
-          availability: availability.map(avail => ({
+          availability: (availability || []).map(avail => ({
             ...convertTrainerAvailabilityToStaffAvailability(avail),
             staff_id: avail.trainer_id
           })) as StaffAvailability[]
         };
         
         // Check if trainerData has experience fields and add them if available
-        if ('experience_years' in trainerData) {
+        if (trainerData && 'experience_years' in trainerData) {
           staffProfile.experience_years = typeof trainerData.experience_years === 'number' 
             ? Number(trainerData.experience_years) 
             : undefined;
         }
         
-        if ('experience_level' in trainerData) {
+        if (trainerData && 'experience_level' in trainerData) {
           // Ensure experience_level is treated as a string or undefined
           staffProfile.experience_level = typeof trainerData.experience_level === 'string' 
             ? trainerData.experience_level 
@@ -104,7 +104,7 @@ export const useTrainerDetail = (id: string | undefined) => {
     try {
       // Update the trainer in Supabase
       const { error } = await supabase
-        .from('trainers')
+        .from('trainer_profiles')
         .update({
           name: updatedTrainer.full_name,
           email: updatedTrainer.email,
@@ -142,7 +142,7 @@ export const useTrainerDetail = (id: string | undefined) => {
     
     try {
       const { error } = await supabase
-        .from('trainers')
+        .from('trainer_profiles')
         .delete()
         .eq('id', trainer.id);
         

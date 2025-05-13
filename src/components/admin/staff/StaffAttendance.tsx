@@ -1,13 +1,12 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { CheckIn, CheckOut, Clock, Calendar } from 'lucide-react';
+import { Check, LogOut, Clock, Calendar } from 'lucide-react';
 import { format } from 'date-fns';
 import { useStaffData } from '@/hooks/staff/useStaffData';
-import { useToast } from '@/hooks/use-toast';
+import { useToast } from '@/components/ui/use-toast';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 
@@ -285,7 +284,7 @@ const StaffAttendance: React.FC = () => {
                 disabled={loadingAction === 'checkin'}
                 className="bg-green-600 hover:bg-green-700"
               >
-                <CheckIn className="mr-2 h-4 w-4" />
+                <Check className="mr-2 h-4 w-4" />
                 {loadingAction === 'checkin' ? 'Processing...' : 'Check In'}
               </Button>
               
@@ -294,7 +293,7 @@ const StaffAttendance: React.FC = () => {
                 disabled={loadingAction === 'checkout'}
                 className="bg-orange-600 hover:bg-orange-700"
               >
-                <CheckOut className="mr-2 h-4 w-4" />
+                <LogOut className="mr-2 h-4 w-4" />
                 {loadingAction === 'checkout' ? 'Processing...' : 'Check Out'}
               </Button>
             </div>

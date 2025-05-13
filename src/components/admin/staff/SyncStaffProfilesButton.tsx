@@ -1,70 +1,74 @@
 
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { RefreshCw } from 'lucide-react';
+import { useToast } from '@/components/ui/use-toast';
 import { supabase } from '@/integrations/supabase/client';
-import { useToast } from '@/hooks/use-toast';
-import { useAuth } from '@/hooks/useAuth';
+import { RefreshCw } from 'lucide-react';
 
-interface SyncStaffProfilesButtonProps {
-  className?: string;
-}
-
-const SyncStaffProfilesButton: React.FC<SyncStaffProfilesButtonProps> = ({ className }) => {
-  const [isSyncing, setIsSyncing] = useState(false);
+const SyncStaffProfilesButton: React.FC = () => {
+  const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
-  const { user } = useAuth();
 
-  const handleSyncProfiles = async () => {
-    setIsSyncing(true);
-    
+  const handleSync = async () => {
+    setIsLoading(true);
     try {
-      // Get the current session
       const { data: sessionData } = await supabase.auth.getSession();
-      if (!sessionData?.session) {
-        throw new Error('Authentication required');
-      }
       
-      // Call the edge function
-      const { data, error } = await supabase.functions.invoke('sync_missing_staff_profiles', {
+      if (!sessionData.session) {
+        toast({
+          title: "Authentication Error",
+          description: "You must be logged in to perform this action.",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      const response = await fetch('https://qrjwfiurwvcsyrcpewsj.supabase.co/functions/v1/sync_missing_staff_profiles', {
         method: 'POST',
         headers: {
-          Authorization: `Bearer ${sessionData.session.access_token}`,
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${sessionData.session.access_token}`,
         },
-        body: { role: 'trainer' }, // Default to trainer role for now
+        body: JSON.stringify({ role: 'trainer' }), // Currently focusing on trainers
       });
-      
-      if (error) {
-        throw error;
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(result.error || 'Failed to sync staff profiles');
       }
-      
+
       toast({
-        title: 'Success',
-        description: 'Staff profile sync completed successfully',
-        variant: 'default',
+        title: "Success",
+        description: "Staff profile sync completed successfully.",
       });
-      
+
+      // Optionally reload the page to show updated profiles
+      setTimeout(() => {
+        window.location.reload();
+      }, 1500);
+
     } catch (error) {
-      console.error('Error syncing staff profiles:', error);
+      console.error('Sync error:', error);
       toast({
-        title: 'Error',
-        description: 'Failed to sync staff profiles. Please try again.',
-        variant: 'destructive',
+        title: "Error",
+        description: error.message || "Failed to sync staff profiles. Please try again.",
+        variant: "destructive",
       });
     } finally {
-      setIsSyncing(false);
+      setIsLoading(false);
     }
   };
-  
+
   return (
-    <Button
-      onClick={handleSyncProfiles}
-      disabled={isSyncing}
-      className={className}
-      variant="outline"
+    <Button 
+      variant="outline" 
+      onClick={handleSync} 
+      disabled={isLoading}
+      className="flex items-center gap-2"
     >
-      <RefreshCw className={`mr-2 h-4 w-4 ${isSyncing ? 'animate-spin' : ''}`} />
-      {isSyncing ? 'Syncing...' : 'Sync Staff Profiles'}
+      <RefreshCw className={`h-4 w-4 ${isLoading ? 'animate-spin' : ''}`} />
+      {isLoading ? 'Syncing...' : 'Sync Staff Profiles'}
     </Button>
   );
 };
