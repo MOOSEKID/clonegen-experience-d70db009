@@ -35,12 +35,12 @@ const SyncStaffProfilesButton: React.FC = () => {
       const result = await response.json();
 
       if (!response.ok) {
-        throw new Error(result.error || 'Failed to sync staff profiles');
+        throw new Error(result.error || 'Failed to sync trainer profiles');
       }
 
       toast({
         title: "Success",
-        description: "Staff profile sync completed successfully.",
+        description: "Trainer profile sync completed successfully.",
       });
 
       // Optionally reload the page to show updated profiles
@@ -52,7 +52,7 @@ const SyncStaffProfilesButton: React.FC = () => {
       console.error('Sync error:', error);
       toast({
         title: "Error",
-        description: error.message || "Failed to sync staff profiles. Please try again.",
+        description: error.message || "Failed to sync trainer profiles. Please try again.",
         variant: "destructive",
       });
     } finally {
@@ -68,7 +68,7 @@ const SyncStaffProfilesButton: React.FC = () => {
       className="flex items-center gap-2"
     >
       <RefreshCw className={`h-4 w-4 ${isLoading ? 'animate-spin' : ''}`} />
-      {isLoading ? 'Syncing...' : 'Sync Staff Profiles'}
+      {isLoading ? 'Syncing...' : 'Sync Trainer Profiles'}
     </Button>
   );
 };
