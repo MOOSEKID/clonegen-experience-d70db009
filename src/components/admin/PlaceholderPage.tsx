@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, Clock } from 'lucide-react';
+import { ArrowLeft, Clock, FileText } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import PlaceholderSection from '@/components/admin/PlaceholderSection';
@@ -68,6 +68,7 @@ const PlaceholderPage: React.FC<PlaceholderPageProps> = ({
           features={features}
           ctaText={ctaText}
           onClick={onCtaClick}
+          icon={<FileText className="h-5 w-5 text-primary" />}
         />
       )}
     </div>

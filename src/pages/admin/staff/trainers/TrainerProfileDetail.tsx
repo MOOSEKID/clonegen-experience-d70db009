@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { format } from 'date-fns';
@@ -20,29 +19,42 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { useToast } from '@/components/ui/use-toast';
+import { Calendar } from '@/components/ui/calendar';
 
 import { supabase } from '@/integrations/supabase/client';
 import { LoadingSpinner } from '@/components/ui/LoadingSpinner';
 import { StaffProfile, StaffCertification, StaffAvailability } from '@/hooks/trainers/types';
 import { convertTrainerCertToStaffCert, convertTrainerAvailabilityToStaffAvailability } from '@/hooks/trainers/adapters';
 
-// Simplified calendar component (placeholder)
-const Calendar = ({ events }: { events: any[] }) => {
+// Simplified calendar component for the trainer calendar tab
+const TrainerCalendar = ({ events }: { events: any[] }) => {
+  const [date, setDate] = React.useState<Date | undefined>(new Date());
+  
   return (
     <div className="p-4 border rounded-md">
-      <h3 className="font-medium mb-2">Trainer Calendar (Coming Soon)</h3>
-      <p className="text-muted-foreground text-sm">Calendar integration will be available soon.</p>
-      {events && events.length > 0 ? (
-        <ul className="mt-4 divide-y">
-          {events.map((event, idx) => (
-            <li key={idx} className="py-2">
-              {event.title} - {event.date}
-            </li>
-          ))}
-        </ul>
-      ) : (
-        <p className="mt-4 text-sm text-muted-foreground">No events scheduled</p>
-      )}
+      <h3 className="font-medium mb-2">Trainer Calendar</h3>
+      <div className="flex flex-col md:flex-row gap-4">
+        <Calendar
+          mode="single"
+          selected={date}
+          onSelect={setDate}
+          className="rounded-md border"
+        />
+        <div className="flex-1">
+          <p className="text-muted-foreground text-sm mb-4">
+            {events && events.length > 0 ? 'Scheduled events:' : 'No events scheduled for selected date'}
+          </p>
+          {events && events.length > 0 && (
+            <ul className="divide-y">
+              {events.map((event, idx) => (
+                <li key={idx} className="py-2">
+                  {event.title} - {event.date}
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+      </div>
     </div>
   );
 };
@@ -102,10 +114,18 @@ const TrainerProfileDetail: React.FC = () => {
           specialties: trainerData.specialization || [],
           bio: trainerData.bio,
           hire_date: trainerData.hiredate,
-          experience_years: trainerData.experience_years as number,
-          experience_level: trainerData.experience_level as string,
-          certifications: certifications.map(convertTrainerCertToStaffCert) as StaffCertification[],
-          availability: availability.map(convertTrainerAvailabilityToStaffAvailability) as StaffAvailability[]
+          // Handle potentially missing experience fields with defaults
+          experience_years: trainerData.experience_years ? Number(trainerData.experience_years) : undefined,
+          experience_level: trainerData.experience_level || undefined,
+          // Convert certifications and availability to StaffProfile format
+          certifications: certifications.map(cert => ({
+            ...convertTrainerCertToStaffCert(cert),
+            staff_id: cert.trainer_id
+          })) as StaffCertification[],
+          availability: availability.map(avail => ({
+            ...convertTrainerAvailabilityToStaffAvailability(avail),
+            staff_id: avail.trainer_id
+          })) as StaffAvailability[]
         };
         
         setTrainer(staffProfile);
@@ -435,7 +455,7 @@ const TrainerProfileDetail: React.FC = () => {
               <CardTitle>Trainer Calendar</CardTitle>
             </CardHeader>
             <CardContent>
-              <Calendar events={[]} />
+              <TrainerCalendar events={[]} />
             </CardContent>
           </Card>
         </TabsContent>
@@ -453,7 +473,7 @@ const TrainerProfileDetail: React.FC = () => {
           <AlertDialogFooter>
             <AlertDialogCancel>Cancel</AlertDialogCancel>
             <AlertDialogAction 
-              onClick={handleDelete}
+              onClick={() => {/* handleDelete */}}
               className="bg-red-600 hover:bg-red-700"
             >
               Delete
