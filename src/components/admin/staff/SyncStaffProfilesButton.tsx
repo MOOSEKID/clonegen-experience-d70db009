@@ -4,9 +4,23 @@ import { Button } from '@/components/ui/button';
 import { useToast } from '@/components/ui/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { RefreshCw } from 'lucide-react';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+
+type RoleOption = {
+  value: string;
+  label: string;
+};
+
+const roles: RoleOption[] = [
+  { value: 'trainer', label: 'Trainer' },
+  { value: 'manager', label: 'Manager' },
+  { value: 'reception', label: 'Reception' },
+  { value: 'support', label: 'Support' }
+];
 
 const SyncStaffProfilesButton: React.FC = () => {
   const [isLoading, setIsLoading] = useState(false);
+  const [selectedRole, setSelectedRole] = useState<string>("trainer");
   const { toast } = useToast();
 
   const handleSync = async () => {
@@ -29,19 +43,35 @@ const SyncStaffProfilesButton: React.FC = () => {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${sessionData.session.access_token}`,
         },
-        body: JSON.stringify({ role: 'trainer' }), // Currently focusing on trainers
+        body: JSON.stringify({ role: selectedRole }), 
       });
 
       const result = await response.json();
 
       if (!response.ok) {
-        throw new Error(result.error || 'Failed to sync trainer profiles');
+        throw new Error(result.error || `Failed to sync ${selectedRole} profiles`);
       }
 
       toast({
         title: "Success",
-        description: "Trainer profile sync completed successfully.",
+        description: `${selectedRole.charAt(0).toUpperCase() + selectedRole.slice(1)} profile sync completed successfully.`,
       });
+
+      // Log the action in the audit log
+      const { error: auditError } = await supabase
+        .from('admin_audit_logs')
+        .insert({
+          admin_id: sessionData.session.user.id,
+          action: "sync_profiles",
+          details: { 
+            role_synced: selectedRole, 
+            triggered_by: sessionData.session.user.id 
+          }
+        });
+
+      if (auditError) {
+        console.error('Error logging audit action:', auditError);
+      }
 
       // Optionally reload the page to show updated profiles
       setTimeout(() => {
@@ -52,7 +82,7 @@ const SyncStaffProfilesButton: React.FC = () => {
       console.error('Sync error:', error);
       toast({
         title: "Error",
-        description: error.message || "Failed to sync trainer profiles. Please try again.",
+        description: error.message || `Failed to sync ${selectedRole} profiles. Please try again.`,
         variant: "destructive",
       });
     } finally {
@@ -61,15 +91,34 @@ const SyncStaffProfilesButton: React.FC = () => {
   };
 
   return (
-    <Button 
-      variant="outline" 
-      onClick={handleSync} 
-      disabled={isLoading}
-      className="flex items-center gap-2"
-    >
-      <RefreshCw className={`h-4 w-4 ${isLoading ? 'animate-spin' : ''}`} />
-      {isLoading ? 'Syncing...' : 'Sync Trainer Profiles'}
-    </Button>
+    <div className="flex items-center gap-2">
+      <Select 
+        value={selectedRole} 
+        onValueChange={setSelectedRole}
+        disabled={isLoading}
+      >
+        <SelectTrigger className="w-[180px]">
+          <SelectValue placeholder="Select a role" />
+        </SelectTrigger>
+        <SelectContent>
+          {roles.map(role => (
+            <SelectItem key={role.value} value={role.value}>
+              {role.label}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
+      
+      <Button 
+        variant="outline" 
+        onClick={handleSync} 
+        disabled={isLoading}
+        className="flex items-center gap-2"
+      >
+        <RefreshCw className={`h-4 w-4 ${isLoading ? 'animate-spin' : ''}`} />
+        {isLoading ? 'Syncing...' : 'Sync Staff Profiles'}
+      </Button>
+    </div>
   );
 };
 

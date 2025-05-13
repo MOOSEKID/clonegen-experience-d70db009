@@ -1,7 +1,7 @@
 
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { PlusCircle, Users, Briefcase, DollarSign, Smile, Dumbbell } from 'lucide-react';
+import { PlusCircle, Users, Briefcase, DollarSign, Smile, Dumbbell, Shield } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useStaffData } from '@/hooks/staff/useStaffData';
@@ -10,6 +10,7 @@ import { LoadingSpinner } from '@/components/ui/LoadingSpinner';
 import RoleSpecificCards from '@/components/admin/staff/cards/RoleSpecificCards';
 import SyncStaffProfilesButton from '@/components/admin/staff/SyncStaffProfilesButton';
 import { useAuth } from '@/hooks/useAuth';
+import StaffRoleManagement from '@/components/admin/staff/StaffRoleManagement';
 
 const StaffPage = () => {
   const navigate = useNavigate();
@@ -61,17 +62,30 @@ const StaffPage = () => {
             <PlusCircle className="h-4 w-4" />
             Add Staff Member
           </Button>
+          {isSuperAdmin && (
+            <Button 
+              variant="outline"
+              onClick={() => navigate('/admin/audit-log')}
+              className="flex items-center gap-2"
+            >
+              <Shield className="h-4 w-4" />
+              Audit Logs
+            </Button>
+          )}
         </div>
       </div>
 
       <Tabs defaultValue="all" className="w-full" onValueChange={handleTabChange} value={activeTab}>
-        <TabsList className="grid grid-cols-6 mb-6">
+        <TabsList className="grid grid-cols-7 mb-6">
           <TabsTrigger value="all">All Staff ({staff.length})</TabsTrigger>
           <TabsTrigger value="trainer">Trainers ({getStaffByRole('trainer').length})</TabsTrigger>
           <TabsTrigger value="manager">Managers ({getStaffByRole('manager').length})</TabsTrigger>
           <TabsTrigger value="reception">Reception & Sales ({getStaffByRole('reception').length + getStaffByRole('sales').length})</TabsTrigger>
           <TabsTrigger value="support">Support Staff ({getStaffByRole('support').length})</TabsTrigger>
           <TabsTrigger value="wellness">Wellness Staff (0)</TabsTrigger>
+          {isSuperAdmin && (
+            <TabsTrigger value="roles">Role Management</TabsTrigger>
+          )}
         </TabsList>
         
         <TabsContent value="all">
@@ -139,6 +153,19 @@ const StaffPage = () => {
             <p className="text-gray-500">No wellness staff members found.</p>
           </div>
         </TabsContent>
+        
+        {isSuperAdmin && (
+          <TabsContent value="roles">
+            <div className="flex items-start mb-4">
+              <Shield className="h-5 w-5 text-green-600 mr-2 mt-1" />
+              <div>
+                <h2 className="text-lg font-semibold text-gray-800">Role Management</h2>
+                <p className="text-sm text-gray-500">Manage staff roles and access levels</p>
+              </div>
+            </div>
+            <StaffRoleManagement />
+          </TabsContent>
+        )}
       </Tabs>
     </div>
   );
