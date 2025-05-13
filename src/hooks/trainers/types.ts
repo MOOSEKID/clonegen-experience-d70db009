@@ -4,6 +4,7 @@ export interface StaffProfile {
   email?: string;
   phone?: string;
   role: 'trainer' | 'manager' | 'reception' | 'sales' | 'support';
+  roles?: string[];  // Added for multi-role support
   photo_url?: string;
   access_level?: string;
   status?: string;
