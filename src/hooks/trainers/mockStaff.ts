@@ -5,18 +5,15 @@ export const getMockStaff = (): StaffProfile[] => {
   return [
     {
       id: '1',
-      name: 'John Doe',
+      full_name: 'John Doe',
       email: 'john.doe@uptowngym.com',
       phone: '+1234567890',
       bio: 'Experienced personal trainer specializing in strength and conditioning.',
-      profile_picture: null,
+      photo_url: null,
       role: 'trainer',
-      specialization: ['Strength', 'Conditioning'],
+      specialties: ['Strength', 'Conditioning'],
       status: 'Active',
       hire_date: '2022-01-15',
-      experience_years: 5,
-      experience_level: 'Advanced',
-      hourly_rate: 45,
       certifications: [
         {
           id: '101',
@@ -32,24 +29,22 @@ export const getMockStaff = (): StaffProfile[] => {
         }
       ],
       availability: [],
-      stripe_account_id: null,
+      assigned_classes: [],
+      assigned_members: [],
       created_at: '2022-01-15T00:00:00Z',
       updated_at: '2022-01-15T00:00:00Z'
     },
     {
       id: '2',
-      name: 'Jane Smith',
+      full_name: 'Jane Smith',
       email: 'jane.smith@uptowngym.com',
       phone: '+1987654321',
       bio: 'Yoga and pilates instructor focused on flexibility and mindfulness training.',
-      profile_picture: null,
+      photo_url: null,
       role: 'trainer',
-      specialization: ['Yoga', 'Pilates'],
+      specialties: ['Yoga', 'Pilates'],
       status: 'Active',
       hire_date: '2021-06-20',
-      experience_years: 8,
-      experience_level: 'Expert',
-      hourly_rate: 50,
       certifications: [
         {
           id: '201',
@@ -65,24 +60,22 @@ export const getMockStaff = (): StaffProfile[] => {
         }
       ],
       availability: [],
-      stripe_account_id: null,
+      assigned_classes: [],
+      assigned_members: [],
       created_at: '2021-06-20T00:00:00Z',
       updated_at: '2021-06-20T00:00:00Z'
     },
     {
       id: '3',
-      name: 'Mike Johnson',
+      full_name: 'Mike Johnson',
       email: 'mike.johnson@uptowngym.com',
       phone: '+1547896321',
       bio: 'Former athlete turned fitness trainer specializing in HIIT and functional fitness.',
-      profile_picture: null,
+      photo_url: null,
       role: 'trainer',
-      specialization: ['HIIT', 'Functional Training'],
+      specialties: ['HIIT', 'Functional Training'],
       status: 'Active',
       hire_date: '2022-03-05',
-      experience_years: 3,
-      experience_level: 'Intermediate',
-      hourly_rate: 40,
       certifications: [
         {
           id: '301',
@@ -98,7 +91,8 @@ export const getMockStaff = (): StaffProfile[] => {
         }
       ],
       availability: [],
-      stripe_account_id: null,
+      assigned_classes: [],
+      assigned_members: [],
       created_at: '2022-03-05T00:00:00Z',
       updated_at: '2022-03-05T00:00:00Z'
     }

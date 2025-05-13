@@ -3,6 +3,8 @@ import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { StaffProfile, StaffCertification, StaffAvailability } from '../trainers/types';
 
+type StaffRole = 'trainer' | 'manager' | 'reception' | 'sales' | 'support';
+
 export const useStaffData = () => {
   const [staff, setStaff] = useState<StaffProfile[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -73,13 +75,16 @@ export const useStaffData = () => {
                   }))
               : [];
             
+            // Cast the role to one of the valid role types
+            const role = validateStaffRole(staffMember.role);
+            
             // Return completed staff profile
             return {
               id: staffMember.id,
               full_name: staffMember.full_name,
               email: staffMember.email || '',
               phone: staffMember.phone || '',
-              role: staffMember.role,
+              role,
               photo_url: staffMember.photo_url || null,
               access_level: staffMember.access_level || 'staff',
               status: staffMember.status || 'Active',
@@ -131,6 +136,20 @@ export const useStaffData = () => {
   const getStaffByRole = (role: 'trainer' | 'manager' | 'reception' | 'sales' | 'support' | null = null) => {
     if (!role) return staff;
     return staff.filter(s => s.role === role);
+  };
+
+  // Function to validate and normalize staff role
+  const validateStaffRole = (role: string): StaffRole => {
+    const validRoles: StaffRole[] = ['trainer', 'manager', 'reception', 'sales', 'support'];
+    
+    // Convert to lowercase for case-insensitive comparison
+    const normalizedRole = role.toLowerCase();
+    
+    if (validRoles.includes(normalizedRole as StaffRole)) {
+      return normalizedRole as StaffRole;
+    }
+    
+    return 'support'; // Default fallback role
   };
 
   return {

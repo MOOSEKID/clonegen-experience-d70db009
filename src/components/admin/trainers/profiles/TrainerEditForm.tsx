@@ -10,14 +10,14 @@ import TrainerBioField from "./form/TrainerBioField";
 import FormActions from "./form/FormActions";
 
 const trainerFormSchema = z.object({
-  name: z.string().min(2, { message: "Name must be at least 2 characters." }),
+  full_name: z.string().min(2, { message: "Name must be at least 2 characters." }),
   email: z.string().email({ message: "Please enter a valid email address." }),
   phone: z.string().optional(),
   bio: z.string().optional(),
   status: z.string(),
-  specialization: z.array(z.string()).optional(),
+  specialties: z.array(z.string()).optional(),
   hire_date: z.string().optional(),
-  profile_picture: z.string().optional(),
+  photo_url: z.string().optional(),
 });
 
 export type TrainerFormValues = z.infer<typeof trainerFormSchema>;
@@ -32,14 +32,14 @@ const TrainerEditForm = ({ trainer, onSubmit, onCancel }: TrainerEditFormProps) 
   const form = useForm<TrainerFormValues>({
     resolver: zodResolver(trainerFormSchema),
     defaultValues: {
-      name: trainer.name,
+      full_name: trainer.full_name,
       email: trainer.email || "",
       phone: trainer.phone || "",
       bio: trainer.bio || "",
       status: trainer.status || "Active",
-      specialization: trainer.specialization || [],
+      specialties: trainer.specialties || [],
       hire_date: trainer.hire_date || new Date().toISOString().split('T')[0],
-      profile_picture: trainer.profile_picture || "",
+      photo_url: trainer.photo_url || "",
     },
   });
 

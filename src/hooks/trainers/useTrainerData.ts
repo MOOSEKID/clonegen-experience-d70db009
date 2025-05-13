@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { StaffProfile, StaffCertification } from './types';
 import { getMockStaff } from './mockStaff';
+import { adaptTrainerToStaff } from './adapters';
 
 export const useTrainerData = () => {
   const [trainers, setTrainers] = useState<StaffProfile[]>([]);
@@ -38,27 +39,11 @@ export const useTrainerData = () => {
                 updated_at: cert.updated_at || null
               }));
             
-            // Return mapped staff profile
-            return {
-              id: trainer.id,
-              name: trainer.name,
-              email: trainer.email || '',
-              phone: trainer.phone || null,
-              bio: trainer.bio || null,
-              profile_picture: trainer.profilepicture || null,
-              role: 'trainer',
-              specialization: trainer.specialization || [],
-              status: trainer.status || 'Active',
-              hire_date: trainer.hiredate || null,
-              experience_years: trainer.experience_years || 0,
-              experience_level: trainer.experience_level || 'Beginner',
-              certifications: certifications,
-              availability: [], // Will be populated separately if needed
-              hourly_rate: trainer.hourlyrate || null,
-              stripe_account_id: null,
-              created_at: trainer.created_at || null,
-              updated_at: trainer.updated_at || null
-            };
+            // Return mapped staff profile using adapter
+            return adaptTrainerToStaff({
+              ...trainer,
+              certifications
+            });
           });
           
           setTrainers(processedTrainers);

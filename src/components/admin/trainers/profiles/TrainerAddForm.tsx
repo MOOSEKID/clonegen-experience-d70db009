@@ -5,19 +5,19 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { Form } from "@/components/ui/form";
 import { useTrainerFileUpload } from "@/hooks/trainers/useTrainerFileUpload";
-import { TrainerProfile } from "@/hooks/trainers/useTrainerProfiles";
+import { StaffProfile } from "@/hooks/trainers/types";
 import TrainerAddFormFields from "./form/TrainerAddFormFields";
 import TrainerAddSpecializationsField from "./form/TrainerAddSpecializationsField";
 import TrainerBioField from "./form/TrainerBioField";
 import FormActions from "./form/FormActions";
 
 const trainerFormSchema = z.object({
-  name: z.string().min(2, { message: "Name must be at least 2 characters." }),
+  full_name: z.string().min(2, { message: "Name must be at least 2 characters." }),
   email: z.string().email({ message: "Please enter a valid email address." }),
   phone: z.string().optional(),
   bio: z.string().optional(),
   status: z.string(),
-  specialization: z.array(z.string()).optional(),
+  specialties: z.array(z.string()).optional(),
   hire_date: z.string().optional(),
   experience_years: z.number().optional(),
   experience_level: z.string().optional(),
@@ -26,25 +26,25 @@ const trainerFormSchema = z.object({
 export type TrainerAddFormValues = z.infer<typeof trainerFormSchema>;
 
 interface TrainerAddFormProps {
-  onSubmit: (data: Omit<TrainerProfile, "id" | "certifications" | "availability">) => Promise<void>;
+  onSubmit: (data: Omit<StaffProfile, "id" | "certifications" | "availability">) => Promise<void>;
   onCancel: () => void;
 }
 
 const TrainerAddForm = ({ onSubmit, onCancel }: TrainerAddFormProps) => {
-  const [selectedSpecializations, setSelectedSpecializations] = useState<string[]>([]);
-  const [profilePictureUrl, setProfilePictureUrl] = useState<string | null>(null);
+  const [selectedSpecialties, setSelectedSpecialties] = useState<string[]>([]);
+  const [photoUrl, setPhotoUrl] = useState<string | null>(null);
   
   const { uploadFile, isUploading, uploadProgress } = useTrainerFileUpload();
   
   const form = useForm<TrainerAddFormValues>({
     resolver: zodResolver(trainerFormSchema),
     defaultValues: {
-      name: "",
+      full_name: "",
       email: "",
       phone: "",
       bio: "",
       status: "Active",
-      specialization: [],
+      specialties: [],
       hire_date: new Date().toISOString().split('T')[0],
       experience_years: undefined,
       experience_level: "Beginner",
@@ -55,34 +55,35 @@ const TrainerAddForm = ({ onSubmit, onCancel }: TrainerAddFormProps) => {
     // Combine form data with uploaded profile picture
     const formData = {
       ...data,
-      specialization: selectedSpecializations,
-      profile_picture: profilePictureUrl,
+      specialties: selectedSpecialties,
+      photo_url: photoUrl,
+      role: 'trainer' as const,
     };
     
-    await onSubmit(formData as Omit<TrainerProfile, "id" | "certifications" | "availability">);
+    await onSubmit(formData as Omit<StaffProfile, "id" | "certifications" | "availability">);
     form.reset();
-    setSelectedSpecializations([]);
-    setProfilePictureUrl(null);
+    setSelectedSpecialties([]);
+    setPhotoUrl(null);
   };
 
-  const addSpecialization = (spec: string) => {
+  const addSpecialty = (spec: string) => {
     if (spec.trim() === "") return;
     
-    if (!selectedSpecializations.includes(spec)) {
-      setSelectedSpecializations([...selectedSpecializations, spec]);
+    if (!selectedSpecialties.includes(spec)) {
+      setSelectedSpecialties([...selectedSpecialties, spec]);
     }
   };
 
-  const removeSpecialization = (spec: string) => {
-    setSelectedSpecializations(selectedSpecializations.filter(s => s !== spec));
+  const removeSpecialty = (spec: string) => {
+    setSelectedSpecialties(selectedSpecialties.filter(s => s !== spec));
   };
 
-  const handleProfilePictureUpload = async (file: File) => {
+  const handleProfilePhotoUpload = async (file: File) => {
     // Use a temporary ID for the upload, it will be replaced when the trainer is created
     const tempId = "temp-" + Date.now();
     const url = await uploadFile(file, tempId, 'profile_picture');
     if (url) {
-      setProfilePictureUrl(url);
+      setPhotoUrl(url);
     }
   };
 
@@ -91,16 +92,16 @@ const TrainerAddForm = ({ onSubmit, onCancel }: TrainerAddFormProps) => {
       <form onSubmit={form.handleSubmit(handleFormSubmit)} className="space-y-6">
         <TrainerAddFormFields 
           form={form}
-          profilePictureUrl={profilePictureUrl}
+          profilePictureUrl={photoUrl}
           isUploading={isUploading}
           uploadProgress={uploadProgress}
-          onProfilePictureUpload={handleProfilePictureUpload}
+          onProfilePictureUpload={handleProfilePhotoUpload}
         />
 
         <TrainerAddSpecializationsField
-          selectedSpecializations={selectedSpecializations}
-          onAddSpecialization={addSpecialization}
-          onRemoveSpecialization={removeSpecialization}
+          selectedSpecializations={selectedSpecialties}
+          onAddSpecialization={addSpecialty}
+          onRemoveSpecialization={removeSpecialty}
         />
 
         <TrainerBioField form={form} />

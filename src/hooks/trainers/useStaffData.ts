@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { StaffProfile } from './types';
 import { getMockStaff } from './mockStaff';
+import { adaptTrainerToStaff } from './adapters';
 
 export const useStaffData = () => {
   const [staff, setStaff] = useState<StaffProfile[]>([]);
@@ -24,20 +25,7 @@ export const useStaffData = () => {
         
         if (staffData) {
           const processedStaff = staffData.map((trainer: any) => {
-            return {
-              id: trainer.id,
-              name: trainer.name,
-              email: trainer.email || '',
-              phone: trainer.phone || null,
-              bio: trainer.bio || null,
-              profile_picture: trainer.profilepicture || null,
-              role: 'trainer',
-              specialization: trainer.specialization || [],
-              status: trainer.status || 'Active',
-              hire_date: trainer.hiredate || new Date().toISOString().split('T')[0],
-              experience_years: 0,
-              experience_level: 'Beginner'
-            } as StaffProfile;
+            return adaptTrainerToStaff(trainer);
           });
           
           setStaff(processedStaff);

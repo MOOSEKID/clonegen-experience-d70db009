@@ -48,16 +48,16 @@ const TrainerCard: React.FC<TrainerCardProps> = ({
           </div>
         </div>
         <TrainerBasicInfo 
-          name={trainer.name}
+          name={trainer.full_name}
           email={trainer.email}
           phone={trainer.phone}
-          profilePicture={trainer.profile_picture}
+          profilePicture={trainer.photo_url}
         />
       </CardHeader>
 
       <CardContent className="space-y-4">
         {/* Specialization */}
-        <SpecializationsSection specializations={trainer.specialization} />
+        <SpecializationsSection specializations={trainer.specialties} />
         
         {/* Hire Date */}
         <div className="flex items-center text-sm">
