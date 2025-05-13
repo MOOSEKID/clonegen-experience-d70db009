@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { format } from 'date-fns';
@@ -114,8 +115,8 @@ const TrainerProfileDetail: React.FC = () => {
           specialties: trainerData.specialization || [],
           bio: trainerData.bio,
           hire_date: trainerData.hiredate,
-          // Handle potentially missing experience fields with defaults
-          experience_years: trainerData.experience_years ? Number(trainerData.experience_years) : undefined,
+          // Safely handle potentially missing experience fields with defaults
+          experience_years: typeof trainerData.experience_years === 'number' ? Number(trainerData.experience_years) : undefined,
           experience_level: trainerData.experience_level || undefined,
           // Convert certifications and availability to StaffProfile format
           certifications: certifications.map(cert => ({
@@ -473,7 +474,7 @@ const TrainerProfileDetail: React.FC = () => {
           <AlertDialogFooter>
             <AlertDialogCancel>Cancel</AlertDialogCancel>
             <AlertDialogAction 
-              onClick={() => {/* handleDelete */}}
+              onClick={handleDelete}
               className="bg-red-600 hover:bg-red-700"
             >
               Delete
