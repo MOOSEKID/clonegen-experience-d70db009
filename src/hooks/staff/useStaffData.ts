@@ -75,8 +75,8 @@ export const useStaffData = () => {
                   }))
               : [];
             
-            // Cast the role to one of the valid role types
-            const role = validateStaffRole(staffMember.role);
+            // Cast the role to one of the valid role types and ensure it's a valid value
+            const validatedRole = validateStaffRole(staffMember.role);
             
             // Return completed staff profile
             return {
@@ -84,7 +84,7 @@ export const useStaffData = () => {
               full_name: staffMember.full_name,
               email: staffMember.email || '',
               phone: staffMember.phone || '',
-              role,
+              role: validatedRole,
               photo_url: staffMember.photo_url || null,
               access_level: staffMember.access_level || 'staff',
               status: staffMember.status || 'Active',
@@ -143,10 +143,10 @@ export const useStaffData = () => {
     const validRoles: StaffRole[] = ['trainer', 'manager', 'reception', 'sales', 'support'];
     
     // Convert to lowercase for case-insensitive comparison
-    const normalizedRole = role.toLowerCase();
+    const normalizedRole = role.toLowerCase() as StaffRole;
     
-    if (validRoles.includes(normalizedRole as StaffRole)) {
-      return normalizedRole as StaffRole;
+    if (validRoles.includes(normalizedRole)) {
+      return normalizedRole;
     }
     
     return 'support'; // Default fallback role

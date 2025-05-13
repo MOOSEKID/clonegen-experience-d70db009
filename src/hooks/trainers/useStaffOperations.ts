@@ -1,3 +1,4 @@
+
 import { useToast } from '@/components/ui/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { StaffProfile } from './types';
@@ -10,17 +11,21 @@ export const useStaffOperations = () => {
     try {
       // Use trainers table for now since staff table might not exist yet
       // Convert from StaffProfile to trainer fields for backward compatibility
+      const trainerData = adaptStaffToTrainer(staffMember);
+      
       const { data, error } = await supabase
         .from('trainers')
         .insert({
-          name: staffMember.full_name,
-          email: staffMember.email,
-          phone: staffMember.phone || null,
-          bio: staffMember.bio || null,
-          profilepicture: staffMember.photo_url || null,
-          specialization: staffMember.specialties || [],
-          status: staffMember.status || 'Active',
-          hiredate: staffMember.hire_date || new Date().toISOString().split('T')[0],
+          name: trainerData.name,
+          email: trainerData.email,
+          phone: trainerData.phone || null,
+          bio: trainerData.bio || null,
+          profilepicture: trainerData.profile_picture || null,
+          specialization: trainerData.specialization || [],
+          status: trainerData.status || 'Active',
+          hiredate: trainerData.hire_date || new Date().toISOString().split('T')[0],
+          experience_years: trainerData.experience_years || 0,
+          experience_level: trainerData.experience_level || 'Beginner'
         })
         .select()
         .single();
@@ -29,7 +34,7 @@ export const useStaffOperations = () => {
       
       toast({
         title: "Staff member added",
-        description: `${staffMember.full_name} has been added successfully.`
+        description: `${trainerData.name} has been added successfully.`
       });
       
       return data;
@@ -46,17 +51,20 @@ export const useStaffOperations = () => {
   
   const updateStaffMember = async (id: string, updates: Partial<Omit<StaffProfile, 'id' | 'certifications' | 'availability'>>) => {
     try {
+      // Convert from StaffProfile to trainer fields for backward compatibility
+      const trainerUpdates = adaptStaffToTrainer(updates as any);
+      
       // Convert profile_picture to profilepicture and hire_date to hiredate for DB fields
       const dbUpdates: Record<string, any> = {};
       
-      Object.entries(updates).forEach(([key, value]) => {
-        if (key === 'photo_url') {
+      Object.entries(trainerUpdates).forEach(([key, value]) => {
+        if (key === 'profile_picture') {
           dbUpdates['profilepicture'] = value;
         } else if (key === 'hire_date') {
           dbUpdates['hiredate'] = value;
-        } else if (key === 'full_name') {
+        } else if (key === 'name') {
           dbUpdates['name'] = value;
-        } else if (key === 'specialties') {
+        } else if (key === 'specialization') {
           dbUpdates['specialization'] = value;
         } else {
           dbUpdates[key] = value;
@@ -113,11 +121,26 @@ export const useStaffOperations = () => {
     }
   };
 
+  // Certificate management
   const addCertification = async (staffId: string, certification: string) => {
     try {
+      // First, fetch the current certifications
+      const { data: trainerData, error: fetchError } = await supabase
+        .from('trainers')
+        .select('certifications')
+        .eq('id', staffId)
+        .single();
+      
+      if (fetchError) throw fetchError;
+      
+      // Update certifications array
+      const currentCerts = trainerData?.certifications || [];
+      const updatedCerts = [...currentCerts, certification];
+      
+      // Save the updated array
       const { error } = await supabase
         .from('trainers')
-        .update({ certifications: supabase.functions.call('add_certification', [staffId, certification]) })
+        .update({ certifications: updatedCerts })
         .eq('id', staffId);
         
       if (error) throw error;
@@ -141,9 +164,23 @@ export const useStaffOperations = () => {
 
   const deleteCertification = async (staffId: string, certification: string) => {
     try {
+      // First, fetch the current certifications
+      const { data: trainerData, error: fetchError } = await supabase
+        .from('trainers')
+        .select('certifications')
+        .eq('id', staffId)
+        .single();
+      
+      if (fetchError) throw fetchError;
+      
+      // Update certifications array by removing the certification
+      const currentCerts = trainerData?.certifications || [];
+      const updatedCerts = currentCerts.filter((cert: string) => cert !== certification);
+      
+      // Save the updated array
       const { error } = await supabase
         .from('trainers')
-        .update({ certifications: supabase.functions.call('remove_certification', [staffId, certification]) })
+        .update({ certifications: updatedCerts })
         .eq('id', staffId);
         
       if (error) throw error;
@@ -167,9 +204,23 @@ export const useStaffOperations = () => {
 
   const addAvailability = async (staffId: string, availability: string) => {
     try {
+      // First, fetch the current availability
+      const { data: trainerData, error: fetchError } = await supabase
+        .from('trainers')
+        .select('availability')
+        .eq('id', staffId)
+        .single();
+      
+      if (fetchError) throw fetchError;
+      
+      // Update availability array
+      const currentAvail = trainerData?.availability || [];
+      const updatedAvail = [...currentAvail, availability];
+      
+      // Save the updated array
       const { error } = await supabase
         .from('trainers')
-        .update({ availability: supabase.functions.call('add_availability', [staffId, availability]) })
+        .update({ availability: updatedAvail })
         .eq('id', staffId);
         
       if (error) throw error;
@@ -193,9 +244,23 @@ export const useStaffOperations = () => {
 
   const deleteAvailability = async (staffId: string, availability: string) => {
     try {
+      // First, fetch the current availability
+      const { data: trainerData, error: fetchError } = await supabase
+        .from('trainers')
+        .select('availability')
+        .eq('id', staffId)
+        .single();
+      
+      if (fetchError) throw fetchError;
+      
+      // Update availability array by removing the item
+      const currentAvail = trainerData?.availability || [];
+      const updatedAvail = currentAvail.filter((avail: string) => avail !== availability);
+      
+      // Save the updated array
       const { error } = await supabase
         .from('trainers')
-        .update({ availability: supabase.functions.call('remove_availability', [staffId, availability]) })
+        .update({ availability: updatedAvail })
         .eq('id', staffId);
         
       if (error) throw error;

@@ -2,25 +2,29 @@
 import { useToast } from '@/components/ui/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { TrainerProfile } from './types';
+import { adaptStaffToTrainer } from './adapters';
 
 export const useTrainerOperations = () => {
   const { toast } = useToast();
   
   const addTrainer = async (trainer: Omit<TrainerProfile, 'id' | 'certifications' | 'availability'>) => {
     try {
+      // Convert to trainer fields for database
+      const trainerData = adaptStaffToTrainer(trainer);
+      
       const { data, error } = await supabase
         .from('trainers')
         .insert({
-          name: trainer.name,
-          email: trainer.email,
-          phone: trainer.phone || null,
-          bio: trainer.bio || null,
-          profilepicture: trainer.profile_picture || null,
-          specialization: trainer.specialization || [],
-          status: trainer.status || 'Active',
-          hiredate: trainer.hire_date || new Date().toISOString().split('T')[0],
-          experience_years: trainer.experience_years || null,
-          experience_level: trainer.experience_level || null
+          name: trainerData.name,
+          email: trainerData.email,
+          phone: trainerData.phone || null,
+          bio: trainerData.bio || null,
+          profilepicture: trainerData.profile_picture || null,
+          specialization: trainerData.specialization || [],
+          status: trainerData.status || 'Active',
+          hiredate: trainerData.hire_date || new Date().toISOString().split('T')[0],
+          experience_years: trainerData.experience_years || null,
+          experience_level: trainerData.experience_level || null
         })
         .select()
         .single();
@@ -29,7 +33,7 @@ export const useTrainerOperations = () => {
       
       toast({
         title: "Trainer added",
-        description: `${trainer.name} has been added successfully.`
+        description: `${trainerData.name} has been added successfully.`
       });
       
       return data;
@@ -46,14 +50,21 @@ export const useTrainerOperations = () => {
   
   const updateTrainer = async (id: string, updates: Partial<Omit<TrainerProfile, 'id' | 'certifications' | 'availability'>>) => {
     try {
+      // Convert to trainer fields for database
+      const trainerUpdates = adaptStaffToTrainer(updates as any);
+      
       // Convert profile_picture to profilepicture and hire_date to hiredate for DB fields
       const dbUpdates: Record<string, any> = {};
       
-      Object.entries(updates).forEach(([key, value]) => {
+      Object.entries(trainerUpdates).forEach(([key, value]) => {
         if (key === 'profile_picture') {
           dbUpdates['profilepicture'] = value;
         } else if (key === 'hire_date') {
           dbUpdates['hiredate'] = value;
+        } else if (key === 'name') {
+          dbUpdates['name'] = value;
+        } else if (key === 'specialization') {
+          dbUpdates['specialization'] = value;
         } else {
           dbUpdates[key] = value;
         }

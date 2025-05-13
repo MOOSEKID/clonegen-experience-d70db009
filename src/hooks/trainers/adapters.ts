@@ -29,9 +29,8 @@ export const adaptTrainerToStaff = (trainer: any): StaffProfile => {
 /**
  * Adapts staff properties to trainer properties for backward compatibility
  */
-export const adaptStaffToTrainer = (staff: StaffProfile): any => {
+export const adaptStaffToTrainer = (staff: Omit<StaffProfile, "id" | "certifications" | "availability">): any => {
   return {
-    id: staff.id,
     name: staff.full_name,
     email: staff.email,
     phone: staff.phone,
@@ -40,12 +39,8 @@ export const adaptStaffToTrainer = (staff: StaffProfile): any => {
     status: staff.status,
     hire_date: staff.hire_date,
     bio: staff.bio,
-    certifications: staff.certifications,
-    availability: staff.availability,
     role: staff.role,
-    experience_years: 0, // Default values for trainer-specific fields
-    experience_level: 'Beginner',
-    created_at: staff.created_at,
-    updated_at: staff.updated_at
+    experience_years: staff.experience_years || 0,
+    experience_level: staff.experience_level || 'Beginner',
   };
 };

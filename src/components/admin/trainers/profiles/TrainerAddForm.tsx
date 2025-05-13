@@ -6,6 +6,7 @@ import { z } from "zod";
 import { Form } from "@/components/ui/form";
 import { useTrainerFileUpload } from "@/hooks/trainers/useTrainerFileUpload";
 import { StaffProfile } from "@/hooks/trainers/types";
+import { adaptStaffToTrainer } from "@/hooks/trainers/adapters";
 import TrainerAddFormFields from "./form/TrainerAddFormFields";
 import TrainerAddSpecializationsField from "./form/TrainerAddSpecializationsField";
 import TrainerBioField from "./form/TrainerBioField";
@@ -31,7 +32,6 @@ interface TrainerAddFormProps {
 }
 
 const TrainerAddForm = ({ onSubmit, onCancel }: TrainerAddFormProps) => {
-  const [selectedSpecialties, setSelectedSpecialties] = useState<string[]>([]);
   const [photoUrl, setPhotoUrl] = useState<string | null>(null);
   
   const { uploadFile, isUploading, uploadProgress } = useTrainerFileUpload();
@@ -55,27 +55,13 @@ const TrainerAddForm = ({ onSubmit, onCancel }: TrainerAddFormProps) => {
     // Combine form data with uploaded profile picture
     const formData = {
       ...data,
-      specialties: selectedSpecialties,
       photo_url: photoUrl,
       role: 'trainer' as const,
     };
     
-    await onSubmit(formData as Omit<StaffProfile, "id" | "certifications" | "availability">);
+    await onSubmit(formData);
     form.reset();
-    setSelectedSpecialties([]);
     setPhotoUrl(null);
-  };
-
-  const addSpecialty = (spec: string) => {
-    if (spec.trim() === "") return;
-    
-    if (!selectedSpecialties.includes(spec)) {
-      setSelectedSpecialties([...selectedSpecialties, spec]);
-    }
-  };
-
-  const removeSpecialty = (spec: string) => {
-    setSelectedSpecialties(selectedSpecialties.filter(s => s !== spec));
   };
 
   const handleProfilePhotoUpload = async (file: File) => {
@@ -98,11 +84,7 @@ const TrainerAddForm = ({ onSubmit, onCancel }: TrainerAddFormProps) => {
           onProfilePictureUpload={handleProfilePhotoUpload}
         />
 
-        <TrainerAddSpecializationsField
-          selectedSpecializations={selectedSpecialties}
-          onAddSpecialization={addSpecialty}
-          onRemoveSpecialization={removeSpecialty}
-        />
+        <TrainerAddSpecializationsField form={form} />
 
         <TrainerBioField form={form} />
 

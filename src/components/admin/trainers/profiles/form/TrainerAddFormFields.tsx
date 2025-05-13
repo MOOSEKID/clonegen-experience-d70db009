@@ -44,7 +44,7 @@ const TrainerAddFormFields: React.FC<TrainerAddFormFieldsProps> = ({
 
       <FormField
         control={form.control}
-        name="name"
+        name="full_name"
         render={({ field }) => (
           <FormItem>
             <FormLabel>Name*</FormLabel>
