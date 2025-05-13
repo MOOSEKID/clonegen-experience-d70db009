@@ -3,6 +3,8 @@ import { useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/components/ui/use-toast';
 
+export type FileUploadType = 'profile_picture' | 'certificate';
+
 export const useTrainerFileUpload = () => {
   const [isUploading, setIsUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
@@ -11,7 +13,7 @@ export const useTrainerFileUpload = () => {
   const uploadFile = async (
     file: File, 
     trainerId: string, 
-    fileType: 'profile_picture' | 'certificate'
+    fileType: FileUploadType
   ): Promise<string | null> => {
     setIsUploading(true);
     setUploadProgress(0);
@@ -22,16 +24,12 @@ export const useTrainerFileUpload = () => {
       const fileName = `${trainerId}-${Date.now()}.${fileExt}`;
       const filePath = `${trainerId}/${fileName}`;
       
-      // Upload the file
+      // Upload the file - manually track progress
       const { error: uploadError, data } = await supabase.storage
         .from(bucketId)
         .upload(filePath, file, {
           cacheControl: '3600',
-          upsert: true,
-          onUploadProgress: (progress) => {
-            const calculatedProgress = Math.round((progress.loaded / progress.total) * 100);
-            setUploadProgress(calculatedProgress);
-          }
+          upsert: true
         });
         
       if (uploadError) throw uploadError;

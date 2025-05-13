@@ -1,4 +1,3 @@
-
 import { useToast } from '@/components/ui/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { TrainerProfile } from './types';
@@ -19,10 +18,10 @@ export const useTrainerOperations = () => {
           email: trainerData.email,
           phone: trainerData.phone || null,
           bio: trainerData.bio || null,
-          profilepicture: trainerData.profile_picture || null,
+          profilepicture: trainerData.profilepicture || null,
           specialization: trainerData.specialization || [],
           status: trainerData.status || 'Active',
-          hiredate: trainerData.hire_date || new Date().toISOString().split('T')[0],
+          hiredate: trainerData.hiredate || new Date().toISOString().split('T')[0],
           experience_years: trainerData.experience_years || null,
           experience_level: trainerData.experience_level || null
         })
@@ -57,9 +56,10 @@ export const useTrainerOperations = () => {
       const dbUpdates: Record<string, any> = {};
       
       Object.entries(trainerUpdates).forEach(([key, value]) => {
-        if (key === 'profile_picture') {
+        // Map the properties correctly
+        if (key === 'profilepicture') {
           dbUpdates['profilepicture'] = value;
-        } else if (key === 'hire_date') {
+        } else if (key === 'hiredate') {
           dbUpdates['hiredate'] = value;
         } else if (key === 'name') {
           dbUpdates['name'] = value;

@@ -8,9 +8,7 @@ import Classes from '@/pages/admin/Classes';
 import Trainers from '@/pages/admin/Trainers';
 import Content from '@/pages/admin/Content';
 import Settings from '@/pages/admin/Settings';
-import ClassAttendance from '@/pages/admin/ClassAttendance';
 import Support from '@/pages/admin/Support';
-import Products from '@/pages/admin/Products';
 import Staff from '@/pages/admin/Staff';
 import TrainerProfiles from '@/pages/admin/trainers/TrainerProfiles';
 import StaffAttendancePage from '@/pages/admin/staff/StaffAttendancePage';
@@ -25,14 +23,6 @@ import NavigationBuilder from '@/components/admin/content/cms/NavigationBuilder'
 // Payments Routes
 import { Subscriptions, Invoices, Methods } from '@/pages/admin/payments';
 
-// Settings Routes
-import GeneralSettings from '@/components/admin/settings/GeneralSettings';
-import BusinessHoursSettings from '@/components/admin/settings/BusinessHoursSettings';
-import IntegrationsSettings from '@/components/admin/settings/IntegrationsSettings';
-import SecuritySettings from '@/components/admin/settings/SecuritySettings';
-import NotificationsSettings from '@/components/admin/settings/NotificationsSettings';
-import RolesSettings from '@/components/admin/settings/RolesSettings';
-
 export const useAdminRoutes = (): RouteObject[] => {
   return [
     {
@@ -46,10 +36,6 @@ export const useAdminRoutes = (): RouteObject[] => {
     {
       path: '/admin/classes',
       element: <Classes />,
-    },
-    {
-      path: '/admin/classes/:id/attendance',
-      element: <ClassAttendance />,
     },
     {
       path: '/admin/trainers',
@@ -70,10 +56,6 @@ export const useAdminRoutes = (): RouteObject[] => {
     {
       path: '/admin/support',
       element: <Support />,
-    },
-    {
-      path: '/admin/products',
-      element: <Products />,
     },
     {
       path: '/admin/staff',
@@ -122,32 +104,6 @@ export const useAdminRoutes = (): RouteObject[] => {
     {
       path: '/admin/payments/methods',
       element: <Methods />,
-    },
-    
-    // Settings Routes
-    {
-      path: '/admin/settings/general',
-      element: <GeneralSettings />,
-    },
-    {
-      path: '/admin/settings/business-hours',
-      element: <BusinessHoursSettings />,
-    },
-    {
-      path: '/admin/settings/integrations',
-      element: <IntegrationsSettings />,
-    },
-    {
-      path: '/admin/settings/security',
-      element: <SecuritySettings />,
-    },
-    {
-      path: '/admin/settings/notifications',
-      element: <NotificationsSettings />,
-    },
-    {
-      path: '/admin/settings/roles',
-      element: <RolesSettings />,
     },
   ];
 };

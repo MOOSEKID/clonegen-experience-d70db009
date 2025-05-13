@@ -1,66 +1,64 @@
 
-import { cn } from '@/lib/utils';
+import React from 'react';
 import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card';
 
-interface PlaceholderSectionProps {
+export interface PlaceholderSectionProps {
   title: string;
-  icon?: React.ReactNode;
+  icon: React.ReactNode;
   description: string;
-  className?: string;
-  onClick?: () => void;
   ctaText?: string;
+  onClick?: () => void;
   features?: string[];
+  className?: string;
+  badge?: string; // Added badge property
 }
 
-const PlaceholderSection = ({ 
-  title, 
-  icon, 
-  description, 
-  className,
-  onClick,
+const PlaceholderSection: React.FC<PlaceholderSectionProps> = ({
+  title,
+  icon,
+  description,
   ctaText,
-  features
-}: PlaceholderSectionProps) => {
+  onClick,
+  features,
+  className,
+  badge, // Include badge in props
+}) => {
   return (
-    <div 
-      className={cn(
-        "bg-white border border-gray-200 rounded-lg shadow-sm p-8 flex flex-col items-center justify-center text-center cursor-pointer hover:border-gym-orange/50 transition-all",
-        className
-      )}
-      onClick={onClick}
-    >
-      {icon && (
-        <div className="bg-gym-orange/10 p-4 rounded-full mb-4">
+    <Card className={`${className || ''}`}>
+      <CardHeader className="flex flex-row items-start justify-between space-y-0 pb-2">
+        <div className="flex items-center">
           {icon}
+          <h3 className="ml-2 font-semibold">{title}</h3>
         </div>
+        {badge && (
+          <span className="bg-amber-100 text-amber-800 text-xs font-medium px-2 py-1 rounded">
+            {badge}
+          </span>
+        )}
+      </CardHeader>
+      <CardContent>
+        <p className="text-sm text-muted-foreground">{description}</p>
+        
+        {features && features.length > 0 && (
+          <ul className="mt-2 grid grid-cols-2 gap-x-4 gap-y-1 text-xs text-muted-foreground">
+            {features.map((feature, i) => (
+              <li key={i} className="flex items-center">
+                <span className="mr-1.5 h-1.5 w-1.5 rounded-full bg-primary"></span>
+                {feature}
+              </li>
+            ))}
+          </ul>
+        )}
+      </CardContent>
+      {ctaText && onClick && (
+        <CardFooter>
+          <Button size="sm" className="w-full" onClick={onClick} variant="outline">
+            {ctaText}
+          </Button>
+        </CardFooter>
       )}
-      <h2 className="text-xl font-bold text-gray-800 mb-2">{title}</h2>
-      <p className="text-gray-500 max-w-md mb-6">{description}</p>
-      
-      {features && features.length > 0 && (
-        <div className="grid grid-cols-2 gap-x-8 gap-y-2 text-left mb-6 w-full max-w-md">
-          {features.map((feature, index) => (
-            <div key={index} className="flex items-center">
-              <div className="w-2 h-2 bg-gym-orange rounded-full mr-2"></div>
-              <span className="text-sm text-gray-600">{feature}</span>
-            </div>
-          ))}
-        </div>
-      )}
-      
-      {ctaText && (
-        <Button 
-          variant="default" 
-          className="bg-gym-orange hover:bg-gym-orange/90 mt-2"
-          onClick={(e) => {
-            e.stopPropagation();
-            onClick?.();
-          }}
-        >
-          {ctaText}
-        </Button>
-      )}
-    </div>
+    </Card>
   );
 };
 

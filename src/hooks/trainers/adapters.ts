@@ -43,6 +43,22 @@ export const adaptTrainerToStaff = (trainer: any): StaffProfile => {
   };
 };
 
+// Helper to convert between trainer_id and staff_id
+export const convertTrainerCertToStaffCert = (trainerCert: any): any => {
+  const staffCert = { ...trainerCert };
+  staffCert.staff_id = trainerCert.trainer_id;
+  delete staffCert.trainer_id;
+  return staffCert;
+};
+
+// Helper to convert between trainer_id and staff_id for availability
+export const convertTrainerAvailabilityToStaffAvailability = (trainerAvail: any): any => {
+  const staffAvail = { ...trainerAvail };
+  staffAvail.staff_id = trainerAvail.trainer_id;
+  delete staffAvail.trainer_id;
+  return staffAvail;
+};
+
 // Helper function to validate staff role type
 export const validateStaffRole = (role: string): 'trainer' | 'manager' | 'reception' | 'sales' | 'support' => {
   const validRoles = ['trainer', 'manager', 'reception', 'sales', 'support'];
