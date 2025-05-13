@@ -1,5 +1,5 @@
 
-import { ClientSession } from '../types';
+import { ClientSession } from './types';
 
 export const generateMockSessions = (trainerId?: string, clientId?: string): ClientSession[] => {
   const mockTrainerIds = ['1', '2', '3'];
@@ -14,7 +14,7 @@ export const generateMockSessions = (trainerId?: string, clientId?: string): Cli
   
   for (let i = 0; i < count; i++) {
     // Use provided IDs or random ones
-    const actualTrainerId = trainerId || mockTrainerIds[Math.floor(Math.random() * mockTrainerIds.length)];
+    const actualStaffId = trainerId || mockTrainerIds[Math.floor(Math.random() * mockTrainerIds.length)];
     const actualClientId = clientId || mockClientIds[Math.floor(Math.random() * mockClientIds.length)];
     
     // Create date string for a random date within +/- 30 days from now
@@ -53,21 +53,21 @@ export const generateMockSessions = (trainerId?: string, clientId?: string): Cli
     
     sessions.push({
       id: `mock-${i}`,
-      trainer_id: actualTrainerId,
+      staff_id: actualStaffId,
       client_id: actualClientId,
       session_date: sessionDate.toISOString().split('T')[0],
       start_time: startTime,
       end_time: endTime,
       duration,
-      session_type: mockSessionTypes[Math.floor(Math.random() * mockSessionTypes.length)],
-      location: mockLocations[Math.floor(Math.random() * mockLocations.length)],
-      status,
+      session_type: mockSessionTypes[Math.floor(Math.random() * mockSessionTypes.length)] as any,
+      location: mockLocations[Math.floor(Math.random() * mockLocations.length)] as any,
+      status: status as any,
       notes: status === 'completed' ? 'Session completed successfully' : 
              status === 'cancelled' ? 'Client had to reschedule' :
              status === 'no-show' ? 'Client did not attend' : 
              'Regular training session',
       focus_areas: focusAreas,
-      achievements: status === 'completed' ? 'Improved form and increased weights' : undefined,
+      achievements: status === 'completed' ? 'Improved form and increased weights' : null,
       created_at: new Date().toISOString(),
       updated_at: new Date().toISOString()
     });

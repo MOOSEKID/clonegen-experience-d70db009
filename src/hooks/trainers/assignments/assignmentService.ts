@@ -1,14 +1,13 @@
 
 import { supabase } from '@/integrations/supabase/client';
-import { ClientAssignment } from '../types';
-import { toast } from 'sonner';
+import { ClientAssignment } from './types';
 
-export const fetchAssignments = async (trainerId?: string, clientId?: string) => {
+export const fetchAssignments = async (trainerId?: string, clientId?: string): Promise<ClientAssignment[]> => {
   try {
     let query = supabase.from('trainer_client_assignments').select('*');
     
     if (trainerId) {
-      query = query.eq('trainer_id', trainerId);
+      query = query.eq('staff_id', trainerId);
     }
     
     if (clientId) {
@@ -19,53 +18,61 @@ export const fetchAssignments = async (trainerId?: string, clientId?: string) =>
     
     if (error) throw error;
     
-    return data || [];
-  } catch (err) {
-    console.error('Error fetching assignments:', err);
-    throw err;
+    // Map the data to match our ClientAssignment type
+    const assignments = data.map((item: any) => ({
+      ...item,
+      staff_id: item.trainer_id || item.staff_id, // Handle both trainer_id and staff_id
+    })) as ClientAssignment[];
+    
+    return assignments;
+  } catch (error) {
+    console.error('Error fetching assignments:', error);
+    throw error;
   }
 };
 
-export const createAssignment = async (trainerId: string, clientId: string) => {
+export const createAssignment = async (trainerId: string, clientId: string): Promise<ClientAssignment> => {
   try {
+    const newAssignment = {
+      staff_id: trainerId,
+      client_id: clientId,
+      assignment_date: new Date().toISOString().split('T')[0],
+      status: 'active'
+    };
+    
     const { data, error } = await supabase
       .from('trainer_client_assignments')
-      .insert({
-        trainer_id: trainerId,
-        client_id: clientId,
-        assignment_date: new Date().toISOString().split('T')[0],
-        status: 'active'
-      })
+      .insert(newAssignment)
       .select()
       .single();
     
     if (error) throw error;
     
-    return data;
-  } catch (err) {
-    console.error('Error creating assignment:', err);
-    throw err;
+    return data as unknown as ClientAssignment;
+  } catch (error) {
+    console.error('Error creating assignment:', error);
+    throw error;
   }
 };
 
-export const updateAssignmentStatus = async (id: string, status: 'active' | 'paused' | 'ended') => {
+export const updateAssignmentStatus = async (id: string, status: 'active' | 'paused' | 'ended'): Promise<boolean> => {
   try {
-    let updates: { status: string; end_date?: string } = { status };
+    let updateData: any = { status };
     
     if (status === 'ended') {
-      updates.end_date = new Date().toISOString().split('T')[0];
+      updateData.end_date = new Date().toISOString().split('T')[0];
     }
     
     const { error } = await supabase
       .from('trainer_client_assignments')
-      .update(updates)
+      .update(updateData)
       .eq('id', id);
     
     if (error) throw error;
     
     return true;
-  } catch (err) {
-    console.error('Error updating assignment status:', err);
-    throw err;
+  } catch (error) {
+    console.error('Error updating assignment status:', error);
+    throw error;
   }
 };

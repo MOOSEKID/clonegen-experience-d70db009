@@ -8,18 +8,18 @@ export const useStaffOperations = () => {
   
   const addStaffMember = async (staffMember: Omit<StaffProfile, 'id' | 'certifications' | 'availability'>) => {
     try {
+      // Use trainers table for now since staff table might not exist yet
       const { data, error } = await supabase
-        .from('staff')
+        .from('trainers')
         .insert({
           name: staffMember.name,
           email: staffMember.email,
           phone: staffMember.phone || null,
           bio: staffMember.bio || null,
-          profile_picture: staffMember.profile_picture || null,
-          role: staffMember.role || 'trainer',
+          profilepicture: staffMember.profile_picture || null,
           specialization: staffMember.specialization || [],
           status: staffMember.status || 'Active',
-          hire_date: staffMember.hire_date || new Date().toISOString().split('T')[0],
+          hiredate: staffMember.hire_date || new Date().toISOString().split('T')[0],
           experience_years: staffMember.experience_years || null,
           experience_level: staffMember.experience_level || null
         })
@@ -47,9 +47,22 @@ export const useStaffOperations = () => {
   
   const updateStaffMember = async (id: string, updates: Partial<Omit<StaffProfile, 'id' | 'certifications' | 'availability'>>) => {
     try {
+      // Convert profile_picture to profilepicture and hire_date to hiredate for DB fields
+      const dbUpdates: Record<string, any> = {};
+      
+      Object.entries(updates).forEach(([key, value]) => {
+        if (key === 'profile_picture') {
+          dbUpdates['profilepicture'] = value;
+        } else if (key === 'hire_date') {
+          dbUpdates['hiredate'] = value;
+        } else {
+          dbUpdates[key] = value;
+        }
+      });
+      
       const { error } = await supabase
-        .from('staff')
-        .update(updates)
+        .from('trainers')
+        .update(dbUpdates)
         .eq('id', id);
         
       if (error) throw error;
@@ -74,7 +87,7 @@ export const useStaffOperations = () => {
   const deleteStaffMember = async (id: string) => {
     try {
       const { error } = await supabase
-        .from('staff')
+        .from('trainers')
         .delete()
         .eq('id', id);
         

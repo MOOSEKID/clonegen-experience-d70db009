@@ -7,6 +7,10 @@ import { UseFormReturn } from "react-hook-form";
 import { TrainerAddFormValues } from "../TrainerAddForm";
 import FileUpload from "@/components/admin/trainers/common/FileUpload";
 
+export interface FormFieldProps {
+  form: UseFormReturn<any>;
+}
+
 interface TrainerAddFormFieldsProps {
   form: UseFormReturn<TrainerAddFormValues>;
   profilePictureUrl: string | null;

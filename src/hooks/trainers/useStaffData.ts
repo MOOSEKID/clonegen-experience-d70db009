@@ -14,9 +14,9 @@ export const useStaffData = () => {
       setIsLoading(true);
       
       try {
-        // Temporarily use the trainers table until the staff table is created
+        // For now, use the trainers table as a fallback since staff table might not exist yet
         const { data: staffData, error: staffError } = await supabase
-          .from('trainers' as any)
+          .from('trainers')
           .select('*')
           .order('name');
           

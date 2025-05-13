@@ -13,10 +13,18 @@ export function useAvailabilityManagement() {
     setError(null);
     
     try {
+      // Map staff_id to trainer_id if using trainer_availability table
+      const availabilityData = {
+        trainer_id: availability.staff_id,
+        day_of_week: availability.day_of_week,
+        start_time: availability.start_time,
+        end_time: availability.end_time
+      };
+      
       // Insert new availability
       const { data, error: insertError } = await supabase
-        .from('trainer_availability' as any)
-        .insert(availability)
+        .from('trainer_availability')
+        .insert(availabilityData)
         .select()
         .single();
       
@@ -43,7 +51,7 @@ export function useAvailabilityManagement() {
     try {
       // Delete availability by id
       const { error: deleteError } = await supabase
-        .from('trainer_availability' as any)
+        .from('trainer_availability')
         .delete()
         .eq('id', id);
       

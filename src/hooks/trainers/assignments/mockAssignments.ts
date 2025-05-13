@@ -1,5 +1,5 @@
 
-import { ClientAssignment } from '../types';
+import { ClientAssignment } from './types';
 
 export const generateMockAssignments = (trainerId?: string, clientId?: string): ClientAssignment[] => {
   const mockTrainerIds = ['1', '2', '3'];
@@ -30,7 +30,7 @@ export const generateMockAssignments = (trainerId?: string, clientId?: string): 
     
     assignments.push({
       id: `mock-${i}`,
-      trainer_id: actualTrainerId,
+      staff_id: actualTrainerId,
       client_id: actualClientId,
       assignment_date: assignmentDate.toISOString().split('T')[0],
       end_date: endDate,

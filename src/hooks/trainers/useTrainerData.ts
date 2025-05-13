@@ -23,7 +23,7 @@ export const useTrainerData = () => {
         
         if (trainersData) {
           const processedTrainers = await Promise.all(
-            trainersData.map(async (trainer) => {
+            trainersData.map(async (trainer: any) => {
               const { data: certifications, error: certError } = await supabase
                 .from('trainer_certifications')
                 .select('*')
@@ -39,12 +39,18 @@ export const useTrainerData = () => {
               if (availError) console.error('Error fetching availability:', availError);
               
               return {
-                ...trainer,
-                profilepicture: trainer.profilepicture || null,
-                hiredate: trainer.hiredate || new Date().toISOString().split('T')[0],
+                id: trainer.id,
+                name: trainer.name,
+                email: trainer.email || '',
+                phone: trainer.phone || null,
+                bio: trainer.bio || null,
+                profile_picture: trainer.profilepicture || null,
+                role: 'trainer',
+                specialization: trainer.specialization || [],
+                status: trainer.status || 'Active',
+                hire_date: trainer.hiredate || new Date().toISOString().split('T')[0],
                 certifications: certifications || [],
                 availability: availability || [],
-                // Use type assertion to safely access potentially missing properties
                 experience_years: (trainer as any).experience_years || 0,
                 experience_level: (trainer as any).experience_level || 'Beginner'
               } as TrainerProfile;

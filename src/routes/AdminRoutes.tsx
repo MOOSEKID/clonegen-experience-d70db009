@@ -4,11 +4,27 @@ import { Route } from "react-router-dom";
 import { useAdminRoutes } from "../hooks/routing/useAdminRoutes";
 
 const AdminRoutes = () => {
-  // Get routes from the hook, but render them here as a React Fragment
-  // so they can be used as children of the Routes component
+  // Get routes from the hook
+  const adminRoutes = useAdminRoutes();
+  
+  // Render routes as React components
   return (
     <React.Fragment>
-      {useAdminRoutes()}
+      {adminRoutes.map((route) => (
+        <Route
+          key={route.path}
+          path={route.path.replace('/admin/', '')}
+          element={route.element}
+        >
+          {route.children?.map((child) => (
+            <Route
+              key={child.path}
+              path={child.path}
+              element={child.element}
+            />
+          ))}
+        </Route>
+      ))}
     </React.Fragment>
   );
 };

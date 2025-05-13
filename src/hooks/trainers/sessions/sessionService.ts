@@ -1,13 +1,13 @@
 
 import { supabase } from '@/integrations/supabase/client';
-import { ClientSession, ClientSessionInput } from '../types';
+import { ClientSession, ClientSessionInput } from './types';
 
-export const fetchSessions = async (trainerId?: string, clientId?: string) => {
+export const fetchSessions = async (trainerId?: string, clientId?: string): Promise<ClientSession[]> => {
   try {
     let query = supabase.from('client_sessions').select('*');
     
     if (trainerId) {
-      query = query.eq('trainer_id', trainerId);
+      query = query.eq('staff_id', trainerId);
     }
     
     if (clientId) {
@@ -18,14 +18,20 @@ export const fetchSessions = async (trainerId?: string, clientId?: string) => {
     
     if (error) throw error;
     
-    return data || [];
-  } catch (err) {
-    console.error('Error fetching sessions:', err);
-    throw err;
+    // Map the data to match our ClientSession type
+    const sessions = data.map((item: any) => ({
+      ...item,
+      staff_id: item.trainer_id || item.staff_id, // Handle both trainer_id and staff_id
+    })) as ClientSession[];
+    
+    return sessions;
+  } catch (error) {
+    console.error('Error fetching sessions:', error);
+    throw error;
   }
 };
 
-export const createSession = async (session: ClientSessionInput) => {
+export const createSession = async (session: ClientSessionInput): Promise<ClientSession> => {
   try {
     const { data, error } = await supabase
       .from('client_sessions')
@@ -35,14 +41,14 @@ export const createSession = async (session: ClientSessionInput) => {
     
     if (error) throw error;
     
-    return data;
-  } catch (err) {
-    console.error('Error creating session:', err);
-    throw err;
+    return data as unknown as ClientSession;
+  } catch (error) {
+    console.error('Error creating session:', error);
+    throw error;
   }
 };
 
-export const updateSession = async (id: string, updates: Partial<ClientSessionInput>) => {
+export const updateSession = async (id: string, updates: Partial<ClientSessionInput>): Promise<ClientSession> => {
   try {
     const { data, error } = await supabase
       .from('client_sessions')
@@ -53,14 +59,14 @@ export const updateSession = async (id: string, updates: Partial<ClientSessionIn
     
     if (error) throw error;
     
-    return data;
-  } catch (err) {
-    console.error('Error updating session:', err);
-    throw err;
+    return data as unknown as ClientSession;
+  } catch (error) {
+    console.error('Error updating session:', error);
+    throw error;
   }
 };
 
-export const deleteSession = async (id: string) => {
+export const deleteSession = async (id: string): Promise<boolean> => {
   try {
     const { error } = await supabase
       .from('client_sessions')
@@ -70,8 +76,8 @@ export const deleteSession = async (id: string) => {
     if (error) throw error;
     
     return true;
-  } catch (err) {
-    console.error('Error deleting session:', err);
-    throw err;
+  } catch (error) {
+    console.error('Error deleting session:', error);
+    throw error;
   }
 };

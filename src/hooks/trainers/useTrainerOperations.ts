@@ -15,10 +15,10 @@ export const useTrainerOperations = () => {
           email: trainer.email,
           phone: trainer.phone || null,
           bio: trainer.bio || null,
-          profilepicture: trainer.profilepicture || null,
+          profilepicture: trainer.profile_picture || null,
           specialization: trainer.specialization || [],
           status: trainer.status || 'Active',
-          hiredate: trainer.hiredate || new Date().toISOString().split('T')[0],
+          hiredate: trainer.hire_date || new Date().toISOString().split('T')[0],
           experience_years: trainer.experience_years || null,
           experience_level: trainer.experience_level || null
         })
@@ -46,9 +46,22 @@ export const useTrainerOperations = () => {
   
   const updateTrainer = async (id: string, updates: Partial<Omit<TrainerProfile, 'id' | 'certifications' | 'availability'>>) => {
     try {
+      // Convert profile_picture to profilepicture and hire_date to hiredate for DB fields
+      const dbUpdates: Record<string, any> = {};
+      
+      Object.entries(updates).forEach(([key, value]) => {
+        if (key === 'profile_picture') {
+          dbUpdates['profilepicture'] = value;
+        } else if (key === 'hire_date') {
+          dbUpdates['hiredate'] = value;
+        } else {
+          dbUpdates[key] = value;
+        }
+      });
+      
       const { error } = await supabase
         .from('trainers')
-        .update(updates)
+        .update(dbUpdates)
         .eq('id', id);
         
       if (error) throw error;

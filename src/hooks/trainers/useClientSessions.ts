@@ -1,7 +1,7 @@
 
 import { useState, useEffect } from 'react';
 import { useToast } from '@/components/ui/use-toast';
-import { ClientSession, ClientSessionInput } from './types';
+import { ClientSession, ClientSessionInput } from './sessions/types';
 import { 
   fetchSessions, 
   createSession, 
@@ -9,6 +9,7 @@ import {
   deleteSession 
 } from './sessions/sessionService';
 import generateMockSessions from './sessions/mockSessions';
+import { supabase } from '@/integrations/supabase/client';
 
 export const useClientSessions = (trainerId?: string, clientId?: string) => {
   const [sessions, setSessions] = useState<ClientSession[]>([]);
@@ -119,7 +120,7 @@ export const useClientSessions = (trainerId?: string, clientId?: string) => {
   };
   
   const updateSessionStatus = (id: string, status: string) => {
-    return editSession(id, { status });
+    return editSession(id, { status: status as any });
   };
   
   return {
@@ -132,6 +133,3 @@ export const useClientSessions = (trainerId?: string, clientId?: string) => {
     updateSessionStatus
   };
 };
-
-// Add missing supabase import
-import { supabase } from '@/integrations/supabase/client';

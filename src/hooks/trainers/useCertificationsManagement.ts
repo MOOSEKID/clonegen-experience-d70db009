@@ -8,15 +8,18 @@ export const useCertificationsManagement = () => {
   
   const addCertification = async (certification: Omit<StaffCertification, 'id'>) => {
     try {
+      // Map staff_id to trainer_id if using trainer_certifications table
+      const certificationData = {
+        trainer_id: certification.staff_id,
+        certification_name: certification.certification_name,
+        issuing_organization: certification.issuing_organization,
+        issue_date: certification.issue_date,
+        expiry_date: certification.expiry_date
+      };
+      
       const { data, error } = await supabase
-        .from('trainer_certifications' as any)
-        .insert({
-          staff_id: certification.staff_id,
-          certification_name: certification.certification_name,
-          issuing_organization: certification.issuing_organization,
-          issue_date: certification.issue_date,
-          expiry_date: certification.expiry_date
-        })
+        .from('trainer_certifications')
+        .insert(certificationData)
         .select()
         .single();
         
@@ -42,7 +45,7 @@ export const useCertificationsManagement = () => {
   const deleteCertification = async (id: string) => {
     try {
       const { error } = await supabase
-        .from('trainer_certifications' as any)
+        .from('trainer_certifications')
         .delete()
         .eq('id', id);
         
