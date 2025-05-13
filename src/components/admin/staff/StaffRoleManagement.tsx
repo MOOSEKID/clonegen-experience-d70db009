@@ -200,7 +200,7 @@ const StaffRoleManagement: React.FC = () => {
                 <TableCell>
                   <Badge
                     variant={
-                      staffMember.status?.toLowerCase() === 'active' ? 'success' :
+                      staffMember.status?.toLowerCase() === 'active' ? 'secondary' :
                       staffMember.status?.toLowerCase() === 'inactive' ? 'destructive' : 'default'
                     }
                   >
