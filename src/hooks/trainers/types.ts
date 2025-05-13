@@ -1,19 +1,18 @@
 
 export interface StaffProfile {
   id: string;
-  name: string;
+  full_name: string;
   email?: string;
   phone?: string;
-  bio?: string;
-  profile_picture?: string;
-  role: string;
-  specialization?: string[];
+  role: 'trainer' | 'manager' | 'reception' | 'sales' | 'support';
+  photo_url?: string;
+  access_level?: string;
   status?: string;
+  specialties?: string[];
+  bio?: string;
   hire_date?: string;
-  experience_years?: number;
-  experience_level?: string;
-  stripe_account_id?: string;
-  hourly_rate?: number;
+  assigned_classes?: string[];
+  assigned_members?: string[];
   created_at?: string;
   updated_at?: string;
   certifications?: StaffCertification[];

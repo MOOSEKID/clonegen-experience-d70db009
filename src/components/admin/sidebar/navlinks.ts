@@ -9,7 +9,8 @@ import {
   BarChartBig,
   FileText,
   HelpCircle,
-  Settings
+  Settings,
+  UsersIcon
 } from "lucide-react";
 
 import { NavLink } from "./types";
@@ -31,9 +32,9 @@ export const navLinks: NavLink[] = [
     icon: CalendarDays,
   },
   {
-    title: "Trainers",
-    href: "/admin/trainers",
-    icon: Dumbbell,
+    title: "Staff",
+    href: "/admin/staff",
+    icon: UsersIcon,
   },
   {
     title: "Shop",

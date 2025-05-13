@@ -1594,6 +1594,148 @@ export type Database = {
         }
         Relationships: []
       }
+      staff: {
+        Row: {
+          access_level: string | null
+          assigned_classes: string[] | null
+          assigned_members: string[] | null
+          bio: string | null
+          certifications: Json | null
+          created_at: string | null
+          email: string | null
+          full_name: string
+          hire_date: string | null
+          id: string
+          phone: string | null
+          photo_url: string | null
+          role: string
+          specialties: string[] | null
+          status: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          access_level?: string | null
+          assigned_classes?: string[] | null
+          assigned_members?: string[] | null
+          bio?: string | null
+          certifications?: Json | null
+          created_at?: string | null
+          email?: string | null
+          full_name: string
+          hire_date?: string | null
+          id?: string
+          phone?: string | null
+          photo_url?: string | null
+          role: string
+          specialties?: string[] | null
+          status?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          access_level?: string | null
+          assigned_classes?: string[] | null
+          assigned_members?: string[] | null
+          bio?: string | null
+          certifications?: Json | null
+          created_at?: string | null
+          email?: string | null
+          full_name?: string
+          hire_date?: string | null
+          id?: string
+          phone?: string | null
+          photo_url?: string | null
+          role?: string
+          specialties?: string[] | null
+          status?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      staff_availability: {
+        Row: {
+          created_at: string | null
+          day_of_week: string | null
+          end_time: string | null
+          id: string
+          staff_id: string | null
+          start_time: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          day_of_week?: string | null
+          end_time?: string | null
+          id?: string
+          staff_id?: string | null
+          start_time?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          day_of_week?: string | null
+          end_time?: string | null
+          id?: string
+          staff_id?: string | null
+          start_time?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "staff_availability_staff_id_fkey"
+            columns: ["staff_id"]
+            isOneToOne: false
+            referencedRelation: "staff"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      staff_certifications: {
+        Row: {
+          certification_file: string | null
+          certification_name: string
+          created_at: string | null
+          expiry_date: string | null
+          id: string
+          issue_date: string | null
+          issuing_organization: string | null
+          staff_id: string | null
+          updated_at: string | null
+          verified: boolean | null
+        }
+        Insert: {
+          certification_file?: string | null
+          certification_name: string
+          created_at?: string | null
+          expiry_date?: string | null
+          id?: string
+          issue_date?: string | null
+          issuing_organization?: string | null
+          staff_id?: string | null
+          updated_at?: string | null
+          verified?: boolean | null
+        }
+        Update: {
+          certification_file?: string | null
+          certification_name?: string
+          created_at?: string | null
+          expiry_date?: string | null
+          id?: string
+          issue_date?: string | null
+          issuing_organization?: string | null
+          staff_id?: string | null
+          updated_at?: string | null
+          verified?: boolean | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "staff_certifications_staff_id_fkey"
+            columns: ["staff_id"]
+            isOneToOne: false
+            referencedRelation: "staff"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       trainer_attendance: {
         Row: {
           check_in_time: string | null
