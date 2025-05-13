@@ -138,7 +138,10 @@ const TrainerProfileDetail: React.FC = () => {
         }
         
         if ('experience_level' in trainerData) {
-          staffProfile.experience_level = trainerData.experience_level;
+          // Ensure experience_level is treated as a string or undefined
+          staffProfile.experience_level = typeof trainerData.experience_level === 'string' 
+            ? trainerData.experience_level 
+            : undefined;
         }
         
         setTrainer(staffProfile);
