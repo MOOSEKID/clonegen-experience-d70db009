@@ -22,14 +22,16 @@ export const adaptTrainerToStaff = (trainer: any): StaffProfile => {
     created_at: trainer.created_at || null,
     updated_at: trainer.updated_at || null,
     assigned_classes: [],
-    assigned_members: []
+    assigned_members: [],
+    experience_years: trainer.experience_years || 0,
+    experience_level: trainer.experience_level || 'Beginner'
   };
 };
 
 /**
  * Adapts staff properties to trainer properties for backward compatibility
  */
-export const adaptStaffToTrainer = (staff: Omit<StaffProfile, "id" | "certifications" | "availability">): any => {
+export const adaptStaffToTrainer = (staff: any): any => {
   return {
     name: staff.full_name,
     email: staff.email,

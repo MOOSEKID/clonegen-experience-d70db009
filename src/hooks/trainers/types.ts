@@ -16,6 +16,8 @@ export interface StaffProfile {
   updated_at?: string;
   certifications?: StaffCertification[];
   availability?: StaffAvailability[];
+  experience_years?: number;
+  experience_level?: string;
 }
 
 export interface StaffCertification {

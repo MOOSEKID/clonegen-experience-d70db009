@@ -134,7 +134,10 @@ export const useStaffOperations = () => {
       if (fetchError) throw fetchError;
       
       // Update certifications array
-      const currentCerts = trainerData?.certifications || [];
+      let currentCerts = trainerData?.certifications || [];
+      if (!Array.isArray(currentCerts)) {
+        currentCerts = [];
+      }
       const updatedCerts = [...currentCerts, certification];
       
       // Save the updated array
@@ -174,7 +177,10 @@ export const useStaffOperations = () => {
       if (fetchError) throw fetchError;
       
       // Update certifications array by removing the certification
-      const currentCerts = trainerData?.certifications || [];
+      let currentCerts = trainerData?.certifications || [];
+      if (!Array.isArray(currentCerts)) {
+        currentCerts = [];
+      }
       const updatedCerts = currentCerts.filter((cert: string) => cert !== certification);
       
       // Save the updated array

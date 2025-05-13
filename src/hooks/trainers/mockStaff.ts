@@ -6,95 +6,64 @@ export const getMockStaff = (): StaffProfile[] => {
     {
       id: '1',
       full_name: 'John Doe',
-      email: 'john.doe@uptowngym.com',
+      email: 'john.doe@example.com',
       phone: '+1234567890',
-      bio: 'Experienced personal trainer specializing in strength and conditioning.',
-      photo_url: null,
+      bio: 'Professional fitness trainer with over 10 years of experience.',
+      photo_url: 'https://randomuser.me/api/portraits/men/32.jpg',
       role: 'trainer',
-      specialties: ['Strength', 'Conditioning'],
+      specialties: ['Strength', 'Cardio', 'Nutrition'],
       status: 'Active',
-      hire_date: '2022-01-15',
-      certifications: [
-        {
-          id: '101',
-          staff_id: '1',
-          certification_name: 'Certified Personal Trainer',
-          issuing_organization: 'National Academy of Sports Medicine',
-          issue_date: '2018-03-10',
-          expiry_date: '2023-03-10',
-          verified: true,
-          certification_file: null,
-          created_at: '2022-01-15T00:00:00Z',
-          updated_at: '2022-01-15T00:00:00Z'
-        }
-      ],
+      hire_date: '2018-03-15',
+      certifications: [],
       availability: [],
       assigned_classes: [],
       assigned_members: [],
-      created_at: '2022-01-15T00:00:00Z',
-      updated_at: '2022-01-15T00:00:00Z'
+      created_at: null,
+      updated_at: null,
+      experience_years: 10,
+      experience_level: 'Expert'
     },
     {
       id: '2',
       full_name: 'Jane Smith',
-      email: 'jane.smith@uptowngym.com',
-      phone: '+1987654321',
-      bio: 'Yoga and pilates instructor focused on flexibility and mindfulness training.',
-      photo_url: null,
+      email: 'jane.smith@example.com',
+      phone: '+0987654321',
+      bio: 'Specialized in yoga and flexibility training.',
+      photo_url: 'https://randomuser.me/api/portraits/women/44.jpg',
       role: 'trainer',
-      specialties: ['Yoga', 'Pilates'],
+      specialties: ['Yoga', 'Pilates', 'Flexibility'],
       status: 'Active',
-      hire_date: '2021-06-20',
-      certifications: [
-        {
-          id: '201',
-          staff_id: '2',
-          certification_name: 'Registered Yoga Teacher 500',
-          issuing_organization: 'Yoga Alliance',
-          issue_date: '2015-05-15',
-          expiry_date: null,
-          verified: true,
-          certification_file: null,
-          created_at: '2021-06-20T00:00:00Z',
-          updated_at: '2021-06-20T00:00:00Z'
-        }
-      ],
+      hire_date: '2019-06-22',
+      certifications: [],
       availability: [],
       assigned_classes: [],
       assigned_members: [],
-      created_at: '2021-06-20T00:00:00Z',
-      updated_at: '2021-06-20T00:00:00Z'
+      created_at: null,
+      updated_at: null,
+      experience_years: 5,
+      experience_level: 'Intermediate'
     },
     {
       id: '3',
       full_name: 'Mike Johnson',
-      email: 'mike.johnson@uptowngym.com',
-      phone: '+1547896321',
-      bio: 'Former athlete turned fitness trainer specializing in HIIT and functional fitness.',
-      photo_url: null,
+      email: 'mike.johnson@example.com',
+      phone: '+1122334455',
+      bio: 'Focused on athletic performance and sports-specific training.',
+      photo_url: 'https://randomuser.me/api/portraits/men/67.jpg',
       role: 'trainer',
-      specialties: ['HIIT', 'Functional Training'],
-      status: 'Active',
-      hire_date: '2022-03-05',
-      certifications: [
-        {
-          id: '301',
-          staff_id: '3',
-          certification_name: 'Certified Functional Strength Coach',
-          issuing_organization: 'Functional Movement Systems',
-          issue_date: '2020-11-12',
-          expiry_date: '2025-11-12',
-          verified: true,
-          certification_file: null,
-          created_at: '2022-03-05T00:00:00Z',
-          updated_at: '2022-03-05T00:00:00Z'
-        }
-      ],
+      specialties: ['Sports', 'Performance', 'Rehabilitation'],
+      status: 'On Leave',
+      hire_date: '2020-01-10',
+      certifications: [],
       availability: [],
       assigned_classes: [],
       assigned_members: [],
-      created_at: '2022-03-05T00:00:00Z',
-      updated_at: '2022-03-05T00:00:00Z'
+      created_at: null,
+      updated_at: null,
+      experience_years: 3,
+      experience_level: 'Advanced'
     }
   ];
 };
+
+export default getMockStaff;
