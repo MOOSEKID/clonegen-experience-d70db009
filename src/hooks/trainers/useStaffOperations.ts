@@ -1,3 +1,4 @@
+
 import { useToast } from '@/components/ui/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { StaffProfile } from './types';
@@ -267,7 +268,32 @@ export const useStaffOperations = () => {
       if (fetchError) throw fetchError;
       
       // Update availability array
-      const currentAvail = trainerData?.availability || [];
+      let currentAvail: string[] = [];
+      
+      // Safely handle the availability value which might be null, a string, or an array
+      if (trainerData?.availability) {
+        if (Array.isArray(trainerData.availability)) {
+          currentAvail = trainerData.availability as string[];
+        } else if (typeof trainerData.availability === 'string') {
+          try {
+            // If it's a JSON string, try parsing it
+            const parsed = JSON.parse(trainerData.availability as string);
+            if (Array.isArray(parsed)) {
+              currentAvail = parsed;
+            } else {
+              // If parsing didn't result in an array, use a single item array
+              currentAvail = [String(trainerData.availability)];
+            }
+          } catch (e) {
+            // If parsing fails, treat as a single string value
+            currentAvail = [String(trainerData.availability)];
+          }
+        } else {
+          // Handle other cases by converting to string
+          currentAvail = [String(trainerData.availability)];
+        }
+      }
+      
       const updatedAvail = [...currentAvail, availability];
       
       // Save the updated array
@@ -307,8 +333,37 @@ export const useStaffOperations = () => {
       if (fetchError) throw fetchError;
       
       // Update availability array by removing the item
-      const currentAvail = trainerData?.availability || [];
-      const updatedAvail = currentAvail.filter((avail: string) => avail !== availability);
+      let currentAvail: string[] = [];
+      let updatedAvail: string[] = [];
+      
+      // Safely handle the availability value
+      if (trainerData?.availability) {
+        if (Array.isArray(trainerData.availability)) {
+          currentAvail = trainerData.availability as string[];
+          updatedAvail = currentAvail.filter((avail: string) => avail !== availability);
+        } else if (typeof trainerData.availability === 'string') {
+          try {
+            // Try parsing as JSON
+            const parsed = JSON.parse(trainerData.availability as string);
+            if (Array.isArray(parsed)) {
+              currentAvail = parsed;
+              updatedAvail = currentAvail.filter(avail => avail !== availability);
+            } else {
+              // If parsing didn't yield an array, handle as single string
+              const availString = String(trainerData.availability);
+              updatedAvail = availString === availability ? [] : [availString];
+            }
+          } catch (e) {
+            // If parsing fails, treat as single string
+            const availString = String(trainerData.availability);
+            updatedAvail = availString === availability ? [] : [availString];
+          }
+        } else {
+          // Handle as single item
+          const availString = String(trainerData.availability);
+          updatedAvail = availString === availability ? [] : [availString];
+        }
+      }
       
       // Save the updated array
       const { error } = await supabase
