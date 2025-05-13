@@ -9,7 +9,7 @@ export const useCertificationsManagement = () => {
   const addCertification = async (certification: Omit<StaffCertification, 'id'>) => {
     try {
       const { data, error } = await supabase
-        .from('staff_certifications')
+        .from('trainer_certifications' as any)
         .insert({
           staff_id: certification.staff_id,
           certification_name: certification.certification_name,
@@ -42,7 +42,7 @@ export const useCertificationsManagement = () => {
   const deleteCertification = async (id: string) => {
     try {
       const { error } = await supabase
-        .from('staff_certifications')
+        .from('trainer_certifications' as any)
         .delete()
         .eq('id', id);
         

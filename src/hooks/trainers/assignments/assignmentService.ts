@@ -1,105 +1,71 @@
 
-import { ClientAssignment } from '../types';
-import { mockAssignments } from './mockAssignments';
-import { mockMembers } from '@/data/mockMembersData';
-import mockTrainers from '../mockTrainers';
 import { supabase } from '@/integrations/supabase/client';
+import { ClientAssignment } from '../types';
+import { toast } from 'sonner';
 
-// Mock function to get assignments with trainer and client details
-export const getClientAssignments = async (trainerId?: string, clientId?: string): Promise<ClientAssignment[]> => {
+export const fetchAssignments = async (trainerId?: string, clientId?: string) => {
   try {
-    // In a real implementation, this would be a database call
+    let query = supabase.from('trainer_client_assignments').select('*');
     
-    // For mock data, we're adding trainer and client details
-    let filteredAssignments = [...mockAssignments];
-
-    // Apply filters if provided
     if (trainerId) {
-      filteredAssignments = filteredAssignments.filter(assignment => assignment.staff_id === trainerId);
+      query = query.eq('trainer_id', trainerId);
     }
     
     if (clientId) {
-      filteredAssignments = filteredAssignments.filter(assignment => assignment.client_id === clientId);
+      query = query.eq('client_id', clientId);
     }
     
-    // Add trainer and client details
-    const enrichedAssignments = filteredAssignments.map(assignment => {
-      const trainer = mockTrainers.find(t => t.id === assignment.staff_id);
-      const client = mockMembers.find(m => m.id === assignment.client_id);
-      
-      return {
-        ...assignment,
-        trainer_name: trainer?.name || 'Unknown Trainer',
-        client_name: client?.name || 'Unknown Client',
-        trainers: trainer,
-        members: client
-      };
-    });
+    const { data, error } = await query.order('assignment_date', { ascending: false });
     
-    return enrichedAssignments as any;
-  } catch (error) {
-    console.error("Error fetching client assignments:", error);
-    return [];
+    if (error) throw error;
+    
+    return data || [];
+  } catch (err) {
+    console.error('Error fetching assignments:', err);
+    throw err;
   }
 };
 
-// Function to create a new client assignment
-export const createClientAssignment = async (assignmentData: Omit<ClientAssignment, 'id'>): Promise<ClientAssignment | null> => {
+export const createAssignment = async (trainerId: string, clientId: string) => {
   try {
-    // In a real implementation, this would be a database insert
-    const newAssignment: ClientAssignment = {
-      id: `mock_${Date.now()}`,
-      ...assignmentData,
-      created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString()
-    };
+    const { data, error } = await supabase
+      .from('trainer_client_assignments')
+      .insert({
+        trainer_id: trainerId,
+        client_id: clientId,
+        assignment_date: new Date().toISOString().split('T')[0],
+        status: 'active'
+      })
+      .select()
+      .single();
     
-    // Return the newly created assignment
-    return newAssignment;
-  } catch (error) {
-    console.error("Error creating client assignment:", error);
-    return null;
+    if (error) throw error;
+    
+    return data;
+  } catch (err) {
+    console.error('Error creating assignment:', err);
+    throw err;
   }
 };
 
-// Function to update an existing client assignment
-export const updateClientAssignment = async (id: string, assignmentData: Partial<ClientAssignment>): Promise<ClientAssignment | null> => {
+export const updateAssignmentStatus = async (id: string, status: 'active' | 'paused' | 'ended') => {
   try {
-    // In a real implementation, this would be a database update
-    const assignmentIndex = mockAssignments.findIndex(a => a.id === id);
+    let updates: { status: string; end_date?: string } = { status };
     
-    if (assignmentIndex === -1) {
-      throw new Error("Assignment not found");
+    if (status === 'ended') {
+      updates.end_date = new Date().toISOString().split('T')[0];
     }
     
-    const updatedAssignment: ClientAssignment = {
-      ...mockAssignments[assignmentIndex],
-      ...assignmentData,
-      updated_at: new Date().toISOString()
-    };
+    const { error } = await supabase
+      .from('trainer_client_assignments')
+      .update(updates)
+      .eq('id', id);
     
-    // Return the updated assignment
-    return updatedAssignment;
-  } catch (error) {
-    console.error("Error updating client assignment:", error);
-    return null;
-  }
-};
-
-// Function to delete a client assignment
-export const deleteClientAssignment = async (id: string): Promise<boolean> => {
-  try {
-    // In a real implementation, this would be a database delete
-    const assignmentIndex = mockAssignments.findIndex(a => a.id === id);
+    if (error) throw error;
     
-    if (assignmentIndex === -1) {
-      throw new Error("Assignment not found");
-    }
-    
-    // Return success
     return true;
-  } catch (error) {
-    console.error("Error deleting client assignment:", error);
-    return false;
+  } catch (err) {
+    console.error('Error updating assignment status:', err);
+    throw err;
   }
 };

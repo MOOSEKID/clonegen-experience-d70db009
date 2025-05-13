@@ -1,17 +1,14 @@
 
 import { useState, useEffect } from 'react';
 import { useToast } from '@/components/ui/use-toast';
-import { supabase } from '@/integrations/supabase/client';
-import { ClientSession, ClientSessionInput } from './sessions/types';
+import { ClientSession, ClientSessionInput } from './types';
 import { 
   fetchSessions, 
   createSession, 
   updateSession, 
   deleteSession 
 } from './sessions/sessionService';
-import { generateMockSessions } from './sessions/mockSessions';
-
-export type { ClientSession, ClientSessionInput } from './sessions/types';
+import generateMockSessions from './sessions/mockSessions';
 
 export const useClientSessions = (trainerId?: string, clientId?: string) => {
   const [sessions, setSessions] = useState<ClientSession[]>([]);
@@ -58,95 +55,83 @@ export const useClientSessions = (trainerId?: string, clientId?: string) => {
     };
   }, [trainerId, clientId]);
   
-  const createClientSession = async (sessionData: ClientSessionInput) => {
+  const addSession = async (session: ClientSessionInput) => {
     try {
-      await createSession(sessionData);
+      const newSession = await createSession(session);
       
       toast({
         title: "Session created",
-        description: "The client session has been scheduled.",
+        description: "The client session has been added to the schedule.",
       });
+      
+      return newSession;
     } catch (err) {
+      console.error('Error adding session:', err);
       toast({
         variant: "destructive",
         title: "Error",
-        description: "Failed to create client session. Please try again.",
+        description: "Failed to create session. Please try again.",
       });
       throw err;
     }
   };
   
-  const updateClientSession = async (id: string, sessionData: Partial<ClientSessionInput>) => {
+  const editSession = async (id: string, updates: Partial<ClientSessionInput>) => {
     try {
-      await updateSession(id, sessionData);
+      const updatedSession = await updateSession(id, updates);
       
       toast({
         title: "Session updated",
         description: "The client session has been updated.",
       });
+      
+      return updatedSession;
     } catch (err) {
+      console.error('Error updating session:', err);
       toast({
         variant: "destructive",
         title: "Error",
-        description: "Failed to update client session. Please try again.",
+        description: "Failed to update session. Please try again.",
       });
       throw err;
     }
   };
   
-  const completeSession = async (id: string, achievements: string, notes?: string) => {
-    return updateClientSession(id, {
-      status: 'completed',
-      achievements,
-      notes
-    });
-  };
-  
-  const cancelSession = async (id: string, notes?: string) => {
-    return updateClientSession(id, {
-      status: 'canceled',
-      notes
-    });
-  };
-  
-  const markNoShow = async (id: string, notes?: string) => {
-    return updateClientSession(id, {
-      status: 'no-show',
-      notes
-    });
-  };
-  
-  const deleteClientSession = async (id: string) => {
+  const removeSession = async (id: string) => {
     try {
-      const success = await deleteSession(id);
+      await deleteSession(id);
       
-      if (success) {
-        toast({
-          title: "Session deleted",
-          description: "The client session has been removed.",
-        });
-      }
+      toast({
+        title: "Session deleted",
+        description: "The client session has been removed.",
+      });
       
-      return success;
+      return true;
     } catch (err) {
+      console.error('Error deleting session:', err);
       toast({
         variant: "destructive",
         title: "Error",
-        description: "Failed to delete client session. Please try again.",
+        description: "Failed to delete session. Please try again.",
       });
-      return false;
+      throw err;
     }
+  };
+  
+  const updateSessionStatus = (id: string, status: string) => {
+    return editSession(id, { status });
   };
   
   return {
     sessions,
     isLoading,
     error,
-    createSession: createClientSession,
-    updateSession: updateClientSession,
-    completeSession,
-    cancelSession,
-    markNoShow,
-    deleteSession: deleteClientSession
+    addSession,
+    editSession,
+    removeSession,
+    updateSessionStatus
   };
 };
+
+// Add missing supabase import
+import { supabase } from '@/integrations/supabase/client';

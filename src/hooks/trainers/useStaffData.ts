@@ -14,41 +14,31 @@ export const useStaffData = () => {
       setIsLoading(true);
       
       try {
+        // Temporarily use the trainers table until the staff table is created
         const { data: staffData, error: staffError } = await supabase
-          .from('staff')
+          .from('trainers' as any)
           .select('*')
           .order('name');
           
         if (staffError) throw staffError;
         
         if (staffData) {
-          const processedStaff = await Promise.all(
-            staffData.map(async (staffMember) => {
-              const { data: certifications, error: certError } = await supabase
-                .from('staff_certifications')
-                .select('*')
-                .eq('staff_id', staffMember.id);
-                
-              if (certError) console.error('Error fetching certifications:', certError);
-              
-              const { data: availability, error: availError } = await supabase
-                .from('staff_availability')
-                .select('*')
-                .eq('staff_id', staffMember.id);
-                
-              if (availError) console.error('Error fetching availability:', availError);
-              
-              return {
-                ...staffMember,
-                profile_picture: staffMember.profile_picture || null,
-                hire_date: staffMember.hire_date || new Date().toISOString().split('T')[0],
-                certifications: certifications || [],
-                availability: availability || [],
-                experience_years: staffMember.experience_years || 0,
-                experience_level: staffMember.experience_level || 'Beginner'
-              } as StaffProfile;
-            })
-          );
+          const processedStaff = staffData.map((trainer: any) => {
+            return {
+              id: trainer.id,
+              name: trainer.name,
+              email: trainer.email || '',
+              phone: trainer.phone || null,
+              bio: trainer.bio || null,
+              profile_picture: trainer.profilepicture || null,
+              role: 'trainer',
+              specialization: trainer.specialization || [],
+              status: trainer.status || 'Active',
+              hire_date: trainer.hiredate || new Date().toISOString().split('T')[0],
+              experience_years: 0,
+              experience_level: 'Beginner'
+            } as StaffProfile;
+          });
           
           setStaff(processedStaff);
         } else {
@@ -67,11 +57,11 @@ export const useStaffData = () => {
     fetchStaff();
     
     const subscription = supabase
-      .channel('public:staff')
+      .channel('public:trainers')
       .on('postgres_changes', { 
           event: '*', 
           schema: 'public', 
-          table: 'staff'
+          table: 'trainers'
       }, () => {
         fetchStaff();
       })

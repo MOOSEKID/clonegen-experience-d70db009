@@ -1,5 +1,5 @@
-import { Route } from "react-router-dom";
-import AdminLayout from "@/pages/admin/AdminLayout";
+
+import { Route, RouteObject } from "react-router-dom";
 import Dashboard from "@/pages/admin/Dashboard";
 import Members from "@/pages/admin/Members";
 import Classes from "@/pages/admin/Classes";
@@ -21,6 +21,7 @@ import PermissionsSettings from "@/pages/admin/settings/Permissions";
 import CustomMessagesSettings from "@/pages/admin/settings/CustomMessages";
 import ReportsExportsSettings from "@/pages/admin/settings/ReportsExports";
 import AutomationRulesPage from "@/pages/admin/settings/AutomationRules";
+import HolidaysPage from "@/pages/admin/settings/Holidays";
 
 // Create a placeholder component for missing pages
 const PlaceholderPage = ({ name }: { name: string }) => (
@@ -30,7 +31,7 @@ const PlaceholderPage = ({ name }: { name: string }) => (
   </div>
 );
 
-// Create placeholders for all the missing pages
+// Create placeholders for all the missing pages with proper components
 const MemberDetail = () => <PlaceholderPage name="Member Detail" />;
 const ClassDetail = () => <PlaceholderPage name="Class Detail" />;
 const TrainerDetail = () => <PlaceholderPage name="Trainer Detail" />;
@@ -78,284 +79,137 @@ const Settings = () => <PlaceholderPage name="Settings" />;
 const SettingsDetail = () => <PlaceholderPage name="Settings Detail" />;
 
 // Changed from default export to named export
-export const useAdminRoutes = () => {
-  const routes = [
+export const useAdminRoutes = (): RouteObject[] => {
+  return [
     {
       path: "/admin",
-      element: <AdminLayout />,
-      children: [
-        {
-          path: "",
-          element: <Dashboard />,
-        },
-        {
-          path: "dashboard",
-          element: <Dashboard />,
-        },
-        {
-          path: "members",
-          element: <Members />,
-        },
-        {
-          path: "members/:id",
-          element: <MemberDetail />,
-        },
-        {
-          path: "classes",
-          element: <Classes />,
-        },
-        {
-          path: "classes/:id",
-          element: <ClassDetail />,
-        },
-        {
-          path: "trainers",
-          element: <Trainers />,
-        },
-        {
-          path: "trainers/:id",
-          element: <TrainerDetail />,
-        },
-        {
-          path: "billing",
-          element: <Billing />,
-        },
-        {
-          path: "reports",
-          element: <Reports />,
-        },
-        {
-          path: "settings",
-          element: <AdminSettings />,
-        },
-        {
-          path: "memberships",
-          element: <Memberships />,
-        },
-        {
-          path: "memberships/:id",
-          element: <MembershipDetail />,
-        },
-        {
-          path: "attendance",
-          element: <Attendance />,
-        },
-        {
-          path: "equipment",
-          element: <Equipment />,
-        },
-        {
-          path: "equipment/:id",
-          element: <EquipmentDetail />,
-        },
-        {
-          path: "maintenance",
-          element: <Maintenance />,
-        },
-        {
-          path: "maintenance/:id",
-          element: <MaintenanceDetail />,
-        },
-        {
-          path: "announcements",
-          element: <Announcements />,
-        },
-        {
-          path: "announcements/:id",
-          element: <AnnouncementDetail />,
-        },
-        {
-          path: "employees",
-          element: <Employees />,
-        },
-        {
-          path: "employees/:id",
-          element: <EmployeeDetail />,
-        },
-        {
-          path: "payroll",
-          element: <Payroll />,
-        },
-        {
-          path: "payroll/:id",
-          element: <PayrollDetail />,
-        },
-        {
-          path: "inventory",
-          element: <Inventory />,
-        },
-        {
-          path: "inventory/:id",
-          element: <InventoryDetail />,
-        },
-        {
-          path: "pos",
-          element: <POS />,
-        },
-        {
-          path: "pos/:id",
-          element: <POSDetail />,
-        },
-        {
-          path: "marketing",
-          element: <Marketing />,
-        },
-        {
-          path: "marketing/:id",
-          element: <MarketingDetail />,
-        },
-        {
-          path: "analytics",
-          element: <Analytics />,
-        },
-        {
-          path: "analytics/:id",
-          element: <AnalyticsDetail />,
-        },
-        {
-          path: "help",
-          element: <Help />,
-        },
-        {
-          path: "help/:id",
-          element: <HelpDetail />,
-        },
-        {
-          path: "profile",
-          element: <Profile />,
-        },
-        {
-          path: "profile/:id",
-          element: <ProfileDetail />,
-        },
-        {
-          path: "notifications",
-          element: <Notifications />,
-        },
-        {
-          path: "notifications/:id",
-          element: <NotificationsDetail />,
-        },
-        {
-          path: "messages",
-          element: <Messages />,
-        },
-        {
-          path: "messages/:id",
-          element: <MessagesDetail />,
-        },
-        {
-          path: "calendar",
-          element: <Calendar />,
-        },
-        {
-          path: "calendar/:id",
-          element: <CalendarDetail />,
-        },
-        {
-          path: "tasks",
-          element: <Tasks />,
-        },
-        {
-          path: "tasks/:id",
-          element: <TasksDetail />,
-        },
-        {
-          path: "notes",
-          element: <Notes />,
-        },
-        {
-          path: "notes/:id",
-          element: <NotesDetail />,
-        },
-        {
-          path: "files",
-          element: <Files />,
-        },
-        {
-          path: "files/:id",
-          element: <FilesDetail />,
-        },
-        {
-          path: "search",
-          element: <Search />,
-        },
-        {
-          path: "search/:id",
-          element: <SearchDetail />,
-        },
-        {
-          path: "settings",
-          element: <Settings />,
-        },
-        {
-          path: "settings/:id",
-          element: <SettingsDetail />,
-        },
-        // Business Hours setting route
-        {
-          path: "settings/business-hours",
-          element: <BusinessHoursPage />,
-        },
-        {
-          path: "settings/holidays",
-          element: <HolidaysSettings />,
-        },
-        {
-          path: "settings/general",
-          element: <GeneralSettings />,
-        },
-        {
-          path: "settings/security",
-          element: <SecuritySettings />,
-        },
-        {
-          path: "settings/integrations",
-          element: <IntegrationsSettings />,
-        },
-        {
-          path: "settings/platform",
-          element: <PlatformSettings />,
-        },
-        {
-          path: "settings/test-accounts",
-          element: <TestAccountsSettings />,
-        },
-        {
-          path: "settings/company-automation",
-          element: <CompanyAutomationSettings />,
-        },
-        {
-          path: "settings/member-defaults",
-          element: <MemberDefaultsPage />,
-        },
-        {
-          path: "settings/invoice-templates",
-          element: <InvoiceTemplatesPage />,
-        },
-        {
-          path: "settings/notifications",
-          element: <NotificationsSettings />,
-        },
-        {
-          path: "settings/permissions",
-          element: <PermissionsSettings />,
-        },
-        {
-          path: "settings/custom-messages",
-          element: <CustomMessagesSettings />,
-        },
-        {
-          path: "settings/reports-exports",
-          element: <ReportsExportsSettings />,
-        },
-        {
-          path: "settings/automation-rules",
-          element: <AutomationRulesPage />,
-        },
-      ]
+      element: <Dashboard />,
+      children: []
+    },
+    {
+      path: "/admin/dashboard",
+      element: <Dashboard />,
+      children: []
+    },
+    {
+      path: "/admin/members",
+      element: <Members />,
+      children: []
+    },
+    {
+      path: "/admin/members/:id",
+      element: <MemberDetail />,
+      children: []
+    },
+    {
+      path: "/admin/classes",
+      element: <Classes />,
+      children: []
+    },
+    {
+      path: "/admin/classes/:id",
+      element: <ClassDetail />,
+      children: []
+    },
+    {
+      path: "/admin/trainers",
+      element: <Trainers />,
+      children: []
+    },
+    {
+      path: "/admin/trainers/:id",
+      element: <TrainerDetail />,
+      children: []
+    },
+    {
+      path: "/admin/billing",
+      element: <Billing />,
+      children: []
+    },
+    {
+      path: "/admin/reports",
+      element: <Reports />,
+      children: []
+    },
+    {
+      path: "/admin/settings",
+      element: <AdminSettings />,
+      children: []
+    },
+    {
+      path: "/admin/settings/business-hours",
+      element: <BusinessHoursPage />,
+      children: []
+    },
+    {
+      path: "/admin/settings/holidays",
+      element: <HolidaysPage />,
+      children: []
+    },
+    {
+      path: "/admin/settings/general",
+      element: <GeneralSettings />,
+      children: []
+    },
+    {
+      path: "/admin/settings/security",
+      element: <SecuritySettings />,
+      children: []
+    },
+    {
+      path: "/admin/settings/integrations",
+      element: <IntegrationsSettings />,
+      children: []
+    },
+    {
+      path: "/admin/settings/platform",
+      element: <PlatformSettings />,
+      children: []
+    },
+    {
+      path: "/admin/settings/test-accounts",
+      element: <TestAccountsSettings />,
+      children: []
+    },
+    {
+      path: "/admin/settings/company-automation",
+      element: <CompanyAutomationSettings />,
+      children: []
+    },
+    {
+      path: "/admin/settings/member-defaults",
+      element: <MemberDefaultsPage />,
+      children: []
+    },
+    {
+      path: "/admin/settings/invoice-templates",
+      element: <InvoiceTemplatesPage />,
+      children: []
+    },
+    {
+      path: "/admin/settings/notifications",
+      element: <NotificationsSettings />,
+      children: []
+    },
+    {
+      path: "/admin/settings/permissions",
+      element: <PermissionsSettings />,
+      children: []
+    },
+    {
+      path: "/admin/settings/custom-messages",
+      element: <CustomMessagesSettings />,
+      children: []
+    },
+    {
+      path: "/admin/settings/reports-exports",
+      element: <ReportsExportsSettings />,
+      children: []
+    },
+    {
+      path: "/admin/settings/automation-rules",
+      element: <AutomationRulesPage />,
+      children: []
     }
   ];
-
-  return routes;
 };

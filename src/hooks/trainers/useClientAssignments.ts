@@ -1,9 +1,9 @@
 
 import { useState, useEffect } from 'react';
 import { useToast } from '@/components/ui/use-toast';
-import { ClientAssignment, AssignedClient } from './assignments/types';
+import { ClientAssignment, AssignedClient } from './types';
 import { fetchAssignments, createAssignment, updateAssignmentStatus } from './assignments/assignmentService';
-import { generateMockAssignments } from './assignments/mockAssignments';
+import generateMockAssignments from './assignments/mockAssignments';
 
 export type { ClientAssignment, AssignedClient } from './assignments/types';
 
@@ -105,7 +105,7 @@ export const useClientAssignments = (trainerId?: string, clientId?: string) => {
       .filter(a => a.status === 'active')
       .map(a => ({
         id: a.client_id,
-        name: a.client_name || 'Unknown Client',
+        name: a.client_id || 'Unknown Client',
         assignmentId: a.id,
         status: a.status
       }));

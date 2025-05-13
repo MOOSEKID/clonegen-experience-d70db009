@@ -7,53 +7,55 @@ export const getMockStaff = (): StaffProfile[] => {
       id: '1',
       name: 'John Doe',
       email: 'john.doe@uptowngym.com',
-      phone: '+250 78 123 4567',
-      specialization: ['Weight Training', 'Nutrition'],
-      bio: 'John is a certified personal trainer with 5 years of experience specializing in strength training and nutrition counseling.',
+      phone: '+1 (555) 123-4567',
+      bio: 'Experienced fitness coach with 5+ years specializing in strength training and HIIT workouts.',
+      profile_picture: '/assets/trainers/john-doe.jpg',
+      role: 'trainer',
+      specialization: ['Strength Training', 'HIIT'],
       status: 'Active',
-      hire_date: '2020-06-15',
+      hire_date: '2019-05-15',
       experience_years: 5,
       experience_level: 'Advanced',
-      role: 'trainer',
-      profile_picture: null,
       certifications: [
         {
-          id: 'cert1',
+          id: '101',
           staff_id: '1',
-          certification_name: 'NASM Certified Personal Trainer',
-          issuing_organization: 'National Academy of Sports Medicine',
-          issue_date: '2018-04-20',
-          expiry_date: '2023-04-20'
+          certification_name: 'ACE Personal Trainer',
+          issuing_organization: 'American Council on Exercise',
+          issue_date: '2018-03-10',
+          expiry_date: '2023-03-10',
+          verified: true
         },
         {
-          id: 'cert2',
+          id: '102',
           staff_id: '1',
-          certification_name: 'Precision Nutrition Level 1',
-          issuing_organization: 'Precision Nutrition',
-          issue_date: '2019-02-15',
-          expiry_date: '2024-02-15'
+          certification_name: 'NASM Performance Enhancement',
+          issuing_organization: 'National Academy of Sports Medicine',
+          issue_date: '2019-07-22',
+          expiry_date: '2023-07-22',
+          verified: true
         }
       ],
       availability: [
         {
-          id: 'avail1',
+          id: '201',
           staff_id: '1',
           day_of_week: 'Monday',
-          start_time: '08:00',
+          start_time: '09:00',
           end_time: '17:00'
         },
         {
-          id: 'avail2',
+          id: '202',
           staff_id: '1',
           day_of_week: 'Wednesday',
-          start_time: '08:00',
+          start_time: '09:00',
           end_time: '17:00'
         },
         {
-          id: 'avail3',
+          id: '203',
           staff_id: '1',
           day_of_week: 'Friday',
-          start_time: '08:00',
+          start_time: '09:00',
           end_time: '17:00'
         }
       ]
@@ -62,168 +64,113 @@ export const getMockStaff = (): StaffProfile[] => {
       id: '2',
       name: 'Jane Smith',
       email: 'jane.smith@uptowngym.com',
-      phone: '+250 79 876 5432',
-      specialization: ['Yoga', 'Pilates', 'Meditation'],
-      bio: 'Jane is a yoga and pilates instructor with a focus on mindfulness and rehabilitation exercises for clients of all ages.',
-      status: 'Active',
-      hire_date: '2019-03-10',
-      experience_years: 7,
-      experience_level: 'Expert',
+      phone: '+1 (555) 987-6543',
+      bio: 'Specialized in yoga and pilates with focus on proper alignment and mindfulness in movement.',
+      profile_picture: '/assets/trainers/jane-smith.jpg',
       role: 'trainer',
-      profile_picture: null,
+      specialization: ['Yoga', 'Pilates', 'Flexibility'],
+      status: 'Active',
+      hire_date: '2020-02-10',
+      experience_years: 6,
+      experience_level: 'Expert',
       certifications: [
         {
-          id: 'cert3',
+          id: '103',
           staff_id: '2',
-          certification_name: '500-Hour Yoga Teacher Training',
+          certification_name: '200-Hour Yoga Teacher Training',
           issuing_organization: 'Yoga Alliance',
-          issue_date: '2017-07-12',
-          expiry_date: '2022-07-12'
+          issue_date: '2017-05-18',
+          expiry_date: null,
+          verified: true
         },
         {
-          id: 'cert4',
+          id: '104',
           staff_id: '2',
           certification_name: 'Pilates Method Alliance Certification',
           issuing_organization: 'Pilates Method Alliance',
-          issue_date: '2018-09-22',
-          expiry_date: '2023-09-22'
+          issue_date: '2018-11-05',
+          expiry_date: '2022-11-05',
+          verified: true
         }
       ],
       availability: [
         {
-          id: 'avail4',
+          id: '204',
           staff_id: '2',
           day_of_week: 'Tuesday',
-          start_time: '10:00',
-          end_time: '19:00'
+          start_time: '08:00',
+          end_time: '16:00'
         },
         {
-          id: 'avail5',
+          id: '205',
           staff_id: '2',
           day_of_week: 'Thursday',
-          start_time: '10:00',
-          end_time: '19:00'
+          start_time: '08:00',
+          end_time: '16:00'
         },
         {
-          id: 'avail6',
+          id: '206',
           staff_id: '2',
           day_of_week: 'Saturday',
-          start_time: '09:00',
+          start_time: '10:00',
           end_time: '14:00'
         }
       ]
     },
     {
       id: '3',
-      name: 'Mike Johnson',
-      email: 'mike.johnson@uptowngym.com',
-      phone: '+250 72 345 6789',
-      specialization: ['HIIT', 'CrossFit', 'Group Training'],
-      bio: 'Mike specializes in high-intensity interval training and CrossFit methodology for clients looking to maximize their fitness results.',
-      status: 'Active',
-      hire_date: '2021-01-15',
-      experience_years: 4,
-      experience_level: 'Intermediate',
+      name: 'Michael Johnson',
+      email: 'michael.johnson@uptowngym.com',
+      phone: '+1 (555) 456-7890',
+      bio: 'Former athlete specializing in sports-specific training and rehabilitation.',
+      profile_picture: '/assets/trainers/michael-johnson.jpg',
       role: 'trainer',
-      profile_picture: null,
+      specialization: ['Sports Training', 'Rehabilitation', 'Athletic Performance'],
+      status: 'Active',
+      hire_date: '2018-08-23',
+      experience_years: 8,
+      experience_level: 'Expert',
       certifications: [
         {
-          id: 'cert5',
+          id: '105',
           staff_id: '3',
-          certification_name: 'CrossFit Level 2 Trainer',
-          issuing_organization: 'CrossFit Inc.',
-          issue_date: '2020-03-15',
-          expiry_date: '2024-03-15'
+          certification_name: 'NSCA Certified Strength and Conditioning Specialist',
+          issuing_organization: 'National Strength and Conditioning Association',
+          issue_date: '2016-12-01',
+          expiry_date: '2023-12-01',
+          verified: true
         }
       ],
       availability: [
         {
-          id: 'avail7',
+          id: '207',
           staff_id: '3',
           day_of_week: 'Monday',
-          start_time: '15:00',
-          end_time: '21:00'
+          start_time: '12:00',
+          end_time: '20:00'
         },
         {
-          id: 'avail8',
+          id: '208',
           staff_id: '3',
           day_of_week: 'Tuesday',
-          start_time: '15:00',
-          end_time: '21:00'
+          start_time: '12:00',
+          end_time: '20:00'
         },
         {
-          id: 'avail9',
+          id: '209',
           staff_id: '3',
           day_of_week: 'Thursday',
-          start_time: '15:00',
-          end_time: '21:00'
-        },
-        {
-          id: 'avail10',
-          staff_id: '3',
-          day_of_week: 'Saturday',
-          start_time: '14:00',
+          start_time: '12:00',
           end_time: '20:00'
-        }
-      ]
-    },
-    {
-      id: '4',
-      name: 'Sarah Williams',
-      email: 'sarah.williams@uptowngym.com',
-      phone: '+250 73 567 8901',
-      specialization: ['Senior Fitness', 'Rehabilitation', 'Functional Training'],
-      bio: 'Sarah focuses on functional fitness and rehabilitation training, especially for older adults and individuals recovering from injuries.',
-      status: 'Active',
-      hire_date: '2020-07-20',
-      experience_years: 6,
-      experience_level: 'Advanced',
-      role: 'trainer',
-      profile_picture: null,
-      certifications: [
-        {
-          id: 'cert6',
-          staff_id: '4',
-          certification_name: 'ACSM Certified Exercise Physiologist',
-          issuing_organization: 'American College of Sports Medicine',
-          issue_date: '2019-05-15',
-          expiry_date: '2023-05-15'
         },
         {
-          id: 'cert7',
-          staff_id: '4',
-          certification_name: 'Functional Aging Specialist',
-          issuing_organization: 'Functional Aging Institute',
-          issue_date: '2020-02-10',
-          expiry_date: '2022-02-10'
-        }
-      ],
-      availability: [
-        {
-          id: 'avail11',
-          staff_id: '4',
-          day_of_week: 'Wednesday',
-          start_time: '08:00',
-          end_time: '15:00'
-        },
-        {
-          id: 'avail12',
-          staff_id: '4',
+          id: '210',
+          staff_id: '3',
           day_of_week: 'Friday',
-          start_time: '08:00',
-          end_time: '15:00'
-        },
-        {
-          id: 'avail13',
-          staff_id: '4',
-          day_of_week: 'Sunday',
-          start_time: '10:00',
-          end_time: '16:00'
+          start_time: '12:00',
+          end_time: '20:00'
         }
       ]
     }
   ];
 };
-
-// For backward compatibility
-export const getMockTrainers = getMockStaff;

@@ -1,137 +1,79 @@
 
 import { ClientSession } from '../types';
 
-export const mockSessions: ClientSession[] = [
-  {
-    id: '1',
-    staff_id: '1',
-    client_id: '101',
-    session_date: '2023-08-15',
-    start_time: '09:00',
-    end_time: '10:00',
-    duration: 60,
-    session_type: 'personal_training',
-    location: 'Main Gym Floor',
-    status: 'completed',
-    notes: 'Focused on upper body strength',
-    focus_areas: ['chest', 'shoulders', 'triceps'],
-    achievements: 'Increased bench press by 5kg',
-    created_at: '2023-08-10T14:30:00Z',
-    updated_at: '2023-08-15T10:05:00Z'
-  },
-  {
-    id: '2',
-    staff_id: '1',
-    client_id: '102',
-    session_date: '2023-08-16',
-    start_time: '11:00',
-    end_time: '12:00',
-    duration: 60,
-    session_type: 'personal_training',
-    location: 'Functional Training Area',
-    status: 'scheduled',
-    notes: 'Will focus on core stability',
-    focus_areas: ['core', 'balance'],
-    created_at: '2023-08-10T15:00:00Z',
-    updated_at: '2023-08-10T15:00:00Z'
-  },
-  {
-    id: '3',
-    staff_id: '2',
-    client_id: '103',
-    session_date: '2023-08-14',
-    start_time: '15:00',
-    end_time: '16:30',
-    duration: 90,
-    session_type: 'rehabilitation',
-    location: 'Physio Room',
-    status: 'completed',
-    notes: 'Knee mobility exercises',
-    focus_areas: ['knee', 'leg strength', 'mobility'],
-    achievements: 'Improved range of motion',
-    created_at: '2023-08-07T09:15:00Z',
-    updated_at: '2023-08-14T16:35:00Z'
-  },
-  {
-    id: '4',
-    staff_id: '2',
-    client_id: '104',
-    session_date: '2023-08-17',
-    start_time: '14:00',
-    end_time: '15:30',
-    duration: 90,
-    session_type: 'sports_conditioning',
-    location: 'Sprint Track',
-    status: 'scheduled',
-    notes: 'Sprint training and agility drills',
-    focus_areas: ['speed', 'agility', 'endurance'],
-    created_at: '2023-08-10T11:45:00Z',
-    updated_at: '2023-08-10T11:45:00Z'
-  },
-  {
-    id: '5',
-    staff_id: '3',
-    client_id: '105',
-    session_date: '2023-08-15',
-    start_time: '17:00',
-    end_time: '18:00',
-    duration: 60,
-    session_type: 'yoga',
-    location: 'Yoga Studio',
-    status: 'canceled',
-    notes: 'Client had emergency',
-    focus_areas: ['flexibility', 'relaxation'],
-    created_at: '2023-08-08T16:30:00Z',
-    updated_at: '2023-08-14T20:15:00Z'
-  },
-  {
-    id: '6',
-    staff_id: '3',
-    client_id: '106',
-    session_date: '2023-08-18',
-    start_time: '18:00',
-    end_time: '19:00',
-    duration: 60,
-    session_type: 'mindfulness',
-    location: 'Yoga Studio',
-    status: 'scheduled',
-    notes: 'Breathing techniques and stress reduction',
-    focus_areas: ['meditation', 'breathing'],
-    created_at: '2023-08-11T10:00:00Z',
-    updated_at: '2023-08-11T10:00:00Z'
-  },
-  {
-    id: '7',
-    staff_id: '4',
-    client_id: '107',
-    session_date: '2023-08-14',
-    start_time: '08:00',
-    end_time: '09:00',
-    duration: 60,
-    session_type: 'hiit',
-    location: 'Crossfit Area',
-    status: 'no-show',
-    notes: 'Client didn\'t show up',
-    focus_areas: ['cardio', 'strength', 'endurance'],
-    created_at: '2023-08-07T14:00:00Z',
-    updated_at: '2023-08-14T09:05:00Z'
-  },
-  {
-    id: '8',
-    staff_id: '1',
-    client_id: '108',
-    session_date: '2023-08-19',
-    start_time: '10:00',
-    end_time: '11:00',
-    duration: 60,
-    session_type: 'personal_training',
-    location: 'Weight Room',
-    status: 'scheduled',
-    notes: 'First session after completion of fitness challenge',
-    focus_areas: ['maintenance', 'goal setting'],
-    created_at: '2023-08-12T11:30:00Z',
-    updated_at: '2023-08-12T11:30:00Z'
+export const generateMockSessions = (trainerId?: string, clientId?: string): ClientSession[] => {
+  const mockTrainerIds = ['1', '2', '3'];
+  const mockClientIds = ['101', '102', '103', '104', '105'];
+  const mockSessionTypes = ['Assessment', 'Strength', 'Cardio', 'Flexibility', 'Recovery'];
+  const mockLocations = ['Main Gym', 'Pool Area', 'Studio 1', 'Outdoor Track', 'Private Room'];
+  const mockStatuses = ['scheduled', 'completed', 'cancelled', 'no-show'];
+  
+  // Generate 5-15 mock sessions
+  const count = Math.floor(Math.random() * 11) + 5;
+  const sessions: ClientSession[] = [];
+  
+  for (let i = 0; i < count; i++) {
+    // Use provided IDs or random ones
+    const actualTrainerId = trainerId || mockTrainerIds[Math.floor(Math.random() * mockTrainerIds.length)];
+    const actualClientId = clientId || mockClientIds[Math.floor(Math.random() * mockClientIds.length)];
+    
+    // Create date string for a random date within +/- 30 days from now
+    const daysDiff = Math.floor(Math.random() * 61) - 30; // -30 to +30 days
+    const sessionDate = new Date();
+    sessionDate.setDate(sessionDate.getDate() + daysDiff);
+    
+    // Create a random time between 6AM and 8PM
+    const hour = Math.floor(Math.random() * 14) + 6; // 6AM to 8PM
+    const minute = [0, 15, 30, 45][Math.floor(Math.random() * 4)]; // 0, 15, 30, or 45 minutes
+    
+    const startTime = `${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}`;
+    
+    // Session duration 30-90 minutes
+    const duration = [30, 45, 60, 90][Math.floor(Math.random() * 4)];
+    
+    // Calculate end time
+    const endHour = hour + Math.floor((minute + duration) / 60);
+    const endMinute = (minute + duration) % 60;
+    const endTime = `${endHour.toString().padStart(2, '0')}:${endMinute.toString().padStart(2, '0')}`;
+    
+    const focusAreas = [];
+    const possibleAreas = ['Core', 'Upper Body', 'Lower Body', 'Cardio', 'Balance', 'Flexibility'];
+    const numAreas = Math.floor(Math.random() * 3) + 1; // 1-3 focus areas
+    
+    for (let j = 0; j < numAreas; j++) {
+      const randomArea = possibleAreas[Math.floor(Math.random() * possibleAreas.length)];
+      if (!focusAreas.includes(randomArea)) {
+        focusAreas.push(randomArea);
+      }
+    }
+    
+    const status = daysDiff < 0 ? 
+      (Math.random() > 0.2 ? 'completed' : ['cancelled', 'no-show'][Math.floor(Math.random() * 2)]) : 
+      'scheduled';
+    
+    sessions.push({
+      id: `mock-${i}`,
+      trainer_id: actualTrainerId,
+      client_id: actualClientId,
+      session_date: sessionDate.toISOString().split('T')[0],
+      start_time: startTime,
+      end_time: endTime,
+      duration,
+      session_type: mockSessionTypes[Math.floor(Math.random() * mockSessionTypes.length)],
+      location: mockLocations[Math.floor(Math.random() * mockLocations.length)],
+      status,
+      notes: status === 'completed' ? 'Session completed successfully' : 
+             status === 'cancelled' ? 'Client had to reschedule' :
+             status === 'no-show' ? 'Client did not attend' : 
+             'Regular training session',
+      focus_areas: focusAreas,
+      achievements: status === 'completed' ? 'Improved form and increased weights' : undefined,
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString()
+    });
   }
-];
+  
+  return sessions;
+};
 
-export default mockSessions;
+export default generateMockSessions;

@@ -1,19 +1,19 @@
 
 export interface ClientAssignment {
   id: string;
-  staff_id: string;
+  trainer_id: string;
   client_id: string;
   assignment_date: string;
-  status: 'active' | 'paused' | 'ended';
-  created_at: string;
-  updated_at: string;
-  client_name?: string;
-  staff_name?: string;
+  end_date?: string | null;
+  status?: string;
+  notes?: string;
+  created_at?: string;
+  updated_at?: string;
 }
 
 export interface AssignedClient {
   id: string;
   name: string;
   assignmentId: string;
-  status: 'active' | 'paused' | 'ended';
+  status?: string;
 }

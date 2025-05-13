@@ -17,7 +17,7 @@ const DashboardLayout = lazy(() => import("./pages/dashboard/DashboardLayout"));
 
 import { QueryProvider } from "./routes/QueryProvider";
 
-// Import routes hooks directly (fix: use named import)
+// Import routes hooks directly (using named import)
 import useMainRoutes from "./hooks/routing/useMainRoutes";
 import { useAdminRoutes } from "./hooks/routing/useAdminRoutes"; 
 import useDashboardRoutes from "./hooks/routing/useDashboardRoutes";
@@ -60,7 +60,21 @@ const App = () => {
                     </Suspense>
                   </AdminRoute>
                 }>
-                  {useAdminRoutes()}
+                  {useAdminRoutes().map((route) => (
+                    <Route 
+                      key={route.path} 
+                      path={route.path.replace('/admin/', '')} 
+                      element={route.element}
+                    >
+                      {route.children?.map((child) => (
+                        <Route 
+                          key={child.path} 
+                          path={child.path} 
+                          element={child.element} 
+                        />
+                      ))}
+                    </Route>
+                  ))}
                 </Route>
                 
                 {/* Dashboard Routes */}

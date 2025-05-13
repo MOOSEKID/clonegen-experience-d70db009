@@ -15,7 +15,7 @@ export function useAvailabilityManagement() {
     try {
       // Insert new availability
       const { data, error: insertError } = await supabase
-        .from('staff_availability')
+        .from('trainer_availability' as any)
         .insert(availability)
         .select()
         .single();
@@ -43,7 +43,7 @@ export function useAvailabilityManagement() {
     try {
       // Delete availability by id
       const { error: deleteError } = await supabase
-        .from('staff_availability')
+        .from('trainer_availability' as any)
         .delete()
         .eq('id', id);
       
