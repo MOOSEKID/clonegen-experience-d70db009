@@ -1,48 +1,70 @@
 
-import { StaffProfile, TrainerProfile } from './types';
+import { StaffProfile } from './types';
 
-/**
- * Adapts trainer properties to staff properties for backward compatibility
- */
-export const adaptTrainerToStaff = (trainer: any): StaffProfile => {
-  return {
-    id: trainer.id,
-    full_name: trainer.name || '',
-    email: trainer.email || '',
-    phone: trainer.phone || '',
-    role: 'trainer',
-    photo_url: trainer.profile_picture || trainer.profilepicture || null,
-    access_level: trainer.access_level || 'staff',
-    status: trainer.status || 'Active',
-    specialties: trainer.specialization || [],
-    bio: trainer.bio || null,
-    hire_date: trainer.hire_date || trainer.hiredate || null,
-    certifications: trainer.certifications || [],
-    availability: trainer.availability || [],
-    created_at: trainer.created_at || null,
-    updated_at: trainer.updated_at || null,
-    assigned_classes: [],
-    assigned_members: [],
-    experience_years: trainer.experience_years || 0,
-    experience_level: trainer.experience_level || 'Beginner'
-  };
-};
-
-/**
- * Adapts staff properties to trainer properties for backward compatibility
- */
-export const adaptStaffToTrainer = (staff: any): any => {
+// Convert from StaffProfile to trainer fields format
+export const adaptStaffToTrainer = (staff: Partial<StaffProfile> | Omit<StaffProfile, 'id' | 'certifications' | 'availability'>) => {
   return {
     name: staff.full_name,
     email: staff.email,
     phone: staff.phone,
+    bio: staff.bio,
     profile_picture: staff.photo_url,
     specialization: staff.specialties,
     status: staff.status,
     hire_date: staff.hire_date,
-    bio: staff.bio,
-    role: staff.role,
-    experience_years: staff.experience_years || 0,
-    experience_level: staff.experience_level || 'Beginner',
+    experience_years: staff.experience_years,
+    experience_level: staff.experience_level
+  };
+};
+
+// Convert from trainer data to StaffProfile format
+export const adaptTrainerToStaff = (trainer: any): Partial<StaffProfile> => {
+  return {
+    id: trainer.id,
+    full_name: trainer.name,
+    email: trainer.email,
+    phone: trainer.phone,
+    bio: trainer.bio,
+    photo_url: trainer.profilepicture,
+    role: 'trainer',
+    status: trainer.status,
+    specialties: trainer.specialization,
+    hire_date: trainer.hiredate,
+    certifications: Array.isArray(trainer.certifications) 
+      ? trainer.certifications.map((cert: string) => ({
+          id: `temp-${Date.now()}-${Math.random()}`,
+          staff_id: trainer.id,
+          certification_name: cert
+        }))
+      : [],
+    availability: [],
+    experience_years: trainer.experience_years !== undefined ? Number(trainer.experience_years) : undefined,
+    experience_level: trainer.experience_level
+  };
+};
+
+// Helper function to validate staff role type
+export const validateStaffRole = (role: string): 'trainer' | 'manager' | 'reception' | 'sales' | 'support' => {
+  const validRoles = ['trainer', 'manager', 'reception', 'sales', 'support'];
+  if (validRoles.includes(role)) {
+    return role as 'trainer' | 'manager' | 'reception' | 'sales' | 'support';
+  }
+  return 'trainer'; // Default fallback
+};
+
+// Convert from old TrainerAddFormValues to new StaffProfile format
+export const adaptFormToStaffProfile = (formData: any): Omit<StaffProfile, 'id' | 'certifications' | 'availability'> => {
+  return {
+    full_name: formData.full_name,
+    email: formData.email,
+    phone: formData.phone,
+    role: 'trainer',
+    photo_url: formData.photo_url,
+    status: formData.status,
+    specialties: formData.specialties || [],
+    bio: formData.bio,
+    hire_date: formData.hire_date,
+    experience_years: formData.experience_years,
+    experience_level: formData.experience_level
   };
 };

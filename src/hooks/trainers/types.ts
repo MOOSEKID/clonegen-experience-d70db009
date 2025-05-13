@@ -1,3 +1,4 @@
+
 export interface StaffProfile {
   id: string;
   full_name: string;
@@ -89,3 +90,6 @@ export interface BusinessHour {
   is_closed: boolean;
   updated_at?: string;
 }
+
+// Define the JSON type for better type safety
+export type Json = string | number | boolean | null | { [key: string]: Json } | Json[];

@@ -6,7 +6,6 @@ import { z } from "zod";
 import { Form } from "@/components/ui/form";
 import { useTrainerFileUpload } from "@/hooks/trainers/useTrainerFileUpload";
 import { StaffProfile } from "@/hooks/trainers/types";
-import { adaptStaffToTrainer } from "@/hooks/trainers/adapters";
 import TrainerAddFormFields from "./form/TrainerAddFormFields";
 import TrainerAddSpecializationsField from "./form/TrainerAddSpecializationsField";
 import TrainerBioField from "./form/TrainerBioField";
@@ -18,7 +17,6 @@ const trainerFormSchema = z.object({
   phone: z.string().optional(),
   bio: z.string().optional(),
   status: z.string(),
-  specialties: z.array(z.string()).default([]),
   hire_date: z.string().optional(),
   experience_years: z.number().optional(),
   experience_level: z.string().optional(),
@@ -45,7 +43,6 @@ const TrainerAddForm = ({ onSubmit, onCancel }: TrainerAddFormProps) => {
       phone: "",
       bio: "",
       status: "Active",
-      specialties: [],
       hire_date: new Date().toISOString().split('T')[0],
       experience_years: undefined,
       experience_level: "Beginner",
@@ -56,9 +53,11 @@ const TrainerAddForm = ({ onSubmit, onCancel }: TrainerAddFormProps) => {
     // Combine form data with uploaded profile picture
     const formData = {
       ...data,
-      photo_url: photoUrl,
+      photo_url: photoUrl || "",
       role: 'trainer' as const,
       specialties: selectedSpecializations, // Use the state for specializations
+      // Ensure full_name is required and not undefined
+      full_name: data.full_name,
     };
     
     await onSubmit(formData);

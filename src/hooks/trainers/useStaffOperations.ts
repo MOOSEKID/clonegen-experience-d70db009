@@ -1,4 +1,3 @@
-
 import { useToast } from '@/components/ui/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { StaffProfile } from './types';
@@ -134,10 +133,26 @@ export const useStaffOperations = () => {
       if (fetchError) throw fetchError;
       
       // Update certifications array
-      let currentCerts = trainerData?.certifications || [];
-      if (!Array.isArray(currentCerts)) {
-        currentCerts = [];
+      let currentCerts: string[] = [];
+      
+      // Safely handle the certifications value which might be null, a string, or an array
+      if (trainerData?.certifications) {
+        if (Array.isArray(trainerData.certifications)) {
+          currentCerts = trainerData.certifications as string[];
+        } else if (typeof trainerData.certifications === 'string') {
+          try {
+            // If it's a JSON string, try parsing it
+            const parsed = JSON.parse(trainerData.certifications);
+            if (Array.isArray(parsed)) {
+              currentCerts = parsed;
+            }
+          } catch (e) {
+            // If parsing fails, treat as a single string value
+            currentCerts = [trainerData.certifications as string];
+          }
+        }
       }
+      
       const updatedCerts = [...currentCerts, certification];
       
       // Save the updated array
@@ -177,11 +192,19 @@ export const useStaffOperations = () => {
       if (fetchError) throw fetchError;
       
       // Update certifications array by removing the certification
-      let currentCerts = trainerData?.certifications || [];
-      if (!Array.isArray(currentCerts)) {
-        currentCerts = [];
+      let currentCerts: string[] = [];
+      let updatedCerts: string[] = [];
+      
+      // Safely handle the certifications value
+      if (trainerData?.certifications) {
+        if (Array.isArray(trainerData.certifications)) {
+          currentCerts = trainerData.certifications as string[];
+          updatedCerts = currentCerts.filter((cert: string) => cert !== certification);
+        } else if (typeof trainerData.certifications === 'string') {
+          // Don't try to filter if it's not an array
+          updatedCerts = [trainerData.certifications as string].filter(cert => cert !== certification);
+        }
       }
-      const updatedCerts = currentCerts.filter((cert: string) => cert !== certification);
       
       // Save the updated array
       const { error } = await supabase
