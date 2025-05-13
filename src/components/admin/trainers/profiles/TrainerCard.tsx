@@ -4,7 +4,7 @@ import { format } from 'date-fns';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { CalendarIcon, EditIcon, Trash2Icon } from 'lucide-react';
-import { TrainerProfile } from '@/hooks/trainers/useTrainerProfiles';
+import { StaffProfile } from '@/hooks/trainers/types';
 import { Separator } from '@/components/ui/separator';
 
 // Import smaller components
@@ -15,7 +15,7 @@ import CertificationsSection from './card/CertificationsSection';
 import AvailabilitySection from './card/AvailabilitySection';
 
 interface TrainerCardProps {
-  trainer: TrainerProfile;
+  trainer: StaffProfile;
   onEdit: () => void;
   onDelete: () => void;
   onAddCertification: () => void;
@@ -51,7 +51,7 @@ const TrainerCard: React.FC<TrainerCardProps> = ({
           name={trainer.name}
           email={trainer.email}
           phone={trainer.phone}
-          profilePicture={trainer.profilepicture}
+          profilePicture={trainer.profile_picture}
         />
       </CardHeader>
 
@@ -64,7 +64,7 @@ const TrainerCard: React.FC<TrainerCardProps> = ({
           <CalendarIcon className="h-4 w-4 mr-2" />
           <span className="text-muted-foreground">Hire Date:</span>
           <span className="ml-1 font-medium">
-            {trainer.hiredate ? format(new Date(trainer.hiredate), 'MMM d, yyyy') : 'Not specified'}
+            {trainer.hire_date ? format(new Date(trainer.hire_date), 'MMM d, yyyy') : 'Not specified'}
           </span>
         </div>
 

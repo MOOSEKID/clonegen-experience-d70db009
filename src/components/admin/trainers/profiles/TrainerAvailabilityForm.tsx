@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
-import { TrainerAvailability } from "@/hooks/trainers/useTrainerProfiles";
+import { StaffAvailability } from "@/hooks/trainers/types";
 import { weekDays } from "@/utils/classFormUtils";
 
 const availabilityFormSchema = z.object({
@@ -22,7 +22,7 @@ type AvailabilityFormValues = z.infer<typeof availabilityFormSchema>;
 
 interface TrainerAvailabilityFormProps {
   trainerId: string;
-  onSubmit: (data: Omit<TrainerAvailability, 'id'>) => Promise<void>;
+  onSubmit: (data: Omit<StaffAvailability, 'id'>) => Promise<void>;
   onCancel: () => void;
 }
 
@@ -37,8 +37,8 @@ const TrainerAvailabilityForm = ({ trainerId, onSubmit, onCancel }: TrainerAvail
   });
 
   const handleSubmit = async (data: AvailabilityFormValues) => {
-    const availabilityData: Omit<TrainerAvailability, 'id'> = {
-      trainer_id: trainerId,
+    const availabilityData: Omit<StaffAvailability, 'id'> = {
+      staff_id: trainerId,
       day_of_week: data.day_of_week,
       start_time: data.start_time,
       end_time: data.end_time

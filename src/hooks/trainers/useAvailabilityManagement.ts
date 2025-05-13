@@ -1,71 +1,72 @@
 
-import { useToast } from '@/components/ui/use-toast';
+import { useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { StaffAvailability } from './types';
+import { toast } from 'sonner';
 
-export const useAvailabilityManagement = () => {
-  const { toast } = useToast();
-  
+export function useAvailabilityManagement() {
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<Error | null>(null);
+
   const addAvailability = async (availability: Omit<StaffAvailability, 'id'>) => {
+    setIsLoading(true);
+    setError(null);
+    
     try {
-      const { data, error } = await supabase
+      // Insert new availability
+      const { data, error: insertError } = await supabase
         .from('staff_availability')
-        .insert({
-          staff_id: availability.staff_id,
-          day_of_week: availability.day_of_week,
-          start_time: availability.start_time,
-          end_time: availability.end_time
-        })
+        .insert(availability)
         .select()
         .single();
-        
-      if (error) throw error;
       
-      toast({
-        title: "Availability added",
-        description: "Availability schedule has been added successfully."
-      });
+      if (insertError) {
+        throw new Error(`Error adding availability: ${insertError.message}`);
+      }
       
+      toast.success('Availability added successfully');
       return data;
-    } catch (err) {
-      console.error('Error adding availability:', err);
-      toast({
-        variant: "destructive",
-        title: "Error",
-        description: "Failed to add availability. Please try again."
-      });
-      throw err;
+    } catch (err: any) {
+      console.error('Error in addAvailability:', err);
+      toast.error(err.message || 'Failed to add availability');
+      setError(err);
+      return null;
+    } finally {
+      setIsLoading(false);
     }
   };
-  
+
   const deleteAvailability = async (id: string) => {
+    setIsLoading(true);
+    setError(null);
+    
     try {
-      const { error } = await supabase
+      // Delete availability by id
+      const { error: deleteError } = await supabase
         .from('staff_availability')
         .delete()
         .eq('id', id);
-        
-      if (error) throw error;
       
-      toast({
-        title: "Availability deleted",
-        description: "Availability schedule has been removed successfully."
-      });
+      if (deleteError) {
+        throw new Error(`Error deleting availability: ${deleteError.message}`);
+      }
       
+      toast.success('Availability deleted successfully');
       return true;
-    } catch (err) {
-      console.error('Error deleting availability:', err);
-      toast({
-        variant: "destructive",
-        title: "Error",
-        description: "Failed to delete availability. Please try again."
-      });
-      throw err;
+    } catch (err: any) {
+      console.error('Error in deleteAvailability:', err);
+      toast.error(err.message || 'Failed to delete availability');
+      setError(err);
+      return false;
+    } finally {
+      setIsLoading(false);
     }
   };
 
   return {
     addAvailability,
-    deleteAvailability
+    deleteAvailability,
+    isLoading,
+    error
   };
-};
+}

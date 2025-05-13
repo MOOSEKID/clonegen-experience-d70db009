@@ -1,53 +1,137 @@
 
-import { ClientSession } from './types';
+import { ClientSession } from '../types';
 
-export const generateMockSessions = (trainerId?: string, clientId?: string): ClientSession[] => {
-  const mockSessions: ClientSession[] = [];
-  const now = new Date();
-  
-  // Generate sessions for the past and future
-  for (let i = -5; i < 10; i++) {
-    const sessionDate = new Date();
-    sessionDate.setDate(now.getDate() + i);
-    
-    let status: 'scheduled' | 'completed' | 'canceled' | 'no-show';
-    
-    if (i < 0) {
-      // Past sessions
-      const random = Math.random();
-      if (random < 0.7) {
-        status = 'completed';
-      } else if (random < 0.85) {
-        status = 'canceled';
-      } else {
-        status = 'no-show';
-      }
-    } else {
-      // Future sessions
-      status = 'scheduled';
-    }
-    
-    const defaultTrainerId = trainerId || 'default-trainer-id';
-    const defaultClientId = clientId || 'default-client-id';
-    
-    mockSessions.push({
-      id: `mock-${i + 5}`,
-      trainer_id: defaultTrainerId,
-      client_id: defaultClientId,
-      session_date: sessionDate.toISOString(),
-      start_time: "09:00",
-      end_time: "10:00",
-      duration: 60,
-      status,
-      notes: status === 'completed' ? "Great progress today" : null,
-      focus_areas: ["Strength", "Core"],
-      achievements: status === 'completed' ? "Increased squat weight by 10lbs" : null,
-      created_at: new Date(sessionDate.getTime() - 1000 * 60 * 60 * 24).toISOString(),
-      updated_at: new Date().toISOString(),
-      client_name: "John Doe",
-      trainer_name: "Trainer Name"
-    });
+export const mockSessions: ClientSession[] = [
+  {
+    id: '1',
+    staff_id: '1',
+    client_id: '101',
+    session_date: '2023-08-15',
+    start_time: '09:00',
+    end_time: '10:00',
+    duration: 60,
+    session_type: 'personal_training',
+    location: 'Main Gym Floor',
+    status: 'completed',
+    notes: 'Focused on upper body strength',
+    focus_areas: ['chest', 'shoulders', 'triceps'],
+    achievements: 'Increased bench press by 5kg',
+    created_at: '2023-08-10T14:30:00Z',
+    updated_at: '2023-08-15T10:05:00Z'
+  },
+  {
+    id: '2',
+    staff_id: '1',
+    client_id: '102',
+    session_date: '2023-08-16',
+    start_time: '11:00',
+    end_time: '12:00',
+    duration: 60,
+    session_type: 'personal_training',
+    location: 'Functional Training Area',
+    status: 'scheduled',
+    notes: 'Will focus on core stability',
+    focus_areas: ['core', 'balance'],
+    created_at: '2023-08-10T15:00:00Z',
+    updated_at: '2023-08-10T15:00:00Z'
+  },
+  {
+    id: '3',
+    staff_id: '2',
+    client_id: '103',
+    session_date: '2023-08-14',
+    start_time: '15:00',
+    end_time: '16:30',
+    duration: 90,
+    session_type: 'rehabilitation',
+    location: 'Physio Room',
+    status: 'completed',
+    notes: 'Knee mobility exercises',
+    focus_areas: ['knee', 'leg strength', 'mobility'],
+    achievements: 'Improved range of motion',
+    created_at: '2023-08-07T09:15:00Z',
+    updated_at: '2023-08-14T16:35:00Z'
+  },
+  {
+    id: '4',
+    staff_id: '2',
+    client_id: '104',
+    session_date: '2023-08-17',
+    start_time: '14:00',
+    end_time: '15:30',
+    duration: 90,
+    session_type: 'sports_conditioning',
+    location: 'Sprint Track',
+    status: 'scheduled',
+    notes: 'Sprint training and agility drills',
+    focus_areas: ['speed', 'agility', 'endurance'],
+    created_at: '2023-08-10T11:45:00Z',
+    updated_at: '2023-08-10T11:45:00Z'
+  },
+  {
+    id: '5',
+    staff_id: '3',
+    client_id: '105',
+    session_date: '2023-08-15',
+    start_time: '17:00',
+    end_time: '18:00',
+    duration: 60,
+    session_type: 'yoga',
+    location: 'Yoga Studio',
+    status: 'canceled',
+    notes: 'Client had emergency',
+    focus_areas: ['flexibility', 'relaxation'],
+    created_at: '2023-08-08T16:30:00Z',
+    updated_at: '2023-08-14T20:15:00Z'
+  },
+  {
+    id: '6',
+    staff_id: '3',
+    client_id: '106',
+    session_date: '2023-08-18',
+    start_time: '18:00',
+    end_time: '19:00',
+    duration: 60,
+    session_type: 'mindfulness',
+    location: 'Yoga Studio',
+    status: 'scheduled',
+    notes: 'Breathing techniques and stress reduction',
+    focus_areas: ['meditation', 'breathing'],
+    created_at: '2023-08-11T10:00:00Z',
+    updated_at: '2023-08-11T10:00:00Z'
+  },
+  {
+    id: '7',
+    staff_id: '4',
+    client_id: '107',
+    session_date: '2023-08-14',
+    start_time: '08:00',
+    end_time: '09:00',
+    duration: 60,
+    session_type: 'hiit',
+    location: 'Crossfit Area',
+    status: 'no-show',
+    notes: 'Client didn\'t show up',
+    focus_areas: ['cardio', 'strength', 'endurance'],
+    created_at: '2023-08-07T14:00:00Z',
+    updated_at: '2023-08-14T09:05:00Z'
+  },
+  {
+    id: '8',
+    staff_id: '1',
+    client_id: '108',
+    session_date: '2023-08-19',
+    start_time: '10:00',
+    end_time: '11:00',
+    duration: 60,
+    session_type: 'personal_training',
+    location: 'Weight Room',
+    status: 'scheduled',
+    notes: 'First session after completion of fitness challenge',
+    focus_areas: ['maintenance', 'goal setting'],
+    created_at: '2023-08-12T11:30:00Z',
+    updated_at: '2023-08-12T11:30:00Z'
   }
-  
-  return mockSessions;
-};
+];
+
+export default mockSessions;

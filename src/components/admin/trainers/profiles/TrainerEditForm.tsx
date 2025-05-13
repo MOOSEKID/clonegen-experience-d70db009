@@ -3,7 +3,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { Form } from "@/components/ui/form";
-import { TrainerProfile } from "@/hooks/trainers/types";
+import { StaffProfile } from "@/hooks/trainers/types";
 import TrainerBasicInfoFields from "./form/TrainerBasicInfoFields";
 import TrainerSpecializationsField from "./form/TrainerSpecializationsField";
 import TrainerBioField from "./form/TrainerBioField";
@@ -16,15 +16,15 @@ const trainerFormSchema = z.object({
   bio: z.string().optional(),
   status: z.string(),
   specialization: z.array(z.string()).optional(),
-  hiredate: z.string().optional(),
-  profilepicture: z.string().optional(),
+  hire_date: z.string().optional(),
+  profile_picture: z.string().optional(),
 });
 
 export type TrainerFormValues = z.infer<typeof trainerFormSchema>;
 
 interface TrainerEditFormProps {
-  trainer: TrainerProfile;
-  onSubmit: (id: string, data: Partial<TrainerProfile>) => Promise<void>;
+  trainer: StaffProfile;
+  onSubmit: (id: string, data: Partial<StaffProfile>) => Promise<void>;
   onCancel: () => void;
 }
 
@@ -33,13 +33,13 @@ const TrainerEditForm = ({ trainer, onSubmit, onCancel }: TrainerEditFormProps) 
     resolver: zodResolver(trainerFormSchema),
     defaultValues: {
       name: trainer.name,
-      email: trainer.email,
+      email: trainer.email || "",
       phone: trainer.phone || "",
       bio: trainer.bio || "",
       status: trainer.status || "Active",
       specialization: trainer.specialization || [],
-      hiredate: trainer.hiredate || new Date().toISOString().split('T')[0],
-      profilepicture: trainer.profilepicture || "",
+      hire_date: trainer.hire_date || new Date().toISOString().split('T')[0],
+      profile_picture: trainer.profile_picture || "",
     },
   });
 

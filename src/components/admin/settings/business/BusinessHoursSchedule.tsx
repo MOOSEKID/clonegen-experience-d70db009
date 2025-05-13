@@ -1,11 +1,11 @@
 
 import React from 'react';
 import DayScheduleCard from './DayScheduleCard';
-import { BusinessHoursData } from '@/hooks/admin/useBusinessHours';
+import { BusinessHour } from '@/hooks/trainers/types';
 
 interface BusinessHoursScheduleProps {
   daysOfWeek: string[];
-  formData: { [key: string]: BusinessHoursData };
+  formData: { [key: string]: BusinessHour };
   onToggleDay: (day: string, closed: boolean) => void;
   onTimeChange: (day: string, type: 'open_time' | 'close_time', value: string) => void;
 }

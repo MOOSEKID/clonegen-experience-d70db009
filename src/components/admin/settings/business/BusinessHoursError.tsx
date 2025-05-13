@@ -16,7 +16,7 @@ const BusinessHoursError = ({ error, onRetry }: BusinessHoursErrorProps) => {
       description="Error loading business hours"
       saveState={SaveState.Error}
     >
-      <div className="p-4 bg-red-50 text-red-800 rounded-md flex items-start gap-3">
+      <div className="p-4 bg-red-50 dark:bg-red-900/20 text-red-800 dark:text-red-200 rounded-md flex items-start gap-3">
         <AlertCircle className="h-5 w-5 mt-0.5 flex-shrink-0" />
         <div>
           <p className="font-medium">Failed to load business hours</p>

@@ -10,7 +10,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { FileIcon, X } from 'lucide-react';
 import { useTrainerFileUpload } from '@/hooks/trainers/useTrainerFileUpload';
 import FileUpload from '@/components/admin/trainers/common/FileUpload';
-import { TrainerCertification } from '@/hooks/trainers/useTrainerProfiles';
+import { StaffCertification } from '@/hooks/trainers/types';
 
 const certificationFormSchema = z.object({
   certification_name: z.string().min(2, { message: "Certification name is required." }),
@@ -26,7 +26,7 @@ type CertificationFormValues = z.infer<typeof certificationFormSchema>;
 
 interface CertificateUploadFormProps {
   trainerId: string;
-  onSubmit: (data: Omit<TrainerCertification, 'id'>, certificateFile?: File) => Promise<void>;
+  onSubmit: (data: Omit<StaffCertification, 'id'>, certificateFile?: File) => Promise<void>;
   onCancel: () => void;
   isOpen: boolean;
 }
@@ -46,8 +46,8 @@ const CertificateUploadForm = ({ trainerId, onSubmit, onCancel, isOpen }: Certif
   });
 
   const handleSubmit = async (data: CertificationFormValues) => {
-    const certData: Omit<TrainerCertification, 'id'> = {
-      trainer_id: trainerId,
+    const certData: Omit<StaffCertification, 'id'> = {
+      staff_id: trainerId,
       certification_name: data.certification_name,
       issuing_organization: data.issuing_organization,
       issue_date: data.issue_date || undefined,

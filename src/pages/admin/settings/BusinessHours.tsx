@@ -24,7 +24,7 @@ const BusinessHoursPage = () => {
         </Breadcrumb>
         
         <h1 className="text-2xl font-bold mt-4">Business Hours</h1>
-        <p className="text-gray-500">Configure your gym's operating hours</p>
+        <p className="text-gray-500 dark:text-gray-400">Configure your gym's operating hours</p>
       </div>
       
       <BusinessHoursSettings />

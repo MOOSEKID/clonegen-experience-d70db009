@@ -2,7 +2,7 @@
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { BusinessHoursData } from '@/hooks/admin/useBusinessHours';
+import { BusinessHour } from '@/hooks/trainers/types';
 
 // Generate time options for the select dropdown
 const timeOptions = Array.from({ length: 24 * 4 }).map((_, index) => {
@@ -15,7 +15,7 @@ const timeOptions = Array.from({ length: 24 * 4 }).map((_, index) => {
 
 interface DayScheduleCardProps {
   day: string;
-  dayData: BusinessHoursData;
+  dayData: BusinessHour;
   onToggleDay: (day: string, closed: boolean) => void;
   onTimeChange: (day: string, type: 'open_time' | 'close_time', value: string) => void;
 }
