@@ -19,7 +19,9 @@ export const getMockTrainers = (): StaffProfile[] => {
       assigned_classes: [],
       assigned_members: [],
       created_at: null,
-      updated_at: null
+      updated_at: null,
+      experience_years: 10,
+      experience_level: 'Expert'
     },
     {
       id: '2',
@@ -37,7 +39,9 @@ export const getMockTrainers = (): StaffProfile[] => {
       assigned_classes: [],
       assigned_members: [],
       created_at: null,
-      updated_at: null
+      updated_at: null,
+      experience_years: 5,
+      experience_level: 'Intermediate'
     },
     {
       id: '3',
@@ -55,7 +59,9 @@ export const getMockTrainers = (): StaffProfile[] => {
       assigned_classes: [],
       assigned_members: [],
       created_at: null,
-      updated_at: null
+      updated_at: null,
+      experience_years: 3,
+      experience_level: 'Advanced'
     }
   ];
 };

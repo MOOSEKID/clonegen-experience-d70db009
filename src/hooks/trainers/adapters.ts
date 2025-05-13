@@ -18,10 +18,10 @@ export const adaptStaffToTrainer = (staff: Partial<StaffProfile> | Omit<StaffPro
 };
 
 // Convert from trainer data to StaffProfile format
-export const adaptTrainerToStaff = (trainer: any): Partial<StaffProfile> => {
+export const adaptTrainerToStaff = (trainer: any): StaffProfile => {
   return {
-    id: trainer.id,
-    full_name: trainer.name,
+    id: trainer.id || `temp-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+    full_name: trainer.name || 'Unknown',
     email: trainer.email,
     phone: trainer.phone,
     bio: trainer.bio,
@@ -55,7 +55,7 @@ export const validateStaffRole = (role: string): 'trainer' | 'manager' | 'recept
 // Convert from old TrainerAddFormValues to new StaffProfile format
 export const adaptFormToStaffProfile = (formData: any): Omit<StaffProfile, 'id' | 'certifications' | 'availability'> => {
   return {
-    full_name: formData.full_name,
+    full_name: formData.full_name || 'New Trainer',
     email: formData.email,
     phone: formData.phone,
     role: 'trainer',

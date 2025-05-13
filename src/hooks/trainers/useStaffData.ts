@@ -25,7 +25,18 @@ export const useStaffData = () => {
         
         if (staffData) {
           const processedStaff = staffData.map((trainer: any) => {
-            return adaptTrainerToStaff(trainer);
+            // Ensure all required fields are present
+            const staffMember = adaptTrainerToStaff(trainer);
+            
+            // Ensure the required fields are present
+            if (!staffMember.id) {
+              staffMember.id = trainer.id || 'temp-' + Math.random().toString(36).substring(2, 15);
+            }
+            if (!staffMember.full_name && trainer.name) {
+              staffMember.full_name = trainer.name;
+            }
+            
+            return staffMember as StaffProfile;
           });
           
           setStaff(processedStaff);

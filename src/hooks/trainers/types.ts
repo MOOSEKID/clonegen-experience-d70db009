@@ -1,4 +1,3 @@
-
 export interface StaffProfile {
   id: string;
   full_name: string;

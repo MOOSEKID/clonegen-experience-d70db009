@@ -27,7 +27,7 @@ export const useTrainerData = () => {
             // Process certifications to match StaffCertification
             const certifications: StaffCertification[] = (trainer.certifications || [])
               .map((cert: any): StaffCertification => ({
-                id: cert.id || '',
+                id: cert.id || `temp-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
                 staff_id: trainer.id,
                 certification_name: cert.certification_name || '',
                 issuing_organization: cert.issuing_organization || '',
@@ -40,10 +40,20 @@ export const useTrainerData = () => {
               }));
             
             // Return mapped staff profile using adapter
-            return adaptTrainerToStaff({
+            const staffMember = adaptTrainerToStaff({
               ...trainer,
               certifications
             });
+            
+            // Ensure required fields
+            if (!staffMember.id) {
+              staffMember.id = trainer.id || 'temp-' + Math.random().toString(36).substring(2, 15);
+            }
+            if (!staffMember.full_name && trainer.name) {
+              staffMember.full_name = trainer.name;
+            }
+            
+            return staffMember as StaffProfile;
           });
           
           setTrainers(processedTrainers);

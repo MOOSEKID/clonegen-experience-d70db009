@@ -145,11 +145,17 @@ export const useStaffOperations = () => {
             const parsed = JSON.parse(trainerData.certifications);
             if (Array.isArray(parsed)) {
               currentCerts = parsed;
+            } else {
+              // If parsing didn't result in an array, use a single item array
+              currentCerts = [String(trainerData.certifications)];
             }
           } catch (e) {
             // If parsing fails, treat as a single string value
-            currentCerts = [trainerData.certifications as string];
+            currentCerts = [String(trainerData.certifications)];
           }
+        } else {
+          // Handle other cases by converting to string
+          currentCerts = [String(trainerData.certifications)];
         }
       }
       
@@ -201,8 +207,26 @@ export const useStaffOperations = () => {
           currentCerts = trainerData.certifications as string[];
           updatedCerts = currentCerts.filter((cert: string) => cert !== certification);
         } else if (typeof trainerData.certifications === 'string') {
-          // Don't try to filter if it's not an array
-          updatedCerts = [trainerData.certifications as string].filter(cert => cert !== certification);
+          try {
+            // Try parsing as JSON
+            const parsed = JSON.parse(trainerData.certifications);
+            if (Array.isArray(parsed)) {
+              currentCerts = parsed;
+              updatedCerts = currentCerts.filter(cert => cert !== certification);
+            } else {
+              // If parsing didn't yield an array, handle as single string
+              const certString = String(trainerData.certifications);
+              updatedCerts = certString === certification ? [] : [certString];
+            }
+          } catch (e) {
+            // If parsing fails, treat as single string
+            const certString = String(trainerData.certifications);
+            updatedCerts = certString === certification ? [] : [certString];
+          }
+        } else {
+          // Handle as single item
+          const certString = String(trainerData.certifications);
+          updatedCerts = certString === certification ? [] : [certString];
         }
       }
       
