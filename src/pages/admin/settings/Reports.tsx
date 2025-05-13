@@ -1,8 +1,8 @@
 
 import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbSeparator } from "@/components/ui/breadcrumb";
-import AutomationRulesSettings from "@/components/admin/settings/advanced/AutomationRulesSettings";
+import ReportsExportsSettings from "@/components/admin/settings/advanced/ReportsExportsSettings";
 
-const AutomationPage = () => {
+const ReportsPage = () => {
   return (
     <div className="space-y-6">
       <div>
@@ -17,18 +17,18 @@ const AutomationPage = () => {
             </BreadcrumbItem>
             <BreadcrumbSeparator />
             <BreadcrumbItem>
-              <span className="font-medium">Automation</span>
+              <span className="font-medium">Reports</span>
             </BreadcrumbItem>
           </BreadcrumbList>
         </Breadcrumb>
         
-        <h1 className="text-2xl font-bold text-gray-800 mt-4">Automation Rules</h1>
-        <p className="text-gray-500 mb-6">Create and manage trigger-based automation rules for your gym</p>
+        <h1 className="text-2xl font-bold text-gray-800 mt-4">Reports & Exports</h1>
+        <p className="text-gray-500 mb-6">Schedule and configure automated exports to email or cloud storage</p>
       </div>
 
-      <AutomationRulesSettings />
+      <ReportsExportsSettings />
     </div>
   );
 };
 
-export default AutomationPage;
+export default ReportsPage;

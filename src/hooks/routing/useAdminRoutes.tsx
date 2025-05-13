@@ -15,6 +15,7 @@ import Support from '@/pages/admin/Support';
 import Workouts from '@/pages/admin/Workouts';
 import TestAccounts from '@/pages/admin/TestAccounts';
 import { Subscriptions, Invoices, Methods } from '@/pages/admin/payments';
+import { useAdminSettingsRoutes } from './useAdminSettingsRoutes';
 
 export interface AdminRoute {
   path: string;
@@ -23,6 +24,8 @@ export interface AdminRoute {
 }
 
 export const useAdminRoutes = (): AdminRoute[] => {
+  const settingsRoutes = useAdminSettingsRoutes();
+  
   return [
     {
       path: '/admin',
@@ -94,5 +97,7 @@ export const useAdminRoutes = (): AdminRoute[] => {
       path: '/admin/test-accounts',
       element: <TestAccounts />
     },
+    // Add all settings routes
+    ...settingsRoutes
   ];
 };

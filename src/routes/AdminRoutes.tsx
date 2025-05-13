@@ -20,7 +20,7 @@ const AdminRoutes = () => {
             <Route
               key={child.path}
               path={child.path}
-              element={child.element}
+              element={child.element} 
             />
           ))}
         </Route>
