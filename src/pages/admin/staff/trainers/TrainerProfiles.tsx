@@ -4,11 +4,41 @@ import { useNavigate } from 'react-router-dom';
 import { ArrowLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
-import { useTrainerProfiles } from '@/hooks/trainers/useTrainerProfiles';
+import TrainerProfileHeader from '@/components/admin/trainers/profiles/TrainerProfileHeader';
+import TrainerProfileTabs from '@/components/admin/trainers/profiles/TrainerProfileTabs';
+import TrainerProfilesGrid from '@/components/admin/trainers/profiles/TrainerProfilesGrid';
+import TrainerDialogs from '@/components/admin/trainers/profiles/TrainerDialogs';
+import { useTrainerProfilesState } from '@/components/admin/trainers/profiles/useTrainerProfilesState';
 
 const TrainerProfiles = () => {
   const navigate = useNavigate();
-  const { trainers, isLoading } = useTrainerProfiles();
+  const {
+    isLoading,
+    filteredTrainers,
+    isAddDialogOpen,
+    setIsAddDialogOpen,
+    isEditDialogOpen,
+    setIsEditDialogOpen,
+    isCertDialogOpen,
+    setIsCertDialogOpen,
+    isAvailDialogOpen,
+    setIsAvailDialogOpen,
+    selectedTrainer,
+    activeTab,
+    setActiveTab,
+    getSelectedTrainer,
+    handleAddTrainer,
+    handleEditTrainer,
+    handleAddCertification,
+    handleAddAvailability,
+    handleAddTrainerSubmit,
+    handleUpdateTrainerSubmit,
+    handleDeleteTrainerSubmit,
+    handleAddCertificationSubmit,
+    handleDeleteCertificationSubmit,
+    handleAddAvailabilitySubmit,
+    handleDeleteAvailabilitySubmit,
+  } = useTrainerProfilesState();
 
   return (
     <div className="space-y-6">
@@ -30,11 +60,38 @@ const TrainerProfiles = () => {
         </div>
       </div>
 
-      {/* Reusing the existing TrainerProfiles content */}
-      <iframe 
-        src="/admin/trainers" 
-        className="w-full h-[calc(100vh-200px)] border-0 rounded-md" 
-        title="Trainer Profiles"
+      <TrainerProfileHeader onAddTrainer={handleAddTrainer} />
+      
+      <TrainerProfileTabs activeTab={activeTab} onTabChange={setActiveTab} />
+      
+      <div className="mt-4">
+        <TrainerProfilesGrid
+          trainers={filteredTrainers}
+          isLoading={isLoading}
+          onEdit={handleEditTrainer}
+          onDelete={handleDeleteTrainerSubmit}
+          onAddCertification={handleAddCertification}
+          onDeleteCertification={handleDeleteCertificationSubmit}
+          onAddAvailability={handleAddAvailability}
+          onDeleteAvailability={handleDeleteAvailabilitySubmit}
+        />
+      </div>
+      
+      <TrainerDialogs
+        isAddDialogOpen={isAddDialogOpen}
+        setIsAddDialogOpen={setIsAddDialogOpen}
+        isEditDialogOpen={isEditDialogOpen}
+        setIsEditDialogOpen={setIsEditDialogOpen}
+        isCertDialogOpen={isCertDialogOpen}
+        setIsCertDialogOpen={setIsCertDialogOpen}
+        isAvailDialogOpen={isAvailDialogOpen}
+        setIsAvailDialogOpen={setIsAvailDialogOpen}
+        selectedTrainer={selectedTrainer}
+        selectedTrainerData={getSelectedTrainer()}
+        onAddTrainerSubmit={handleAddTrainerSubmit}
+        onUpdateTrainerSubmit={handleUpdateTrainerSubmit}
+        onAddCertificationSubmit={handleAddCertificationSubmit}
+        onAddAvailabilitySubmit={handleAddAvailabilitySubmit}
       />
     </div>
   );

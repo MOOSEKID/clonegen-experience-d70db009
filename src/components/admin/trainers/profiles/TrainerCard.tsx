@@ -3,9 +3,10 @@ import React from 'react';
 import { format } from 'date-fns';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { CalendarIcon, EditIcon, Trash2Icon } from 'lucide-react';
+import { CalendarIcon, EditIcon, Trash2Icon, Eye } from 'lucide-react';
 import { StaffProfile } from '@/hooks/trainers/types';
 import { Separator } from '@/components/ui/separator';
+import { useNavigate } from 'react-router-dom';
 
 // Import smaller components
 import TrainerStatusBadge from './card/TrainerStatusBadge';
@@ -33,6 +34,12 @@ const TrainerCard: React.FC<TrainerCardProps> = ({
   onAddAvailability,
   onDeleteAvailability
 }) => {
+  const navigate = useNavigate();
+  
+  const handleViewProfile = () => {
+    navigate(`/admin/staff/trainers/${trainer.id}`);
+  };
+
   return (
     <Card className="overflow-hidden">
       <CardHeader className="pb-2">
@@ -94,6 +101,13 @@ const TrainerCard: React.FC<TrainerCardProps> = ({
           </CardFooter>
         </>
       )}
+      
+      <CardFooter className="bg-muted/30 mt-2">
+        <Button variant="outline" className="w-full" onClick={handleViewProfile}>
+          <Eye className="h-4 w-4 mr-2" />
+          View Profile
+        </Button>
+      </CardFooter>
     </Card>
   );
 };

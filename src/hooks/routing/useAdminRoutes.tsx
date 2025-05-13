@@ -1,4 +1,3 @@
-
 import React from 'react';
 import AdminDashboard from '@/pages/admin/Dashboard';
 import Members from '@/pages/admin/Members';
@@ -18,8 +17,9 @@ import TestAccounts from '@/pages/admin/TestAccounts';
 import { Subscriptions, Invoices, Methods } from '@/pages/admin/payments';
 import { useAdminSettingsRoutes } from './useAdminSettingsRoutes';
 
-// Import placeholder pages for staff role-specific sections
+// Import trainer pages
 import TrainerProfiles from '@/pages/admin/staff/trainers/TrainerProfiles';
+import TrainerProfileDetail from '@/pages/admin/staff/trainers/TrainerProfileDetail';
 import PlaceholderPage from '@/components/admin/PlaceholderPage';
 
 export interface AdminRoute {
@@ -60,10 +60,15 @@ export const useAdminRoutes = (): AdminRoute[] => {
       path: '/admin/staff/attendance',
       element: <StaffAttendancePage />
     },
+    
     // Trainer specific routes
     {
       path: '/admin/staff/trainers/profiles',
       element: <TrainerProfiles />
+    },
+    {
+      path: '/admin/staff/trainers/:id',
+      element: <TrainerProfileDetail />
     },
     {
       path: '/admin/staff/trainers/performance',
