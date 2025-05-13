@@ -3,7 +3,14 @@ import React from 'react';
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
-import { Form } from '@/components/ui/form';
+import { 
+  Form,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormControl,
+  FormMessage
+} from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -38,7 +45,13 @@ const StaffAvailabilityForm: React.FC<StaffAvailabilityFormProps> = ({
   });
 
   const handleFormSubmit = async (data: AvailabilityFormValues) => {
-    await onSubmit(data);
+    // Ensure staff_id is set explicitly to satisfy the required property constraint
+    await onSubmit({
+      staff_id: staffId,
+      day_of_week: data.day_of_week,
+      start_time: data.start_time,
+      end_time: data.end_time,
+    });
     form.reset();
   };
 
@@ -55,18 +68,18 @@ const StaffAvailabilityForm: React.FC<StaffAvailabilityFormProps> = ({
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(handleFormSubmit)} className="space-y-4">
-        <Form.Field
+        <FormField
           control={form.control}
           name="day_of_week"
           render={({ field }) => (
-            <Form.Item>
-              <Form.Label>Day of Week*</Form.Label>
+            <FormItem>
+              <FormLabel>Day of Week*</FormLabel>
               <Select onValueChange={field.onChange} defaultValue={field.value}>
-                <Form.Control>
+                <FormControl>
                   <SelectTrigger>
                     <SelectValue placeholder="Select day" />
                   </SelectTrigger>
-                </Form.Control>
+                </FormControl>
                 <SelectContent>
                   {daysOfWeek.map(day => (
                     <SelectItem key={day} value={day}>
@@ -75,37 +88,37 @@ const StaffAvailabilityForm: React.FC<StaffAvailabilityFormProps> = ({
                   ))}
                 </SelectContent>
               </Select>
-              <Form.Message />
-            </Form.Item>
+              <FormMessage />
+            </FormItem>
           )}
         />
 
         <div className="grid grid-cols-2 gap-4">
-          <Form.Field
+          <FormField
             control={form.control}
             name="start_time"
             render={({ field }) => (
-              <Form.Item>
-                <Form.Label>Start Time*</Form.Label>
-                <Form.Control>
+              <FormItem>
+                <FormLabel>Start Time*</FormLabel>
+                <FormControl>
                   <Input type="time" {...field} />
-                </Form.Control>
-                <Form.Message />
-              </Form.Item>
+                </FormControl>
+                <FormMessage />
+              </FormItem>
             )}
           />
 
-          <Form.Field
+          <FormField
             control={form.control}
             name="end_time"
             render={({ field }) => (
-              <Form.Item>
-                <Form.Label>End Time*</Form.Label>
-                <Form.Control>
+              <FormItem>
+                <FormLabel>End Time*</FormLabel>
+                <FormControl>
                   <Input type="time" {...field} />
-                </Form.Control>
-                <Form.Message />
-              </Form.Item>
+                </FormControl>
+                <FormMessage />
+              </FormItem>
             )}
           />
         </div>

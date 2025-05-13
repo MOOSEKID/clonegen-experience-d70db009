@@ -101,7 +101,15 @@ export const useStaffOperations = () => {
     try {
       const { data, error } = await supabase
         .from('staff_certifications')
-        .insert(certification)
+        .insert({
+          staff_id: certification.staff_id,
+          certification_name: certification.certification_name,
+          issuing_organization: certification.issuing_organization || null,
+          issue_date: certification.issue_date || null,
+          expiry_date: certification.expiry_date || null,
+          certification_file: certification.certification_file || null,
+          verified: certification.verified || false
+        })
         .select()
         .single();
         
@@ -155,7 +163,12 @@ export const useStaffOperations = () => {
     try {
       const { data, error } = await supabase
         .from('staff_availability')
-        .insert(availability)
+        .insert({
+          staff_id: availability.staff_id,
+          day_of_week: availability.day_of_week,
+          start_time: availability.start_time,
+          end_time: availability.end_time
+        })
         .select()
         .single();
         

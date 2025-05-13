@@ -3,7 +3,15 @@ import React from 'react';
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
-import { Form } from '@/components/ui/form';
+import { 
+  Form,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormControl,
+  FormMessage,
+  FormDescription
+} from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -44,106 +52,115 @@ const StaffCertificationForm: React.FC<StaffCertificationFormProps> = ({
   });
 
   const handleFormSubmit = async (data: CertificationFormValues) => {
-    await onSubmit(data);
+    // Ensure staff_id is set explicitly to satisfy the required property constraint
+    await onSubmit({
+      staff_id: staffId,
+      certification_name: data.certification_name,
+      issuing_organization: data.issuing_organization,
+      issue_date: data.issue_date,
+      expiry_date: data.expiry_date,
+      verified: data.verified,
+      certification_file: data.certification_file,
+    });
     form.reset();
   };
 
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(handleFormSubmit)} className="space-y-4">
-        <Form.Field
+        <FormField
           control={form.control}
           name="certification_name"
           render={({ field }) => (
-            <Form.Item>
-              <Form.Label>Certification Name*</Form.Label>
-              <Form.Control>
+            <FormItem>
+              <FormLabel>Certification Name*</FormLabel>
+              <FormControl>
                 <Input placeholder="Enter certification name" {...field} />
-              </Form.Control>
-              <Form.Message />
-            </Form.Item>
+              </FormControl>
+              <FormMessage />
+            </FormItem>
           )}
         />
 
-        <Form.Field
+        <FormField
           control={form.control}
           name="issuing_organization"
           render={({ field }) => (
-            <Form.Item>
-              <Form.Label>Issuing Organization</Form.Label>
-              <Form.Control>
+            <FormItem>
+              <FormLabel>Issuing Organization</FormLabel>
+              <FormControl>
                 <Input placeholder="Enter issuing organization" {...field} />
-              </Form.Control>
-              <Form.Message />
-            </Form.Item>
+              </FormControl>
+              <FormMessage />
+            </FormItem>
           )}
         />
 
         <div className="grid grid-cols-2 gap-4">
-          <Form.Field
+          <FormField
             control={form.control}
             name="issue_date"
             render={({ field }) => (
-              <Form.Item>
-                <Form.Label>Issue Date</Form.Label>
-                <Form.Control>
+              <FormItem>
+                <FormLabel>Issue Date</FormLabel>
+                <FormControl>
                   <Input type="date" {...field} />
-                </Form.Control>
-                <Form.Message />
-              </Form.Item>
+                </FormControl>
+                <FormMessage />
+              </FormItem>
             )}
           />
 
-          <Form.Field
+          <FormField
             control={form.control}
             name="expiry_date"
             render={({ field }) => (
-              <Form.Item>
-                <Form.Label>Expiry Date (if applicable)</Form.Label>
-                <Form.Control>
+              <FormItem>
+                <FormLabel>Expiry Date (if applicable)</FormLabel>
+                <FormControl>
                   <Input type="date" {...field} />
-                </Form.Control>
-                <Form.Message />
-              </Form.Item>
+                </FormControl>
+                <FormMessage />
+              </FormItem>
             )}
           />
         </div>
 
-        <Form.Field
+        <FormField
           control={form.control}
           name="certification_file"
           render={({ field }) => (
-            <Form.Item>
-              <Form.Label>Certificate File URL</Form.Label>
-              <Form.Control>
+            <FormItem>
+              <FormLabel>Certificate File URL</FormLabel>
+              <FormControl>
                 <Input placeholder="Enter certificate file URL" {...field} />
-              </Form.Control>
-              <Form.Description>
+              </FormControl>
+              <FormDescription>
                 Enter a URL to the certificate file or document.
-              </Form.Description>
-              <Form.Message />
-            </Form.Item>
+              </FormDescription>
+              <FormMessage />
+            </FormItem>
           )}
         />
 
-        <Form.Field
+        <FormField
           control={form.control}
           name="verified"
           render={({ field }) => (
-            <Form.Item className="flex flex-row items-start space-x-3 space-y-0 p-4 border rounded-md">
-              <Form.Control>
+            <FormItem className="flex flex-row items-start space-x-3 space-y-0 p-4 border rounded-md">
+              <FormControl>
                 <Checkbox
                   checked={field.value}
                   onCheckedChange={field.onChange}
                 />
-              </Form.Control>
+              </FormControl>
               <div className="space-y-1 leading-none">
-                <Form.Label>Verification Status</Form.Label>
-                <Form.Description>
+                <FormLabel>Verification Status</FormLabel>
+                <FormDescription>
                   Mark this certification as verified if you have confirmed its validity.
-                </Form.Description>
+                </FormDescription>
               </div>
-            </Form.Item>
+            </FormItem>
           )}
         />
 

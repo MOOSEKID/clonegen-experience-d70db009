@@ -1,4 +1,3 @@
-
 export interface StaffProfile {
   id: string;
   full_name: string;
@@ -35,9 +34,9 @@ export interface StaffCertification {
 export interface StaffAvailability {
   id: string;
   staff_id: string;
-  day_of_week?: string;
-  start_time?: string;
-  end_time?: string;
+  day_of_week: string;
+  start_time: string;
+  end_time: string;
   created_at?: string;
   updated_at?: string;
 }
