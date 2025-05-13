@@ -4,7 +4,8 @@ import { ClientSession, ClientSessionInput } from './types';
 
 export const fetchSessions = async (trainerId?: string, clientId?: string): Promise<ClientSession[]> => {
   try {
-    let query = supabase.from('client_sessions').select('*');
+    // Use any to avoid deep type instantiation error
+    let query = supabase.from('client_sessions').select('*') as any;
     
     if (trainerId) {
       query = query.eq('staff_id', trainerId);
@@ -21,7 +22,7 @@ export const fetchSessions = async (trainerId?: string, clientId?: string): Prom
     // Map the data to match our ClientSession type
     const sessions = data.map((item: any) => ({
       ...item,
-      staff_id: item.trainer_id || item.staff_id, // Handle both trainer_id and staff_id
+      staff_id: item.staff_id || item.trainer_id, // Handle both trainer_id and staff_id
     })) as ClientSession[];
     
     return sessions;
@@ -33,9 +34,11 @@ export const fetchSessions = async (trainerId?: string, clientId?: string): Prom
 
 export const createSession = async (session: ClientSessionInput): Promise<ClientSession> => {
   try {
+    // Make sure session object conforms to the expected structure
+    // Cast to any to avoid type issues
     const { data, error } = await supabase
       .from('client_sessions')
-      .insert(session)
+      .insert(session as any)
       .select()
       .single();
     
@@ -52,7 +55,7 @@ export const updateSession = async (id: string, updates: Partial<ClientSessionIn
   try {
     const { data, error } = await supabase
       .from('client_sessions')
-      .update(updates)
+      .update(updates as any)
       .eq('id', id)
       .select()
       .single();

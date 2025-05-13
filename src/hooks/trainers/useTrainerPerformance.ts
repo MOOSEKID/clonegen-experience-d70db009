@@ -23,10 +23,11 @@ export interface PerformanceMetrics {
 export const useTrainerPerformance = (staffId?: string) => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<Error | null>(null);
+  const [performanceMetrics, setPerformanceMetrics] = useState<PerformanceMetrics | null>(null);
   
-  // Mock performance data - to be replaced with real data when available
+  // Mock performance data
   const getPerformanceMetrics = (): PerformanceMetrics => {
-    return {
+    const metrics = {
       attendance: {
         total: 30,
         onTime: 27,
@@ -44,11 +45,21 @@ export const useTrainerPerformance = (staffId?: string) => {
         count: 35
       }
     };
+
+    // Set the metrics in state as well
+    setPerformanceMetrics(metrics);
+    return metrics;
   };
+
+  // Initialize performance metrics when the hook is called
+  if (!performanceMetrics && !isLoading) {
+    getPerformanceMetrics();
+  }
 
   return {
     isLoading,
     error,
+    performanceMetrics,
     getPerformanceMetrics
   };
 };

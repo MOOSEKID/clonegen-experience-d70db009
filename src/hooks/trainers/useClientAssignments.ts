@@ -1,16 +1,13 @@
 
 import { useState, useEffect } from 'react';
 import { useToast } from '@/components/ui/use-toast';
-import { ClientAssignment } from './assignments/types';
-import { AssignedClient } from './assignments/types';
+import { ClientAssignment, AssignedClient } from './assignments/types';
 import { fetchAssignments, createAssignment, updateAssignmentStatus } from './assignments/assignmentService';
 import generateMockAssignments from './assignments/mockAssignments';
-import { supabase } from '@/integrations/supabase/client';
-
-export type { ClientAssignment, AssignedClient };
 
 export const useClientAssignments = (trainerId?: string, clientId?: string) => {
   const [assignments, setAssignments] = useState<ClientAssignment[]>([]);
+  const [clients, setClients] = useState<AssignedClient[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
   const { toast } = useToast();
@@ -36,32 +33,19 @@ export const useClientAssignments = (trainerId?: string, clientId?: string) => {
     };
     
     loadAssignments();
-    
-    // Set up real-time subscription
-    const channel = supabase
-      .channel('client-assignments-changes')
-      .on('postgres_changes', { 
-          event: '*', 
-          schema: 'public', 
-          table: 'trainer_client_assignments'
-      }, () => {
-        loadAssignments();
-      })
-      .subscribe();
-      
-    return () => {
-      channel.unsubscribe();
-    };
   }, [trainerId, clientId]);
   
   const assignClient = async (trainerId: string, clientId: string) => {
     try {
-      await createAssignment(trainerId, clientId);
+      const newAssignment = await createAssignment(trainerId, clientId);
+      setAssignments(prev => [...prev, newAssignment]);
       
       toast({
         title: "Client assigned",
         description: "The client has been assigned to the trainer.",
       });
+      
+      return newAssignment;
     } catch (err) {
       console.error('Error assigning client:', err);
       toast({
@@ -73,54 +57,43 @@ export const useClientAssignments = (trainerId?: string, clientId?: string) => {
     }
   };
   
-  const handleStatusUpdate = async (id: string, status: 'active' | 'paused' | 'ended') => {
+  const updateAssignmentStatusLocal = async (id: string, status: 'active' | 'paused' | 'ended') => {
     try {
-      await updateAssignmentStatus(id, status);
+      const success = await updateAssignmentStatus(id, status);
       
-      const statusMessages = {
-        active: "The client assignment has been activated.",
-        paused: "The client assignment has been paused.",
-        ended: "The client assignment has been ended."
-      };
+      if (success) {
+        setAssignments(prev => 
+          prev.map(assignment => 
+            assignment.id === id 
+              ? { ...assignment, status, ...(status === 'ended' ? { end_date: new Date().toISOString().split('T')[0] } : {}) } 
+              : assignment
+          )
+        );
+        
+        toast({
+          title: "Status updated",
+          description: `The assignment has been marked as ${status}.`,
+        });
+      }
       
-      toast({
-        title: "Assignment updated",
-        description: statusMessages[status],
-      });
+      return success;
     } catch (err) {
       console.error('Error updating assignment status:', err);
       toast({
         variant: "destructive",
         title: "Error",
-        description: "Failed to update assignment status. Please try again.",
+        description: "Failed to update status. Please try again.",
       });
       throw err;
     }
   };
   
-  const pauseAssignment = (id: string) => handleStatusUpdate(id, 'paused');
-  const activateAssignment = (id: string) => handleStatusUpdate(id, 'active');
-  const endAssignment = (id: string) => handleStatusUpdate(id, 'ended');
-  
-  const getAssignedClients = (): AssignedClient[] => {
-    return assignments
-      .filter(a => a.status === 'active')
-      .map(a => ({
-        id: a.client_id,
-        name: a.client_id || 'Unknown Client',
-        assignmentId: a.id,
-        status: a.status
-      }));
-  };
-  
   return {
     assignments,
+    clients,
     isLoading,
     error,
     assignClient,
-    pauseAssignment,
-    activateAssignment,
-    endAssignment,
-    getAssignedClients
+    updateAssignmentStatus: updateAssignmentStatusLocal
   };
 };

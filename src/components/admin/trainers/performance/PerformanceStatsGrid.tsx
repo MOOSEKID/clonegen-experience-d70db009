@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { useTrainerPerformance } from '@/hooks/trainers/useTrainerPerformance';
 
@@ -18,16 +18,16 @@ const PerformanceStatsGrid: React.FC<PerformanceStatsGridProps> = ({ trainerId }
     return <div>No performance data available</div>;
   }
   
-  // Safely access performance metrics properties with fallbacks
+  // Create stats from performance metrics
   const stats = [
-    { label: 'Classes Taught', value: performanceMetrics.classes_taught || 0 },
-    { label: 'Private Sessions', value: performanceMetrics.private_sessions || 0 },
-    { label: 'New Clients', value: performanceMetrics.new_clients || 0 },
-    { label: 'Active Clients', value: performanceMetrics.activeClients },
-    { label: 'Avg. Session Rating', value: `${performanceMetrics.avg_session_rating || 0}/5` },
-    { label: 'Monthly Goal Progress', value: `${performanceMetrics.monthly_goal_progress || 0}%` },
-    { label: 'Class Fill Rate', value: `${performanceMetrics.class_fill_rate || 0}%` },
-    { label: 'Total Hours', value: performanceMetrics.total_hours || 0 },
+    { label: 'Sessions Total', value: performanceMetrics.sessions.total },
+    { label: 'Sessions Completed', value: performanceMetrics.sessions.completed },
+    { label: 'Sessions Canceled', value: performanceMetrics.sessions.canceled },
+    { label: 'No Shows', value: performanceMetrics.sessions.noShow },
+    { label: 'Average Rating', value: `${performanceMetrics.ratings.average}/5` },
+    { label: 'Attendance On-Time', value: `${Math.round((performanceMetrics.attendance.onTime / performanceMetrics.attendance.total) * 100)}%` },
+    { label: 'Attendance Late', value: performanceMetrics.attendance.late },
+    { label: 'Attendance Missed', value: performanceMetrics.attendance.missed },
   ];
   
   return (

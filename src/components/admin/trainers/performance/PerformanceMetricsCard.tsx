@@ -36,7 +36,7 @@ const PerformanceMetricsCard: React.FC<PerformanceMetricsCardProps> = ({
     );
   }
   
-  if (fullView) {
+  if (fullView && performanceMetrics) {
     // Render a full performance metrics view
     return (
       <Card>
@@ -46,20 +46,20 @@ const PerformanceMetricsCard: React.FC<PerformanceMetricsCardProps> = ({
         <CardContent>
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <p className="text-sm font-medium">Classes Taught</p>
-              <p className="text-xl">{performanceMetrics.classes_taught}</p>
+              <p className="text-sm font-medium">Sessions Taught</p>
+              <p className="text-xl">{performanceMetrics.sessions.total}</p>
             </div>
             <div>
-              <p className="text-sm font-medium">Private Sessions</p>
-              <p className="text-xl">{performanceMetrics.private_sessions}</p>
+              <p className="text-sm font-medium">Sessions Completed</p>
+              <p className="text-xl">{performanceMetrics.sessions.completed}</p>
             </div>
             <div>
-              <p className="text-sm font-medium">Client Retention</p>
-              <p className="text-xl">{performanceMetrics.client_retention_rate}%</p>
+              <p className="text-sm font-medium">Attendance Rate</p>
+              <p className="text-xl">{Math.round((performanceMetrics.attendance.onTime / performanceMetrics.attendance.total) * 100)}%</p>
             </div>
             <div>
               <p className="text-sm font-medium">Rating</p>
-              <p className="text-xl">{performanceMetrics.avg_session_rating}/5</p>
+              <p className="text-xl">{performanceMetrics.ratings.average}/5</p>
             </div>
           </div>
         </CardContent>

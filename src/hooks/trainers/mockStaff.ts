@@ -6,74 +6,101 @@ export const getMockStaff = (): StaffProfile[] => {
     {
       id: '1',
       name: 'John Doe',
-      email: 'john.doe@example.com',
+      email: 'john.doe@uptowngym.com',
       phone: '+1234567890',
-      bio: 'Professional fitness trainer with over 10 years of experience.',
-      profile_picture: 'https://randomuser.me/api/portraits/men/32.jpg',
+      bio: 'Experienced personal trainer specializing in strength and conditioning.',
+      profile_picture: null,
       role: 'trainer',
-      specialization: ['Strength', 'Cardio', 'Nutrition'],
+      specialization: ['Strength', 'Conditioning'],
       status: 'Active',
-      hire_date: '2018-03-15',
-      experience_years: 10,
-      experience_level: 'Expert'
+      hire_date: '2022-01-15',
+      experience_years: 5,
+      experience_level: 'Advanced',
+      hourly_rate: 45,
+      certifications: [
+        {
+          id: '101',
+          staff_id: '1',
+          certification_name: 'Certified Personal Trainer',
+          issuing_organization: 'National Academy of Sports Medicine',
+          issue_date: '2018-03-10',
+          expiry_date: '2023-03-10',
+          verified: true,
+          certification_file: null,
+          created_at: '2022-01-15T00:00:00Z',
+          updated_at: '2022-01-15T00:00:00Z'
+        }
+      ],
+      availability: [],
+      stripe_account_id: null,
+      created_at: '2022-01-15T00:00:00Z',
+      updated_at: '2022-01-15T00:00:00Z'
     },
     {
       id: '2',
       name: 'Jane Smith',
-      email: 'jane.smith@example.com',
-      phone: '+0987654321',
-      bio: 'Specialized in yoga and flexibility training.',
-      profile_picture: 'https://randomuser.me/api/portraits/women/44.jpg',
+      email: 'jane.smith@uptowngym.com',
+      phone: '+1987654321',
+      bio: 'Yoga and pilates instructor focused on flexibility and mindfulness training.',
+      profile_picture: null,
       role: 'trainer',
-      specialization: ['Yoga', 'Pilates', 'Flexibility'],
+      specialization: ['Yoga', 'Pilates'],
       status: 'Active',
-      hire_date: '2019-06-22',
-      experience_years: 7,
-      experience_level: 'Advanced'
+      hire_date: '2021-06-20',
+      experience_years: 8,
+      experience_level: 'Expert',
+      hourly_rate: 50,
+      certifications: [
+        {
+          id: '201',
+          staff_id: '2',
+          certification_name: 'Registered Yoga Teacher 500',
+          issuing_organization: 'Yoga Alliance',
+          issue_date: '2015-05-15',
+          expiry_date: null,
+          verified: true,
+          certification_file: null,
+          created_at: '2021-06-20T00:00:00Z',
+          updated_at: '2021-06-20T00:00:00Z'
+        }
+      ],
+      availability: [],
+      stripe_account_id: null,
+      created_at: '2021-06-20T00:00:00Z',
+      updated_at: '2021-06-20T00:00:00Z'
     },
     {
       id: '3',
       name: 'Mike Johnson',
-      email: 'mike.johnson@example.com',
-      phone: '+1122334455',
-      bio: 'Focused on athletic performance and sports-specific training.',
-      profile_picture: 'https://randomuser.me/api/portraits/men/67.jpg',
+      email: 'mike.johnson@uptowngym.com',
+      phone: '+1547896321',
+      bio: 'Former athlete turned fitness trainer specializing in HIIT and functional fitness.',
+      profile_picture: null,
       role: 'trainer',
-      specialization: ['Sports', 'Performance', 'Rehabilitation'],
-      status: 'On Leave',
-      hire_date: '2020-01-10',
-      experience_years: 5,
-      experience_level: 'Intermediate'
-    },
-    {
-      id: '4',
-      name: 'Sarah Wilson',
-      email: 'sarah.wilson@example.com',
-      phone: '+2233445566',
-      bio: 'Receptionist with excellent customer service skills.',
-      profile_picture: 'https://randomuser.me/api/portraits/women/22.jpg',
-      role: 'receptionist',
-      specialization: [],
+      specialization: ['HIIT', 'Functional Training'],
       status: 'Active',
-      hire_date: '2021-04-15',
+      hire_date: '2022-03-05',
       experience_years: 3,
-      experience_level: 'Intermediate'
-    },
-    {
-      id: '5',
-      name: 'David Brown',
-      email: 'david.brown@example.com',
-      phone: '+3344556677',
-      bio: 'Facility manager responsible for maintenance and equipment.',
-      profile_picture: 'https://randomuser.me/api/portraits/men/45.jpg',
-      role: 'manager',
-      specialization: [],
-      status: 'Active',
-      hire_date: '2017-08-01',
-      experience_years: 8,
-      experience_level: 'Expert'
+      experience_level: 'Intermediate',
+      hourly_rate: 40,
+      certifications: [
+        {
+          id: '301',
+          staff_id: '3',
+          certification_name: 'Certified Functional Strength Coach',
+          issuing_organization: 'Functional Movement Systems',
+          issue_date: '2020-11-12',
+          expiry_date: '2025-11-12',
+          verified: true,
+          certification_file: null,
+          created_at: '2022-03-05T00:00:00Z',
+          updated_at: '2022-03-05T00:00:00Z'
+        }
+      ],
+      availability: [],
+      stripe_account_id: null,
+      created_at: '2022-03-05T00:00:00Z',
+      updated_at: '2022-03-05T00:00:00Z'
     }
   ];
 };
-
-export default getMockStaff;

@@ -1,10 +1,11 @@
 
 import { supabase } from '@/integrations/supabase/client';
-import { ClientAssignment } from './types';
+import { ClientAssignment } from '../assignments/types';
 
 export const fetchAssignments = async (trainerId?: string, clientId?: string): Promise<ClientAssignment[]> => {
   try {
-    let query = supabase.from('trainer_client_assignments').select('*');
+    // Use any to avoid deep type instantiation error
+    let query = supabase.from('trainer_client_assignments').select('*') as any;
     
     if (trainerId) {
       query = query.eq('staff_id', trainerId);
@@ -21,7 +22,7 @@ export const fetchAssignments = async (trainerId?: string, clientId?: string): P
     // Map the data to match our ClientAssignment type
     const assignments = data.map((item: any) => ({
       ...item,
-      staff_id: item.trainer_id || item.staff_id, // Handle both trainer_id and staff_id
+      staff_id: item.staff_id || item.trainer_id, // Handle both trainer_id and staff_id
     })) as ClientAssignment[];
     
     return assignments;
