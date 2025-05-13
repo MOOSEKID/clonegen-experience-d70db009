@@ -9,6 +9,30 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      admin_audit_logs: {
+        Row: {
+          action: string
+          admin_id: string
+          details: Json | null
+          id: string
+          timestamp: string
+        }
+        Insert: {
+          action: string
+          admin_id: string
+          details?: Json | null
+          id?: string
+          timestamp?: string
+        }
+        Update: {
+          action?: string
+          admin_id?: string
+          details?: Json | null
+          id?: string
+          timestamp?: string
+        }
+        Relationships: []
+      }
       categories: {
         Row: {
           created_at: string
@@ -170,7 +194,7 @@ export type Database = {
             foreignKeyName: "classes_trainer_id_fkey"
             columns: ["trainer_id"]
             isOneToOne: false
-            referencedRelation: "trainers"
+            referencedRelation: "trainer_profiles"
             referencedColumns: ["id"]
           },
         ]
@@ -236,7 +260,7 @@ export type Database = {
             foreignKeyName: "client_progress_trainer_id_fkey"
             columns: ["trainer_id"]
             isOneToOne: false
-            referencedRelation: "trainers"
+            referencedRelation: "trainer_profiles"
             referencedColumns: ["id"]
           },
         ]
@@ -305,7 +329,7 @@ export type Database = {
             foreignKeyName: "client_sessions_trainer_id_fkey"
             columns: ["trainer_id"]
             isOneToOne: false
-            referencedRelation: "trainers"
+            referencedRelation: "trainer_profiles"
             referencedColumns: ["id"]
           },
         ]
@@ -1687,7 +1711,7 @@ export type Database = {
             foreignKeyName: "staff_attendance_staff_id_fkey"
             columns: ["staff_id"]
             isOneToOne: false
-            referencedRelation: "trainers"
+            referencedRelation: "trainer_profiles"
             referencedColumns: ["id"]
           },
         ]
@@ -1813,7 +1837,7 @@ export type Database = {
             foreignKeyName: "trainer_attendance_trainer_id_fkey"
             columns: ["trainer_id"]
             isOneToOne: false
-            referencedRelation: "trainers"
+            referencedRelation: "trainer_profiles"
             referencedColumns: ["id"]
           },
         ]
@@ -1851,7 +1875,7 @@ export type Database = {
             foreignKeyName: "trainer_availability_trainer_id_fkey"
             columns: ["trainer_id"]
             isOneToOne: false
-            referencedRelation: "trainers"
+            referencedRelation: "trainer_profiles"
             referencedColumns: ["id"]
           },
         ]
@@ -1898,7 +1922,7 @@ export type Database = {
             foreignKeyName: "trainer_certifications_trainer_id_fkey"
             columns: ["trainer_id"]
             isOneToOne: false
-            referencedRelation: "trainers"
+            referencedRelation: "trainer_profiles"
             referencedColumns: ["id"]
           },
         ]
@@ -1949,7 +1973,90 @@ export type Database = {
             foreignKeyName: "trainer_client_assignments_trainer_id_fkey"
             columns: ["trainer_id"]
             isOneToOne: false
-            referencedRelation: "trainers"
+            referencedRelation: "trainer_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      trainer_profiles: {
+        Row: {
+          availability: Json | null
+          bio: string | null
+          certifications: string[] | null
+          created_at: string | null
+          created_by: string | null
+          email: string | null
+          experience_level: string | null
+          hiredate: string | null
+          hourlyrate: number | null
+          id: string
+          last_synced_at: string | null
+          name: string
+          phone: string | null
+          photo_url: string | null
+          profilepicture: string | null
+          specialization: string[] | null
+          specializations: string[] | null
+          staff_id: string | null
+          status: string | null
+          updated_at: string | null
+          updated_by: string | null
+          years_of_experience: number | null
+        }
+        Insert: {
+          availability?: Json | null
+          bio?: string | null
+          certifications?: string[] | null
+          created_at?: string | null
+          created_by?: string | null
+          email?: string | null
+          experience_level?: string | null
+          hiredate?: string | null
+          hourlyrate?: number | null
+          id?: string
+          last_synced_at?: string | null
+          name: string
+          phone?: string | null
+          photo_url?: string | null
+          profilepicture?: string | null
+          specialization?: string[] | null
+          specializations?: string[] | null
+          staff_id?: string | null
+          status?: string | null
+          updated_at?: string | null
+          updated_by?: string | null
+          years_of_experience?: number | null
+        }
+        Update: {
+          availability?: Json | null
+          bio?: string | null
+          certifications?: string[] | null
+          created_at?: string | null
+          created_by?: string | null
+          email?: string | null
+          experience_level?: string | null
+          hiredate?: string | null
+          hourlyrate?: number | null
+          id?: string
+          last_synced_at?: string | null
+          name?: string
+          phone?: string | null
+          photo_url?: string | null
+          profilepicture?: string | null
+          specialization?: string[] | null
+          specializations?: string[] | null
+          staff_id?: string | null
+          status?: string | null
+          updated_at?: string | null
+          updated_by?: string | null
+          years_of_experience?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fk_staff_id"
+            columns: ["staff_id"]
+            isOneToOne: false
+            referencedRelation: "staff"
             referencedColumns: ["id"]
           },
         ]
@@ -1994,61 +2101,10 @@ export type Database = {
             foreignKeyName: "trainer_ratings_trainer_id_fkey"
             columns: ["trainer_id"]
             isOneToOne: false
-            referencedRelation: "trainers"
+            referencedRelation: "trainer_profiles"
             referencedColumns: ["id"]
           },
         ]
-      }
-      trainers: {
-        Row: {
-          availability: Json | null
-          bio: string | null
-          certifications: string[] | null
-          created_at: string | null
-          email: string | null
-          hiredate: string | null
-          hourlyrate: number | null
-          id: string
-          name: string
-          phone: string | null
-          profilepicture: string | null
-          specialization: string[] | null
-          status: string | null
-          updated_at: string | null
-        }
-        Insert: {
-          availability?: Json | null
-          bio?: string | null
-          certifications?: string[] | null
-          created_at?: string | null
-          email?: string | null
-          hiredate?: string | null
-          hourlyrate?: number | null
-          id?: string
-          name: string
-          phone?: string | null
-          profilepicture?: string | null
-          specialization?: string[] | null
-          status?: string | null
-          updated_at?: string | null
-        }
-        Update: {
-          availability?: Json | null
-          bio?: string | null
-          certifications?: string[] | null
-          created_at?: string | null
-          email?: string | null
-          hiredate?: string | null
-          hourlyrate?: number | null
-          id?: string
-          name?: string
-          phone?: string | null
-          profilepicture?: string | null
-          specialization?: string[] | null
-          status?: string | null
-          updated_at?: string | null
-        }
-        Relationships: []
       }
     }
     Views: {
@@ -2074,6 +2130,14 @@ export type Database = {
       is_admin_user: {
         Args: Record<PropertyKey, never>
         Returns: boolean
+      }
+      is_superadmin: {
+        Args: Record<PropertyKey, never>
+        Returns: boolean
+      }
+      sync_missing_trainer_profiles: {
+        Args: Record<PropertyKey, never>
+        Returns: undefined
       }
     }
     Enums: {

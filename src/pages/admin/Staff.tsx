@@ -8,11 +8,19 @@ import { useStaffData } from '@/hooks/staff/useStaffData';
 import StaffGrid from '@/components/admin/staff/StaffGrid';
 import { LoadingSpinner } from '@/components/ui/LoadingSpinner';
 import RoleSpecificCards from '@/components/admin/staff/cards/RoleSpecificCards';
+import SyncStaffProfilesButton from '@/components/admin/staff/SyncStaffProfilesButton';
+import { useAuth } from '@/hooks/useAuth';
 
 const StaffPage = () => {
   const navigate = useNavigate();
   const { staff, isLoading, error, getStaffByRole } = useStaffData();
   const [activeTab, setActiveTab] = useState('all');
+  const { user } = useAuth();
+
+  // Determine if user is superadmin
+  const isSuperAdmin = staff.find(s => 
+    s.id === user?.id && s.access_level === 'superadmin'
+  ) !== undefined;
 
   if (isLoading) {
     return (
@@ -42,13 +50,18 @@ const StaffPage = () => {
           <h1 className="text-2xl font-bold text-gray-800">Staff Management</h1>
           <p className="text-gray-500">Manage all gym staff members and their roles</p>
         </div>
-        <Button 
-          onClick={() => navigate('/admin/staff/add')}
-          className="flex items-center gap-2"
-        >
-          <PlusCircle className="h-4 w-4" />
-          Add Staff Member
-        </Button>
+        <div className="flex gap-3">
+          {isSuperAdmin && (
+            <SyncStaffProfilesButton />
+          )}
+          <Button 
+            onClick={() => navigate('/admin/staff/add')}
+            className="flex items-center gap-2"
+          >
+            <PlusCircle className="h-4 w-4" />
+            Add Staff Member
+          </Button>
+        </div>
       </div>
 
       <Tabs defaultValue="all" className="w-full" onValueChange={handleTabChange} value={activeTab}>
