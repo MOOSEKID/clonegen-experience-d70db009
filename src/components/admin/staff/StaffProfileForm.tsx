@@ -26,7 +26,7 @@ import StaffSpecialtiesField from './StaffSpecialtiesField';
 
 // Define the form schema
 const staffProfileSchema = z.object({
-  name: z.string().min(2, { message: "Name must be at least 2 characters" }),
+  full_name: z.string().min(2, { message: "Name must be at least 2 characters" }),
   email: z.string().email({ message: "Invalid email address" }).optional().or(z.literal('')),
   phone: z.string().optional().or(z.literal('')),
   role: z.enum(['trainer', 'manager', 'reception', 'sales', 'support']),
@@ -53,28 +53,28 @@ const StaffProfileForm: React.FC<StaffProfileFormProps> = ({
   const form = useForm<StaffProfileFormValues>({
     resolver: zodResolver(staffProfileSchema),
     defaultValues: {
-      name: staffMember?.name || '',
+      full_name: staffMember?.full_name || '',
       email: staffMember?.email || '',
       phone: staffMember?.phone || '',
       role: (staffMember?.role as any) || 'trainer',
-      status: staffMember?.status || 'Active',
+      status: staffMember?.status as 'Active' | 'Inactive' || 'Active',
       bio: staffMember?.bio || '',
-      specialties: staffMember?.specialization || [],
-      photo_url: staffMember?.profile_picture || '',
+      specialties: staffMember?.specialties || [],
+      photo_url: staffMember?.photo_url || '',
       access_level: (staffMember?.access_level as any) || 'staff',
     },
   });
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6" id="staff-form">
         <div className="flex items-center space-x-4">
           <Avatar className="h-16 w-16">
             {form.watch('photo_url') ? (
-              <img src={form.watch('photo_url')} alt={form.watch('name')} />
+              <img src={form.watch('photo_url')} alt={form.watch('full_name')} />
             ) : (
               <div className="flex h-full w-full items-center justify-center bg-muted text-xl font-semibold uppercase text-muted-foreground">
-                {form.watch('name').charAt(0)}
+                {form.watch('full_name').charAt(0)}
               </div>
             )}
           </Avatar>
@@ -98,7 +98,7 @@ const StaffProfileForm: React.FC<StaffProfileFormProps> = ({
         <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
           <FormField
             control={form.control}
-            name="name"
+            name="full_name"
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Full Name *</FormLabel>
@@ -224,10 +224,14 @@ const StaffProfileForm: React.FC<StaffProfileFormProps> = ({
             control={form.control}
             name="specialties"
             render={({ field }) => (
-              <StaffSpecialtiesField
-                value={field.value || []}
-                onChange={field.onChange}
-              />
+              <FormItem>
+                <StaffSpecialtiesField
+                  value={field.value || []}
+                  onChange={field.onChange}
+                  role={form.watch('role')}
+                />
+                <FormMessage />
+              </FormItem>
             )}
           />
         )}

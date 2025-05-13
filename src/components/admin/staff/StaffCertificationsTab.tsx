@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -48,13 +47,27 @@ const StaffCertificationsTab: React.FC<StaffCertificationsTabProps> = ({ staffMe
         staff_id: staffMember.id,
         certification_name: certName,
         issuing_organization: organization,
-        issue_date: issueDate ? format(issueDate, 'yyyy-MM-dd') : null,
-        expiry_date: expiryDate ? format(expiryDate, 'yyyy-MM-dd') : null,
-        certification_file: fileUrl || null,
+        issue_date: issueDate ? format(issueDate, 'yyyy-MM-dd') : undefined,
+        expiry_date: expiryDate ? format(expiryDate, 'yyyy-MM-dd') : undefined,
+        certification_file: fileUrl || undefined,
         verified: false,
       });
 
-      setCertifications([...certifications, newCert]);
+      // Ensure the returned certification has the correct shape
+      const staffCert: StaffCertification = {
+        id: newCert.id,
+        staff_id: staffMember.id,
+        certification_name: newCert.certification_name,
+        issuing_organization: newCert.issuing_organization,
+        issue_date: newCert.issue_date,
+        expiry_date: newCert.expiry_date,
+        certification_file: newCert.certification_file,
+        verified: newCert.verified || false,
+        created_at: newCert.created_at,
+        updated_at: newCert.updated_at
+      };
+
+      setCertifications([...certifications, staffCert]);
       
       // Reset form
       setCertName("");
@@ -82,7 +95,7 @@ const StaffCertificationsTab: React.FC<StaffCertificationsTabProps> = ({ staffMe
   };
 
   // Check if a certification has expired
-  const isExpired = (expiryDate: string | Date | null) => {
+  const isExpired = (expiryDate: string | undefined | null) => {
     if (!expiryDate) return false;
     
     const expiry = new Date(expiryDate);

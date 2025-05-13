@@ -46,15 +46,15 @@ const StaffCard: React.FC<StaffCardProps> = ({ staffMember }) => {
           <div className="flex items-center space-x-3">
             <Avatar className="h-12 w-12 border">
               {staffMember.photo_url ? (
-                <img src={staffMember.photo_url} alt={staffMember.name} />
+                <img src={staffMember.photo_url} alt={staffMember.full_name} />
               ) : (
                 <div className="flex h-full w-full items-center justify-center bg-gray-100 text-gray-500">
-                  {staffMember.name.charAt(0)}
+                  {staffMember.full_name.charAt(0)}
                 </div>
               )}
             </Avatar>
             <div>
-              <h3 className="font-semibold">{staffMember.name}</h3>
+              <h3 className="font-semibold">{staffMember.full_name}</h3>
               <div className="flex flex-wrap gap-1 mt-1">
                 <Badge variant="outline" className={getRoleColor(staffMember.role || '')}>
                   {staffMember.role?.charAt(0).toUpperCase() + staffMember.role?.slice(1) || 'Staff'}
@@ -77,18 +77,18 @@ const StaffCard: React.FC<StaffCardProps> = ({ staffMember }) => {
             <p className="text-gray-600">{staffMember.phone}</p>
           )}
           
-          {staffMember.role === 'trainer' && staffMember.specialization && staffMember.specialization.length > 0 && (
+          {staffMember.role === 'trainer' && staffMember.specialties && staffMember.specialties.length > 0 && (
             <div className="mt-2">
               <p className="text-xs text-gray-500 mb-1">Specialties:</p>
               <div className="flex flex-wrap gap-1">
-                {staffMember.specialization.slice(0, 3).map((specialty, index) => (
+                {staffMember.specialties.slice(0, 3).map((specialty, index) => (
                   <Badge key={index} variant="outline" className="text-xs bg-gray-50">
                     {specialty}
                   </Badge>
                 ))}
-                {staffMember.specialization.length > 3 && (
+                {staffMember.specialties.length > 3 && (
                   <Badge variant="outline" className="text-xs bg-gray-50">
-                    +{staffMember.specialization.length - 3}
+                    +{staffMember.specialties.length - 3}
                   </Badge>
                 )}
               </div>

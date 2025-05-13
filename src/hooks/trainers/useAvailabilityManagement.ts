@@ -1,80 +1,81 @@
 
-import { useState } from 'react';
+import { useToast } from '@/components/ui/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { StaffAvailability } from './types';
-import { toast } from 'sonner';
 
-export function useAvailabilityManagement() {
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<Error | null>(null);
-
+export const useAvailabilityManagement = () => {
+  const { toast } = useToast();
+  
   const addAvailability = async (availability: Omit<StaffAvailability, 'id'>) => {
-    setIsLoading(true);
-    setError(null);
-    
     try {
-      // Map staff_id to trainer_id if using trainer_availability table
-      const availabilityData = {
-        trainer_id: availability.staff_id,
-        day_of_week: availability.day_of_week,
-        start_time: availability.start_time,
-        end_time: availability.end_time
-      };
-      
-      // Insert new availability
-      const { data, error: insertError } = await supabase
-        .from('trainer_availability')
-        .insert(availabilityData)
+      // Try to use staff_availability table with staff_id
+      const { data, error } = await supabase
+        .from('staff_availability')
+        .insert({
+          staff_id: availability.staff_id,
+          day_of_week: availability.day_of_week,
+          start_time: availability.start_time,
+          end_time: availability.end_time
+        })
         .select()
         .single();
+        
+      if (error) throw error;
       
-      if (insertError) {
-        throw new Error(`Error adding availability: ${insertError.message}`);
-      }
+      toast({
+        title: "Availability added",
+        description: "Availability has been added successfully."
+      });
       
-      toast.success('Availability added successfully');
       return data;
-    } catch (err: any) {
-      console.error('Error in addAvailability:', err);
-      toast.error(err.message || 'Failed to add availability');
-      setError(err);
-      return null;
-    } finally {
-      setIsLoading(false);
+    } catch (err) {
+      console.error('Error adding availability:', err);
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Failed to add availability. Please try again."
+      });
+      throw err;
     }
   };
-
+  
   const deleteAvailability = async (id: string) => {
-    setIsLoading(true);
-    setError(null);
-    
     try {
-      // Delete availability by id
-      const { error: deleteError } = await supabase
-        .from('trainer_availability')
+      // Try staff_availability first
+      let { error } = await supabase
+        .from('staff_availability')
         .delete()
         .eq('id', id);
       
-      if (deleteError) {
-        throw new Error(`Error deleting availability: ${deleteError.message}`);
+      // If no rows affected, try trainer_availability as fallback
+      if (error) {
+        const { error: trainerError } = await supabase
+          .from('trainer_availability')
+          .delete()
+          .eq('id', id);
+          
+        if (trainerError) throw trainerError;
       }
       
-      toast.success('Availability deleted successfully');
+      toast({
+        title: "Availability deleted",
+        description: "Availability has been removed successfully."
+      });
+      
       return true;
-    } catch (err: any) {
-      console.error('Error in deleteAvailability:', err);
-      toast.error(err.message || 'Failed to delete availability');
-      setError(err);
-      return false;
-    } finally {
-      setIsLoading(false);
+    } catch (err) {
+      console.error('Error deleting availability:', err);
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Failed to delete availability. Please try again."
+      });
+      throw err;
     }
   };
 
   return {
     addAvailability,
-    deleteAvailability,
-    isLoading,
-    error
+    deleteAvailability
   };
-}
+};

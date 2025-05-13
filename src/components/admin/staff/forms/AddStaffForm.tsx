@@ -16,6 +16,14 @@ import {
 } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import StaffSpecialtiesField from '@/components/admin/staff/StaffSpecialtiesField';
+import {
+  FormField,
+  FormItem,
+  FormLabel,
+  FormControl,
+  FormDescription,
+  FormMessage
+} from '@/components/ui/form';
 
 const addStaffSchema = z.object({
   full_name: z.string().min(2, { message: "Name must be at least 2 characters." }),
@@ -54,39 +62,53 @@ const AddStaffForm: React.FC<AddStaffFormProps> = ({ onSubmit }) => {
   });
 
   const handleFormSubmit = async (data: AddStaffFormValues) => {
-    await onSubmit(data);
+    // Ensure we're passing a complete StaffProfile object with required fields
+    const staffData: Omit<StaffProfile, 'id' | 'certifications' | 'availability'> = {
+      full_name: data.full_name,
+      email: data.email || undefined,
+      phone: data.phone || undefined,
+      role: data.role,
+      bio: data.bio || undefined,
+      photo_url: data.photo_url || undefined,
+      access_level: data.access_level,
+      status: data.status,
+      hire_date: data.hire_date,
+      specialties: data.specialties || [],
+    };
+    
+    await onSubmit(staffData);
   };
 
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(handleFormSubmit)} className="space-y-6">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <Form.Field
+          <FormField
             control={form.control}
             name="full_name"
             render={({ field }) => (
-              <Form.Item>
-                <Form.Label>Full Name*</Form.Label>
-                <Form.Control>
+              <FormItem>
+                <FormLabel>Full Name*</FormLabel>
+                <FormControl>
                   <Input placeholder="Enter full name" {...field} />
-                </Form.Control>
-                <Form.Message />
-              </Form.Item>
+                </FormControl>
+                <FormMessage />
+              </FormItem>
             )}
           />
 
-          <Form.Field
+          <FormField
             control={form.control}
             name="role"
             render={({ field }) => (
-              <Form.Item>
-                <Form.Label>Role*</Form.Label>
+              <FormItem>
+                <FormLabel>Role*</FormLabel>
                 <Select onValueChange={field.onChange} defaultValue={field.value}>
-                  <Form.Control>
+                  <FormControl>
                     <SelectTrigger>
                       <SelectValue placeholder="Select role" />
                     </SelectTrigger>
-                  </Form.Control>
+                  </FormControl>
                   <SelectContent>
                     <SelectItem value="trainer">Trainer</SelectItem>
                     <SelectItem value="manager">Manager</SelectItem>
@@ -95,131 +117,144 @@ const AddStaffForm: React.FC<AddStaffFormProps> = ({ onSubmit }) => {
                     <SelectItem value="support">Support</SelectItem>
                   </SelectContent>
                 </Select>
-                <Form.Message />
-              </Form.Item>
+                <FormMessage />
+              </FormItem>
             )}
           />
 
-          <Form.Field
+          <FormField
             control={form.control}
             name="email"
             render={({ field }) => (
-              <Form.Item>
-                <Form.Label>Email</Form.Label>
-                <Form.Control>
+              <FormItem>
+                <FormLabel>Email</FormLabel>
+                <FormControl>
                   <Input type="email" placeholder="Enter email address" {...field} />
-                </Form.Control>
-                <Form.Message />
-              </Form.Item>
+                </FormControl>
+                <FormMessage />
+              </FormItem>
             )}
           />
 
-          <Form.Field
+          <FormField
             control={form.control}
             name="phone"
             render={({ field }) => (
-              <Form.Item>
-                <Form.Label>Phone</Form.Label>
-                <Form.Control>
+              <FormItem>
+                <FormLabel>Phone</FormLabel>
+                <FormControl>
                   <Input placeholder="Enter phone number" {...field} />
-                </Form.Control>
-                <Form.Message />
-              </Form.Item>
+                </FormControl>
+                <FormMessage />
+              </FormItem>
             )}
           />
 
-          <Form.Field
+          <FormField
             control={form.control}
             name="status"
             render={({ field }) => (
-              <Form.Item>
-                <Form.Label>Status</Form.Label>
+              <FormItem>
+                <FormLabel>Status</FormLabel>
                 <Select onValueChange={field.onChange} defaultValue={field.value}>
-                  <Form.Control>
+                  <FormControl>
                     <SelectTrigger>
                       <SelectValue placeholder="Select status" />
                     </SelectTrigger>
-                  </Form.Control>
+                  </FormControl>
                   <SelectContent>
                     <SelectItem value="Active">Active</SelectItem>
                     <SelectItem value="Inactive">Inactive</SelectItem>
                     <SelectItem value="On Leave">On Leave</SelectItem>
                   </SelectContent>
                 </Select>
-                <Form.Message />
-              </Form.Item>
+                <FormMessage />
+              </FormItem>
             )}
           />
 
-          <Form.Field
+          <FormField
             control={form.control}
             name="access_level"
             render={({ field }) => (
-              <Form.Item>
-                <Form.Label>Access Level</Form.Label>
+              <FormItem>
+                <FormLabel>Access Level</FormLabel>
                 <Select onValueChange={field.onChange} defaultValue={field.value}>
-                  <Form.Control>
+                  <FormControl>
                     <SelectTrigger>
                       <SelectValue placeholder="Select access level" />
                     </SelectTrigger>
-                  </Form.Control>
+                  </FormControl>
                   <SelectContent>
                     <SelectItem value="admin">Admin</SelectItem>
                     <SelectItem value="staff">Staff</SelectItem>
                     <SelectItem value="read-only">Read Only</SelectItem>
                   </SelectContent>
                 </Select>
-                <Form.Message />
-              </Form.Item>
+                <FormMessage />
+              </FormItem>
             )}
           />
 
-          <Form.Field
+          <FormField
             control={form.control}
             name="hire_date"
             render={({ field }) => (
-              <Form.Item>
-                <Form.Label>Hire Date</Form.Label>
-                <Form.Control>
+              <FormItem>
+                <FormLabel>Hire Date</FormLabel>
+                <FormControl>
                   <Input type="date" {...field} />
-                </Form.Control>
-                <Form.Message />
-              </Form.Item>
+                </FormControl>
+                <FormMessage />
+              </FormItem>
             )}
           />
 
-          <Form.Field
+          <FormField
             control={form.control}
             name="photo_url"
             render={({ field }) => (
-              <Form.Item>
-                <Form.Label>Photo URL</Form.Label>
-                <Form.Control>
+              <FormItem>
+                <FormLabel>Photo URL</FormLabel>
+                <FormControl>
                   <Input placeholder="Enter photo URL" {...field} />
-                </Form.Control>
-                <Form.Message />
-              </Form.Item>
+                </FormControl>
+                <FormMessage />
+              </FormItem>
             )}
           />
         </div>
 
-        <StaffSpecialtiesField form={form} />
+        <FormField
+          control={form.control}
+          name="specialties"
+          render={({ field }) => (
+            <FormItem>
+              <StaffSpecialtiesField 
+                value={field.value || []} 
+                onChange={field.onChange}
+                role={form.watch('role')}
+              />
+              <FormMessage />
+            </FormItem>
+          )}
+        />
 
-        <Form.Field
+        <FormField
           control={form.control}
           name="bio"
           render={({ field }) => (
-            <Form.Item>
-              <Form.Label>Biography</Form.Label>
-              <Form.Control>
+            <FormItem>
+              <FormLabel>Biography</FormLabel>
+              <FormControl>
                 <Textarea
                   placeholder="Enter staff biography"
                   className="min-h-[120px]"
                   {...field}
                 />
-              </Form.Control>
-              <Form.Message />
-            </Form.Item>
+              </FormControl>
+              <FormMessage />
+            </FormItem>
           )}
         />
 
