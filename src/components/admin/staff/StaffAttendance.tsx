@@ -10,9 +10,21 @@ import { useStaffAttendance } from '@/hooks/staff/useStaffAttendance';
 import { LoadingSpinner } from '@/components/ui/LoadingSpinner';
 import { StaffProfile } from '@/hooks/trainers/types';
 
+interface AttendanceRecord {
+  id: string;
+  staff_id: string;
+  full_name: string;
+  roles?: string[];
+  sign_in_time: string;
+  sign_out_time?: string;
+  date: string;
+  method?: string;
+  notes?: string;
+}
+
 const StaffAttendance = () => {
   const [date, setDate] = useState(new Date().toISOString().split('T')[0]);
-  const [attendanceRecords, setAttendanceRecords] = useState<any[]>([]);
+  const [attendanceRecords, setAttendanceRecords] = useState<AttendanceRecord[]>([]);
   const [activeStaff, setActiveStaff] = useState<StaffProfile[]>([]);
   const [refreshTrigger, setRefreshTrigger] = useState(0);
   
@@ -34,7 +46,7 @@ const StaffAttendance = () => {
           
           // Filter staff who haven't checked in yet
           if (staff.length > 0) {
-            const checkedInStaffIds = records.map((record) => record.staff_id);
+            const checkedInStaffIds = records.map((record: AttendanceRecord) => record.staff_id);
             const notCheckedInStaff = staff.filter(
               (s) => !checkedInStaffIds.includes(s.id) && s.status === 'Active'
             );
@@ -163,7 +175,7 @@ const StaffAttendance = () => {
                   </tr>
                 </thead>
                 <tbody>
-                  {attendanceRecords.map((record) => (
+                  {attendanceRecords.map((record: AttendanceRecord) => (
                     <tr key={record.id} className="border-t hover:bg-gray-50">
                       <td className="p-3 font-medium">{record.full_name}</td>
                       <td className="p-3 capitalize">{record.roles ? record.roles.join(', ') : '—'}</td>

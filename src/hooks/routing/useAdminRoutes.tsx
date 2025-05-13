@@ -1,10 +1,10 @@
-
 import React from 'react';
 import AdminDashboard from '@/pages/admin/Dashboard';
 import Members from '@/pages/admin/Members';
 import Classes from '@/pages/admin/Classes';
 import Staff from '@/pages/admin/Staff';
 import StaffProfile from '@/pages/admin/staff/StaffProfile';
+import StaffAttendancePage from '@/pages/admin/staff/StaffAttendancePage';
 import AddStaff from '@/pages/admin/staff/AddStaff';
 import Shop from '@/pages/admin/Shop';
 import Payments from '@/pages/admin/Payments';
@@ -50,6 +50,10 @@ export const useAdminRoutes = (): AdminRoute[] => {
     {
       path: '/admin/staff/add',
       element: <AddStaff />
+    },
+    {
+      path: '/admin/staff/attendance',
+      element: <StaffAttendancePage />
     },
     {
       path: '/admin/shop',

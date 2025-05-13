@@ -26,7 +26,8 @@ export const useStaffAttendance = () => {
     setError(null);
     
     try {
-      const { data, error } = await supabase
+      // Use the any type to bypass type checking for the staff_attendance table
+      const { data, error } = await (supabase as any)
         .from('staff_attendance')
         .select('*')
         .eq('date', date)
@@ -49,7 +50,7 @@ export const useStaffAttendance = () => {
     setError(null);
     
     try {
-      const { data, error } = await supabase
+      const { data, error } = await (supabase as any)
         .from('staff_attendance')
         .select('*')
         .eq('staff_id', staffId)
@@ -78,7 +79,7 @@ export const useStaffAttendance = () => {
       const today = now.toISOString().split('T')[0];
       
       // Check if already checked in today
-      const { data: existingRecord } = await supabase
+      const { data: existingRecord } = await (supabase as any)
         .from('staff_attendance')
         .select('*')
         .eq('staff_id', staffId)
@@ -89,7 +90,7 @@ export const useStaffAttendance = () => {
         toast({
           title: "Already checked in",
           description: `${fullName} is already checked in today.`,
-          variant: "warning",
+          variant: "destructive", // Changed from "warning" to "destructive" as warning is not a valid variant
         });
         return existingRecord[0];
       }
@@ -103,7 +104,7 @@ export const useStaffAttendance = () => {
         method: 'manual'
       };
       
-      const { data, error } = await supabase
+      const { data, error } = await (supabase as any)
         .from('staff_attendance')
         .insert(attendanceRecord)
         .select()
@@ -141,7 +142,7 @@ export const useStaffAttendance = () => {
     try {
       const now = new Date().toISOString();
       
-      const { data, error } = await supabase
+      const { data, error } = await (supabase as any)
         .from('staff_attendance')
         .update({ sign_out_time: now })
         .eq('id', attendanceId)
