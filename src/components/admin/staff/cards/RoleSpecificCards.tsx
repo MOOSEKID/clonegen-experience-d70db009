@@ -1,190 +1,200 @@
 
 import React from 'react';
-import { 
-  User, Activity, Star, Calendar, Shield, MapPin, History, Users, 
-  ClipboardList, CalendarDays, ListTodo, Clock, FileText 
-} from 'lucide-react';
-import StaffFunctionCard from './StaffFunctionCard';
-
-// Define the structure for card data
-export interface StaffFunctionCardData {
-  title: string;
-  subtitle: string;
-  link: string;
-  icon: React.ReactNode;
-  implemented?: boolean;
-}
-
-// Cards for trainers
-const trainerCards: StaffFunctionCardData[] = [
-  {
-    title: "Trainer Profiles",
-    subtitle: "Manage profiles, specialties, and certifications",
-    link: "/admin/staff/trainers/profiles",
-    icon: <User size={20} />,
-    implemented: true
-  },
-  {
-    title: "Performance Tracking",
-    subtitle: "Analyze attendance and feedback metrics",
-    link: "/admin/staff/trainers/performance",
-    icon: <Activity size={20} />
-  },
-  {
-    title: "Ratings & Reviews",
-    subtitle: "View ratings, respond to feedback",
-    link: "/admin/staff/trainers/ratings",
-    icon: <Star size={20} />
-  },
-  {
-    title: "Scheduling",
-    subtitle: "Manage classes, availability, time-off",
-    link: "/admin/staff/trainers/scheduling",
-    icon: <Calendar size={20} />
-  }
-];
-
-// Cards for managers
-const managerCards: StaffFunctionCardData[] = [
-  {
-    title: "Admin Roles & Permissions",
-    subtitle: "Set access levels and manage roles",
-    link: "/admin/staff/managers/permissions",
-    icon: <Shield size={20} />
-  },
-  {
-    title: "Branch Assignments",
-    subtitle: "Assign branch responsibilities",
-    link: "/admin/staff/managers/branches",
-    icon: <MapPin size={20} />
-  },
-  {
-    title: "Activity Logs",
-    subtitle: "View login history and key actions",
-    link: "/admin/staff/managers/activity",
-    icon: <History size={20} />
-  }
-];
-
-// Cards for reception and sales
-const receptionSalesCards: StaffFunctionCardData[] = [
-  {
-    title: "Lead Management",
-    subtitle: "Track and assign gym leads",
-    link: "/admin/staff/reception-sales/leads",
-    icon: <Users size={20} />
-  },
-  {
-    title: "Onboarding History",
-    subtitle: "Review new member registrations",
-    link: "/admin/staff/reception-sales/onboarding",
-    icon: <ClipboardList size={20} />
-  },
-  {
-    title: "Shift Planner",
-    subtitle: "View shift schedule for front desk",
-    link: "/admin/staff/reception-sales/shifts",
-    icon: <CalendarDays size={20} />
-  }
-];
-
-// Cards for support staff
-const supportCards: StaffFunctionCardData[] = [
-  {
-    title: "Task Assignment",
-    subtitle: "Assign daily duties and maintenance tasks",
-    link: "/admin/staff/support/tasks",
-    icon: <ListTodo size={20} />
-  },
-  {
-    title: "Attendance Tracker",
-    subtitle: "Monitor check-in/out records",
-    link: "/admin/staff/support/attendance",
-    icon: <Clock size={20} />,
-    implemented: true
-  },
-  {
-    title: "Duty Schedule",
-    subtitle: "Weekly calendar of responsibilities",
-    link: "/admin/staff/support/schedule",
-    icon: <Calendar size={20} />
-  }
-];
-
-// Cards for wellness staff
-const wellnessCards: StaffFunctionCardData[] = [
-  {
-    title: "Massage Therapist Roster",
-    subtitle: "Manage therapist availability and logs",
-    link: "/admin/staff/wellness/massage",
-    icon: <Users size={20} />
-  },
-  {
-    title: "Sauna Schedule",
-    subtitle: "Assign attendants to sauna shifts",
-    link: "/admin/staff/wellness/sauna",
-    icon: <Clock size={20} />
-  },
-  {
-    title: "Client Logs",
-    subtitle: "View internal notes for wellness sessions",
-    link: "/admin/staff/wellness/notes",
-    icon: <FileText size={20} />
-  }
-];
+import { useNavigate } from 'react-router-dom';
+import { CalendarDays, Users, Award, FileText } from 'lucide-react';
+import PlaceholderSection from '@/components/admin/PlaceholderSection';
 
 interface RoleSpecificCardsProps {
-  role: string;
+  role: 'trainer' | 'manager' | 'reception' | 'sales' | 'support' | 'wellness';
 }
 
 const RoleSpecificCards: React.FC<RoleSpecificCardsProps> = ({ role }) => {
-  let cards: StaffFunctionCardData[] = [];
+  const navigate = useNavigate();
   
-  // Select cards based on role
-  switch (role) {
-    case 'trainer':
-      cards = trainerCards;
-      break;
-    case 'manager':
-      cards = managerCards;
-      break;
-    case 'reception':
-    case 'sales':
-      cards = receptionSalesCards;
-      break;
-    case 'support':
-      cards = supportCards;
-      break;
-    case 'wellness':
-      cards = wellnessCards;
-      break;
-    default:
-      return null;
+  // Cards for Trainers
+  if (role === 'trainer') {
+    return (
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 mb-6">
+        <PlaceholderSection
+          title="Trainer Profiles"
+          icon={<Users className="h-6 w-6 text-blue-600" />}
+          description="View and manage all trainer profiles."
+          ctaText="Manage Profiles"
+          onClick={() => navigate('/admin/staff/trainers/profiles')}
+          features={[
+            "View profiles", 
+            "Edit details", 
+            "Add certifications", 
+            "Manage schedule"
+          ]}
+          className="hover:scale-[1.02] transition-transform"
+        />
+        
+        <PlaceholderSection
+          title="Attendance Tracking"
+          icon={<CalendarDays className="h-6 w-6 text-green-600" />}
+          description="Track trainer attendance and check-ins."
+          ctaText="View Attendance"
+          onClick={() => navigate('/admin/staff/attendance')}
+          features={[
+            "Daily check-ins", 
+            "Attendance reports", 
+            "Schedule monitoring", 
+            "Late alerts"
+          ]}
+          className="hover:scale-[1.02] transition-transform"
+        />
+        
+        <PlaceholderSection
+          title="Certifications"
+          icon={<Award className="h-6 w-6 text-amber-600" />}
+          description="Manage trainer certifications and qualifications."
+          ctaText="Manage Certifications"
+          onClick={() => navigate('/admin/staff/trainers/profiles')}
+          features={[
+            "View certifications", 
+            "Upload documents", 
+            "Track expiry dates", 
+            "Verify credentials"
+          ]}
+          className="hover:scale-[1.02] transition-transform"
+        />
+        
+        <PlaceholderSection
+          title="Performance"
+          icon={<FileText className="h-6 w-6 text-purple-600" />}
+          description="Track trainer performance and client feedback."
+          ctaText="View Performance"
+          onClick={() => {}}
+          features={[
+            "Class attendance", 
+            "Client retention", 
+            "Satisfaction ratings", 
+            "Upsell metrics"
+          ]}
+          className="hover:scale-[1.02] transition-transform"
+          badge="Coming Soon"
+        />
+      </div>
+    );
   }
   
-  return (
-    <div className="mb-8">
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        {cards.map((card, index) => (
-          <StaffFunctionCard
-            key={index}
-            title={card.title}
-            subtitle={card.subtitle}
-            link={card.link}
-            icon={card.icon}
-            implemented={card.implemented}
-          />
-        ))}
+  // Cards for Managers
+  if (role === 'manager') {
+    return (
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 mb-6">
+        <PlaceholderSection
+          title="Manager Dashboard"
+          icon={<Users className="h-6 w-6 text-blue-600" />}
+          description="Access manager-specific tools and reports."
+          ctaText="View Dashboard"
+          onClick={() => {}}
+          features={[
+            "Financial overview", 
+            "Staff management", 
+            "Performance metrics", 
+            "Business KPIs"
+          ]}
+          className="hover:scale-[1.02] transition-transform"
+          badge="Coming Soon"
+        />
+        
+        <PlaceholderSection
+          title="Attendance Management"
+          icon={<CalendarDays className="h-6 w-6 text-green-600" />}
+          description="Monitor and manage staff attendance."
+          ctaText="View Attendance"
+          onClick={() => navigate('/admin/staff/attendance')}
+          features={[
+            "Staff check-ins", 
+            "Attendance reports", 
+            "Issue management", 
+            "Time tracking"
+          ]}
+          className="hover:scale-[1.02] transition-transform"
+        />
       </div>
-    </div>
-  );
+    );
+  }
+  
+  // Cards for Reception & Sales
+  if (role === 'reception' || role === 'sales') {
+    return (
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 mb-6">
+        <PlaceholderSection
+          title="Front Desk Tools"
+          icon={<Users className="h-6 w-6 text-blue-600" />}
+          description="Access tools for member check-ins and management."
+          ctaText="Access Tools"
+          onClick={() => {}}
+          features={[
+            "Member check-in", 
+            "Quick registration", 
+            "Class schedules", 
+            "Member search"
+          ]}
+          className="hover:scale-[1.02] transition-transform"
+          badge="Coming Soon"
+        />
+        
+        <PlaceholderSection
+          title="Attendance Tracking"
+          icon={<CalendarDays className="h-6 w-6 text-green-600" />}
+          description="Track your attendance and check-ins."
+          ctaText="View Attendance"
+          onClick={() => navigate('/admin/staff/attendance')}
+          features={[
+            "Daily check-ins", 
+            "Schedule tracking", 
+            "Time management", 
+            "Attendance history"
+          ]}
+          className="hover:scale-[1.02] transition-transform"
+        />
+      </div>
+    );
+  }
+  
+  // Cards for Support staff
+  if (role === 'support') {
+    return (
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 mb-6">
+        <PlaceholderSection
+          title="Support Tools"
+          icon={<Users className="h-6 w-6 text-blue-600" />}
+          description="Access tools for facility maintenance and support."
+          ctaText="Access Tools"
+          onClick={() => {}}
+          features={[
+            "Maintenance requests", 
+            "Equipment tracking", 
+            "Cleaning schedules", 
+            "Task assignments"
+          ]}
+          className="hover:scale-[1.02] transition-transform"
+          badge="Coming Soon"
+        />
+        
+        <PlaceholderSection
+          title="Attendance Tracking"
+          icon={<CalendarDays className="h-6 w-6 text-green-600" />}
+          description="Track your attendance and check-ins."
+          ctaText="View Attendance"
+          onClick={() => navigate('/admin/staff/attendance')}
+          features={[
+            "Daily check-ins", 
+            "Schedule tracking", 
+            "Time management", 
+            "Attendance history"
+          ]}
+          className="hover:scale-[1.02] transition-transform"
+        />
+      </div>
+    );
+  }
+  
+  // Default: empty div for any other role
+  return <div></div>;
 };
 
 export default RoleSpecificCards;
-export { 
-  trainerCards, 
-  managerCards, 
-  receptionSalesCards, 
-  supportCards, 
-  wellnessCards 
-};

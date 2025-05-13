@@ -1,348 +1,423 @@
 
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, Clock, Calendar, Search, Download, Filter, CheckCircle, XCircle, Loader2 } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import { Calendar, Clock, CheckCircle, XCircle, UserCheck } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue
-} from '@/components/ui/select';
-import { Separator } from '@/components/ui/separator';
-import { format } from 'date-fns';
+import { Button } from '@/components/ui/button';
 import { useToast } from '@/components/ui/use-toast';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
 import { useStaffData } from '@/hooks/staff/useStaffData';
+import { supabase } from '@/integrations/supabase/client';
+import { format } from 'date-fns';
+import { LoadingSpinner } from '@/components/ui/LoadingSpinner';
 
 interface StaffAttendanceRecord {
   id: string;
   staff_id: string;
-  staff_name: string;
-  staff_role: string;
+  date: string;
   check_in_time: string | null;
   check_out_time: string | null;
-  date: string;
   notes: string | null;
-  source: 'manual' | 'biometric';
+  full_name?: string; // Staff member name added when joined with staff data
 }
 
-const StaffAttendance = () => {
-  const navigate = useNavigate();
+const StaffAttendance: React.FC = () => {
+  const [date, setDate] = useState<string>(format(new Date(), 'yyyy-MM-dd'));
+  const [loading, setLoading] = useState(true);
+  const [records, setRecords] = useState<StaffAttendanceRecord[]>([]);
+  const [selectedStaffId, setSelectedStaffId] = useState<string | null>(null);
+  const [notes, setNotes] = useState<string>('');
+  const { staff, isLoading: staffLoading } = useStaffData();
   const { toast } = useToast();
-  const { staff, isLoading: isStaffLoading } = useStaffData();
-  const [searchTerm, setSearchTerm] = useState('');
-  const [dateFilter, setDateFilter] = useState(format(new Date(), 'yyyy-MM-dd'));
-  const [roleFilter, setRoleFilter] = useState<string>('all');
-  const [isLoading, setIsLoading] = useState(true);
-  const [attendanceRecords, setAttendanceRecords] = useState<StaffAttendanceRecord[]>([]);
-  const [isUpdating, setIsUpdating] = useState<string | null>(null);
 
-  // Fetch staff attendance data
+  // Fetch attendance records for the selected date
   useEffect(() => {
-    const fetchAttendanceData = async () => {
-      // In a real implementation, this would fetch from the database
-      setIsLoading(true);
-      
+    const fetchAttendanceRecords = async () => {
+      setLoading(true);
       try {
-        // Mock data - in production, replace with actual API call
-        setTimeout(() => {
-          const mockData: StaffAttendanceRecord[] = staff.map(staffMember => ({
-            id: `attendance-${staffMember.id}`,
-            staff_id: staffMember.id,
-            staff_name: staffMember.full_name,
-            staff_role: staffMember.role,
-            check_in_time: Math.random() > 0.3 ? format(new Date().setHours(8, Math.floor(Math.random() * 30), 0), 'HH:mm:ss') : null,
-            check_out_time: Math.random() > 0.5 ? format(new Date().setHours(17, Math.floor(Math.random() * 30), 0), 'HH:mm:ss') : null,
-            date: dateFilter,
-            notes: null,
-            source: 'manual'
-          }));
+        const { data, error } = await supabase
+          .from('staff_attendance')
+          .select('*')
+          .eq('date', date);
           
-          setAttendanceRecords(mockData);
-          setIsLoading(false);
-        }, 800);
+        if (error) throw error;
+        
+        // Join with staff data to get names
+        const recordsWithNames = await Promise.all(
+          (data || []).map(async (record) => {
+            const { data: staffData } = await supabase
+              .from('staff')
+              .select('full_name')
+              .eq('id', record.staff_id)
+              .single();
+              
+            return {
+              ...record,
+              full_name: staffData?.full_name || 'Unknown'
+            };
+          })
+        );
+        
+        setRecords(recordsWithNames);
       } catch (error) {
-        console.error('Error fetching attendance data:', error);
+        console.error('Error fetching attendance records:', error);
         toast({
           variant: "destructive",
-          title: "Failed to load attendance data",
-          description: "There was an error loading the attendance records."
+          title: "Failed to load attendance records",
+          description: "Please try refreshing the page."
         });
-        setIsLoading(false);
+      } finally {
+        setLoading(false);
       }
     };
     
-    if (!isStaffLoading && staff.length > 0) {
-      fetchAttendanceData();
+    if (date) {
+      fetchAttendanceRecords();
     }
-  }, [staff, isStaffLoading, dateFilter, toast]);
+  }, [date, toast]);
 
-  // Handle check-in and check-out actions
   const handleCheckIn = async (staffId: string) => {
-    setIsUpdating(staffId);
-    
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 800));
+      const now = new Date().toISOString();
       
-      setAttendanceRecords(prev => 
-        prev.map(record => 
-          record.staff_id === staffId 
-            ? { ...record, check_in_time: format(new Date(), 'HH:mm:ss'), source: 'manual' as const }
-            : record
-        )
+      // Check if record already exists for this staff member and date
+      const { data: existingRecord } = await supabase
+        .from('staff_attendance')
+        .select('id')
+        .eq('staff_id', staffId)
+        .eq('date', date)
+        .maybeSingle();
+      
+      if (existingRecord) {
+        // Update existing record
+        const { error } = await supabase
+          .from('staff_attendance')
+          .update({ check_in_time: now })
+          .eq('id', existingRecord.id);
+          
+        if (error) throw error;
+      } else {
+        // Create new record
+        const { error } = await supabase
+          .from('staff_attendance')
+          .insert({
+            staff_id: staffId,
+            date,
+            check_in_time: now,
+            notes: notes || null
+          });
+          
+        if (error) throw error;
+      }
+      
+      // Refresh records
+      const { data, error } = await supabase
+        .from('staff_attendance')
+        .select('*')
+        .eq('date', date);
+        
+      if (error) throw error;
+      
+      const recordsWithNames = await Promise.all(
+        (data || []).map(async (record) => {
+          const { data: staffData } = await supabase
+            .from('staff')
+            .select('full_name')
+            .eq('id', record.staff_id)
+            .single();
+            
+          return {
+            ...record,
+            full_name: staffData?.full_name || 'Unknown'
+          };
+        })
       );
+      
+      setRecords(recordsWithNames);
+      setNotes('');
+      setSelectedStaffId(null);
       
       toast({
         title: "Check-in recorded",
-        description: `Staff member checked in at ${format(new Date(), 'HH:mm:ss')}`
+        description: "Staff member has been checked in successfully."
       });
     } catch (error) {
+      console.error('Error checking in staff:', error);
       toast({
         variant: "destructive",
         title: "Check-in failed",
         description: "There was an error recording the check-in."
       });
-    } finally {
-      setIsUpdating(null);
     }
   };
-  
+
   const handleCheckOut = async (staffId: string) => {
-    setIsUpdating(staffId);
-    
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 800));
+      const now = new Date().toISOString();
       
-      setAttendanceRecords(prev => 
-        prev.map(record => 
-          record.staff_id === staffId 
-            ? { ...record, check_out_time: format(new Date(), 'HH:mm:ss'), source: 'manual' as const }
-            : record
-        )
-      );
+      // Find the record for this staff member
+      const { data: existingRecord } = await supabase
+        .from('staff_attendance')
+        .select('id')
+        .eq('staff_id', staffId)
+        .eq('date', date)
+        .maybeSingle();
       
-      toast({
-        title: "Check-out recorded",
-        description: `Staff member checked out at ${format(new Date(), 'HH:mm:ss')}`
-      });
+      if (existingRecord) {
+        // Update existing record with check out time
+        const { error } = await supabase
+          .from('staff_attendance')
+          .update({ 
+            check_out_time: now,
+            notes: notes ? notes : undefined // Only update notes if provided
+          })
+          .eq('id', existingRecord.id);
+          
+        if (error) throw error;
+        
+        // Refresh records
+        const { data, error: fetchError } = await supabase
+          .from('staff_attendance')
+          .select('*')
+          .eq('date', date);
+          
+        if (fetchError) throw fetchError;
+        
+        const recordsWithNames = await Promise.all(
+          (data || []).map(async (record) => {
+            const { data: staffData } = await supabase
+              .from('staff')
+              .select('full_name')
+              .eq('id', record.staff_id)
+              .single();
+              
+            return {
+              ...record,
+              full_name: staffData?.full_name || 'Unknown'
+            };
+          })
+        );
+        
+        setRecords(recordsWithNames);
+        setNotes('');
+        setSelectedStaffId(null);
+        
+        toast({
+          title: "Check-out recorded",
+          description: "Staff member has been checked out successfully."
+        });
+      } else {
+        toast({
+          variant: "destructive",
+          title: "Check-out failed",
+          description: "No check-in record found for this staff member today."
+        });
+      }
     } catch (error) {
+      console.error('Error checking out staff:', error);
       toast({
         variant: "destructive",
         title: "Check-out failed",
         description: "There was an error recording the check-out."
       });
-    } finally {
-      setIsUpdating(null);
     }
   };
 
-  // Filter attendance records
-  const filteredRecords = attendanceRecords.filter(record => {
-    const matchesSearch = record.staff_name.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesRole = roleFilter === 'all' || record.staff_role === roleFilter;
-    return matchesSearch && matchesRole;
-  });
+  const isCheckedIn = (staffId: string): boolean => {
+    return records.some(record => 
+      record.staff_id === staffId && 
+      record.check_in_time !== null
+    );
+  };
+
+  const isCheckedOut = (staffId: string): boolean => {
+    return records.some(record => 
+      record.staff_id === staffId && 
+      record.check_out_time !== null
+    );
+  };
+
+  const getAttendanceStatus = (staffId: string) => {
+    const record = records.find(r => r.staff_id === staffId);
+    if (!record) return "Not checked in";
+    if (record.check_in_time && !record.check_out_time) return "Checked in";
+    if (record.check_in_time && record.check_out_time) return "Checked out";
+    return "Unknown";
+  };
+
+  if (staffLoading || loading) {
+    return (
+      <div className="flex justify-center items-center h-64">
+        <LoadingSpinner size="lg" />
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-bold text-gray-800">Staff Attendance</h1>
+          <p className="text-gray-500">Track and manage staff check-ins and check-outs</p>
+        </div>
         <div className="flex items-center space-x-2">
-          <Button 
-            variant="ghost" 
-            size="sm"
-            onClick={() => navigate('/admin/staff')}
-          >
-            <ArrowLeft className="h-4 w-4 mr-1" />
-            Back to Staff
-          </Button>
-          <Separator orientation="vertical" className="h-6" />
-          <div>
-            <h1 className="text-2xl font-bold text-gray-800">Staff Attendance</h1>
-            <p className="text-gray-500">Track and manage staff check-ins and check-outs</p>
-          </div>
+          <Label htmlFor="date" className="sr-only">Select Date</Label>
+          <Input
+            id="date"
+            type="date"
+            value={date}
+            onChange={(e) => setDate(e.target.value)}
+            className="w-40"
+          />
+          <Calendar className="h-4 w-4 text-gray-500" />
         </div>
       </div>
 
-      {/* Filters */}
-      <Card>
-        <CardContent className="p-6">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div>
-              <label className="block text-sm font-medium mb-1 text-gray-700">Search Staff</label>
-              <div className="relative">
-                <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-gray-500" />
-                <Input
-                  placeholder="Search by name..."
-                  className="pl-8"
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                />
-              </div>
-            </div>
-            
-            <div>
-              <label className="block text-sm font-medium mb-1 text-gray-700">Date</label>
-              <div className="relative">
-                <Calendar className="absolute left-2.5 top-2.5 h-4 w-4 text-gray-500" />
-                <Input
-                  type="date"
-                  className="pl-8"
-                  value={dateFilter}
-                  onChange={(e) => setDateFilter(e.target.value)}
-                />
-              </div>
-            </div>
-            
-            <div>
-              <label className="block text-sm font-medium mb-1 text-gray-700">Role Filter</label>
-              <Select value={roleFilter} onValueChange={setRoleFilter}>
-                <SelectTrigger className="w-full">
-                  <SelectValue placeholder="Filter by role" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Roles</SelectItem>
-                  <SelectItem value="trainer">Trainers</SelectItem>
-                  <SelectItem value="manager">Managers</SelectItem>
-                  <SelectItem value="reception">Reception</SelectItem>
-                  <SelectItem value="sales">Sales</SelectItem>
-                  <SelectItem value="support">Support</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
-          
-          <div className="flex justify-end mt-4 space-x-2">
-            <Button variant="outline" className="flex items-center">
-              <Download className="mr-1 h-4 w-4" />
-              Export
-            </Button>
-            <Button variant="outline" onClick={() => {
-              setSearchTerm('');
-              setRoleFilter('all');
-              setDateFilter(format(new Date(), 'yyyy-MM-dd'));
-            }}>
-              <Filter className="mr-1 h-4 w-4" />
-              Reset Filters
-            </Button>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Attendance Records */}
-      <Card>
+      <Card className="mb-6">
         <CardHeader>
-          <CardTitle>Attendance Records</CardTitle>
+          <CardTitle className="flex items-center">
+            <UserCheck className="h-5 w-5 mr-2" />
+            Staff Attendance for {format(new Date(date), 'MMMM d, yyyy')}
+          </CardTitle>
         </CardHeader>
         <CardContent>
-          {isLoading ? (
-            <div className="flex justify-center items-center h-64">
-              <Loader2 className="h-8 w-8 animate-spin text-gray-400" />
-              <span className="ml-2 text-gray-500">Loading attendance data...</span>
+          {selectedStaffId ? (
+            <div className="space-y-4 mb-4 p-4 border rounded-md">
+              <h3 className="font-medium">Add notes for {staff.find(s => s.id === selectedStaffId)?.full_name}</h3>
+              <Textarea 
+                placeholder="Add notes about this attendance record..."
+                value={notes}
+                onChange={(e) => setNotes(e.target.value)}
+                rows={3}
+              />
+              <div className="flex justify-end space-x-2">
+                <Button variant="outline" onClick={() => {
+                  setSelectedStaffId(null);
+                  setNotes('');
+                }}>
+                  Cancel
+                </Button>
+                <Button 
+                  onClick={() => {
+                    if (isCheckedIn(selectedStaffId) && !isCheckedOut(selectedStaffId)) {
+                      handleCheckOut(selectedStaffId);
+                    } else {
+                      handleCheckIn(selectedStaffId);
+                    }
+                  }}
+                >
+                  {isCheckedIn(selectedStaffId) && !isCheckedOut(selectedStaffId) 
+                    ? "Check Out" 
+                    : "Check In"
+                  }
+                </Button>
+              </div>
             </div>
-          ) : filteredRecords.length === 0 ? (
-            <div className="bg-gray-50 rounded-lg p-8 text-center">
-              <p className="text-gray-500">No attendance records found for the selected filters.</p>
-            </div>
-          ) : (
-            <div className="overflow-x-auto">
-              <table className="w-full border-collapse">
-                <thead>
-                  <tr className="bg-gray-50 border-b">
-                    <th className="py-3 px-4 text-left text-sm font-semibold text-gray-700">Staff Name</th>
-                    <th className="py-3 px-4 text-left text-sm font-semibold text-gray-700">Role</th>
-                    <th className="py-3 px-4 text-left text-sm font-semibold text-gray-700">Check In</th>
-                    <th className="py-3 px-4 text-left text-sm font-semibold text-gray-700">Check Out</th>
-                    <th className="py-3 px-4 text-left text-sm font-semibold text-gray-700">Source</th>
-                    <th className="py-3 px-4 text-right text-sm font-semibold text-gray-700">Actions</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {filteredRecords.map((record) => (
-                    <tr key={record.id} className="border-b hover:bg-gray-50">
-                      <td className="py-3 px-4 text-sm">{record.staff_name}</td>
-                      <td className="py-3 px-4 text-sm capitalize">
-                        <span className={`inline-block px-2 py-1 rounded-full text-xs ${
-                          record.staff_role === 'trainer' ? 'bg-blue-100 text-blue-800' :
-                          record.staff_role === 'manager' ? 'bg-purple-100 text-purple-800' :
-                          record.staff_role === 'reception' ? 'bg-amber-100 text-amber-800' :
-                          record.staff_role === 'sales' ? 'bg-green-100 text-green-800' :
-                          'bg-gray-100 text-gray-800'
-                        }`}>
-                          {record.staff_role}
-                        </span>
-                      </td>
-                      <td className="py-3 px-4 text-sm">
-                        {record.check_in_time ? (
-                          <div className="flex items-center">
-                            <Clock className="h-3 w-3 mr-1 text-green-600" />
-                            <span>{record.check_in_time}</span>
-                          </div>
-                        ) : (
-                          <span className="text-gray-400">Not checked in</span>
+          ) : null}
+
+          <div className="overflow-x-auto">
+            <table className="w-full border-collapse">
+              <thead>
+                <tr className="bg-gray-50 text-left border-b">
+                  <th className="px-4 py-3">Staff Name</th>
+                  <th className="px-4 py-3">Status</th>
+                  <th className="px-4 py-3">Check In Time</th>
+                  <th className="px-4 py-3">Check Out Time</th>
+                  <th className="px-4 py-3">Notes</th>
+                  <th className="px-4 py-3 text-right">Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {staff.map((staffMember) => {
+                  const record = records.find(r => r.staff_id === staffMember.id);
+                  const status = getAttendanceStatus(staffMember.id);
+                  
+                  return (
+                    <tr key={staffMember.id} className="border-b hover:bg-gray-50">
+                      <td className="px-4 py-3">{staffMember.full_name}</td>
+                      <td className="px-4 py-3">
+                        {status === "Checked in" && (
+                          <span className="inline-flex items-center rounded-full bg-green-100 px-2.5 py-0.5 text-xs font-medium text-green-800">
+                            <CheckCircle className="h-3 w-3 mr-1" />
+                            Checked in
+                          </span>
+                        )}
+                        {status === "Checked out" && (
+                          <span className="inline-flex items-center rounded-full bg-blue-100 px-2.5 py-0.5 text-xs font-medium text-blue-800">
+                            <XCircle className="h-3 w-3 mr-1" />
+                            Checked out
+                          </span>
+                        )}
+                        {status === "Not checked in" && (
+                          <span className="inline-flex items-center rounded-full bg-gray-100 px-2.5 py-0.5 text-xs font-medium text-gray-800">
+                            Not checked in
+                          </span>
                         )}
                       </td>
-                      <td className="py-3 px-4 text-sm">
-                        {record.check_out_time ? (
-                          <div className="flex items-center">
-                            <Clock className="h-3 w-3 mr-1 text-red-600" />
-                            <span>{record.check_out_time}</span>
-                          </div>
-                        ) : (
-                          <span className="text-gray-400">Not checked out</span>
-                        )}
+                      <td className="px-4 py-3">
+                        {record?.check_in_time 
+                          ? format(new Date(record.check_in_time), 'h:mm a') 
+                          : "-"
+                        }
                       </td>
-                      <td className="py-3 px-4 text-sm capitalize">{record.source}</td>
-                      <td className="py-3 px-4 text-right">
-                        <div className="flex justify-end space-x-2">
-                          {!record.check_in_time ? (
-                            <Button 
-                              size="sm" 
-                              variant="outline" 
-                              className="text-green-600 border-green-200 hover:bg-green-50"
-                              onClick={() => handleCheckIn(record.staff_id)}
-                              disabled={isUpdating === record.staff_id}
-                            >
-                              {isUpdating === record.staff_id ? (
-                                <Loader2 className="h-3 w-3 animate-spin mr-1" />
-                              ) : (
-                                <CheckCircle className="h-3 w-3 mr-1" />
-                              )}
-                              Check In
-                            </Button>
-                          ) : !record.check_out_time ? (
-                            <Button 
-                              size="sm" 
-                              variant="outline" 
-                              className="text-red-600 border-red-200 hover:bg-red-50"
-                              onClick={() => handleCheckOut(record.staff_id)}
-                              disabled={isUpdating === record.staff_id}
-                            >
-                              {isUpdating === record.staff_id ? (
-                                <Loader2 className="h-3 w-3 animate-spin mr-1" />
-                              ) : (
-                                <XCircle className="h-3 w-3 mr-1" />
-                              )}
-                              Check Out
-                            </Button>
-                          ) : (
-                            <span className="text-sm text-green-600 flex items-center">
-                              <CheckCircle className="h-3 w-3 mr-1" />
-                              Completed
-                            </span>
-                          )}
-                        </div>
+                      <td className="px-4 py-3">
+                        {record?.check_out_time 
+                          ? format(new Date(record.check_out_time), 'h:mm a')
+                          : "-"
+                        }
+                      </td>
+                      <td className="px-4 py-3">
+                        {record?.notes || "-"}
+                      </td>
+                      <td className="px-4 py-3 text-right">
+                        {isCheckedIn(staffMember.id) && !isCheckedOut(staffMember.id) ? (
+                          <Button 
+                            size="sm" 
+                            onClick={() => {
+                              setSelectedStaffId(staffMember.id);
+                              setNotes(record?.notes || '');
+                            }}
+                          >
+                            <Clock className="h-4 w-4 mr-2" />
+                            Check Out
+                          </Button>
+                        ) : !isCheckedIn(staffMember.id) ? (
+                          <Button 
+                            size="sm" 
+                            variant="outline" 
+                            onClick={() => {
+                              setSelectedStaffId(staffMember.id);
+                              setNotes('');
+                            }}
+                          >
+                            <UserCheck className="h-4 w-4 mr-2" />
+                            Check In
+                          </Button>
+                        ) : (
+                          <Button 
+                            size="sm" 
+                            variant="outline" 
+                            disabled
+                          >
+                            Completed
+                          </Button>
+                        )}
                       </td>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          )}
+                  );
+                })}
+                
+                {staff.length === 0 && (
+                  <tr>
+                    <td colSpan={6} className="px-4 py-6 text-center text-gray-500">
+                      No staff members found
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </div>
         </CardContent>
       </Card>
     </div>

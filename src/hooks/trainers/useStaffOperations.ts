@@ -20,24 +20,26 @@ export const useStaffOperations = () => {
           email: trainerData.email,
           phone: trainerData.phone || null,
           bio: trainerData.bio || null,
-          profilepicture: trainerData.profile_picture || null,
+          profilepicture: trainerData.profilepicture || null,
           specialization: trainerData.specialization || [],
           status: trainerData.status || 'Active',
-          hiredate: trainerData.hire_date || new Date().toISOString().split('T')[0],
+          hiredate: trainerData.hiredate || new Date().toISOString().split('T')[0],
           experience_years: trainerData.experience_years || 0,
           experience_level: trainerData.experience_level || 'Beginner'
         })
-        .select()
-        .single();
+        .select();
         
-      if (error) throw error;
+      if (error) {
+        console.error("Supabase insert error:", error);
+        throw error;
+      }
       
       toast({
         title: "Staff member added",
         description: `${trainerData.name} has been added successfully.`
       });
       
-      return data;
+      return data?.[0];
     } catch (err) {
       console.error('Error adding staff member:', err);
       toast({
@@ -58,15 +60,15 @@ export const useStaffOperations = () => {
       const dbUpdates: Record<string, any> = {};
       
       Object.entries(trainerUpdates).forEach(([key, value]) => {
-        if (key === 'profile_picture') {
+        if (key === 'profilepicture' && value !== undefined) {
           dbUpdates['profilepicture'] = value;
-        } else if (key === 'hire_date') {
+        } else if (key === 'hiredate' && value !== undefined) {
           dbUpdates['hiredate'] = value;
-        } else if (key === 'name') {
+        } else if (key === 'name' && value !== undefined) {
           dbUpdates['name'] = value;
-        } else if (key === 'specialization') {
+        } else if (key === 'specialization' && value !== undefined) {
           dbUpdates['specialization'] = value;
-        } else {
+        } else if (value !== undefined) {
           dbUpdates[key] = value;
         }
       });
@@ -76,7 +78,10 @@ export const useStaffOperations = () => {
         .update(dbUpdates)
         .eq('id', id);
         
-      if (error) throw error;
+      if (error) {
+        console.error("Supabase update error:", error);
+        throw error;
+      }
       
       toast({
         title: "Staff updated",
@@ -122,51 +127,19 @@ export const useStaffOperations = () => {
   };
 
   // Certificate management
-  const addCertification = async (staffId: string, certification: string) => {
+  const addCertification = async (data: any) => {
     try {
-      // First, fetch the current certifications
-      const { data: trainerData, error: fetchError } = await supabase
-        .from('trainers')
-        .select('certifications')
-        .eq('id', staffId)
-        .single();
-      
-      if (fetchError) throw fetchError;
-      
-      // Update certifications array
-      let currentCerts: string[] = [];
-      
-      // Safely handle the certifications value which might be null, a string, or an array
-      if (trainerData?.certifications) {
-        if (Array.isArray(trainerData.certifications)) {
-          currentCerts = trainerData.certifications as string[];
-        } else if (typeof trainerData.certifications === 'string') {
-          try {
-            // If it's a JSON string, try parsing it
-            const parsed = JSON.parse(trainerData.certifications);
-            if (Array.isArray(parsed)) {
-              currentCerts = parsed;
-            } else {
-              // If parsing didn't result in an array, use a single item array
-              currentCerts = [String(trainerData.certifications)];
-            }
-          } catch (e) {
-            // If parsing fails, treat as a single string value
-            currentCerts = [String(trainerData.certifications)];
-          }
-        } else {
-          // Handle other cases by converting to string
-          currentCerts = [String(trainerData.certifications)];
-        }
-      }
-      
-      const updatedCerts = [...currentCerts, certification];
-      
-      // Save the updated array
       const { error } = await supabase
-        .from('trainers')
-        .update({ certifications: updatedCerts })
-        .eq('id', staffId);
+        .from('trainer_certifications')
+        .insert({
+          trainer_id: data.staff_id,
+          certification_name: data.certification_name,
+          issuing_organization: data.issuing_organization || null,
+          issue_date: data.issue_date || null,
+          expiry_date: data.expiry_date || null,
+          certification_file: data.certification_file || null,
+          verified: data.verified || false
+        });
         
       if (error) throw error;
       
@@ -187,55 +160,12 @@ export const useStaffOperations = () => {
     }
   };
 
-  const deleteCertification = async (staffId: string, certification: string) => {
+  const deleteCertification = async (id: string) => {
     try {
-      // First, fetch the current certifications
-      const { data: trainerData, error: fetchError } = await supabase
-        .from('trainers')
-        .select('certifications')
-        .eq('id', staffId)
-        .single();
-      
-      if (fetchError) throw fetchError;
-      
-      // Update certifications array by removing the certification
-      let currentCerts: string[] = [];
-      let updatedCerts: string[] = [];
-      
-      // Safely handle the certifications value
-      if (trainerData?.certifications) {
-        if (Array.isArray(trainerData.certifications)) {
-          currentCerts = trainerData.certifications as string[];
-          updatedCerts = currentCerts.filter((cert: string) => cert !== certification);
-        } else if (typeof trainerData.certifications === 'string') {
-          try {
-            // Try parsing as JSON
-            const parsed = JSON.parse(trainerData.certifications);
-            if (Array.isArray(parsed)) {
-              currentCerts = parsed;
-              updatedCerts = currentCerts.filter(cert => cert !== certification);
-            } else {
-              // If parsing didn't yield an array, handle as single string
-              const certString = String(trainerData.certifications);
-              updatedCerts = certString === certification ? [] : [certString];
-            }
-          } catch (e) {
-            // If parsing fails, treat as single string
-            const certString = String(trainerData.certifications);
-            updatedCerts = certString === certification ? [] : [certString];
-          }
-        } else {
-          // Handle as single item
-          const certString = String(trainerData.certifications);
-          updatedCerts = certString === certification ? [] : [certString];
-        }
-      }
-      
-      // Save the updated array
       const { error } = await supabase
-        .from('trainers')
-        .update({ certifications: updatedCerts })
-        .eq('id', staffId);
+        .from('trainer_certifications')
+        .delete()
+        .eq('id', id);
         
       if (error) throw error;
       
@@ -256,51 +186,16 @@ export const useStaffOperations = () => {
     }
   };
 
-  const addAvailability = async (staffId: string, availability: string) => {
+  const addAvailability = async (data: any) => {
     try {
-      // First, fetch the current availability
-      const { data: trainerData, error: fetchError } = await supabase
-        .from('trainers')
-        .select('availability')
-        .eq('id', staffId)
-        .single();
-      
-      if (fetchError) throw fetchError;
-      
-      // Update availability array
-      let currentAvail: string[] = [];
-      
-      // Safely handle the availability value which might be null, a string, or an array
-      if (trainerData?.availability) {
-        if (Array.isArray(trainerData.availability)) {
-          currentAvail = trainerData.availability as string[];
-        } else if (typeof trainerData.availability === 'string') {
-          try {
-            // If it's a JSON string, try parsing it
-            const parsed = JSON.parse(trainerData.availability as string);
-            if (Array.isArray(parsed)) {
-              currentAvail = parsed;
-            } else {
-              // If parsing didn't result in an array, use a single item array
-              currentAvail = [String(trainerData.availability)];
-            }
-          } catch (e) {
-            // If parsing fails, treat as a single string value
-            currentAvail = [String(trainerData.availability)];
-          }
-        } else {
-          // Handle other cases by converting to string
-          currentAvail = [String(trainerData.availability)];
-        }
-      }
-      
-      const updatedAvail = [...currentAvail, availability];
-      
-      // Save the updated array
       const { error } = await supabase
-        .from('trainers')
-        .update({ availability: updatedAvail })
-        .eq('id', staffId);
+        .from('trainer_availability')
+        .insert({
+          trainer_id: data.staff_id,
+          day_of_week: data.day_of_week,
+          start_time: data.start_time,
+          end_time: data.end_time
+        });
         
       if (error) throw error;
       
@@ -321,55 +216,12 @@ export const useStaffOperations = () => {
     }
   };
 
-  const deleteAvailability = async (staffId: string, availability: string) => {
+  const deleteAvailability = async (id: string) => {
     try {
-      // First, fetch the current availability
-      const { data: trainerData, error: fetchError } = await supabase
-        .from('trainers')
-        .select('availability')
-        .eq('id', staffId)
-        .single();
-      
-      if (fetchError) throw fetchError;
-      
-      // Update availability array by removing the item
-      let currentAvail: string[] = [];
-      let updatedAvail: string[] = [];
-      
-      // Safely handle the availability value
-      if (trainerData?.availability) {
-        if (Array.isArray(trainerData.availability)) {
-          currentAvail = trainerData.availability as string[];
-          updatedAvail = currentAvail.filter((avail: string) => avail !== availability);
-        } else if (typeof trainerData.availability === 'string') {
-          try {
-            // Try parsing as JSON
-            const parsed = JSON.parse(trainerData.availability as string);
-            if (Array.isArray(parsed)) {
-              currentAvail = parsed;
-              updatedAvail = currentAvail.filter(avail => avail !== availability);
-            } else {
-              // If parsing didn't yield an array, handle as single string
-              const availString = String(trainerData.availability);
-              updatedAvail = availString === availability ? [] : [availString];
-            }
-          } catch (e) {
-            // If parsing fails, treat as single string
-            const availString = String(trainerData.availability);
-            updatedAvail = availString === availability ? [] : [availString];
-          }
-        } else {
-          // Handle as single item
-          const availString = String(trainerData.availability);
-          updatedAvail = availString === availability ? [] : [availString];
-        }
-      }
-      
-      // Save the updated array
       const { error } = await supabase
-        .from('trainers')
-        .update({ availability: updatedAvail })
-        .eq('id', staffId);
+        .from('trainer_availability')
+        .delete()
+        .eq('id', id);
         
       if (error) throw error;
       

@@ -8,10 +8,10 @@ export const adaptStaffToTrainer = (staff: Partial<StaffProfile> | Omit<StaffPro
     email: staff.email,
     phone: staff.phone,
     bio: staff.bio,
-    profile_picture: staff.photo_url,
+    profilepicture: staff.photo_url,
     specialization: staff.specialties,
     status: staff.status,
-    hire_date: staff.hire_date,
+    hiredate: staff.hire_date,
     experience_years: staff.experience_years,
     experience_level: staff.experience_level
   };
