@@ -1,174 +1,150 @@
 
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { PlusCircle, Users, Briefcase, DollarSign, Smile, Dumbbell, Shield } from 'lucide-react';
-import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { useStaffData } from '@/hooks/staff/useStaffData';
+import { Users, UserCheck, UserPlus, Settings, ClipboardList } from 'lucide-react';
+import { Card } from '@/components/ui/card';
 import StaffGrid from '@/components/admin/staff/StaffGrid';
-import { LoadingSpinner } from '@/components/ui/LoadingSpinner';
-import RoleSpecificCards from '@/components/admin/staff/cards/RoleSpecificCards';
-import SyncStaffProfilesButton from '@/components/admin/staff/SyncStaffProfilesButton';
-import { useAuth } from '@/hooks/useAuth';
 import StaffRoleManagement from '@/components/admin/staff/StaffRoleManagement';
+import StaffFunctionCard from '@/components/admin/staff/cards/StaffFunctionCard';
+import AdminBreadcrumb from '@/components/admin/common/AdminBreadcrumb';
+import { useStaffData } from '@/hooks/staff/useStaffData';
 
-const StaffPage = () => {
-  const navigate = useNavigate();
-  const { staff, isLoading, error, getStaffByRole } = useStaffData();
-  const [activeTab, setActiveTab] = useState('all');
-  const { user } = useAuth();
-
-  // Determine if user is superadmin
-  const isSuperAdmin = staff.find(s => 
-    s.id === user?.id && s.access_level === 'superadmin'
-  ) !== undefined;
-
-  if (isLoading) {
-    return (
-      <div className="flex items-center justify-center h-64">
-        <LoadingSpinner size="lg" />
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="p-4 bg-red-50 text-red-600 rounded-md">
-        <h3 className="text-lg font-medium">Error loading staff data</h3>
-        <p>{error.message}</p>
-      </div>
-    );
-  }
-
-  const handleTabChange = (value: string) => {
-    setActiveTab(value);
-  };
-
+const Staff = () => {
+  const [activeTab, setActiveTab] = useState('overview');
+  const { staff, isLoading } = useStaffData();
+  
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-800">Staff Management</h1>
-          <p className="text-gray-500">Manage all gym staff members and their roles</p>
-        </div>
-        <div className="flex gap-3">
-          {isSuperAdmin && (
-            <SyncStaffProfilesButton />
-          )}
-          <Button 
-            onClick={() => navigate('/admin/staff/add')}
-            className="flex items-center gap-2"
-          >
-            <PlusCircle className="h-4 w-4" />
-            Add Staff Member
-          </Button>
-          {isSuperAdmin && (
-            <Button 
-              variant="outline"
-              onClick={() => navigate('/admin/audit-log')}
-              className="flex items-center gap-2"
-            >
-              <Shield className="h-4 w-4" />
-              Audit Logs
-            </Button>
-          )}
-        </div>
+    <div className="space-y-6 animate-fade-in">
+      <div>
+        <AdminBreadcrumb items={[{ label: 'Staff Management' }]} />
+        <h2 className="text-3xl font-bold tracking-tight">Staff Management</h2>
+        <p className="text-muted-foreground mt-2">
+          Manage staff members, roles, permissions, and attendance across your organization.
+        </p>
       </div>
 
-      <Tabs defaultValue="all" className="w-full" onValueChange={handleTabChange} value={activeTab}>
-        <TabsList className="grid grid-cols-7 mb-6">
-          <TabsTrigger value="all">All Staff ({staff.length})</TabsTrigger>
-          <TabsTrigger value="trainer">Trainers ({getStaffByRole('trainer').length})</TabsTrigger>
-          <TabsTrigger value="manager">Managers ({getStaffByRole('manager').length})</TabsTrigger>
-          <TabsTrigger value="reception">Reception & Sales ({getStaffByRole('reception').length + getStaffByRole('sales').length})</TabsTrigger>
-          <TabsTrigger value="support">Support Staff ({getStaffByRole('support').length})</TabsTrigger>
-          <TabsTrigger value="wellness">Wellness Staff (0)</TabsTrigger>
-          {isSuperAdmin && (
-            <TabsTrigger value="roles">Role Management</TabsTrigger>
-          )}
+      <Tabs defaultValue="overview" value={activeTab} onValueChange={setActiveTab} className="space-y-4">
+        <TabsList className="grid w-full grid-cols-2 sm:grid-cols-4 h-auto bg-muted/50">
+          <TabsTrigger value="overview" className="data-[state=active]:bg-background py-3">
+            <Users className="h-4 w-4 mr-2" />
+            <span>Overview</span>
+          </TabsTrigger>
+          <TabsTrigger value="roles" className="data-[state=active]:bg-background py-3">
+            <Settings className="h-4 w-4 mr-2" />
+            <span>Roles</span>
+          </TabsTrigger>
+          <TabsTrigger value="trainers" className="data-[state=active]:bg-background py-3">
+            <UserCheck className="h-4 w-4 mr-2" />
+            <span>Trainers</span>
+          </TabsTrigger>
+          <TabsTrigger value="attendance" className="data-[state=active]:bg-background py-3">
+            <ClipboardList className="h-4 w-4 mr-2" />
+            <span>Attendance</span>
+          </TabsTrigger>
         </TabsList>
         
-        <TabsContent value="all">
-          <StaffGrid staff={staff} />
-        </TabsContent>
-        
-        <TabsContent value="trainer">
-          <div className="flex items-start mb-4">
-            <Dumbbell className="h-5 w-5 text-blue-600 mr-2 mt-1" />
-            <div>
-              <h2 className="text-lg font-semibold text-gray-800">Trainers</h2>
-              <p className="text-sm text-gray-500">Fitness professionals and class instructors</p>
+        <TabsContent value="overview" className="space-y-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <StaffFunctionCard 
+              title="Staff Profiles" 
+              subtitle="Manage staff member details and information" 
+              link="#"
+              icon={<Users className="h-5 w-5" />}
+              implemented={true}
+            />
+            <StaffFunctionCard 
+              title="Trainer Profiles" 
+              subtitle="Manage trainer specialties, certifications, and availability"
+              link="/admin/staff/trainers/profiles"
+              icon={<UserCheck className="h-5 w-5" />}
+              implemented={true}
+            />
+            <StaffFunctionCard 
+              title="Staff Attendance" 
+              subtitle="Track staff attendance, schedules, and time-off"
+              link="/admin/staff/attendance"
+              icon={<ClipboardList className="h-5 w-5" />}
+              implemented={true}
+            />
+            <StaffFunctionCard 
+              title="Add New Staff" 
+              subtitle="Create profile for new staff member"
+              link="#" 
+              icon={<UserPlus className="h-5 w-5" />}
+              implemented={false}
+            />
+          </div>
+          
+          <Card>
+            <div className="p-6">
+              <h3 className="text-xl font-semibold mb-4">Current Staff</h3>
+              <StaffGrid staff={staff} />
             </div>
-          </div>
-          <RoleSpecificCards role="trainer" />
-          <StaffGrid staff={getStaffByRole('trainer')} />
+          </Card>
         </TabsContent>
         
-        <TabsContent value="manager">
-          <div className="flex items-start mb-4">
-            <Briefcase className="h-5 w-5 text-blue-600 mr-2 mt-1" />
-            <div>
-              <h2 className="text-lg font-semibold text-gray-800">Managers</h2>
-              <p className="text-sm text-gray-500">Branch leads, admin staff, and management team</p>
-            </div>
-          </div>
-          <RoleSpecificCards role="manager" />
-          <StaffGrid staff={getStaffByRole('manager')} />
+        <TabsContent value="roles">
+          <StaffRoleManagement />
         </TabsContent>
         
-        <TabsContent value="reception">
-          <div className="flex items-start mb-4">
-            <DollarSign className="h-5 w-5 text-amber-600 mr-2 mt-1" />
-            <div>
-              <h2 className="text-lg font-semibold text-gray-800">Reception & Sales</h2>
-              <p className="text-sm text-gray-500">Front desk staff and membership consultants</p>
-            </div>
-          </div>
-          <RoleSpecificCards role="reception" />
-          <StaffGrid staff={[...getStaffByRole('reception'), ...getStaffByRole('sales')]} />
-        </TabsContent>
-        
-        <TabsContent value="support">
-          <div className="flex items-start mb-4">
-            <Users className="h-5 w-5 text-purple-600 mr-2 mt-1" />
-            <div>
-              <h2 className="text-lg font-semibold text-gray-800">Support Staff</h2>
-              <p className="text-sm text-gray-500">Maintenance, security, and other support personnel</p>
-            </div>
-          </div>
-          <RoleSpecificCards role="support" />
-          <StaffGrid staff={getStaffByRole('support')} />
-        </TabsContent>
-        
-        <TabsContent value="wellness">
-          <div className="flex items-start mb-4">
-            <Smile className="h-5 w-5 text-green-600 mr-2 mt-1" />
-            <div>
-              <h2 className="text-lg font-semibold text-gray-800">Wellness Staff</h2>
-              <p className="text-sm text-gray-500">Massage therapists, wellness specialists, and spa staff</p>
-            </div>
-          </div>
-          <RoleSpecificCards role="wellness" />
-          <div className="bg-gray-50 rounded-lg p-8 text-center">
-            <p className="text-gray-500">No wellness staff members found.</p>
-          </div>
-        </TabsContent>
-        
-        {isSuperAdmin && (
-          <TabsContent value="roles">
-            <div className="flex items-start mb-4">
-              <Shield className="h-5 w-5 text-green-600 mr-2 mt-1" />
+        <TabsContent value="trainers">
+          <div className="space-y-4">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
               <div>
-                <h2 className="text-lg font-semibold text-gray-800">Role Management</h2>
-                <p className="text-sm text-gray-500">Manage staff roles and access levels</p>
+                <h3 className="text-xl font-semibold">Trainers</h3>
+                <p className="text-muted-foreground">Manage trainer profiles and certifications</p>
               </div>
+              <StaffFunctionCard 
+                title="Trainer Profiles" 
+                subtitle="Detailed trainer management"
+                link="/admin/staff/trainers/profiles"
+                icon={<UserCheck className="h-5 w-5" />}
+                implemented={true}
+              />
             </div>
-            <StaffRoleManagement />
-          </TabsContent>
-        )}
+            
+            <Card>
+              <div className="p-6">
+                {isLoading ? (
+                  <p>Loading trainer data...</p>
+                ) : (
+                  <StaffGrid 
+                    staff={staff.filter(member => member.role === 'trainer')} 
+                  />
+                )}
+              </div>
+            </Card>
+          </div>
+        </TabsContent>
+        
+        <TabsContent value="attendance">
+          <div className="space-y-4">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+              <div>
+                <h3 className="text-xl font-semibold">Staff Attendance</h3>
+                <p className="text-muted-foreground">Track staff attendance, schedules, and time-off</p>
+              </div>
+              <StaffFunctionCard 
+                title="Staff Attendance" 
+                subtitle="Detailed attendance management"
+                link="/admin/staff/attendance"
+                icon={<ClipboardList className="h-5 w-5" />}
+                implemented={true}
+              />
+            </div>
+            
+            <Card>
+              <div className="p-6">
+                <p className="text-center py-8 text-muted-foreground">
+                  Navigate to Staff Attendance section for detailed attendance tracking.
+                </p>
+              </div>
+            </Card>
+          </div>
+        </TabsContent>
       </Tabs>
     </div>
   );
 };
 
-export default StaffPage;
+export default Staff;
