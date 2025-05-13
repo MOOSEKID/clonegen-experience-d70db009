@@ -36,16 +36,16 @@ export const useStaffData = () => {
           setStaff(mappedStaff);
           console.log('Staff loaded from staff table:', mappedStaff.length);
         } else {
-          // Fallback: If no staff data, try fetching from trainers table
-          console.log('No staff found in staff table, trying trainers table');
+          // Fallback: If no staff data, try fetching from trainer_profiles table
+          console.log('No staff found in staff table, trying trainer_profiles table');
           const { data: trainersData, error: trainersError } = await supabase
-            .from('trainers')
+            .from('trainer_profiles')
             .select('*')
             .order('name');
             
           if (trainersError) {
-            console.error('Error fetching from trainers table:', trainersError);
-            throw new Error(`Failed to fetch from trainers table: ${trainersError.message}`);
+            console.error('Error fetching from trainer_profiles table:', trainersError);
+            throw new Error(`Failed to fetch from trainer_profiles table: ${trainersError.message}`);
           }
           
           if (trainersData && trainersData.length > 0) {
@@ -55,7 +55,7 @@ export const useStaffData = () => {
             });
             
             setStaff(mappedTrainers);
-            console.log('Staff loaded from trainers table:', mappedTrainers.length);
+            console.log('Staff loaded from trainer_profiles table:', mappedTrainers.length);
           } else {
             setStaff([]);
             console.log('No staff found in either table');
@@ -97,13 +97,13 @@ export const useStaffData = () => {
       })
       .subscribe();
       
-    // Also keep subscription to trainers table for backward compatibility
+    // Also keep subscription to trainer_profiles table for backward compatibility
     const trainerSubscription = supabase
-      .channel('public:trainers')
+      .channel('public:trainer_profiles')
       .on('postgres_changes', { 
           event: '*', 
           schema: 'public', 
-          table: 'trainers'
+          table: 'trainer_profiles'
       }, () => {
         fetchStaff();
       })

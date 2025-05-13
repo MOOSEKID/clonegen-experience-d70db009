@@ -15,9 +15,9 @@ export const useStaffData = () => {
       setIsLoading(true);
       
       try {
-        // For now, use the trainers table as a fallback since staff table might not exist yet
+        // For now, use the trainer_profiles table
         const { data: staffData, error: staffError } = await supabase
-          .from('trainers')
+          .from('trainer_profiles')
           .select('*')
           .order('name');
           
@@ -56,11 +56,11 @@ export const useStaffData = () => {
     fetchStaff();
     
     const subscription = supabase
-      .channel('public:trainers')
+      .channel('public:trainer_profiles')
       .on('postgres_changes', { 
           event: '*', 
           schema: 'public', 
-          table: 'trainers'
+          table: 'trainer_profiles'
       }, () => {
         fetchStaff();
       })

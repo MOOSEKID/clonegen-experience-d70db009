@@ -1,198 +1,367 @@
 
 import React, { useState, useEffect } from 'react';
-import { format, parseISO } from 'date-fns';
-import { CalendarDays, Clock, UserCheck, RefreshCw, AlertCircle } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { useToast } from '@/components/ui/use-toast';
-import { supabase } from '@/integrations/supabase/client';
-import { useStaffData } from '@/hooks/staff/useStaffData';
-import { LoadingSpinner } from '@/components/ui/LoadingSpinner';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { CheckIn, CheckOut, Clock, Calendar } from 'lucide-react';
+import { format } from 'date-fns';
+import { useStaffData } from '@/hooks/staff/useStaffData';
+import { useToast } from '@/hooks/use-toast';
+import { useAuth } from '@/hooks/useAuth';
+import { supabase } from '@/integrations/supabase/client';
 
-const StaffAttendance = () => {
+const StaffAttendance: React.FC = () => {
   const { staff, isLoading: isStaffLoading } = useStaffData();
-  const [attendanceData, setAttendanceData] = useState<any[]>([]);
+  const [attendance, setAttendance] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const [loadingAction, setLoadingAction] = useState<string | null>(null);
   const { toast } = useToast();
+  const { user } = useAuth();
+  const [startDate, setStartDate] = useState(() => {
+    const date = new Date();
+    date.setDate(date.getDate() - 7); // Last 7 days by default
+    return date;
+  });
+  const [endDate, setEndDate] = useState(new Date());
 
-  const fetchAttendanceData = async () => {
-    setIsLoading(true);
-    setError(null);
-
-    try {
-      // Try fetching from staff_attendance table first
-      const { data: staffAttendance, error: staffAttendanceError } = await supabase
-        .from('staff_attendance')
-        .select('*')
-        .order('date', { ascending: false })
-        .limit(50);
-
-      if (staffAttendanceError) {
-        console.error('Error fetching from staff_attendance table:', staffAttendanceError);
-        
-        // Fallback: Try trainer_attendance if staff_attendance fails
-        const { data: trainerAttendance, error: trainerAttendanceError } = await supabase
-          .from('trainer_attendance')
-          .select('*')
-          .order('date', { ascending: false })
-          .limit(50);
-
-        if (trainerAttendanceError) {
-          throw new Error(`Failed to fetch attendance data: ${trainerAttendanceError.message}`);
-        }
-
-        setAttendanceData(trainerAttendance || []);
-      } else {
-        setAttendanceData(staffAttendance || []);
-      }
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Unknown error fetching attendance data';
-      setError(errorMessage);
-      toast({
-        variant: "destructive",
-        title: "Failed to load attendance data",
-        description: errorMessage,
-      });
-    } finally {
-      setIsLoading(false);
-    }
-  };
+  // Find the current user's staff record
+  const currentStaffMember = staff.find(s => s.id === user?.id);
 
   useEffect(() => {
-    fetchAttendanceData();
-  }, []);
+    const fetchAttendance = async () => {
+      setIsLoading(true);
+      try {
+        // Format dates for query
+        const startDateStr = startDate.toISOString().split('T')[0];
+        const endDateStr = endDate.toISOString().split('T')[0];
+        
+        // Fetch attendance records for the selected date range
+        const { data, error } = await supabase
+          .from('staff_attendance')
+          .select('*')
+          .gte('date', startDateStr)
+          .lte('date', endDateStr)
+          .order('date', { ascending: false });
+          
+        if (error) {
+          throw error;
+        }
+        
+        // Get staff IDs to fetch names
+        const staffIds = [...new Set(data.map(record => record.staff_id))];
+        const staffMap: Record<string, string> = {};
+        
+        if (staffIds.length > 0) {
+          const { data: staffData } = await supabase
+            .from('staff')
+            .select('id, full_name')
+            .in('id', staffIds);
+            
+          if (staffData) {
+            staffData.forEach(s => {
+              staffMap[s.id] = s.full_name;
+            });
+          }
+        }
+        
+        // Add staff names to records
+        const attendanceWithNames = data.map(record => ({
+          ...record,
+          staff_name: staffMap[record.staff_id] || 'Unknown'
+        }));
+        
+        setAttendance(attendanceWithNames);
+      } catch (err) {
+        console.error('Error fetching attendance:', err);
+        toast({
+          title: 'Error',
+          description: 'Failed to load attendance records',
+          variant: 'destructive'
+        });
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    
+    fetchAttendance();
+  }, [startDate, endDate, toast]);
 
-  const getStaffName = (staffId: string) => {
-    const staffMember = staff.find(s => s.id === staffId);
-    return staffMember ? staffMember.full_name : 'Unknown Staff';
-  };
-
-  const formatTime = (timeStr: string) => {
-    if (!timeStr) return 'Not recorded';
+  const handleCheckIn = async () => {
+    if (!currentStaffMember?.id) {
+      toast({
+        title: 'Error',
+        description: 'Could not identify your staff profile',
+        variant: 'destructive'
+      });
+      return;
+    }
+    
+    setLoadingAction('checkin');
     try {
-      return format(parseISO(timeStr), 'h:mm a');
-    } catch (e) {
-      return 'Invalid time';
+      const today = new Date().toISOString().split('T')[0];
+      
+      // Check if already checked in today
+      const { data: existingRecord } = await supabase
+        .from('staff_attendance')
+        .select('*')
+        .eq('staff_id', currentStaffMember.id)
+        .eq('date', today)
+        .maybeSingle();
+        
+      if (existingRecord?.check_in_time) {
+        toast({
+          title: 'Already checked in',
+          description: `You already checked in at ${new Date(existingRecord.check_in_time).toLocaleTimeString()}`,
+        });
+        return;
+      }
+      
+      const checkInTime = new Date().toISOString();
+      
+      if (existingRecord) {
+        // Update existing record
+        await supabase
+          .from('staff_attendance')
+          .update({ 
+            check_in_time: checkInTime
+          })
+          .eq('id', existingRecord.id);
+      } else {
+        // Create new record
+        await supabase
+          .from('staff_attendance')
+          .insert({
+            staff_id: currentStaffMember.id,
+            date: today,
+            check_in_time: checkInTime
+          });
+      }
+      
+      toast({
+        title: 'Checked in successfully',
+        description: `Check-in time: ${new Date(checkInTime).toLocaleTimeString()}`
+      });
+      
+      // Refresh attendance data
+      const { data } = await supabase
+        .from('staff_attendance')
+        .select('*')
+        .order('date', { ascending: false });
+        
+      setAttendance(data || []);
+      
+    } catch (err) {
+      console.error('Check-in error:', err);
+      toast({
+        title: 'Error',
+        description: 'Failed to record check-in',
+        variant: 'destructive'
+      });
+    } finally {
+      setLoadingAction(null);
     }
   };
 
-  const handleRefresh = () => {
-    fetchAttendanceData();
+  const handleCheckOut = async () => {
+    if (!currentStaffMember?.id) {
+      toast({
+        title: 'Error',
+        description: 'Could not identify your staff profile',
+        variant: 'destructive'
+      });
+      return;
+    }
+    
+    setLoadingAction('checkout');
+    try {
+      const today = new Date().toISOString().split('T')[0];
+      
+      // Find today's record
+      const { data: todayRecord } = await supabase
+        .from('staff_attendance')
+        .select('*')
+        .eq('staff_id', currentStaffMember.id)
+        .eq('date', today)
+        .maybeSingle();
+        
+      if (!todayRecord) {
+        toast({
+          title: 'Not checked in',
+          description: 'You need to check in first before checking out',
+          variant: 'destructive'
+        });
+        return;
+      }
+      
+      if (todayRecord.check_out_time) {
+        toast({
+          title: 'Already checked out',
+          description: `You already checked out at ${new Date(todayRecord.check_out_time).toLocaleTimeString()}`,
+        });
+        return;
+      }
+      
+      const checkOutTime = new Date().toISOString();
+      
+      await supabase
+        .from('staff_attendance')
+        .update({ 
+          check_out_time: checkOutTime
+        })
+        .eq('id', todayRecord.id);
+      
+      toast({
+        title: 'Checked out successfully',
+        description: `Check-out time: ${new Date(checkOutTime).toLocaleTimeString()}`
+      });
+      
+      // Refresh attendance data
+      const { data } = await supabase
+        .from('staff_attendance')
+        .select('*')
+        .order('date', { ascending: false });
+        
+      setAttendance(data || []);
+      
+    } catch (err) {
+      console.error('Check-out error:', err);
+      toast({
+        title: 'Error',
+        description: 'Failed to record check-out',
+        variant: 'destructive'
+      });
+    } finally {
+      setLoadingAction(null);
+    }
+  };
+
+  const formatDateTime = (dateTimeStr: string | null) => {
+    if (!dateTimeStr) return 'N/A';
+    return new Date(dateTimeStr).toLocaleTimeString();
+  };
+
+  const formatDate = (dateStr: string) => {
+    return format(new Date(dateStr), 'PPP');
+  };
+
+  const calculateDuration = (checkIn: string | null, checkOut: string | null) => {
+    if (!checkIn || !checkOut) return 'N/A';
+    
+    const start = new Date(checkIn).getTime();
+    const end = new Date(checkOut).getTime();
+    const durationMs = end - start;
+    
+    // Convert to hours and minutes
+    const hours = Math.floor(durationMs / (1000 * 60 * 60));
+    const minutes = Math.floor((durationMs % (1000 * 60 * 60)) / (1000 * 60));
+    
+    return `${hours}h ${minutes}m`;
   };
 
   if (isStaffLoading) {
     return (
-      <div className="space-y-6">
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex justify-between items-center">
-              <div>Staff Attendance</div>
-              <Button variant="outline" size="sm" disabled>
-                <RefreshCw className="h-4 w-4 mr-2" />
-                Refresh
-              </Button>
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              {Array.from({ length: 5 }).map((_, i) => (
-                <div key={i} className="flex items-center justify-between">
-                  <div className="flex items-center">
-                    <Skeleton className="h-10 w-10 rounded-full" />
-                    <div className="ml-4 space-y-1">
-                      <Skeleton className="h-4 w-[200px]" />
-                      <Skeleton className="h-3 w-[150px]" />
-                    </div>
-                  </div>
-                  <div className="space-y-1">
-                    <Skeleton className="h-4 w-[120px]" />
-                    <Skeleton className="h-3 w-[80px]" />
-                  </div>
-                </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
+      <div className="space-y-4">
+        <Skeleton className="h-8 w-[250px]" />
+        <Skeleton className="h-[100px] w-full" />
+        <Skeleton className="h-[300px] w-full" />
       </div>
     );
   }
 
   return (
     <div className="space-y-6">
+      <h1 className="text-2xl font-bold">Staff Attendance</h1>
+      
+      {currentStaffMember && (
+        <Card>
+          <CardHeader>
+            <CardTitle>Check-in / Check-out</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="flex flex-wrap gap-4">
+              <Button 
+                onClick={handleCheckIn}
+                disabled={loadingAction === 'checkin'}
+                className="bg-green-600 hover:bg-green-700"
+              >
+                <CheckIn className="mr-2 h-4 w-4" />
+                {loadingAction === 'checkin' ? 'Processing...' : 'Check In'}
+              </Button>
+              
+              <Button 
+                onClick={handleCheckOut}
+                disabled={loadingAction === 'checkout'}
+                className="bg-orange-600 hover:bg-orange-700"
+              >
+                <CheckOut className="mr-2 h-4 w-4" />
+                {loadingAction === 'checkout' ? 'Processing...' : 'Check Out'}
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+      
       <Card>
-        <CardHeader>
-          <CardTitle className="flex justify-between items-center">
-            <div>Staff Attendance</div>
-            <Button variant="outline" size="sm" onClick={handleRefresh} disabled={isLoading}>
-              {isLoading ? (
-                <LoadingSpinner size="sm" className="mr-2" />
-              ) : (
-                <RefreshCw className="h-4 w-4 mr-2" />
-              )}
-              Refresh
-            </Button>
+        <CardHeader className="pb-2">
+          <CardTitle className="flex items-center justify-between">
+            <span>Attendance Records</span>
+            <div className="flex gap-4 items-center">
+              <div className="flex items-center gap-2">
+                <Calendar className="h-4 w-4" />
+                <input
+                  type="date"
+                  value={startDate.toISOString().split('T')[0]}
+                  onChange={(e) => setStartDate(new Date(e.target.value))}
+                  className="border rounded px-2 py-1 text-sm"
+                />
+                <span>to</span>
+                <input
+                  type="date"
+                  value={endDate.toISOString().split('T')[0]}
+                  onChange={(e) => setEndDate(new Date(e.target.value))}
+                  className="border rounded px-2 py-1 text-sm"
+                />
+              </div>
+            </div>
           </CardTitle>
         </CardHeader>
         <CardContent>
-          {error && (
-            <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-md mb-4 flex items-start">
-              <AlertCircle className="h-5 w-5 mr-2 mt-0.5" />
-              <div>
-                <p className="font-medium">Error loading attendance data</p>
-                <p className="text-sm">{error}</p>
-              </div>
-            </div>
-          )}
-
           {isLoading ? (
-            <div className="flex justify-center py-8">
-              <LoadingSpinner size="lg" text="Loading attendance data..." />
+            <div className="space-y-2">
+              <Skeleton className="h-8 w-full" />
+              <Skeleton className="h-8 w-full" />
+              <Skeleton className="h-8 w-full" />
             </div>
-          ) : attendanceData.length === 0 ? (
+          ) : attendance.length === 0 ? (
             <div className="text-center py-8 text-gray-500">
-              <CalendarDays className="h-12 w-12 mx-auto mb-2 text-gray-400" />
-              <h3 className="text-lg font-medium mb-1">No attendance records found</h3>
-              <p>Staff attendance records will appear here once recorded.</p>
+              No attendance records found for the selected period.
             </div>
           ) : (
-            <div className="divide-y">
-              {attendanceData.map((record) => {
-                // Handle staff_id from staff_attendance or trainer_id from trainer_attendance
-                const staffId = record.staff_id || record.trainer_id;
-                const isCheckedOut = Boolean(record.check_out_time);
-                
-                return (
-                  <div key={record.id} className="py-4 first:pt-0 last:pb-0">
-                    <div className="flex justify-between items-start">
-                      <div className="flex items-start">
-                        <UserCheck className={`h-5 w-5 mt-1 ${isCheckedOut ? 'text-green-600' : 'text-amber-500'}`} />
-                        <div className="ml-3">
-                          <p className="font-medium">{getStaffName(staffId)}</p>
-                          <p className="text-sm text-gray-600">
-                            {format(parseISO(record.date), 'MMMM d, yyyy')}
-                          </p>
-                          {record.notes && (
-                            <p className="text-xs text-gray-500 mt-1 italic">{record.notes}</p>
-                          )}
-                        </div>
-                      </div>
-                      <div className="text-right">
-                        <div className="flex items-center text-sm">
-                          <Clock className="h-3.5 w-3.5 mr-1 text-green-600" />
-                          <span>In: {formatTime(record.check_in_time)}</span>
-                        </div>
-                        <div className="flex items-center text-sm mt-1">
-                          <Clock className="h-3.5 w-3.5 mr-1 text-red-600" />
-                          <span>Out: {isCheckedOut ? formatTime(record.check_out_time) : 'Not checked out'}</span>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Date</TableHead>
+                  <TableHead>Staff Member</TableHead>
+                  <TableHead>Check In</TableHead>
+                  <TableHead>Check Out</TableHead>
+                  <TableHead>Duration</TableHead>
+                  <TableHead>Notes</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {attendance.map((record) => (
+                  <TableRow key={record.id}>
+                    <TableCell>{formatDate(record.date)}</TableCell>
+                    <TableCell>{record.staff_name}</TableCell>
+                    <TableCell>{formatDateTime(record.check_in_time)}</TableCell>
+                    <TableCell>{formatDateTime(record.check_out_time)}</TableCell>
+                    <TableCell>{calculateDuration(record.check_in_time, record.check_out_time)}</TableCell>
+                    <TableCell>{record.notes || '-'}</TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
           )}
         </CardContent>
       </Card>

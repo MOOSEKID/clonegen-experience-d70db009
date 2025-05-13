@@ -16,7 +16,7 @@ export const useTrainerData = () => {
       
       try {
         const { data: trainersData, error: trainersError } = await supabase
-          .from('trainers')
+          .from('trainer_profiles')
           .select('*')
           .order('name');
           
