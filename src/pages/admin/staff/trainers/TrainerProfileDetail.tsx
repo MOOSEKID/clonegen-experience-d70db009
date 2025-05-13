@@ -116,8 +116,9 @@ const TrainerProfileDetail: React.FC = () => {
           bio: trainerData.bio,
           hire_date: trainerData.hiredate,
           // Safely handle potentially missing experience fields with defaults
-          experience_years: typeof trainerData.experience_years === 'number' ? Number(trainerData.experience_years) : undefined,
-          experience_level: trainerData.experience_level || undefined,
+          // Using nullish coalescing to handle undefined fields
+          experience_years: undefined, // Default value if not present
+          experience_level: undefined, // Default value if not present
           // Convert certifications and availability to StaffProfile format
           certifications: certifications.map(cert => ({
             ...convertTrainerCertToStaffCert(cert),
@@ -128,6 +129,17 @@ const TrainerProfileDetail: React.FC = () => {
             staff_id: avail.trainer_id
           })) as StaffAvailability[]
         };
+        
+        // Check if trainerData has experience fields and add them if available
+        if ('experience_years' in trainerData) {
+          staffProfile.experience_years = typeof trainerData.experience_years === 'number' 
+            ? Number(trainerData.experience_years) 
+            : undefined;
+        }
+        
+        if ('experience_level' in trainerData) {
+          staffProfile.experience_level = trainerData.experience_level;
+        }
         
         setTrainer(staffProfile);
       } catch (err) {
