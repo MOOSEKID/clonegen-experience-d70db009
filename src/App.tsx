@@ -17,9 +17,9 @@ const DashboardLayout = lazy(() => import("./pages/dashboard/DashboardLayout"));
 
 import { QueryProvider } from "./routes/QueryProvider";
 
-// Import routes hooks directly
+// Import routes hooks directly (fix: use named import)
 import useMainRoutes from "./hooks/routing/useMainRoutes";
-import useAdminRoutes from "./hooks/routing/useAdminRoutes";
+import { useAdminRoutes } from "./hooks/routing/useAdminRoutes"; 
 import useDashboardRoutes from "./hooks/routing/useDashboardRoutes";
 
 const App = () => {

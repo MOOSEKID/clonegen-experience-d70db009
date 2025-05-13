@@ -1,56 +1,11 @@
-import { Navigate } from "react-router-dom";
-import AdminLayout from "@/components/admin/layout/AdminLayout";
+import { Route } from "react-router-dom";
+import AdminLayout from "@/pages/admin/AdminLayout";
 import Dashboard from "@/pages/admin/Dashboard";
 import Members from "@/pages/admin/Members";
-import MemberDetail from "@/pages/admin/MemberDetail";
 import Classes from "@/pages/admin/Classes";
-import ClassDetail from "@/pages/admin/ClassDetail";
 import Trainers from "@/pages/admin/Trainers";
-import TrainerDetail from "@/pages/admin/TrainerDetail";
-import Billing from "@/pages/admin/Billing";
 import Reports from "@/pages/admin/Reports";
 import AdminSettings from "@/pages/admin/Settings";
-import Memberships from "@/pages/admin/Memberships";
-import MembershipDetail from "@/pages/admin/MembershipDetail";
-import Attendance from "@/pages/admin/Attendance";
-import Equipment from "@/pages/admin/Equipment";
-import EquipmentDetail from "@/pages/admin/EquipmentDetail";
-import Maintenance from "@/pages/admin/Maintenance";
-import MaintenanceDetail from "@/pages/admin/MaintenanceDetail";
-import Announcements from "@/pages/admin/Announcements";
-import AnnouncementDetail from "@/pages/admin/AnnouncementDetail";
-import Employees from "@/pages/admin/Employees";
-import EmployeeDetail from "@/pages/admin/EmployeeDetail";
-import Payroll from "@/pages/admin/Payroll";
-import PayrollDetail from "@/pages/admin/PayrollDetail";
-import Inventory from "@/pages/admin/Inventory";
-import InventoryDetail from "@/pages/admin/InventoryDetail";
-import POS from "@/pages/admin/POS";
-import POSDetail from "@/pages/admin/POSDetail";
-import Marketing from "@/pages/admin/Marketing";
-import MarketingDetail from "@/pages/admin/MarketingDetail";
-import Analytics from "@/pages/admin/Analytics";
-import AnalyticsDetail from "@/pages/admin/AnalyticsDetail";
-import Help from "@/pages/admin/Help";
-import HelpDetail from "@/pages/admin/HelpDetail";
-import Profile from "@/pages/admin/Profile";
-import ProfileDetail from "@/pages/admin/ProfileDetail";
-import Notifications from "@/pages/admin/Notifications";
-import NotificationsDetail from "@/pages/admin/NotificationsDetail";
-import Messages from "@/pages/admin/Messages";
-import MessagesDetail from "@/pages/admin/MessagesDetail";
-import Calendar from "@/pages/admin/Calendar";
-import CalendarDetail from "@/pages/admin/CalendarDetail";
-import Tasks from "@/pages/admin/Tasks";
-import TasksDetail from "@/pages/admin/TasksDetail";
-import Notes from "@/pages/admin/Notes";
-import NotesDetail from "@/pages/admin/NotesDetail";
-import Files from "@/pages/admin/Files";
-import FilesDetail from "@/pages/admin/FilesDetail";
-import Search from "@/pages/admin/Search";
-import SearchDetail from "@/pages/admin/SearchDetail";
-import Settings from "@/pages/admin/Settings";
-import SettingsDetail from "@/pages/admin/SettingsDetail";
 import BusinessHoursPage from "@/pages/admin/settings/BusinessHours";
 import HolidaysSettings from "@/components/admin/settings/business/HolidaysSettings";
 import GeneralSettings from "@/pages/admin/settings/General";
@@ -67,6 +22,62 @@ import CustomMessagesSettings from "@/pages/admin/settings/CustomMessages";
 import ReportsExportsSettings from "@/pages/admin/settings/ReportsExports";
 import AutomationRulesPage from "@/pages/admin/settings/AutomationRules";
 
+// Create a placeholder component for missing pages
+const PlaceholderPage = ({ name }: { name: string }) => (
+  <div className="p-8">
+    <h1 className="text-2xl font-bold">{name} Page</h1>
+    <p className="text-gray-500 mt-2">This page is under development.</p>
+  </div>
+);
+
+// Create placeholders for all the missing pages
+const MemberDetail = () => <PlaceholderPage name="Member Detail" />;
+const ClassDetail = () => <PlaceholderPage name="Class Detail" />;
+const TrainerDetail = () => <PlaceholderPage name="Trainer Detail" />;
+const Billing = () => <PlaceholderPage name="Billing" />;
+const Memberships = () => <PlaceholderPage name="Memberships" />;
+const MembershipDetail = () => <PlaceholderPage name="Membership Detail" />;
+const Attendance = () => <PlaceholderPage name="Attendance" />;
+const Equipment = () => <PlaceholderPage name="Equipment" />;
+const EquipmentDetail = () => <PlaceholderPage name="Equipment Detail" />;
+const Maintenance = () => <PlaceholderPage name="Maintenance" />;
+const MaintenanceDetail = () => <PlaceholderPage name="Maintenance Detail" />;
+const Announcements = () => <PlaceholderPage name="Announcements" />;
+const AnnouncementDetail = () => <PlaceholderPage name="Announcement Detail" />;
+const Employees = () => <PlaceholderPage name="Employees" />;
+const EmployeeDetail = () => <PlaceholderPage name="Employee Detail" />;
+const Payroll = () => <PlaceholderPage name="Payroll" />;
+const PayrollDetail = () => <PlaceholderPage name="Payroll Detail" />;
+const Inventory = () => <PlaceholderPage name="Inventory" />;
+const InventoryDetail = () => <PlaceholderPage name="Inventory Detail" />;
+const POS = () => <PlaceholderPage name="POS" />;
+const POSDetail = () => <PlaceholderPage name="POS Detail" />;
+const Marketing = () => <PlaceholderPage name="Marketing" />;
+const MarketingDetail = () => <PlaceholderPage name="Marketing Detail" />;
+const Analytics = () => <PlaceholderPage name="Analytics" />;
+const AnalyticsDetail = () => <PlaceholderPage name="Analytics Detail" />;
+const Help = () => <PlaceholderPage name="Help" />;
+const HelpDetail = () => <PlaceholderPage name="Help Detail" />;
+const Profile = () => <PlaceholderPage name="Profile" />;
+const ProfileDetail = () => <PlaceholderPage name="Profile Detail" />;
+const Notifications = () => <PlaceholderPage name="Notifications" />;
+const NotificationsDetail = () => <PlaceholderPage name="Notifications Detail" />;
+const Messages = () => <PlaceholderPage name="Messages" />;
+const MessagesDetail = () => <PlaceholderPage name="Messages Detail" />;
+const Calendar = () => <PlaceholderPage name="Calendar" />;
+const CalendarDetail = () => <PlaceholderPage name="Calendar Detail" />;
+const Tasks = () => <PlaceholderPage name="Tasks" />;
+const TasksDetail = () => <PlaceholderPage name="Tasks Detail" />;
+const Notes = () => <PlaceholderPage name="Notes" />;
+const NotesDetail = () => <PlaceholderPage name="Notes Detail" />;
+const Files = () => <PlaceholderPage name="Files" />;
+const FilesDetail = () => <PlaceholderPage name="Files Detail" />;
+const Search = () => <PlaceholderPage name="Search" />;
+const SearchDetail = () => <PlaceholderPage name="Search Detail" />;
+const Settings = () => <PlaceholderPage name="Settings" />;
+const SettingsDetail = () => <PlaceholderPage name="Settings Detail" />;
+
+// Changed from default export to named export
 export const useAdminRoutes = () => {
   const routes = [
     {
