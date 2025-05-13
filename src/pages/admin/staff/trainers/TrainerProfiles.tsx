@@ -9,9 +9,20 @@ import TrainerProfileTabs from '@/components/admin/trainers/profiles/TrainerProf
 import TrainerProfilesGrid from '@/components/admin/trainers/profiles/TrainerProfilesGrid';
 import TrainerDialogs from '@/components/admin/trainers/profiles/TrainerDialogs';
 import { useTrainerProfilesState } from '@/components/admin/trainers/profiles/useTrainerProfilesState';
+import SyncStaffProfilesButton from '@/components/admin/staff/SyncStaffProfilesButton';
+import { useAuth } from '@/hooks/useAuth';
+import { useStaffData } from '@/hooks/staff/useStaffData';
 
 const TrainerProfiles = () => {
   const navigate = useNavigate();
+  const { user } = useAuth();
+  const { staff } = useStaffData();
+  
+  // Determine if user is superadmin
+  const isSuperAdmin = staff.find(s => 
+    s.id === user?.id && s.access_level === 'superadmin'
+  ) !== undefined;
+
   const {
     isLoading,
     filteredTrainers,
@@ -58,6 +69,8 @@ const TrainerProfiles = () => {
             <p className="text-gray-500">Manage trainer profiles, specialties, and certifications</p>
           </div>
         </div>
+        
+        {isSuperAdmin && <SyncStaffProfilesButton />}
       </div>
 
       <TrainerProfileHeader onAddTrainer={handleAddTrainer} />

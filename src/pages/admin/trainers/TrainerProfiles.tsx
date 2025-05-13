@@ -6,8 +6,19 @@ import TrainerProfileTabs from '@/components/admin/trainers/profiles/TrainerProf
 import TrainerProfilesGrid from '@/components/admin/trainers/profiles/TrainerProfilesGrid';
 import TrainerDialogs from '@/components/admin/trainers/profiles/TrainerDialogs';
 import { useTrainerProfilesState } from '@/components/admin/trainers/profiles/useTrainerProfilesState';
+import SyncStaffProfilesButton from '@/components/admin/staff/SyncStaffProfilesButton';
+import { useAuth } from '@/hooks/useAuth';
+import { useStaffData } from '@/hooks/staff/useStaffData';
 
 const TrainerProfiles = () => {
+  const { user } = useAuth();
+  const { staff } = useStaffData();
+  
+  // Determine if user is superadmin
+  const isSuperAdmin = staff.find(s => 
+    s.id === user?.id && s.access_level === 'superadmin'
+  ) !== undefined;
+
   const {
     isLoading,
     filteredTrainers,
@@ -38,7 +49,10 @@ const TrainerProfiles = () => {
 
   return (
     <div className="container mx-auto p-6">
-      <TrainerProfileHeader onAddTrainer={handleAddTrainer} />
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6">
+        <TrainerProfileHeader onAddTrainer={handleAddTrainer} />
+        {isSuperAdmin && <SyncStaffProfilesButton />}
+      </div>
       
       <TrainerProfileTabs activeTab={activeTab} onTabChange={setActiveTab} />
       
