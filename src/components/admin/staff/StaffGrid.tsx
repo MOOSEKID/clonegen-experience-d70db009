@@ -16,7 +16,7 @@ const StaffGrid: React.FC<StaffGridProps> = ({ staff }) => {
   const navigate = useNavigate();
   
   const getRoleIcon = (role: string) => {
-    switch (role) {
+    switch (role.toLowerCase()) {
       case 'trainer':
         return <Dumbbell className="h-4 w-4 text-blue-600" />;
       case 'manager':
@@ -41,6 +41,7 @@ const StaffGrid: React.FC<StaffGridProps> = ({ staff }) => {
   };
 
   const formatRole = (role: string) => {
+    if (!role) return 'Staff';
     return role.charAt(0).toUpperCase() + role.slice(1);
   };
 
@@ -48,9 +49,7 @@ const StaffGrid: React.FC<StaffGridProps> = ({ staff }) => {
     if (staffMember.role === 'trainer') {
       navigate(`/admin/staff/trainers/${staffMember.id}`);
     } else {
-      // For other roles, we might create separate profile pages later
-      // For now, just log a message
-      console.log(`Viewing profile for ${staffMember.role} ${staffMember.full_name}`);
+      navigate(`/admin/staff/${staffMember.id}`);
     }
   };
 
@@ -71,17 +70,17 @@ const StaffGrid: React.FC<StaffGridProps> = ({ staff }) => {
             <div className="flex flex-col items-center mb-4">
               <Avatar className="h-20 w-20 mb-3 border">
                 {staffMember.photo_url ? (
-                  <img src={staffMember.photo_url} alt={staffMember.full_name} />
+                  <img src={staffMember.photo_url} alt={staffMember.full_name || 'Staff'} />
                 ) : (
                   <div className="flex h-full w-full items-center justify-center bg-gray-100 text-gray-500 text-xl">
-                    {staffMember.full_name?.charAt(0)}
+                    {(staffMember.full_name || 'S').charAt(0)}
                   </div>
                 )}
               </Avatar>
-              <h3 className="font-medium text-lg">{staffMember.full_name}</h3>
+              <h3 className="font-medium text-lg">{staffMember.full_name || 'Staff Member'}</h3>
               <div className="flex items-center mt-1 space-x-2">
-                {getRoleIcon(staffMember.role)}
-                <span className="text-sm text-gray-600">{formatRole(staffMember.role)}</span>
+                {getRoleIcon(staffMember.role || 'staff')}
+                <span className="text-sm text-gray-600">{formatRole(staffMember.role || 'Staff')}</span>
               </div>
               <Badge className={`mt-2 ${getStatusColor(staffMember.status)}`}>
                 {staffMember.status || 'Unknown'}
@@ -101,7 +100,8 @@ const StaffGrid: React.FC<StaffGridProps> = ({ staff }) => {
                   <span>{staffMember.phone}</span>
                 </div>
               )}
-              {staffMember.specialties && staffMember.specialties.length > 0 && (
+              
+              {staffMember.role === 'trainer' && staffMember.specialties && staffMember.specialties.length > 0 && (
                 <div className="mt-3">
                   <div className="text-xs text-gray-500 mb-1">Specialties</div>
                   <div className="flex flex-wrap gap-1">

@@ -1,423 +1,199 @@
 
 import React, { useState, useEffect } from 'react';
-import { Calendar, Clock, CheckCircle, XCircle, UserCheck } from 'lucide-react';
+import { format, parseISO } from 'date-fns';
+import { CalendarDays, Clock, UserCheck, RefreshCw, AlertCircle } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/components/ui/use-toast';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
-import { useStaffData } from '@/hooks/staff/useStaffData';
 import { supabase } from '@/integrations/supabase/client';
-import { format } from 'date-fns';
+import { useStaffData } from '@/hooks/staff/useStaffData';
 import { LoadingSpinner } from '@/components/ui/LoadingSpinner';
+import { Skeleton } from '@/components/ui/skeleton';
 
-interface StaffAttendanceRecord {
-  id: string;
-  staff_id: string;
-  date: string;
-  check_in_time: string | null;
-  check_out_time: string | null;
-  notes: string | null;
-  full_name?: string; // Staff member name added when joined with staff data
-}
-
-const StaffAttendance: React.FC = () => {
-  const [date, setDate] = useState<string>(format(new Date(), 'yyyy-MM-dd'));
-  const [loading, setLoading] = useState(true);
-  const [records, setRecords] = useState<StaffAttendanceRecord[]>([]);
-  const [selectedStaffId, setSelectedStaffId] = useState<string | null>(null);
-  const [notes, setNotes] = useState<string>('');
-  const { staff, isLoading: staffLoading } = useStaffData();
+const StaffAttendance = () => {
+  const { staff, isLoading: isStaffLoading } = useStaffData();
+  const [attendanceData, setAttendanceData] = useState<any[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const { toast } = useToast();
 
-  // Fetch attendance records for the selected date
-  useEffect(() => {
-    const fetchAttendanceRecords = async () => {
-      setLoading(true);
-      try {
-        const { data, error } = await supabase
-          .from('staff_attendance')
-          .select('*')
-          .eq('date', date);
-          
-        if (error) throw error;
-        
-        // Join with staff data to get names
-        const recordsWithNames = await Promise.all(
-          (data || []).map(async (record) => {
-            const { data: staffData } = await supabase
-              .from('staff')
-              .select('full_name')
-              .eq('id', record.staff_id)
-              .single();
-              
-            return {
-              ...record,
-              full_name: staffData?.full_name || 'Unknown'
-            };
-          })
-        );
-        
-        setRecords(recordsWithNames);
-      } catch (error) {
-        console.error('Error fetching attendance records:', error);
-        toast({
-          variant: "destructive",
-          title: "Failed to load attendance records",
-          description: "Please try refreshing the page."
-        });
-      } finally {
-        setLoading(false);
-      }
-    };
-    
-    if (date) {
-      fetchAttendanceRecords();
-    }
-  }, [date, toast]);
+  const fetchAttendanceData = async () => {
+    setIsLoading(true);
+    setError(null);
 
-  const handleCheckIn = async (staffId: string) => {
     try {
-      const now = new Date().toISOString();
-      
-      // Check if record already exists for this staff member and date
-      const { data: existingRecord } = await supabase
-        .from('staff_attendance')
-        .select('id')
-        .eq('staff_id', staffId)
-        .eq('date', date)
-        .maybeSingle();
-      
-      if (existingRecord) {
-        // Update existing record
-        const { error } = await supabase
-          .from('staff_attendance')
-          .update({ check_in_time: now })
-          .eq('id', existingRecord.id);
-          
-        if (error) throw error;
-      } else {
-        // Create new record
-        const { error } = await supabase
-          .from('staff_attendance')
-          .insert({
-            staff_id: staffId,
-            date,
-            check_in_time: now,
-            notes: notes || null
-          });
-          
-        if (error) throw error;
-      }
-      
-      // Refresh records
-      const { data, error } = await supabase
+      // Try fetching from staff_attendance table first
+      const { data: staffAttendance, error: staffAttendanceError } = await supabase
         .from('staff_attendance')
         .select('*')
-        .eq('date', date);
-        
-      if (error) throw error;
-      
-      const recordsWithNames = await Promise.all(
-        (data || []).map(async (record) => {
-          const { data: staffData } = await supabase
-            .from('staff')
-            .select('full_name')
-            .eq('id', record.staff_id)
-            .single();
-            
-          return {
-            ...record,
-            full_name: staffData?.full_name || 'Unknown'
-          };
-        })
-      );
-      
-      setRecords(recordsWithNames);
-      setNotes('');
-      setSelectedStaffId(null);
-      
-      toast({
-        title: "Check-in recorded",
-        description: "Staff member has been checked in successfully."
-      });
-    } catch (error) {
-      console.error('Error checking in staff:', error);
-      toast({
-        variant: "destructive",
-        title: "Check-in failed",
-        description: "There was an error recording the check-in."
-      });
-    }
-  };
+        .order('date', { ascending: false })
+        .limit(50);
 
-  const handleCheckOut = async (staffId: string) => {
-    try {
-      const now = new Date().toISOString();
-      
-      // Find the record for this staff member
-      const { data: existingRecord } = await supabase
-        .from('staff_attendance')
-        .select('id')
-        .eq('staff_id', staffId)
-        .eq('date', date)
-        .maybeSingle();
-      
-      if (existingRecord) {
-        // Update existing record with check out time
-        const { error } = await supabase
-          .from('staff_attendance')
-          .update({ 
-            check_out_time: now,
-            notes: notes ? notes : undefined // Only update notes if provided
-          })
-          .eq('id', existingRecord.id);
-          
-        if (error) throw error;
+      if (staffAttendanceError) {
+        console.error('Error fetching from staff_attendance table:', staffAttendanceError);
         
-        // Refresh records
-        const { data, error: fetchError } = await supabase
-          .from('staff_attendance')
+        // Fallback: Try trainer_attendance if staff_attendance fails
+        const { data: trainerAttendance, error: trainerAttendanceError } = await supabase
+          .from('trainer_attendance')
           .select('*')
-          .eq('date', date);
-          
-        if (fetchError) throw fetchError;
-        
-        const recordsWithNames = await Promise.all(
-          (data || []).map(async (record) => {
-            const { data: staffData } = await supabase
-              .from('staff')
-              .select('full_name')
-              .eq('id', record.staff_id)
-              .single();
-              
-            return {
-              ...record,
-              full_name: staffData?.full_name || 'Unknown'
-            };
-          })
-        );
-        
-        setRecords(recordsWithNames);
-        setNotes('');
-        setSelectedStaffId(null);
-        
-        toast({
-          title: "Check-out recorded",
-          description: "Staff member has been checked out successfully."
-        });
+          .order('date', { ascending: false })
+          .limit(50);
+
+        if (trainerAttendanceError) {
+          throw new Error(`Failed to fetch attendance data: ${trainerAttendanceError.message}`);
+        }
+
+        setAttendanceData(trainerAttendance || []);
       } else {
-        toast({
-          variant: "destructive",
-          title: "Check-out failed",
-          description: "No check-in record found for this staff member today."
-        });
+        setAttendanceData(staffAttendance || []);
       }
-    } catch (error) {
-      console.error('Error checking out staff:', error);
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Unknown error fetching attendance data';
+      setError(errorMessage);
       toast({
         variant: "destructive",
-        title: "Check-out failed",
-        description: "There was an error recording the check-out."
+        title: "Failed to load attendance data",
+        description: errorMessage,
       });
+    } finally {
+      setIsLoading(false);
     }
   };
 
-  const isCheckedIn = (staffId: string): boolean => {
-    return records.some(record => 
-      record.staff_id === staffId && 
-      record.check_in_time !== null
-    );
+  useEffect(() => {
+    fetchAttendanceData();
+  }, []);
+
+  const getStaffName = (staffId: string) => {
+    const staffMember = staff.find(s => s.id === staffId);
+    return staffMember ? staffMember.full_name : 'Unknown Staff';
   };
 
-  const isCheckedOut = (staffId: string): boolean => {
-    return records.some(record => 
-      record.staff_id === staffId && 
-      record.check_out_time !== null
-    );
+  const formatTime = (timeStr: string) => {
+    if (!timeStr) return 'Not recorded';
+    try {
+      return format(parseISO(timeStr), 'h:mm a');
+    } catch (e) {
+      return 'Invalid time';
+    }
   };
 
-  const getAttendanceStatus = (staffId: string) => {
-    const record = records.find(r => r.staff_id === staffId);
-    if (!record) return "Not checked in";
-    if (record.check_in_time && !record.check_out_time) return "Checked in";
-    if (record.check_in_time && record.check_out_time) return "Checked out";
-    return "Unknown";
+  const handleRefresh = () => {
+    fetchAttendanceData();
   };
 
-  if (staffLoading || loading) {
+  if (isStaffLoading) {
     return (
-      <div className="flex justify-center items-center h-64">
-        <LoadingSpinner size="lg" />
+      <div className="space-y-6">
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex justify-between items-center">
+              <div>Staff Attendance</div>
+              <Button variant="outline" size="sm" disabled>
+                <RefreshCw className="h-4 w-4 mr-2" />
+                Refresh
+              </Button>
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              {Array.from({ length: 5 }).map((_, i) => (
+                <div key={i} className="flex items-center justify-between">
+                  <div className="flex items-center">
+                    <Skeleton className="h-10 w-10 rounded-full" />
+                    <div className="ml-4 space-y-1">
+                      <Skeleton className="h-4 w-[200px]" />
+                      <Skeleton className="h-3 w-[150px]" />
+                    </div>
+                  </div>
+                  <div className="space-y-1">
+                    <Skeleton className="h-4 w-[120px]" />
+                    <Skeleton className="h-3 w-[80px]" />
+                  </div>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
       </div>
     );
   }
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-800">Staff Attendance</h1>
-          <p className="text-gray-500">Track and manage staff check-ins and check-outs</p>
-        </div>
-        <div className="flex items-center space-x-2">
-          <Label htmlFor="date" className="sr-only">Select Date</Label>
-          <Input
-            id="date"
-            type="date"
-            value={date}
-            onChange={(e) => setDate(e.target.value)}
-            className="w-40"
-          />
-          <Calendar className="h-4 w-4 text-gray-500" />
-        </div>
-      </div>
-
-      <Card className="mb-6">
+      <Card>
         <CardHeader>
-          <CardTitle className="flex items-center">
-            <UserCheck className="h-5 w-5 mr-2" />
-            Staff Attendance for {format(new Date(date), 'MMMM d, yyyy')}
+          <CardTitle className="flex justify-between items-center">
+            <div>Staff Attendance</div>
+            <Button variant="outline" size="sm" onClick={handleRefresh} disabled={isLoading}>
+              {isLoading ? (
+                <LoadingSpinner size="sm" className="mr-2" />
+              ) : (
+                <RefreshCw className="h-4 w-4 mr-2" />
+              )}
+              Refresh
+            </Button>
           </CardTitle>
         </CardHeader>
         <CardContent>
-          {selectedStaffId ? (
-            <div className="space-y-4 mb-4 p-4 border rounded-md">
-              <h3 className="font-medium">Add notes for {staff.find(s => s.id === selectedStaffId)?.full_name}</h3>
-              <Textarea 
-                placeholder="Add notes about this attendance record..."
-                value={notes}
-                onChange={(e) => setNotes(e.target.value)}
-                rows={3}
-              />
-              <div className="flex justify-end space-x-2">
-                <Button variant="outline" onClick={() => {
-                  setSelectedStaffId(null);
-                  setNotes('');
-                }}>
-                  Cancel
-                </Button>
-                <Button 
-                  onClick={() => {
-                    if (isCheckedIn(selectedStaffId) && !isCheckedOut(selectedStaffId)) {
-                      handleCheckOut(selectedStaffId);
-                    } else {
-                      handleCheckIn(selectedStaffId);
-                    }
-                  }}
-                >
-                  {isCheckedIn(selectedStaffId) && !isCheckedOut(selectedStaffId) 
-                    ? "Check Out" 
-                    : "Check In"
-                  }
-                </Button>
+          {error && (
+            <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-md mb-4 flex items-start">
+              <AlertCircle className="h-5 w-5 mr-2 mt-0.5" />
+              <div>
+                <p className="font-medium">Error loading attendance data</p>
+                <p className="text-sm">{error}</p>
               </div>
             </div>
-          ) : null}
+          )}
 
-          <div className="overflow-x-auto">
-            <table className="w-full border-collapse">
-              <thead>
-                <tr className="bg-gray-50 text-left border-b">
-                  <th className="px-4 py-3">Staff Name</th>
-                  <th className="px-4 py-3">Status</th>
-                  <th className="px-4 py-3">Check In Time</th>
-                  <th className="px-4 py-3">Check Out Time</th>
-                  <th className="px-4 py-3">Notes</th>
-                  <th className="px-4 py-3 text-right">Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {staff.map((staffMember) => {
-                  const record = records.find(r => r.staff_id === staffMember.id);
-                  const status = getAttendanceStatus(staffMember.id);
-                  
-                  return (
-                    <tr key={staffMember.id} className="border-b hover:bg-gray-50">
-                      <td className="px-4 py-3">{staffMember.full_name}</td>
-                      <td className="px-4 py-3">
-                        {status === "Checked in" && (
-                          <span className="inline-flex items-center rounded-full bg-green-100 px-2.5 py-0.5 text-xs font-medium text-green-800">
-                            <CheckCircle className="h-3 w-3 mr-1" />
-                            Checked in
-                          </span>
-                        )}
-                        {status === "Checked out" && (
-                          <span className="inline-flex items-center rounded-full bg-blue-100 px-2.5 py-0.5 text-xs font-medium text-blue-800">
-                            <XCircle className="h-3 w-3 mr-1" />
-                            Checked out
-                          </span>
-                        )}
-                        {status === "Not checked in" && (
-                          <span className="inline-flex items-center rounded-full bg-gray-100 px-2.5 py-0.5 text-xs font-medium text-gray-800">
-                            Not checked in
-                          </span>
-                        )}
-                      </td>
-                      <td className="px-4 py-3">
-                        {record?.check_in_time 
-                          ? format(new Date(record.check_in_time), 'h:mm a') 
-                          : "-"
-                        }
-                      </td>
-                      <td className="px-4 py-3">
-                        {record?.check_out_time 
-                          ? format(new Date(record.check_out_time), 'h:mm a')
-                          : "-"
-                        }
-                      </td>
-                      <td className="px-4 py-3">
-                        {record?.notes || "-"}
-                      </td>
-                      <td className="px-4 py-3 text-right">
-                        {isCheckedIn(staffMember.id) && !isCheckedOut(staffMember.id) ? (
-                          <Button 
-                            size="sm" 
-                            onClick={() => {
-                              setSelectedStaffId(staffMember.id);
-                              setNotes(record?.notes || '');
-                            }}
-                          >
-                            <Clock className="h-4 w-4 mr-2" />
-                            Check Out
-                          </Button>
-                        ) : !isCheckedIn(staffMember.id) ? (
-                          <Button 
-                            size="sm" 
-                            variant="outline" 
-                            onClick={() => {
-                              setSelectedStaffId(staffMember.id);
-                              setNotes('');
-                            }}
-                          >
-                            <UserCheck className="h-4 w-4 mr-2" />
-                            Check In
-                          </Button>
-                        ) : (
-                          <Button 
-                            size="sm" 
-                            variant="outline" 
-                            disabled
-                          >
-                            Completed
-                          </Button>
-                        )}
-                      </td>
-                    </tr>
-                  );
-                })}
+          {isLoading ? (
+            <div className="flex justify-center py-8">
+              <LoadingSpinner size="lg" text="Loading attendance data..." />
+            </div>
+          ) : attendanceData.length === 0 ? (
+            <div className="text-center py-8 text-gray-500">
+              <CalendarDays className="h-12 w-12 mx-auto mb-2 text-gray-400" />
+              <h3 className="text-lg font-medium mb-1">No attendance records found</h3>
+              <p>Staff attendance records will appear here once recorded.</p>
+            </div>
+          ) : (
+            <div className="divide-y">
+              {attendanceData.map((record) => {
+                // Handle staff_id from staff_attendance or trainer_id from trainer_attendance
+                const staffId = record.staff_id || record.trainer_id;
+                const isCheckedOut = Boolean(record.check_out_time);
                 
-                {staff.length === 0 && (
-                  <tr>
-                    <td colSpan={6} className="px-4 py-6 text-center text-gray-500">
-                      No staff members found
-                    </td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
-          </div>
+                return (
+                  <div key={record.id} className="py-4 first:pt-0 last:pb-0">
+                    <div className="flex justify-between items-start">
+                      <div className="flex items-start">
+                        <UserCheck className={`h-5 w-5 mt-1 ${isCheckedOut ? 'text-green-600' : 'text-amber-500'}`} />
+                        <div className="ml-3">
+                          <p className="font-medium">{getStaffName(staffId)}</p>
+                          <p className="text-sm text-gray-600">
+                            {format(parseISO(record.date), 'MMMM d, yyyy')}
+                          </p>
+                          {record.notes && (
+                            <p className="text-xs text-gray-500 mt-1 italic">{record.notes}</p>
+                          )}
+                        </div>
+                      </div>
+                      <div className="text-right">
+                        <div className="flex items-center text-sm">
+                          <Clock className="h-3.5 w-3.5 mr-1 text-green-600" />
+                          <span>In: {formatTime(record.check_in_time)}</span>
+                        </div>
+                        <div className="flex items-center text-sm mt-1">
+                          <Clock className="h-3.5 w-3.5 mr-1 text-red-600" />
+                          <span>Out: {isCheckedOut ? formatTime(record.check_out_time) : 'Not checked out'}</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
         </CardContent>
       </Card>
     </div>
