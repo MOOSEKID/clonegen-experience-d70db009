@@ -24,7 +24,7 @@ interface MembershipPlanCardProps {
 const MembershipPlanCard = ({ plan, onGetStarted }: MembershipPlanCardProps) => {
   return (
     <div 
-      className={`bg-white rounded-lg overflow-hidden transition-all duration-300 hover:shadow-xl min-w-[300px] ${
+      className={`bg-white rounded-lg overflow-hidden transition-all durationMinutes-300 hover:shadow-xl min-w-[300px] ${
         plan.highlighted 
           ? 'ring-2 ring-gym-orange shadow-lg relative transform hover:-translate-y-2' 
           : 'shadow-md hover:-translate-y-1'

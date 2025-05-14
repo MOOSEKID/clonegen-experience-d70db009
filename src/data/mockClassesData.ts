@@ -16,7 +16,7 @@ export const mockClasses: ClassType[] = [
     waitlistMembers: [],
     day: 'Monday',
     time: '08:00',
-    duration: 60,
+    durationMinutes: 60,
     room: 'Studio 1',
     status: 'scheduled',
     // Added the new required fields
@@ -40,7 +40,7 @@ export const mockClasses: ClassType[] = [
     waitlistMembers: mockMembers.slice(4, 5),
     day: 'Tuesday',
     time: '17:30',
-    duration: 45,
+    durationMinutes: 45,
     room: 'Training Area',
     status: 'full',
     // Added the new required fields
@@ -64,7 +64,7 @@ export const mockClasses: ClassType[] = [
     waitlistMembers: [],
     day: 'Wednesday',
     time: '19:00',
-    duration: 60,
+    durationMinutes: 60,
     room: 'Weights Room',
     status: 'scheduled',
     // Added the new required fields
@@ -88,7 +88,7 @@ export const mockClasses: ClassType[] = [
     waitlistMembers: [],
     day: 'Thursday',
     time: '18:00',
-    duration: 60,
+    durationMinutes: 60,
     room: 'Studio 2',
     status: 'scheduled',
     // Added the new required fields
@@ -112,7 +112,7 @@ export const mockClasses: ClassType[] = [
     waitlistMembers: [],
     day: 'Friday',
     time: '12:00',
-    duration: 45,
+    durationMinutes: 45,
     room: 'Studio 1',
     status: 'scheduled',
     // Added the new required fields
@@ -136,7 +136,7 @@ export const mockClasses: ClassType[] = [
     waitlistMembers: [],
     day: 'Saturday',
     time: '10:00',
-    duration: 60,
+    durationMinutes: 60,
     room: 'Studio 1',
     status: 'scheduled',
     // Added the new required fields
@@ -160,7 +160,7 @@ export const mockClasses: ClassType[] = [
     waitlistMembers: [],
     day: 'Monday',
     time: '19:30',
-    duration: 45,
+    durationMinutes: 45,
     room: 'Training Area',
     status: 'scheduled',
     // Added the new required fields

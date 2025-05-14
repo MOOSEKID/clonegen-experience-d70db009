@@ -73,7 +73,7 @@ const CategoryPage = () => {
     toast(`${product.name} added to cart`, {
       description: "Item added to your shopping cart",
       position: "top-right",
-      duration: 2000
+      durationMinutes: 2000
     });
   };
 

@@ -32,8 +32,8 @@ export const validateClassForm = (formData: ClassType | null): Record<string, st
     errors.capacity = 'Capacity must be at least 1';
   }
   
-  if (formData.duration <= 0) {
-    errors.duration = 'Duration must be at least 1 minute';
+  if (formData.durationMinutes <= 0) {
+    errors.durationMinutes = 'Duration must be at least 1 minute';
   }
   
   // Fee validations

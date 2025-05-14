@@ -134,8 +134,8 @@ const AddClassDialog = ({ open, onOpenChange, onAddClass }: AddClassDialogProps)
       newErrors.capacity = 'Capacity must be at least 1';
     }
     
-    if (classData.duration <= 0) {
-      newErrors.duration = 'Duration must be at least 1 minute';
+    if (classData.durationMinutes <= 0) {
+      newErrors.durationMinutes = 'Duration must be at least 1 minute';
     }
     
     // Fee validations

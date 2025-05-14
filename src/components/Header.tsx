@@ -40,7 +40,7 @@ const Header = () => {
     <ErrorBoundary>
       <header 
         className={cn(
-          'fixed top-0 left-0 right-0 z-50 transition-all duration-300 w-full',
+          'fixed top-0 left-0 right-0 z-50 transition-all durationMinutes-300 w-full',
           isScrolled ? 'bg-gym-darkblue shadow-lg py-2' : 'bg-gym-dark/90 backdrop-blur-md py-4'
         )}
       >

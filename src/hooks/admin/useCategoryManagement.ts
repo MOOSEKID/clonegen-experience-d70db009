@@ -69,7 +69,7 @@ export const useCategoryManagement = () => {
   }, []);
   
   // Create a new category
-  const createCategory = async (categoryData: Omit<Category, 'id' | 'created_at' | 'updated_at' | 'productCount'>) => {
+  const createCategory = async (categoryData: Omit<Category, 'id' | 'createdAt' | 'updatedAt' | 'productCount'>) => {
     setSubmitting(true);
     setError(null);
     
@@ -118,7 +118,7 @@ export const useCategoryManagement = () => {
   };
   
   // Update an existing category
-  const updateCategory = async (id: string, categoryData: Partial<Omit<Category, 'id' | 'created_at' | 'updated_at' | 'productCount'>>) => {
+  const updateCategory = async (id: string, categoryData: Partial<Omit<Category, 'id' | 'createdAt' | 'updatedAt' | 'productCount'>>) => {
     setSubmitting(true);
     setError(null);
     

@@ -45,19 +45,19 @@ const AdminThemeToggle = () => {
       onClick={toggleTheme}
       aria-label={isDark ? 'Switch to light mode' : 'Switch to dark mode'}
       className={cn(
-        "theme-toggle-button relative overflow-hidden transition-colors duration-300",
+        "theme-toggle-button relative overflow-hidden transition-colors durationMinutes-300",
         isDark ? "bg-secondary border-secondary" : "bg-white border-slate-200"
       )}
     >
       <div className={cn(
-        "absolute inset-0 transform transition-transform duration-500",
+        "absolute inset-0 transform transition-transform durationMinutes-500",
         isDark 
           ? "translate-y-0 bg-gradient-to-br from-slate-800 to-slate-900" 
           : "translate-y-full bg-gradient-to-br from-sky-100 to-white"
       )} />
       
       <div className={cn(
-        "relative z-10 transition-all duration-500 transform",
+        "relative z-10 transition-all durationMinutes-500 transform",
         isDark ? "rotate-0" : "-rotate-180"
       )}>
         {isDark ? (
@@ -68,7 +68,7 @@ const AdminThemeToggle = () => {
       </div>
       
       <span className={cn(
-        "absolute bottom-0 left-0 right-0 h-0.5 transform transition-transform duration-300",
+        "absolute bottom-0 left-0 right-0 h-0.5 transform transition-transform durationMinutes-300",
         isDark 
           ? "bg-yellow-300 scale-x-100" 
           : "bg-yellow-500 scale-x-100"

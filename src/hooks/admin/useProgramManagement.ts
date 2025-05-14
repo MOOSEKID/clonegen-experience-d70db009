@@ -6,7 +6,7 @@ interface WorkoutProgram {
   name: string;
   level: string;
   category: string;
-  duration: string;
+  durationMinutes: string;
   exercises: number;
   assignedTo: number;
 }
@@ -17,7 +17,7 @@ const mockWorkoutPrograms = [
     name: 'Beginner Strength Training', 
     level: 'Beginner',
     category: 'Strength',
-    duration: '4 weeks',
+    durationMinutes: '4 weeks',
     exercises: 12,
     assignedTo: 34
   },
@@ -26,7 +26,7 @@ const mockWorkoutPrograms = [
     name: 'Advanced HIIT', 
     level: 'Advanced',
     category: 'Cardio',
-    duration: '6 weeks',
+    durationMinutes: '6 weeks',
     exercises: 20,
     assignedTo: 16
   },
@@ -35,7 +35,7 @@ const mockWorkoutPrograms = [
     name: 'Weight Loss Program', 
     level: 'Intermediate',
     category: 'Weight Loss',
-    duration: '8 weeks',
+    durationMinutes: '8 weeks',
     exercises: 18,
     assignedTo: 45
   },
@@ -44,7 +44,7 @@ const mockWorkoutPrograms = [
     name: 'Senior Mobility & Strength', 
     level: 'Beginner',
     category: 'Mobility',
-    duration: '12 weeks',
+    durationMinutes: '12 weeks',
     exercises: 15,
     assignedTo: 28
   }

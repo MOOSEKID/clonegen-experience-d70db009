@@ -19,8 +19,8 @@ import { StaffAvailability } from '@/hooks/trainers/types';
 const availabilitySchema = z.object({
   staff_id: z.string(),
   day_of_week: z.string().min(1, "Day of week is required"),
-  start_time: z.string().min(1, "Start time is required"),
-  end_time: z.string().min(1, "End time is required"),
+  startTime: z.string().min(1, "Start time is required"),
+  endTime: z.string().min(1, "End time is required"),
 });
 
 type AvailabilityFormValues = z.infer<typeof availabilitySchema>;
@@ -39,8 +39,8 @@ const StaffAvailabilityForm: React.FC<StaffAvailabilityFormProps> = ({
     defaultValues: {
       staff_id: staffId,
       day_of_week: '',
-      start_time: '',
-      end_time: '',
+      startTime: '',
+      endTime: '',
     },
   });
 
@@ -49,8 +49,8 @@ const StaffAvailabilityForm: React.FC<StaffAvailabilityFormProps> = ({
     await onSubmit({
       staff_id: staffId,
       day_of_week: data.day_of_week,
-      start_time: data.start_time,
-      end_time: data.end_time,
+      startTime: data.startTime,
+      endTime: data.endTime,
     });
     form.reset();
   };
@@ -96,7 +96,7 @@ const StaffAvailabilityForm: React.FC<StaffAvailabilityFormProps> = ({
         <div className="grid grid-cols-2 gap-4">
           <FormField
             control={form.control}
-            name="start_time"
+            name="startTime"
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Start Time*</FormLabel>
@@ -110,7 +110,7 @@ const StaffAvailabilityForm: React.FC<StaffAvailabilityFormProps> = ({
 
           <FormField
             control={form.control}
-            name="end_time"
+            name="endTime"
             render={({ field }) => (
               <FormItem>
                 <FormLabel>End Time*</FormLabel>

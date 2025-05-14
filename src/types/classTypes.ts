@@ -21,7 +21,7 @@ export interface ClassType {
   waitlistMembers: MemberInfo[];
   day: string;
   time: string;
-  duration: number;
+  durationMinutes: number;
   room: string;
   status: string;
   classLevel?: string;

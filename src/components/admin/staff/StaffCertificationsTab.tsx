@@ -63,8 +63,8 @@ const StaffCertificationsTab: React.FC<StaffCertificationsTabProps> = ({ staffMe
         expiry_date: newCert.expiry_date,
         certification_file: newCert.certification_file,
         verified: newCert.verified || false,
-        created_at: newCert.created_at,
-        updated_at: newCert.updated_at
+        createdAt: newCert.createdAt,
+        updatedAt: newCert.updatedAt
       };
 
       setCertifications([...certifications, staffCert]);

@@ -16,8 +16,8 @@ export interface ClientProgressRecord {
   arm_measurement?: number;
   thigh_measurement?: number;
   notes?: string;
-  created_at: string;
-  updated_at: string;
+  createdAt: string;
+  updatedAt: string;
   client_name?: string;
 }
 
@@ -219,8 +219,8 @@ export const useClientProgress = (clientId?: string, trainerId?: string) => {
         arm_measurement: 14 + i * 0.1, // Increasing arms
         thigh_measurement: 22 + i * 0.1, // Increasing thighs
         notes: i === 0 ? "Great progress this month" : undefined,
-        created_at: recordDate.toISOString(),
-        updated_at: recordDate.toISOString(),
+        createdAt: recordDate.toISOString(),
+        updatedAt: recordDate.toISOString(),
         client_name: "John Doe"
       });
     }

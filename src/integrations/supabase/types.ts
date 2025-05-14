@@ -11,7 +11,7 @@ export type Database = {
     Tables: {
       categories: {
         Row: {
-          created_at: string
+          createdAt: string
           created_by: string | null
           description: string | null
           featured: boolean | null
@@ -21,11 +21,11 @@ export type Database = {
           name: string
           parent_id: string | null
           slug: string
-          updated_at: string
+          updatedAt: string
           updated_by: string | null
         }
         Insert: {
-          created_at?: string
+          createdAt?: string
           created_by?: string | null
           description?: string | null
           featured?: boolean | null
@@ -35,11 +35,11 @@ export type Database = {
           name: string
           parent_id?: string | null
           slug: string
-          updated_at?: string
+          updatedAt?: string
           updated_by?: string | null
         }
         Update: {
-          created_at?: string
+          createdAt?: string
           created_by?: string | null
           description?: string | null
           featured?: boolean | null
@@ -49,7 +49,7 @@ export type Database = {
           name?: string
           parent_id?: string | null
           slug?: string
-          updated_at?: string
+          updatedAt?: string
           updated_by?: string | null
         }
         Relationships: [
@@ -69,7 +69,7 @@ export type Database = {
           class_id: string | null
           enrolled_at: string | null
           id: string
-          member_id: string | null
+          clientId: string | null
           status: string | null
         }
         Insert: {
@@ -78,7 +78,7 @@ export type Database = {
           class_id?: string | null
           enrolled_at?: string | null
           id?: string
-          member_id?: string | null
+          clientId?: string | null
           status?: string | null
         }
         Update: {
@@ -87,7 +87,7 @@ export type Database = {
           class_id?: string | null
           enrolled_at?: string | null
           id?: string
-          member_id?: string | null
+          clientId?: string | null
           status?: string | null
         }
         Relationships: [
@@ -100,7 +100,7 @@ export type Database = {
           },
           {
             foreignKeyName: "class_enrollments_member_id_fkey"
-            columns: ["member_id"]
+            columns: ["clientId"]
             isOneToOne: false
             referencedRelation: "members"
             referencedColumns: ["id"]
@@ -111,59 +111,59 @@ export type Database = {
         Row: {
           capacity: number | null
           class_type: string | null
-          created_at: string | null
+          createdAt: string | null
           day_of_week: string | null
           description: string | null
           difficulty_level: string | null
-          duration: number | null
-          end_time: string | null
+          durationMinutes: number | null
+          endTime: string | null
           equipment_required: string[] | null
           id: string
           location: string | null
           name: string
           recurring: boolean | null
-          start_time: string | null
+          startTime: string | null
           status: string | null
           trainer_id: string | null
-          updated_at: string | null
+          updatedAt: string | null
         }
         Insert: {
           capacity?: number | null
           class_type?: string | null
-          created_at?: string | null
+          createdAt?: string | null
           day_of_week?: string | null
           description?: string | null
           difficulty_level?: string | null
-          duration?: number | null
-          end_time?: string | null
+          durationMinutes?: number | null
+          endTime?: string | null
           equipment_required?: string[] | null
           id?: string
           location?: string | null
           name: string
           recurring?: boolean | null
-          start_time?: string | null
+          startTime?: string | null
           status?: string | null
           trainer_id?: string | null
-          updated_at?: string | null
+          updatedAt?: string | null
         }
         Update: {
           capacity?: number | null
           class_type?: string | null
-          created_at?: string | null
+          createdAt?: string | null
           day_of_week?: string | null
           description?: string | null
           difficulty_level?: string | null
-          duration?: number | null
-          end_time?: string | null
+          durationMinutes?: number | null
+          endTime?: string | null
           equipment_required?: string[] | null
           id?: string
           location?: string | null
           name?: string
           recurring?: boolean | null
-          start_time?: string | null
+          startTime?: string | null
           status?: string | null
           trainer_id?: string | null
-          updated_at?: string | null
+          updatedAt?: string | null
         }
         Relationships: [
           {
@@ -181,14 +181,14 @@ export type Database = {
           body_fat_percentage: number | null
           chest_measurement: number | null
           client_id: string | null
-          created_at: string | null
+          createdAt: string | null
           date: string
           hip_measurement: number | null
           id: string
           notes: string | null
           thigh_measurement: number | null
           trainer_id: string | null
-          updated_at: string | null
+          updatedAt: string | null
           waist_measurement: number | null
           weight: number | null
         }
@@ -197,14 +197,14 @@ export type Database = {
           body_fat_percentage?: number | null
           chest_measurement?: number | null
           client_id?: string | null
-          created_at?: string | null
+          createdAt?: string | null
           date: string
           hip_measurement?: number | null
           id?: string
           notes?: string | null
           thigh_measurement?: number | null
           trainer_id?: string | null
-          updated_at?: string | null
+          updatedAt?: string | null
           waist_measurement?: number | null
           weight?: number | null
         }
@@ -213,14 +213,14 @@ export type Database = {
           body_fat_percentage?: number | null
           chest_measurement?: number | null
           client_id?: string | null
-          created_at?: string | null
+          createdAt?: string | null
           date?: string
           hip_measurement?: number | null
           id?: string
           notes?: string | null
           thigh_measurement?: number | null
           trainer_id?: string | null
-          updated_at?: string | null
+          updatedAt?: string | null
           waist_measurement?: number | null
           weight?: number | null
         }
@@ -245,53 +245,53 @@ export type Database = {
         Row: {
           achievements: string | null
           client_id: string | null
-          created_at: string | null
-          duration: number | null
-          end_time: string
+          createdAt: string | null
+          durationMinutes: number | null
+          endTime: string
           focus_areas: string[] | null
           id: string
           location: string | null
           notes: string | null
-          session_date: string
-          session_type: string | null
-          start_time: string
+          date: string
+          sessionType: string | null
+          startTime: string
           status: string | null
           trainer_id: string | null
-          updated_at: string | null
+          updatedAt: string | null
         }
         Insert: {
           achievements?: string | null
           client_id?: string | null
-          created_at?: string | null
-          duration?: number | null
-          end_time: string
+          createdAt?: string | null
+          durationMinutes?: number | null
+          endTime: string
           focus_areas?: string[] | null
           id?: string
           location?: string | null
           notes?: string | null
-          session_date: string
-          session_type?: string | null
-          start_time: string
+          date: string
+          sessionType?: string | null
+          startTime: string
           status?: string | null
           trainer_id?: string | null
-          updated_at?: string | null
+          updatedAt?: string | null
         }
         Update: {
           achievements?: string | null
           client_id?: string | null
-          created_at?: string | null
-          duration?: number | null
-          end_time?: string
+          createdAt?: string | null
+          durationMinutes?: number | null
+          endTime?: string
           focus_areas?: string[] | null
           id?: string
           location?: string | null
           notes?: string | null
-          session_date?: string
-          session_type?: string | null
-          start_time?: string
+          date?: string
+          sessionType?: string | null
+          startTime?: string
           status?: string | null
           trainer_id?: string | null
-          updated_at?: string | null
+          updatedAt?: string | null
         }
         Relationships: [
           {
@@ -313,7 +313,7 @@ export type Database = {
       cms_content_blocks: {
         Row: {
           content: Json
-          created_at: string | null
+          createdAt: string | null
           dynamic_source: string | null
           id: string
           is_dynamic: boolean
@@ -321,11 +321,11 @@ export type Database = {
           order_index: number
           page_id: string
           type: string
-          updated_at: string | null
+          updatedAt: string | null
         }
         Insert: {
           content?: Json
-          created_at?: string | null
+          createdAt?: string | null
           dynamic_source?: string | null
           id?: string
           is_dynamic?: boolean
@@ -333,11 +333,11 @@ export type Database = {
           order_index?: number
           page_id: string
           type: string
-          updated_at?: string | null
+          updatedAt?: string | null
         }
         Update: {
           content?: Json
-          created_at?: string | null
+          createdAt?: string | null
           dynamic_source?: string | null
           id?: string
           is_dynamic?: boolean
@@ -345,7 +345,7 @@ export type Database = {
           order_index?: number
           page_id?: string
           type?: string
-          updated_at?: string | null
+          updatedAt?: string | null
         }
         Relationships: [
           {
@@ -359,36 +359,36 @@ export type Database = {
       }
       cms_nav_items: {
         Row: {
-          created_at: string | null
+          createdAt: string | null
           external_url: string | null
           id: string
           label: string
           linked_page_id: string | null
           nav_group: string | null
           order_index: number
-          updated_at: string | null
+          updatedAt: string | null
           visible: boolean
         }
         Insert: {
-          created_at?: string | null
+          createdAt?: string | null
           external_url?: string | null
           id?: string
           label: string
           linked_page_id?: string | null
           nav_group?: string | null
           order_index?: number
-          updated_at?: string | null
+          updatedAt?: string | null
           visible?: boolean
         }
         Update: {
-          created_at?: string | null
+          createdAt?: string | null
           external_url?: string | null
           id?: string
           label?: string
           linked_page_id?: string | null
           nav_group?: string | null
           order_index?: number
-          updated_at?: string | null
+          updatedAt?: string | null
           visible?: boolean
         }
         Relationships: [
@@ -403,7 +403,7 @@ export type Database = {
       }
       cms_pages: {
         Row: {
-          created_at: string | null
+          createdAt: string | null
           id: string
           meta_description: string | null
           meta_keywords: string | null
@@ -412,11 +412,11 @@ export type Database = {
           source_path: string | null
           title: string
           type: string
-          updated_at: string | null
+          updatedAt: string | null
           visible: boolean
         }
         Insert: {
-          created_at?: string | null
+          createdAt?: string | null
           id?: string
           meta_description?: string | null
           meta_keywords?: string | null
@@ -425,11 +425,11 @@ export type Database = {
           source_path?: string | null
           title: string
           type?: string
-          updated_at?: string | null
+          updatedAt?: string | null
           visible?: boolean
         }
         Update: {
-          created_at?: string | null
+          createdAt?: string | null
           id?: string
           meta_description?: string | null
           meta_keywords?: string | null
@@ -438,7 +438,7 @@ export type Database = {
           source_path?: string | null
           title?: string
           type?: string
-          updated_at?: string | null
+          updatedAt?: string | null
           visible?: boolean
         }
         Relationships: [
@@ -454,57 +454,57 @@ export type Database = {
       gym_locations: {
         Row: {
           capacity: number | null
-          created_at: string | null
+          createdAt: string | null
           equipment: string[] | null
           id: string
           name: string
           type: string
-          updated_at: string | null
+          updatedAt: string | null
         }
         Insert: {
           capacity?: number | null
-          created_at?: string | null
+          createdAt?: string | null
           equipment?: string[] | null
           id?: string
           name: string
           type: string
-          updated_at?: string | null
+          updatedAt?: string | null
         }
         Update: {
           capacity?: number | null
-          created_at?: string | null
+          createdAt?: string | null
           equipment?: string[] | null
           id?: string
           name?: string
           type?: string
-          updated_at?: string | null
+          updatedAt?: string | null
         }
         Relationships: []
       }
       member_tabs: {
         Row: {
           amount: number
-          created_at: string
+          createdAt: string
           id: string
           is_paid: boolean | null
-          member_id: string
-          updated_at: string
+          clientId: string
+          updatedAt: string
         }
         Insert: {
           amount?: number
-          created_at?: string
+          createdAt?: string
           id?: string
           is_paid?: boolean | null
-          member_id: string
-          updated_at?: string
+          clientId: string
+          updatedAt?: string
         }
         Update: {
           amount?: number
-          created_at?: string
+          createdAt?: string
           id?: string
           is_paid?: boolean | null
-          member_id?: string
-          updated_at?: string
+          clientId?: string
+          updatedAt?: string
         }
         Relationships: []
       }
@@ -512,7 +512,7 @@ export type Database = {
         Row: {
           accountenabled: boolean | null
           address: string | null
-          created_at: string | null
+          createdAt: string | null
           dateofbirth: string | null
           discountsused: string | null
           email: string | null
@@ -540,14 +540,14 @@ export type Database = {
           startdate: string | null
           status: string | null
           trainerassigned: string | null
-          updated_at: string | null
+          updatedAt: string | null
           username: string | null
           workoutgoals: string | null
         }
         Insert: {
           accountenabled?: boolean | null
           address?: string | null
-          created_at?: string | null
+          createdAt?: string | null
           dateofbirth?: string | null
           discountsused?: string | null
           email?: string | null
@@ -575,14 +575,14 @@ export type Database = {
           startdate?: string | null
           status?: string | null
           trainerassigned?: string | null
-          updated_at?: string | null
+          updatedAt?: string | null
           username?: string | null
           workoutgoals?: string | null
         }
         Update: {
           accountenabled?: boolean | null
           address?: string | null
-          created_at?: string | null
+          createdAt?: string | null
           dateofbirth?: string | null
           discountsused?: string | null
           email?: string | null
@@ -610,7 +610,7 @@ export type Database = {
           startdate?: string | null
           status?: string | null
           trainerassigned?: string | null
-          updated_at?: string | null
+          updatedAt?: string | null
           username?: string | null
           workoutgoals?: string | null
         }
@@ -618,7 +618,7 @@ export type Database = {
       }
       order_items: {
         Row: {
-          created_at: string | null
+          createdAt: string | null
           id: string
           order_id: string
           product_id: string
@@ -627,7 +627,7 @@ export type Database = {
           unit_price: number
         }
         Insert: {
-          created_at?: string | null
+          createdAt?: string | null
           id?: string
           order_id: string
           product_id: string
@@ -636,7 +636,7 @@ export type Database = {
           unit_price: number
         }
         Update: {
-          created_at?: string | null
+          createdAt?: string | null
           id?: string
           order_id?: string
           product_id?: string
@@ -663,7 +663,7 @@ export type Database = {
       }
       orders: {
         Row: {
-          created_at: string | null
+          createdAt: string | null
           customer_email: string
           customer_name: string
           customer_phone: string | null
@@ -675,11 +675,11 @@ export type Database = {
           promo_code_id: string | null
           status: string
           total_amount: number
-          updated_at: string | null
+          updatedAt: string | null
           user_id: string | null
         }
         Insert: {
-          created_at?: string | null
+          createdAt?: string | null
           customer_email: string
           customer_name: string
           customer_phone?: string | null
@@ -691,11 +691,11 @@ export type Database = {
           promo_code_id?: string | null
           status?: string
           total_amount: number
-          updated_at?: string | null
+          updatedAt?: string | null
           user_id?: string | null
         }
         Update: {
-          created_at?: string | null
+          createdAt?: string | null
           customer_email?: string
           customer_name?: string
           customer_phone?: string | null
@@ -707,7 +707,7 @@ export type Database = {
           promo_code_id?: string | null
           status?: string
           total_amount?: number
-          updated_at?: string | null
+          updatedAt?: string | null
           user_id?: string | null
         }
         Relationships: [
@@ -724,7 +724,7 @@ export type Database = {
         Row: {
           category: string
           category_id: string
-          created_at: string
+          createdAt: string
           created_by: string | null
           description: string | null
           id: string
@@ -738,13 +738,13 @@ export type Database = {
           price: number
           sku: string | null
           stock_count: number
-          updated_at: string
+          updatedAt: string
           updated_by: string | null
         }
         Insert: {
           category: string
           category_id: string
-          created_at?: string
+          createdAt?: string
           created_by?: string | null
           description?: string | null
           id?: string
@@ -758,13 +758,13 @@ export type Database = {
           price: number
           sku?: string | null
           stock_count?: number
-          updated_at?: string
+          updatedAt?: string
           updated_by?: string | null
         }
         Update: {
           category?: string
           category_id?: string
-          created_at?: string
+          createdAt?: string
           created_by?: string | null
           description?: string | null
           id?: string
@@ -778,7 +778,7 @@ export type Database = {
           price?: number
           sku?: string | null
           stock_count?: number
-          updated_at?: string
+          updatedAt?: string
           updated_by?: string | null
         }
         Relationships: [
@@ -798,7 +798,7 @@ export type Database = {
           billing_start_date: string | null
           bio: string | null
           contact_number: string | null
-          created_at: string | null
+          createdAt: string | null
           email: string | null
           full_name: string | null
           gym_location: string | null
@@ -808,7 +808,7 @@ export type Database = {
           preferred_workout_time: string | null
           role: string | null
           subscription_status: string | null
-          updated_at: string | null
+          updatedAt: string | null
           username: string | null
         }
         Insert: {
@@ -817,7 +817,7 @@ export type Database = {
           billing_start_date?: string | null
           bio?: string | null
           contact_number?: string | null
-          created_at?: string | null
+          createdAt?: string | null
           email?: string | null
           full_name?: string | null
           gym_location?: string | null
@@ -827,7 +827,7 @@ export type Database = {
           preferred_workout_time?: string | null
           role?: string | null
           subscription_status?: string | null
-          updated_at?: string | null
+          updatedAt?: string | null
           username?: string | null
         }
         Update: {
@@ -836,7 +836,7 @@ export type Database = {
           billing_start_date?: string | null
           bio?: string | null
           contact_number?: string | null
-          created_at?: string | null
+          createdAt?: string | null
           email?: string | null
           full_name?: string | null
           gym_location?: string | null
@@ -846,7 +846,7 @@ export type Database = {
           preferred_workout_time?: string | null
           role?: string | null
           subscription_status?: string | null
-          updated_at?: string | null
+          updatedAt?: string | null
           username?: string | null
         }
         Relationships: []
@@ -854,13 +854,13 @@ export type Database = {
       promo_codes: {
         Row: {
           code: string
-          created_at: string | null
+          createdAt: string | null
           discount_type: string
           id: string
           is_active: boolean | null
           max_uses: number | null
           min_purchase_amount: number | null
-          updated_at: string | null
+          updatedAt: string | null
           uses_count: number | null
           valid_from: string
           valid_until: string
@@ -868,13 +868,13 @@ export type Database = {
         }
         Insert: {
           code: string
-          created_at?: string | null
+          createdAt?: string | null
           discount_type: string
           id?: string
           is_active?: boolean | null
           max_uses?: number | null
           min_purchase_amount?: number | null
-          updated_at?: string | null
+          updatedAt?: string | null
           uses_count?: number | null
           valid_from?: string
           valid_until: string
@@ -882,13 +882,13 @@ export type Database = {
         }
         Update: {
           code?: string
-          created_at?: string | null
+          createdAt?: string | null
           discount_type?: string
           id?: string
           is_active?: boolean | null
           max_uses?: number | null
           min_purchase_amount?: number | null
-          updated_at?: string | null
+          updatedAt?: string | null
           uses_count?: number | null
           valid_from?: string
           valid_until?: string
@@ -898,7 +898,7 @@ export type Database = {
       }
       sale_items: {
         Row: {
-          created_at: string
+          createdAt: string
           id: string
           price_per_unit: number
           product_id: string
@@ -907,7 +907,7 @@ export type Database = {
           total_price: number
         }
         Insert: {
-          created_at?: string
+          createdAt?: string
           id?: string
           price_per_unit: number
           product_id: string
@@ -916,7 +916,7 @@ export type Database = {
           total_price: number
         }
         Update: {
-          created_at?: string
+          createdAt?: string
           id?: string
           price_per_unit?: number
           product_id?: string
@@ -943,34 +943,34 @@ export type Database = {
       }
       sales: {
         Row: {
-          created_at: string
+          createdAt: string
           created_by: string | null
           id: string
-          member_id: string | null
+          clientId: string | null
           member_tab_id: string | null
           payment_method: string | null
           total_amount: number
-          updated_at: string
+          updatedAt: string
         }
         Insert: {
-          created_at?: string
+          createdAt?: string
           created_by?: string | null
           id?: string
-          member_id?: string | null
+          clientId?: string | null
           member_tab_id?: string | null
           payment_method?: string | null
           total_amount?: number
-          updated_at?: string
+          updatedAt?: string
         }
         Update: {
-          created_at?: string
+          createdAt?: string
           created_by?: string | null
           id?: string
-          member_id?: string | null
+          clientId?: string | null
           member_tab_id?: string | null
           payment_method?: string | null
           total_amount?: number
-          updated_at?: string
+          updatedAt?: string
         }
         Relationships: [
           {
@@ -984,76 +984,76 @@ export type Database = {
       }
       settings_automations: {
         Row: {
-          created_at: string | null
+          createdAt: string | null
           id: string
           rules: Json | null
-          updated_at: string | null
+          updatedAt: string | null
         }
         Insert: {
-          created_at?: string | null
+          createdAt?: string | null
           id?: string
           rules?: Json | null
-          updated_at?: string | null
+          updatedAt?: string | null
         }
         Update: {
-          created_at?: string | null
+          createdAt?: string | null
           id?: string
           rules?: Json | null
-          updated_at?: string | null
+          updatedAt?: string | null
         }
         Relationships: []
       }
       settings_business_holidays: {
         Row: {
-          created_at: string | null
+          createdAt: string | null
           holiday_date: string
           holiday_name: string
           id: string
-          updated_at: string | null
+          updatedAt: string | null
         }
         Insert: {
-          created_at?: string | null
+          createdAt?: string | null
           holiday_date: string
           holiday_name: string
           id?: string
-          updated_at?: string | null
+          updatedAt?: string | null
         }
         Update: {
-          created_at?: string | null
+          createdAt?: string | null
           holiday_date?: string
           holiday_name?: string
           id?: string
-          updated_at?: string | null
+          updatedAt?: string | null
         }
         Relationships: []
       }
       settings_business_hours: {
         Row: {
           close_time: string | null
-          created_at: string | null
+          createdAt: string | null
           day_of_week: string
           id: string
           is_closed: boolean | null
           open_time: string | null
-          updated_at: string | null
+          updatedAt: string | null
         }
         Insert: {
           close_time?: string | null
-          created_at?: string | null
+          createdAt?: string | null
           day_of_week: string
           id?: string
           is_closed?: boolean | null
           open_time?: string | null
-          updated_at?: string | null
+          updatedAt?: string | null
         }
         Update: {
           close_time?: string | null
-          created_at?: string | null
+          createdAt?: string | null
           day_of_week?: string
           id?: string
           is_closed?: boolean | null
           open_time?: string | null
-          updated_at?: string | null
+          updatedAt?: string | null
         }
         Relationships: []
       }
@@ -1062,7 +1062,7 @@ export type Database = {
           auto_generate_reports: boolean | null
           auto_invoice: boolean | null
           company_email_signature: string | null
-          created_at: string | null
+          createdAt: string | null
           default_notes: string | null
           id: string
           invoice_generation_day: number | null
@@ -1074,14 +1074,14 @@ export type Database = {
           report_recipients: string | null
           report_types: string[] | null
           send_welcome_email: boolean | null
-          updated_at: string | null
+          updatedAt: string | null
           welcome_email_template: string | null
         }
         Insert: {
           auto_generate_reports?: boolean | null
           auto_invoice?: boolean | null
           company_email_signature?: string | null
-          created_at?: string | null
+          createdAt?: string | null
           default_notes?: string | null
           id?: string
           invoice_generation_day?: number | null
@@ -1093,14 +1093,14 @@ export type Database = {
           report_recipients?: string | null
           report_types?: string[] | null
           send_welcome_email?: boolean | null
-          updated_at?: string | null
+          updatedAt?: string | null
           welcome_email_template?: string | null
         }
         Update: {
           auto_generate_reports?: boolean | null
           auto_invoice?: boolean | null
           company_email_signature?: string | null
-          created_at?: string | null
+          createdAt?: string | null
           default_notes?: string | null
           id?: string
           invoice_generation_day?: number | null
@@ -1112,7 +1112,7 @@ export type Database = {
           report_recipients?: string | null
           report_types?: string[] | null
           send_welcome_email?: boolean | null
-          updated_at?: string | null
+          updatedAt?: string | null
           welcome_email_template?: string | null
         }
         Relationships: []
@@ -1121,7 +1121,7 @@ export type Database = {
         Row: {
           contact_email: string | null
           contact_phone: string | null
-          created_at: string | null
+          createdAt: string | null
           currency: string | null
           dark_mode_enabled: boolean | null
           default_language: string | null
@@ -1130,12 +1130,12 @@ export type Database = {
           logo_dark_url: string | null
           logo_light_url: string | null
           timezone: string | null
-          updated_at: string | null
+          updatedAt: string | null
         }
         Insert: {
           contact_email?: string | null
           contact_phone?: string | null
-          created_at?: string | null
+          createdAt?: string | null
           currency?: string | null
           dark_mode_enabled?: boolean | null
           default_language?: string | null
@@ -1144,12 +1144,12 @@ export type Database = {
           logo_dark_url?: string | null
           logo_light_url?: string | null
           timezone?: string | null
-          updated_at?: string | null
+          updatedAt?: string | null
         }
         Update: {
           contact_email?: string | null
           contact_phone?: string | null
-          created_at?: string | null
+          createdAt?: string | null
           currency?: string | null
           dark_mode_enabled?: boolean | null
           default_language?: string | null
@@ -1158,14 +1158,14 @@ export type Database = {
           logo_dark_url?: string | null
           logo_light_url?: string | null
           timezone?: string | null
-          updated_at?: string | null
+          updatedAt?: string | null
         }
         Relationships: []
       }
       settings_integrations: {
         Row: {
           airtel_api_key: string | null
-          created_at: string | null
+          createdAt: string | null
           id: string
           mtn_api_key: string | null
           smtp_host: string | null
@@ -1177,11 +1177,11 @@ export type Database = {
           test_mode: boolean | null
           twilio_sid: string | null
           twilio_token: string | null
-          updated_at: string | null
+          updatedAt: string | null
         }
         Insert: {
           airtel_api_key?: string | null
-          created_at?: string | null
+          createdAt?: string | null
           id?: string
           mtn_api_key?: string | null
           smtp_host?: string | null
@@ -1193,11 +1193,11 @@ export type Database = {
           test_mode?: boolean | null
           twilio_sid?: string | null
           twilio_token?: string | null
-          updated_at?: string | null
+          updatedAt?: string | null
         }
         Update: {
           airtel_api_key?: string | null
-          created_at?: string | null
+          createdAt?: string | null
           id?: string
           mtn_api_key?: string | null
           smtp_host?: string | null
@@ -1209,28 +1209,28 @@ export type Database = {
           test_mode?: boolean | null
           twilio_sid?: string | null
           twilio_token?: string | null
-          updated_at?: string | null
+          updatedAt?: string | null
         }
         Relationships: []
       }
       settings_invoices_templates: {
         Row: {
-          created_at: string | null
+          createdAt: string | null
           id: string
           templates: Json | null
-          updated_at: string | null
+          updatedAt: string | null
         }
         Insert: {
-          created_at?: string | null
+          createdAt?: string | null
           id?: string
           templates?: Json | null
-          updated_at?: string | null
+          updatedAt?: string | null
         }
         Update: {
-          created_at?: string | null
+          createdAt?: string | null
           id?: string
           templates?: Json | null
-          updated_at?: string | null
+          updatedAt?: string | null
         }
         Relationships: []
       }
@@ -1238,7 +1238,7 @@ export type Database = {
         Row: {
           allow_trial: boolean | null
           auto_renew: boolean | null
-          created_at: string | null
+          createdAt: string | null
           default_currency: string | null
           default_membership_fee: number | null
           default_membership_plan: string | null
@@ -1251,12 +1251,12 @@ export type Database = {
           require_health_info: boolean | null
           require_photo: boolean | null
           trial_period_days: number | null
-          updated_at: string | null
+          updatedAt: string | null
         }
         Insert: {
           allow_trial?: boolean | null
           auto_renew?: boolean | null
-          created_at?: string | null
+          createdAt?: string | null
           default_currency?: string | null
           default_membership_fee?: number | null
           default_membership_plan?: string | null
@@ -1269,12 +1269,12 @@ export type Database = {
           require_health_info?: boolean | null
           require_photo?: boolean | null
           trial_period_days?: number | null
-          updated_at?: string | null
+          updatedAt?: string | null
         }
         Update: {
           allow_trial?: boolean | null
           auto_renew?: boolean | null
-          created_at?: string | null
+          createdAt?: string | null
           default_currency?: string | null
           default_membership_fee?: number | null
           default_membership_plan?: string | null
@@ -1287,13 +1287,13 @@ export type Database = {
           require_health_info?: boolean | null
           require_photo?: boolean | null
           trial_period_days?: number | null
-          updated_at?: string | null
+          updatedAt?: string | null
         }
         Relationships: []
       }
       settings_notifications: {
         Row: {
-          created_at: string | null
+          createdAt: string | null
           email_from_address: string | null
           email_from_name: string | null
           email_notifications_enabled: boolean | null
@@ -1305,10 +1305,10 @@ export type Database = {
           sms_notifications_enabled: boolean | null
           sms_sender_id: string | null
           templates: Json | null
-          updated_at: string | null
+          updatedAt: string | null
         }
         Insert: {
-          created_at?: string | null
+          createdAt?: string | null
           email_from_address?: string | null
           email_from_name?: string | null
           email_notifications_enabled?: boolean | null
@@ -1320,10 +1320,10 @@ export type Database = {
           sms_notifications_enabled?: boolean | null
           sms_sender_id?: string | null
           templates?: Json | null
-          updated_at?: string | null
+          updatedAt?: string | null
         }
         Update: {
-          created_at?: string | null
+          createdAt?: string | null
           email_from_address?: string | null
           email_from_name?: string | null
           email_notifications_enabled?: boolean | null
@@ -1335,13 +1335,13 @@ export type Database = {
           sms_notifications_enabled?: boolean | null
           sms_sender_id?: string | null
           templates?: Json | null
-          updated_at?: string | null
+          updatedAt?: string | null
         }
         Relationships: []
       }
       settings_platform: {
         Row: {
-          created_at: string | null
+          createdAt: string | null
           enable_reports: boolean | null
           enable_shop: boolean | null
           enable_support: boolean | null
@@ -1349,10 +1349,10 @@ export type Database = {
           enable_trainers: boolean | null
           id: string
           maintenance_mode: boolean | null
-          updated_at: string | null
+          updatedAt: string | null
         }
         Insert: {
-          created_at?: string | null
+          createdAt?: string | null
           enable_reports?: boolean | null
           enable_shop?: boolean | null
           enable_support?: boolean | null
@@ -1360,10 +1360,10 @@ export type Database = {
           enable_trainers?: boolean | null
           id?: string
           maintenance_mode?: boolean | null
-          updated_at?: string | null
+          updatedAt?: string | null
         }
         Update: {
-          created_at?: string | null
+          createdAt?: string | null
           enable_reports?: boolean | null
           enable_shop?: boolean | null
           enable_support?: boolean | null
@@ -1371,58 +1371,58 @@ export type Database = {
           enable_trainers?: boolean | null
           id?: string
           maintenance_mode?: boolean | null
-          updated_at?: string | null
+          updatedAt?: string | null
         }
         Relationships: []
       }
       settings_reports_export: {
         Row: {
-          created_at: string | null
+          createdAt: string | null
           export_settings: Json | null
           id: string
           scheduled_reports: Json | null
-          updated_at: string | null
+          updatedAt: string | null
         }
         Insert: {
-          created_at?: string | null
+          createdAt?: string | null
           export_settings?: Json | null
           id?: string
           scheduled_reports?: Json | null
-          updated_at?: string | null
+          updatedAt?: string | null
         }
         Update: {
-          created_at?: string | null
+          createdAt?: string | null
           export_settings?: Json | null
           id?: string
           scheduled_reports?: Json | null
-          updated_at?: string | null
+          updatedAt?: string | null
         }
         Relationships: []
       }
       settings_roles: {
         Row: {
-          created_at: string | null
+          createdAt: string | null
           id: string
           roles: Json | null
-          updated_at: string | null
+          updatedAt: string | null
         }
         Insert: {
-          created_at?: string | null
+          createdAt?: string | null
           id?: string
           roles?: Json | null
-          updated_at?: string | null
+          updatedAt?: string | null
         }
         Update: {
-          created_at?: string | null
+          createdAt?: string | null
           id?: string
           roles?: Json | null
-          updated_at?: string | null
+          updatedAt?: string | null
         }
         Relationships: []
       }
       settings_security: {
         Row: {
-          created_at: string | null
+          createdAt: string | null
           enable_2fa: boolean | null
           id: string
           min_password_length: number | null
@@ -1430,10 +1430,10 @@ export type Database = {
           require_special_chars: boolean | null
           require_uppercase: boolean | null
           session_timeout_minutes: number | null
-          updated_at: string | null
+          updatedAt: string | null
         }
         Insert: {
-          created_at?: string | null
+          createdAt?: string | null
           enable_2fa?: boolean | null
           id?: string
           min_password_length?: number | null
@@ -1441,10 +1441,10 @@ export type Database = {
           require_special_chars?: boolean | null
           require_uppercase?: boolean | null
           session_timeout_minutes?: number | null
-          updated_at?: string | null
+          updatedAt?: string | null
         }
         Update: {
-          created_at?: string | null
+          createdAt?: string | null
           enable_2fa?: boolean | null
           id?: string
           min_password_length?: number | null
@@ -1452,14 +1452,14 @@ export type Database = {
           require_special_chars?: boolean | null
           require_uppercase?: boolean | null
           session_timeout_minutes?: number | null
-          updated_at?: string | null
+          updatedAt?: string | null
         }
         Relationships: []
       }
       settings_testing_accounts: {
         Row: {
           automatically_sync_production_schema: boolean | null
-          created_at: string | null
+          createdAt: string | null
           id: string
           last_test_data_reset: string | null
           show_test_mode_banner: boolean | null
@@ -1467,11 +1467,11 @@ export type Database = {
           test_data_reset_frequency: string | null
           test_mode_banner_color: string | null
           test_mode_enabled: boolean | null
-          updated_at: string | null
+          updatedAt: string | null
         }
         Insert: {
           automatically_sync_production_schema?: boolean | null
-          created_at?: string | null
+          createdAt?: string | null
           id?: string
           last_test_data_reset?: string | null
           show_test_mode_banner?: boolean | null
@@ -1479,11 +1479,11 @@ export type Database = {
           test_data_reset_frequency?: string | null
           test_mode_banner_color?: string | null
           test_mode_enabled?: boolean | null
-          updated_at?: string | null
+          updatedAt?: string | null
         }
         Update: {
           automatically_sync_production_schema?: boolean | null
-          created_at?: string | null
+          createdAt?: string | null
           id?: string
           last_test_data_reset?: string | null
           show_test_mode_banner?: boolean | null
@@ -1491,13 +1491,13 @@ export type Database = {
           test_data_reset_frequency?: string | null
           test_mode_banner_color?: string | null
           test_mode_enabled?: boolean | null
-          updated_at?: string | null
+          updatedAt?: string | null
         }
         Relationships: []
       }
       settings_ui_messages: {
         Row: {
-          created_at: string | null
+          createdAt: string | null
           custom_messages: Json | null
           enable_alerts: boolean | null
           enable_motivational_quotes: boolean | null
@@ -1507,10 +1507,10 @@ export type Database = {
           motivational_quotes_frequency: string | null
           popup_position: string | null
           popup_timeout_seconds: number | null
-          updated_at: string | null
+          updatedAt: string | null
         }
         Insert: {
-          created_at?: string | null
+          createdAt?: string | null
           custom_messages?: Json | null
           enable_alerts?: boolean | null
           enable_motivational_quotes?: boolean | null
@@ -1520,10 +1520,10 @@ export type Database = {
           motivational_quotes_frequency?: string | null
           popup_position?: string | null
           popup_timeout_seconds?: number | null
-          updated_at?: string | null
+          updatedAt?: string | null
         }
         Update: {
-          created_at?: string | null
+          createdAt?: string | null
           custom_messages?: Json | null
           enable_alerts?: boolean | null
           enable_motivational_quotes?: boolean | null
@@ -1533,13 +1533,13 @@ export type Database = {
           motivational_quotes_frequency?: string | null
           popup_position?: string | null
           popup_timeout_seconds?: number | null
-          updated_at?: string | null
+          updatedAt?: string | null
         }
         Relationships: []
       }
       shop_settings: {
         Row: {
-          created_at: string
+          createdAt: string
           credit_limit: number | null
           default_currency: string | null
           email_low_stock: boolean | null
@@ -1554,10 +1554,10 @@ export type Database = {
           id: string
           low_stock_threshold: number | null
           show_member_discounts: boolean | null
-          updated_at: string
+          updatedAt: string
         }
         Insert: {
-          created_at?: string
+          createdAt?: string
           credit_limit?: number | null
           default_currency?: string | null
           email_low_stock?: boolean | null
@@ -1572,10 +1572,10 @@ export type Database = {
           id?: string
           low_stock_threshold?: number | null
           show_member_discounts?: boolean | null
-          updated_at?: string
+          updatedAt?: string
         }
         Update: {
-          created_at?: string
+          createdAt?: string
           credit_limit?: number | null
           default_currency?: string | null
           email_low_stock?: boolean | null
@@ -1590,7 +1590,7 @@ export type Database = {
           id?: string
           low_stock_threshold?: number | null
           show_member_discounts?: boolean | null
-          updated_at?: string
+          updatedAt?: string
         }
         Relationships: []
       }
@@ -1601,7 +1601,7 @@ export type Database = {
           assigned_members: string[] | null
           bio: string | null
           certifications: Json | null
-          created_at: string | null
+          createdAt: string | null
           email: string | null
           full_name: string
           hire_date: string | null
@@ -1611,7 +1611,7 @@ export type Database = {
           role: string
           specialties: string[] | null
           status: string | null
-          updated_at: string | null
+          updatedAt: string | null
         }
         Insert: {
           access_level?: string | null
@@ -1619,7 +1619,7 @@ export type Database = {
           assigned_members?: string[] | null
           bio?: string | null
           certifications?: Json | null
-          created_at?: string | null
+          createdAt?: string | null
           email?: string | null
           full_name: string
           hire_date?: string | null
@@ -1629,7 +1629,7 @@ export type Database = {
           role: string
           specialties?: string[] | null
           status?: string | null
-          updated_at?: string | null
+          updatedAt?: string | null
         }
         Update: {
           access_level?: string | null
@@ -1637,7 +1637,7 @@ export type Database = {
           assigned_members?: string[] | null
           bio?: string | null
           certifications?: Json | null
-          created_at?: string | null
+          createdAt?: string | null
           email?: string | null
           full_name?: string
           hire_date?: string | null
@@ -1647,7 +1647,7 @@ export type Database = {
           role?: string
           specialties?: string[] | null
           status?: string | null
-          updated_at?: string | null
+          updatedAt?: string | null
         }
         Relationships: []
       }
@@ -1655,32 +1655,32 @@ export type Database = {
         Row: {
           check_in_time: string | null
           check_out_time: string | null
-          created_at: string | null
+          createdAt: string | null
           date: string
           id: string
           notes: string | null
           staff_id: string | null
-          updated_at: string | null
+          updatedAt: string | null
         }
         Insert: {
           check_in_time?: string | null
           check_out_time?: string | null
-          created_at?: string | null
+          createdAt?: string | null
           date: string
           id?: string
           notes?: string | null
           staff_id?: string | null
-          updated_at?: string | null
+          updatedAt?: string | null
         }
         Update: {
           check_in_time?: string | null
           check_out_time?: string | null
-          created_at?: string | null
+          createdAt?: string | null
           date?: string
           id?: string
           notes?: string | null
           staff_id?: string | null
-          updated_at?: string | null
+          updatedAt?: string | null
         }
         Relationships: [
           {
@@ -1694,31 +1694,31 @@ export type Database = {
       }
       staff_availability: {
         Row: {
-          created_at: string | null
+          createdAt: string | null
           day_of_week: string | null
-          end_time: string | null
+          endTime: string | null
           id: string
           staff_id: string | null
-          start_time: string | null
-          updated_at: string | null
+          startTime: string | null
+          updatedAt: string | null
         }
         Insert: {
-          created_at?: string | null
+          createdAt?: string | null
           day_of_week?: string | null
-          end_time?: string | null
+          endTime?: string | null
           id?: string
           staff_id?: string | null
-          start_time?: string | null
-          updated_at?: string | null
+          startTime?: string | null
+          updatedAt?: string | null
         }
         Update: {
-          created_at?: string | null
+          createdAt?: string | null
           day_of_week?: string | null
-          end_time?: string | null
+          endTime?: string | null
           id?: string
           staff_id?: string | null
-          start_time?: string | null
-          updated_at?: string | null
+          startTime?: string | null
+          updatedAt?: string | null
         }
         Relationships: [
           {
@@ -1734,37 +1734,37 @@ export type Database = {
         Row: {
           certification_file: string | null
           certification_name: string
-          created_at: string | null
+          createdAt: string | null
           expiry_date: string | null
           id: string
           issue_date: string | null
           issuing_organization: string | null
           staff_id: string | null
-          updated_at: string | null
+          updatedAt: string | null
           verified: boolean | null
         }
         Insert: {
           certification_file?: string | null
           certification_name: string
-          created_at?: string | null
+          createdAt?: string | null
           expiry_date?: string | null
           id?: string
           issue_date?: string | null
           issuing_organization?: string | null
           staff_id?: string | null
-          updated_at?: string | null
+          updatedAt?: string | null
           verified?: boolean | null
         }
         Update: {
           certification_file?: string | null
           certification_name?: string
-          created_at?: string | null
+          createdAt?: string | null
           expiry_date?: string | null
           id?: string
           issue_date?: string | null
           issuing_organization?: string | null
           staff_id?: string | null
-          updated_at?: string | null
+          updatedAt?: string | null
           verified?: boolean | null
         }
         Relationships: [
@@ -1781,32 +1781,32 @@ export type Database = {
         Row: {
           check_in_time: string | null
           check_out_time: string | null
-          created_at: string | null
+          createdAt: string | null
           date: string
           id: string
           notes: string | null
           trainer_id: string | null
-          updated_at: string | null
+          updatedAt: string | null
         }
         Insert: {
           check_in_time?: string | null
           check_out_time?: string | null
-          created_at?: string | null
+          createdAt?: string | null
           date: string
           id?: string
           notes?: string | null
           trainer_id?: string | null
-          updated_at?: string | null
+          updatedAt?: string | null
         }
         Update: {
           check_in_time?: string | null
           check_out_time?: string | null
-          created_at?: string | null
+          createdAt?: string | null
           date?: string
           id?: string
           notes?: string | null
           trainer_id?: string | null
-          updated_at?: string | null
+          updatedAt?: string | null
         }
         Relationships: [
           {
@@ -1820,31 +1820,31 @@ export type Database = {
       }
       trainer_availability: {
         Row: {
-          created_at: string | null
+          createdAt: string | null
           day_of_week: string | null
-          end_time: string | null
+          endTime: string | null
           id: string
-          start_time: string | null
+          startTime: string | null
           trainer_id: string | null
-          updated_at: string | null
+          updatedAt: string | null
         }
         Insert: {
-          created_at?: string | null
+          createdAt?: string | null
           day_of_week?: string | null
-          end_time?: string | null
+          endTime?: string | null
           id?: string
-          start_time?: string | null
+          startTime?: string | null
           trainer_id?: string | null
-          updated_at?: string | null
+          updatedAt?: string | null
         }
         Update: {
-          created_at?: string | null
+          createdAt?: string | null
           day_of_week?: string | null
-          end_time?: string | null
+          endTime?: string | null
           id?: string
-          start_time?: string | null
+          startTime?: string | null
           trainer_id?: string | null
-          updated_at?: string | null
+          updatedAt?: string | null
         }
         Relationships: [
           {
@@ -1860,37 +1860,37 @@ export type Database = {
         Row: {
           certification_file: string | null
           certification_name: string
-          created_at: string | null
+          createdAt: string | null
           expiry_date: string | null
           id: string
           issue_date: string | null
           issuing_organization: string | null
           trainer_id: string | null
-          updated_at: string | null
+          updatedAt: string | null
           verified: boolean | null
         }
         Insert: {
           certification_file?: string | null
           certification_name: string
-          created_at?: string | null
+          createdAt?: string | null
           expiry_date?: string | null
           id?: string
           issue_date?: string | null
           issuing_organization?: string | null
           trainer_id?: string | null
-          updated_at?: string | null
+          updatedAt?: string | null
           verified?: boolean | null
         }
         Update: {
           certification_file?: string | null
           certification_name?: string
-          created_at?: string | null
+          createdAt?: string | null
           expiry_date?: string | null
           id?: string
           issue_date?: string | null
           issuing_organization?: string | null
           trainer_id?: string | null
-          updated_at?: string | null
+          updatedAt?: string | null
           verified?: boolean | null
         }
         Relationships: [
@@ -1907,35 +1907,35 @@ export type Database = {
         Row: {
           assignment_date: string
           client_id: string | null
-          created_at: string | null
+          createdAt: string | null
           end_date: string | null
           id: string
           notes: string | null
           status: string | null
           trainer_id: string | null
-          updated_at: string | null
+          updatedAt: string | null
         }
         Insert: {
           assignment_date: string
           client_id?: string | null
-          created_at?: string | null
+          createdAt?: string | null
           end_date?: string | null
           id?: string
           notes?: string | null
           status?: string | null
           trainer_id?: string | null
-          updated_at?: string | null
+          updatedAt?: string | null
         }
         Update: {
           assignment_date?: string
           client_id?: string | null
-          created_at?: string | null
+          createdAt?: string | null
           end_date?: string | null
           id?: string
           notes?: string | null
           status?: string | null
           trainer_id?: string | null
-          updated_at?: string | null
+          updatedAt?: string | null
         }
         Relationships: [
           {
@@ -1956,36 +1956,36 @@ export type Database = {
       }
       trainer_ratings: {
         Row: {
-          created_at: string | null
+          createdAt: string | null
           id: string
-          member_id: string | null
+          clientId: string | null
           rating: number | null
           review: string | null
           trainer_id: string | null
-          updated_at: string | null
+          updatedAt: string | null
         }
         Insert: {
-          created_at?: string | null
+          createdAt?: string | null
           id?: string
-          member_id?: string | null
+          clientId?: string | null
           rating?: number | null
           review?: string | null
           trainer_id?: string | null
-          updated_at?: string | null
+          updatedAt?: string | null
         }
         Update: {
-          created_at?: string | null
+          createdAt?: string | null
           id?: string
-          member_id?: string | null
+          clientId?: string | null
           rating?: number | null
           review?: string | null
           trainer_id?: string | null
-          updated_at?: string | null
+          updatedAt?: string | null
         }
         Relationships: [
           {
             foreignKeyName: "trainer_ratings_member_id_fkey"
-            columns: ["member_id"]
+            columns: ["clientId"]
             isOneToOne: false
             referencedRelation: "members"
             referencedColumns: ["id"]
@@ -2004,7 +2004,7 @@ export type Database = {
           availability: Json | null
           bio: string | null
           certifications: string[] | null
-          created_at: string | null
+          createdAt: string | null
           email: string | null
           hiredate: string | null
           hourlyrate: number | null
@@ -2014,13 +2014,13 @@ export type Database = {
           profilepicture: string | null
           specialization: string[] | null
           status: string | null
-          updated_at: string | null
+          updatedAt: string | null
         }
         Insert: {
           availability?: Json | null
           bio?: string | null
           certifications?: string[] | null
-          created_at?: string | null
+          createdAt?: string | null
           email?: string | null
           hiredate?: string | null
           hourlyrate?: number | null
@@ -2030,13 +2030,13 @@ export type Database = {
           profilepicture?: string | null
           specialization?: string[] | null
           status?: string | null
-          updated_at?: string | null
+          updatedAt?: string | null
         }
         Update: {
           availability?: Json | null
           bio?: string | null
           certifications?: string[] | null
-          created_at?: string | null
+          createdAt?: string | null
           email?: string | null
           hiredate?: string | null
           hourlyrate?: number | null
@@ -2046,7 +2046,7 @@ export type Database = {
           profilepicture?: string | null
           specialization?: string[] | null
           status?: string | null
-          updated_at?: string | null
+          updatedAt?: string | null
         }
         Relationships: []
       }

@@ -13,7 +13,7 @@ interface RatingCardProps {
 }
 
 const RatingCard = ({ rating, onRespond, onFlag }: RatingCardProps) => {
-  const formattedDate = format(new Date(rating.created_at), 'MMM d, yyyy');
+  const formattedDate = format(new Date(rating.createdAt), 'MMM d, yyyy');
   
   return (
     <Card className={rating.is_flagged ? 'border-red-200 bg-red-50' : ''}>

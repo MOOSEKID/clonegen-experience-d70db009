@@ -41,7 +41,7 @@ export const fetchStaffPerformance = async (staffId: string) => {
     class_name: ['HIIT Workout', 'Yoga Flow', 'Strength Training', 'Spin Class'][i % 4],
     date: new Date(Date.now() - (i * 86400000)).toISOString().split('T')[0],
     time: ['08:00', '12:30', '17:00', '19:30'][i % 4],
-    duration: [45, 60, 90][i % 3],
+    durationMinutes: [45, 60, 90][i % 3],
     staff_id: staffId,
     expected_attendance: 12,
     actual_attendance: Math.floor(Math.random() * 5) + 7, // 7-12 attendees

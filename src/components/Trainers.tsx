@@ -93,7 +93,7 @@ const Trainers = () => {
     <section className="py-20 bg-gray-50">
       <div 
         ref={trainersRef} 
-        className="container-custom opacity-0 transition-opacity duration-1000"
+        className="container-custom opacity-0 transition-opacity durationMinutes-1000"
       >
         <div className="text-center mb-12">
           <h2 className="text-3xl md:text-4xl font-bold mb-4 text-gym-dark">Meet Our Expert Trainers</h2>
@@ -107,14 +107,14 @@ const Trainers = () => {
             <div
               key={trainer.id}
               ref={el => trainerItemsRef.current[index] = el}
-              className="bg-white rounded-lg shadow-md overflow-hidden transition-all duration-300 hover:shadow-xl transform hover:-translate-y-2 opacity-0"
+              className="bg-white rounded-lg shadow-md overflow-hidden transition-all durationMinutes-300 hover:shadow-xl transform hover:-translate-y-2 opacity-0"
               style={{ transitionDelay: `${index * 150}ms` }}
             >
               <div className="h-64 overflow-hidden">
                 <img 
                   src={trainer.image} 
                   alt={trainer.name} 
-                  className="w-full h-full object-cover transition-transform duration-500 hover:scale-110"
+                  className="w-full h-full object-cover transition-transform durationMinutes-500 hover:scale-110"
                 />
               </div>
               <div className="p-6">

@@ -15,7 +15,7 @@ const SidebarLink: React.FC<SidebarLinkProps> = ({ link }) => {
     <Link
       to={link.href}
       className={cn(
-        'flex items-center py-2 px-4 rounded hover:bg-gym-dark transition-colors duration-200',
+        'flex items-center py-2 px-4 rounded hover:bg-gym-dark transition-colors durationMinutes-200',
         location.pathname === link.href || location.pathname.startsWith(`${link.href}/`) 
           ? 'text-gym-orange bg-gym-dark/30' 
           : 'text-white/80'

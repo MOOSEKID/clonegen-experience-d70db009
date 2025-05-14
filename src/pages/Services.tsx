@@ -76,7 +76,7 @@ const Services = () => {
             <Link 
               key={index}
               to={service.link}
-              className="bg-white rounded-lg shadow-md overflow-hidden transition-all duration-300 hover:shadow-lg hover:-translate-y-1"
+              className="bg-white rounded-lg shadow-md overflow-hidden transition-all durationMinutes-300 hover:shadow-lg hover:-translate-y-1"
             >
               <div className="p-6">
                 <div className="mb-4">{service.icon}</div>

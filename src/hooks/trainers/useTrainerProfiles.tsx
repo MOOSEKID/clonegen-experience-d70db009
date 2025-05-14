@@ -250,8 +250,8 @@ export const useTrainerProfiles = () => {
         .insert({
           trainer_id: availData.staff_id,
           day_of_week: availData.day_of_week,
-          start_time: availData.start_time,
-          end_time: availData.end_time
+          startTime: availData.startTime,
+          endTime: availData.endTime
         });
         
       if (error) throw error;

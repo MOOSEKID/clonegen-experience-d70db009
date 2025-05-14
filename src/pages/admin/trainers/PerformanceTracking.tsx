@@ -35,7 +35,7 @@ const PerformanceTracking = () => {
         date: date.toISOString(),
         class_name: ['HIIT Class', 'Yoga Flow', 'Strength Training', 'Spin Class'][index % 4],
         time: ['08:00', '10:30', '14:00', '17:30', '19:00'][index % 5],
-        duration: [45, 60, 30, 50, 90][index % 5],
+        durationMinutes: [45, 60, 30, 50, 90][index % 5],
         attendees: Math.floor(Math.random() * 8) + 3,
         capacity: 12,
         status

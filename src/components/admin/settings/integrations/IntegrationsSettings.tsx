@@ -24,7 +24,7 @@ interface IntegrationsSettingsData {
   twilio_sid: string;
   twilio_token: string;
   test_mode: boolean;
-  updated_at?: string;
+  updatedAt?: string;
 }
 
 const IntegrationsSettings = () => {

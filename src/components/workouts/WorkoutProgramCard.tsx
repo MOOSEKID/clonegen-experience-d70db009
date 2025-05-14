@@ -10,7 +10,7 @@ interface WorkoutProgram {
   name: string;
   description: string;
   level: 'Beginner' | 'Intermediate' | 'Advanced';
-  duration: string;
+  durationMinutes: string;
   category: string;
   isPremium: boolean;
   imageUrl?: string;
@@ -76,7 +76,7 @@ const WorkoutProgramCard = ({ program, hasPremiumAccess }: WorkoutProgramCardPro
           </div>
           <div className="flex items-center">
             <Clock className="h-4 w-4 mr-1 text-gym-orange" />
-            <span>{program.duration}</span>
+            <span>{program.durationMinutes}</span>
           </div>
         </div>
       </CardContent>

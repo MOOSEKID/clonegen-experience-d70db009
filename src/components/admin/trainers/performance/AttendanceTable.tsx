@@ -11,7 +11,7 @@ export interface ClassSession {
   date: string;
   class_name: string;
   time: string;
-  duration: number;
+  durationMinutes: number;
   attendees: number;
   capacity: number;
   status: 'completed' | 'canceled' | 'no-show';
@@ -96,7 +96,7 @@ const AttendanceTable: React.FC<AttendanceTableProps> = ({
                       {session.class_name}
                     </TableCell>
                     <TableCell>
-                      {session.time} ({session.duration} min)
+                      {session.time} ({session.durationMinutes} min)
                     </TableCell>
                     <TableCell>
                       {session.attendees}/{session.capacity}

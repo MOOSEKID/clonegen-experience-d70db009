@@ -144,7 +144,7 @@ export function useBusinessHours() {
               open_time: recordData.open_time,
               close_time: recordData.close_time,
               is_closed: recordData.is_closed,
-              updated_at: new Date().toISOString()
+              updatedAt: new Date().toISOString()
             })
             .eq('id', recordData.id);
 

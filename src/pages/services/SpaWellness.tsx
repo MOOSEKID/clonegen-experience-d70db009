@@ -7,7 +7,7 @@ const services = [
   {
     id: 1,
     name: "Swedish Massage",
-    duration: "60 / 90 minutes",
+    durationMinutes: "60 / 90 minutes",
     price: "RWF 30,000 / RWF 45,000",
     description: "A classic relaxation massage that uses long, flowing strokes to reduce tension, improve circulation, and promote overall wellbeing.",
     image: "/lovable-uploads/swedish-massage.jpg",
@@ -21,7 +21,7 @@ const services = [
   {
     id: 2,
     name: "Deep Tissue Massage",
-    duration: "60 / 90 minutes",
+    durationMinutes: "60 / 90 minutes",
     price: "RWF 35,000 / RWF 50,000",
     description: "Targets deeper muscle layers and connective tissue with firmer pressure, ideal for addressing chronic tension and sports-related issues.",
     image: "/lovable-uploads/deep-tissue.jpg",
@@ -35,7 +35,7 @@ const services = [
   {
     id: 3,
     name: "Sports Recovery",
-    duration: "60 / 90 minutes",
+    durationMinutes: "60 / 90 minutes",
     price: "RWF 35,000 / RWF 50,000",
     description: "Specifically designed for athletes, this massage focuses on areas of the body that are overused and stressed from repetitive movements.",
     image: "/lovable-uploads/sports-recovery.jpg",
@@ -49,7 +49,7 @@ const services = [
   {
     id: 4,
     name: "Sauna & Steam Room",
-    duration: "Unlimited access with membership",
+    durationMinutes: "Unlimited access with membership",
     price: "Included with Premium Membership",
     description: "Our state-of-the-art sauna and steam room facilities provide the perfect way to relax after your workout and enhance your recovery.",
     image: "/lovable-uploads/sauna.jpg",
@@ -63,7 +63,7 @@ const services = [
   {
     id: 5,
     name: "Nutrition Consultation",
-    duration: "45 minutes",
+    durationMinutes: "45 minutes",
     price: "RWF 25,000",
     description: "Meet with our certified nutritionists to create a personalized nutrition plan that complements your fitness goals and lifestyle.",
     image: "/lovable-uploads/nutrition.jpg",
@@ -77,7 +77,7 @@ const services = [
   {
     id: 6,
     name: "Recovery Smoothie Bar",
-    duration: "N/A",
+    durationMinutes: "N/A",
     price: "RWF 5,000 - RWF 8,000",
     description: "Our smoothie bar offers a range of nutrient-rich options designed to replenish and support your body after workouts.",
     image: "/lovable-uploads/smoothie-bar.jpg",
@@ -107,7 +107,7 @@ const ServiceCard = ({ service }) => {
         <div className="flex justify-between items-center mb-4">
           <div>
             <p className="text-sm font-medium">Duration</p>
-            <p className="text-sm text-gray-600">{service.duration}</p>
+            <p className="text-sm text-gray-600">{service.durationMinutes}</p>
           </div>
           <div className="text-right">
             <p className="text-sm font-medium">Price</p>

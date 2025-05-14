@@ -52,7 +52,7 @@ export const useCart = () => {
     toast(`${quantity} x ${product.name} added to cart`, {
       description: "Item successfully added to your cart",
       position: "top-right",
-      duration: 2000,
+      durationMinutes: 2000,
     });
   };
   

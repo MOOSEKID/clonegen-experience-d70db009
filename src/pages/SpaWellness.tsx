@@ -13,25 +13,25 @@ const SpaWellness = () => {
       icon: <Droplets className="text-gym-orange" size={48} />,
       title: 'Hydro Therapy',
       description: 'Experience the healing power of water with our hydrotherapy treatments designed to reduce muscle tension and promote relaxation.',
-      duration: '45-60 mins'
+      durationMinutes: '45-60 mins'
     },
     {
       icon: <Leaf className="text-gym-orange" size={48} />,
       title: 'Massage Therapy',
       description: 'Our skilled massage therapists offer a variety of techniques to relieve tension, improve circulation, and enhance overall well-being.',
-      duration: '30-90 mins'
+      durationMinutes: '30-90 mins'
     },
     {
       icon: <Sparkles className="text-gym-orange" size={48} />,
       title: 'Sauna & Steam Rooms',
       description: 'Detoxify your body and relax your muscles in our premium sauna and steam rooms, designed for optimal comfort and health benefits.',
-      duration: 'Unlimited with membership'
+      durationMinutes: 'Unlimited with membership'
     },
     {
       icon: <Wind className="text-gym-orange" size={48} />,
       title: 'Meditation & Mindfulness',
       description: 'Guided sessions to help reduce stress, increase mental clarity, and improve your overall mental well-being through mindfulness practices.',
-      duration: '30-45 mins'
+      durationMinutes: '30-45 mins'
     }
   ];
 
@@ -58,12 +58,12 @@ const SpaWellness = () => {
           {services.map((service, index) => (
             <div 
               key={index}
-              className="bg-white rounded-lg shadow-md overflow-hidden transition-all duration-300 hover:shadow-lg p-6"
+              className="bg-white rounded-lg shadow-md overflow-hidden transition-all durationMinutes-300 hover:shadow-lg p-6"
             >
               <div className="mb-4">{service.icon}</div>
               <h3 className="text-xl font-bold mb-2 text-gym-dark">{service.title}</h3>
               <div className="mb-3 inline-block bg-gym-orange/10 text-gym-orange px-3 py-1 rounded-full text-sm font-medium">
-                {service.duration}
+                {service.durationMinutes}
               </div>
               <p className="text-gray-600">{service.description}</p>
             </div>

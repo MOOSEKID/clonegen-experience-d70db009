@@ -9,7 +9,7 @@ const programs = [
     name: "Kids' Swimming Lessons",
     ageRange: "4-12 years",
     schedule: "Monday, Wednesday, Friday 4-5pm",
-    duration: "45 minutes",
+    durationMinutes: "45 minutes",
     description: "Our kids' swimming program focuses on water safety, stroke development, and building confidence in the water. Classes are grouped by age and ability.",
     image: "/lovable-uploads/kids-swimming.jpg",
     benefits: [
@@ -24,7 +24,7 @@ const programs = [
     name: "Teen Fitness",
     ageRange: "13-17 years",
     schedule: "Tuesday, Thursday 4-5pm, Saturday 10-11am",
-    duration: "60 minutes",
+    durationMinutes: "60 minutes",
     description: "A program designed specifically for teenagers to learn proper exercise techniques, build strength, and develop healthy fitness habits in a safe, supervised environment.",
     image: "/lovable-uploads/teen-fitness.jpg",
     benefits: [
@@ -39,7 +39,7 @@ const programs = [
     name: "Youth Sports Camp",
     ageRange: "8-14 years",
     schedule: "School holidays and summer breaks",
-    duration: "Half-day or full-day options",
+    durationMinutes: "Half-day or full-day options",
     description: "Multi-sport camps during school breaks where kids can try a variety of activities including basketball, soccer, swimming, and more in a fun, non-competitive environment.",
     image: "/lovable-uploads/youth-sports.jpg",
     benefits: [
@@ -54,7 +54,7 @@ const programs = [
     name: "Family Fitness Classes",
     ageRange: "All ages (children with parents)",
     schedule: "Saturday, Sunday 9-10am",
-    duration: "45 minutes",
+    durationMinutes: "45 minutes",
     description: "Workout sessions designed for the whole family, where parents and children can exercise together in a fun, supportive atmosphere.",
     image: "/lovable-uploads/family-fitness.jpg",
     benefits: [
@@ -92,7 +92,7 @@ const ProgramCard = ({ program }) => {
             <Clock className="text-gym-orange" size={18} />
             <div>
               <p className="text-sm font-medium">Duration</p>
-              <p className="text-sm text-gray-600">{program.duration}</p>
+              <p className="text-sm text-gray-600">{program.durationMinutes}</p>
             </div>
           </div>
           <div className="flex items-center gap-2 col-span-2">

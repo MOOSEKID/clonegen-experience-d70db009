@@ -17,7 +17,7 @@ export const useNavItems = () => {
 
   // Create nav item mutation
   const createNavItem = useMutation({
-    mutationFn: (navItem: Omit<NavItem, 'id' | 'created_at' | 'updated_at'>) => 
+    mutationFn: (navItem: Omit<NavItem, 'id' | 'createdAt' | 'updatedAt'>) => 
       cmsService.createNavItem(navItem),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['cms', 'navItems'] });
@@ -26,7 +26,7 @@ export const useNavItems = () => {
 
   // Update nav item mutation
   const updateNavItem = useMutation({
-    mutationFn: ({ id, navItem }: { id: string, navItem: Partial<Omit<NavItem, 'id' | 'created_at' | 'updated_at'>> }) => 
+    mutationFn: ({ id, navItem }: { id: string, navItem: Partial<Omit<NavItem, 'id' | 'createdAt' | 'updatedAt'>> }) => 
       cmsService.updateNavItem(id, navItem),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['cms', 'navItems'] });

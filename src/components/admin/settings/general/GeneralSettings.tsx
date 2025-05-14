@@ -26,7 +26,7 @@ interface GeneralSettingsData {
   dark_mode_enabled: boolean;
   logo_light_url: string;
   logo_dark_url: string;
-  updated_at?: string; // Add this field to match what we're sending to the API
+  updatedAt?: string; // Add this field to match what we're sending to the API
 }
 
 const GeneralSettings = () => {

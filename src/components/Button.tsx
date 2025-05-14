@@ -14,7 +14,7 @@ interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
 const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
   ({ className, variant = 'primary', size = 'md', asChild = false, href, isLink = false, children, ...props }, ref) => {
     const baseClasses = cn(
-      "inline-flex items-center justify-center font-medium transition-all duration-300 ease-in-out rounded focus:outline-none focus:ring-2 focus:ring-gym-orange focus:ring-opacity-50 relative overflow-hidden",
+      "inline-flex items-center justify-center font-medium transition-all durationMinutes-300 ease-in-out rounded focus:outline-none focus:ring-2 focus:ring-gym-orange focus:ring-opacity-50 relative overflow-hidden",
       {
         "bg-gym-orange hover:bg-gym-orange/90 text-white": variant === 'primary',
         "border-2 border-gym-orange bg-transparent hover:bg-gym-orange/10 text-gym-orange": variant === 'outline',

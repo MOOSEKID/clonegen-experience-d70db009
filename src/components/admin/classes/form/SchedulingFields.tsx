@@ -47,7 +47,7 @@ const SchedulingFields = ({
         
         <TimeAndDurationFields
           time={classData.time}
-          duration={classData.duration}
+          durationMinutes={classData.durationMinutes}
           errors={errors}
           handleChange={handleChange}
           handleNumberChange={handleNumberChange}

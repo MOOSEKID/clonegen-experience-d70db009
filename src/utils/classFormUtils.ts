@@ -12,7 +12,7 @@ export const getDefaultClassData = (): Omit<ClassType, 'id'> => ({
   waitlist: 0,
   day: 'Monday',
   time: '08:00',
-  duration: 60,
+  durationMinutes: 60,
   room: '',
   status: 'scheduled',
   enrolledMembers: [],

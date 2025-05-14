@@ -7,8 +7,8 @@ export interface ClientAssignment {
   end_date?: string | null;
   status?: string;
   notes?: string;
-  created_at?: string;
-  updated_at?: string;
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 export interface AssignedClient {

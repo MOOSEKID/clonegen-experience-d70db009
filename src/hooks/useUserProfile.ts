@@ -13,8 +13,8 @@ export interface UserProfile {
   role: string;
   is_admin: boolean;
   email?: string;
-  created_at: string;
-  updated_at: string;
+  createdAt: string;
+  updatedAt: string;
   // Subscription-related fields
   active_plan_id?: string | null;
   billing_start_date?: string | null;

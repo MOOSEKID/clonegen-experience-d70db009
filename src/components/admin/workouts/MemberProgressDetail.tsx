@@ -53,11 +53,11 @@ const progressData = [
 ];
 
 const completedWorkouts = [
-  { id: 1, name: 'Upper Body Strength', date: '2023-05-01', duration: '45 min', completion: 100 },
-  { id: 2, name: 'HIIT Cardio', date: '2023-05-03', duration: '30 min', completion: 100 },
-  { id: 3, name: 'Lower Body Focus', date: '2023-05-05', duration: '50 min', completion: 85 },
-  { id: 4, name: 'Upper Body Strength', date: '2023-05-08', duration: '45 min', completion: 90 },
-  { id: 5, name: 'Core Workout', date: '2023-05-10', duration: '25 min', completion: 100 },
+  { id: 1, name: 'Upper Body Strength', date: '2023-05-01', durationMinutes: '45 min', completion: 100 },
+  { id: 2, name: 'HIIT Cardio', date: '2023-05-03', durationMinutes: '30 min', completion: 100 },
+  { id: 3, name: 'Lower Body Focus', date: '2023-05-05', durationMinutes: '50 min', completion: 85 },
+  { id: 4, name: 'Upper Body Strength', date: '2023-05-08', durationMinutes: '45 min', completion: 90 },
+  { id: 5, name: 'Core Workout', date: '2023-05-10', durationMinutes: '25 min', completion: 100 },
 ];
 
 const MemberProgressDetail = ({ open, onOpenChange, member }: MemberProgressDetailProps) => {
@@ -227,7 +227,7 @@ const MemberProgressDetail = ({ open, onOpenChange, member }: MemberProgressDeta
                           {formatDate(workout.date)}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                          {workout.duration}
+                          {workout.durationMinutes}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
                           <div className="flex items-center gap-2">

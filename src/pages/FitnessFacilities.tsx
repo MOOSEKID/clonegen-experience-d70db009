@@ -53,7 +53,7 @@ const FitnessFacilities = () => {
           {facilities.map((facility, index) => (
             <div 
               key={index}
-              className="bg-white rounded-lg shadow-md overflow-hidden transition-all duration-300 hover:shadow-lg p-6"
+              className="bg-white rounded-lg shadow-md overflow-hidden transition-all durationMinutes-300 hover:shadow-lg p-6"
             >
               <div className="mb-4">{facility.icon}</div>
               <h3 className="text-xl font-bold mb-3 text-gym-dark">{facility.title}</h3>

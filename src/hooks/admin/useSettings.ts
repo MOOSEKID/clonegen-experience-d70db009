@@ -73,7 +73,7 @@ export function useSettings<T extends Record<string, any>>({
         .from(tableName as any)
         .update({ 
           ...newData, 
-          updated_at: new Date().toISOString() 
+          updatedAt: new Date().toISOString() 
         } as any)
         .eq('id', data.id);
 

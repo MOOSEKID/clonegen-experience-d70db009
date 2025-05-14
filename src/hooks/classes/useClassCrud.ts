@@ -16,7 +16,7 @@ export const useClassCrud = (
   const addClass = async (newClass: Omit<ClassType, 'id'>) => {
     try {
       // Validate required fields before proceeding
-      if (!newClass.name || !newClass.type || !newClass.day || !newClass.time || !newClass.duration || !newClass.room) {
+      if (!newClass.name || !newClass.type || !newClass.day || !newClass.time || !newClass.durationMinutes || !newClass.room) {
         throw new Error('Missing required fields');
       }
       
@@ -50,7 +50,7 @@ export const useClassCrud = (
         capacity: newClass.capacity,
         day: newClass.day,
         time: newClass.time,
-        duration: newClass.duration,
+        durationMinutes: newClass.durationMinutes,
         room: newClass.room,
         status: newClass.status,
         trainer_id: newClass.trainerId || null,
@@ -115,7 +115,7 @@ export const useClassCrud = (
         capacity: updatedClass.capacity,
         day: updatedClass.day,
         time: updatedClass.time,
-        duration: updatedClass.duration,
+        durationMinutes: updatedClass.durationMinutes,
         room: updatedClass.room,
         status: updatedClass.status,
         trainer_id: updatedClass.trainerId || null,

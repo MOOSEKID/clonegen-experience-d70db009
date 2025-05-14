@@ -90,7 +90,7 @@ const ContactUs = () => {
               
               <button
                 type="submit"
-                className="w-full bg-gym-orange hover:bg-gym-orange/90 text-white font-medium py-2.5 px-4 rounded-md transition-colors duration-300"
+                className="w-full bg-gym-orange hover:bg-gym-orange/90 text-white font-medium py-2.5 px-4 rounded-md transition-colors durationMinutes-300"
               >
                 Send Message
               </button>

@@ -24,7 +24,7 @@ const Footer = () => {
                 href="https://twitter.com" 
                 target="_blank" 
                 rel="noopener noreferrer"
-                className="bg-gym-darkblue p-2 rounded-md hover:bg-gym-orange transition-colors duration-300"
+                className="bg-gym-darkblue p-2 rounded-md hover:bg-gym-orange transition-colors durationMinutes-300"
               >
                 <Twitter size={20} />
               </a>
@@ -32,7 +32,7 @@ const Footer = () => {
                 href="https://instagram.com" 
                 target="_blank" 
                 rel="noopener noreferrer"
-                className="bg-gym-darkblue p-2 rounded-md hover:bg-gym-orange transition-colors duration-300"
+                className="bg-gym-darkblue p-2 rounded-md hover:bg-gym-orange transition-colors durationMinutes-300"
               >
                 <Instagram size={20} />
               </a>
@@ -40,7 +40,7 @@ const Footer = () => {
                 href="https://linkedin.com" 
                 target="_blank" 
                 rel="noopener noreferrer"
-                className="bg-gym-darkblue p-2 rounded-md hover:bg-gym-orange transition-colors duration-300"
+                className="bg-gym-darkblue p-2 rounded-md hover:bg-gym-orange transition-colors durationMinutes-300"
               >
                 <Linkedin size={20} />
               </a>
@@ -48,7 +48,7 @@ const Footer = () => {
                 href="https://youtube.com" 
                 target="_blank" 
                 rel="noopener noreferrer"
-                className="bg-gym-darkblue p-2 rounded-md hover:bg-gym-orange transition-colors duration-300"
+                className="bg-gym-darkblue p-2 rounded-md hover:bg-gym-orange transition-colors durationMinutes-300"
               >
                 <Youtube size={20} />
               </a>
@@ -56,7 +56,7 @@ const Footer = () => {
                 href="https://facebook.com" 
                 target="_blank" 
                 rel="noopener noreferrer"
-                className="bg-gym-darkblue p-2 rounded-md hover:bg-gym-orange transition-colors duration-300"
+                className="bg-gym-darkblue p-2 rounded-md hover:bg-gym-orange transition-colors durationMinutes-300"
               >
                 <Facebook size={20} />
               </a>

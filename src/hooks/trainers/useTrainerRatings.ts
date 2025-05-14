@@ -6,15 +6,15 @@ import { supabase } from '@/integrations/supabase/client';
 export interface TrainerRating {
   id: string;
   trainer_id: string;
-  member_id: string;
+  clientId: string;
   member_name: string;
   rating: number;
   review?: string | null;
   trainer_response?: string | null;
   is_flagged?: boolean;
   is_published?: boolean;
-  created_at: string;
-  updated_at: string;
+  createdAt: string;
+  updatedAt: string;
 }
 
 export interface RatingSummary {
@@ -70,33 +70,33 @@ export const useTrainerRatings = (trainerId?: string) => {
         {
           id: '1',
           trainer_id: trainerId,
-          member_id: 'mem1',
+          clientId: 'mem1',
           member_name: 'Alex Johnson',
           rating: 5,
           review: 'John is an amazing trainer! He helped me achieve my fitness goals within just 3 months. Highly recommended.',
-          created_at: '2023-01-15T10:30:00Z',
-          updated_at: '2023-01-15T10:30:00Z'
+          createdAt: '2023-01-15T10:30:00Z',
+          updatedAt: '2023-01-15T10:30:00Z'
         },
         {
           id: '2',
           trainer_id: trainerId,
-          member_id: 'mem2',
+          clientId: 'mem2',
           member_name: 'Sarah Miller',
           rating: 4,
           review: 'Very knowledgeable and professional. Helped me improve my form significantly.',
           trainer_response: 'Thank you Sarah! It\'s been great working with you on your form and technique.',
-          created_at: '2023-02-20T15:45:00Z',
-          updated_at: '2023-02-21T09:15:00Z'
+          createdAt: '2023-02-20T15:45:00Z',
+          updatedAt: '2023-02-21T09:15:00Z'
         },
         {
           id: '3',
           trainer_id: trainerId,
-          member_id: 'mem3',
+          clientId: 'mem3',
           member_name: 'Michael Brown',
           rating: 5,
           review: 'Best trainer I\'ve ever had. Really understands how to customize workouts for individual needs.',
-          created_at: '2023-03-05T11:20:00Z',
-          updated_at: '2023-03-05T11:20:00Z'
+          createdAt: '2023-03-05T11:20:00Z',
+          updatedAt: '2023-03-05T11:20:00Z'
         }
       ];
       
@@ -129,7 +129,7 @@ export const useTrainerRatings = (trainerId?: string) => {
   
   const addRating = async (ratingData: {
     trainer_id: string;
-    member_id: string;
+    clientId: string;
     rating: number;
     review?: string | null;
   }) => {
@@ -138,12 +138,12 @@ export const useTrainerRatings = (trainerId?: string) => {
       const newRating: TrainerRating = {
         id: `new-${Date.now()}`,
         trainer_id: ratingData.trainer_id,
-        member_id: ratingData.member_id,
+        clientId: ratingData.clientId,
         member_name: 'Current User', // Would be fetched from auth context
         rating: ratingData.rating,
         review: ratingData.review,
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString()
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString()
       };
       
       // Update state
@@ -185,7 +185,7 @@ export const useTrainerRatings = (trainerId?: string) => {
       // Update state first for optimistic UI
       setRatings(prev => prev.map(rating => 
         rating.id === ratingId 
-          ? { ...rating, trainer_response: response, updated_at: new Date().toISOString() }
+          ? { ...rating, trainer_response: response, updatedAt: new Date().toISOString() }
           : rating
       ));
       
@@ -216,7 +216,7 @@ export const useTrainerRatings = (trainerId?: string) => {
       // Update state first for optimistic UI
       setRatings(prev => prev.map(rating => 
         rating.id === ratingId 
-          ? { ...rating, is_flagged: true, updated_at: new Date().toISOString() }
+          ? { ...rating, is_flagged: true, updatedAt: new Date().toISOString() }
           : rating
       ));
       

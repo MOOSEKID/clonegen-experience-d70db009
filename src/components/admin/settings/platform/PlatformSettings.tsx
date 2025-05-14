@@ -18,7 +18,7 @@ interface PlatformSettingsData {
   enable_reports: boolean;
   enable_test_mode: boolean;
   maintenance_mode: boolean;
-  updated_at?: string;
+  updatedAt?: string;
 }
 
 const PlatformSettings = () => {

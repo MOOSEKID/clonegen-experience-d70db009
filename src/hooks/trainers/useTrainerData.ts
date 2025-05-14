@@ -35,8 +35,8 @@ export const useTrainerData = () => {
                 expiry_date: cert.expiry_date || null,
                 verified: cert.verified || false,
                 certification_file: cert.certification_file || null,
-                created_at: cert.created_at || null,
-                updated_at: cert.updated_at || null
+                createdAt: cert.createdAt || null,
+                updatedAt: cert.updatedAt || null
               }));
             
             // Return mapped staff profile using adapter

@@ -138,16 +138,16 @@ const Workouts = () => {
       <Card>
         <div className="divide-y divide-gray-700">
           {[
-            { name: 'Full Body Workout', date: '2 days ago', duration: '52 min' },
-            { name: 'Upper Body Strength', date: '5 days ago', duration: '45 min' },
-            { name: 'HIIT Cardio', date: '1 week ago', duration: '32 min' },
+            { name: 'Full Body Workout', date: '2 days ago', durationMinutes: '52 min' },
+            { name: 'Upper Body Strength', date: '5 days ago', durationMinutes: '45 min' },
+            { name: 'HIIT Cardio', date: '1 week ago', durationMinutes: '32 min' },
           ].map((workout, i) => (
             <div key={i} className="p-4 flex justify-between items-center">
               <div>
                 <h3 className="font-medium">{workout.name}</h3>
                 <p className="text-sm text-gray-400">{workout.date}</p>
               </div>
-              <div className="text-sm">{workout.duration}</div>
+              <div className="text-sm">{workout.durationMinutes}</div>
             </div>
           ))}
         </div>

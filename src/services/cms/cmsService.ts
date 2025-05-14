@@ -12,8 +12,8 @@ export interface CmsPage {
   visible: boolean;
   meta_description?: string | null;
   meta_keywords?: string | null;
-  created_at?: string;
-  updated_at?: string;
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 export interface NavItem {
@@ -24,8 +24,8 @@ export interface NavItem {
   nav_group?: string | null;
   order_index: number;
   visible: boolean;
-  created_at?: string;
-  updated_at?: string;
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 export interface ContentBlock {
@@ -37,8 +37,8 @@ export interface ContentBlock {
   is_editable: boolean;
   is_dynamic: boolean;
   dynamic_source?: string | null;
-  created_at?: string;
-  updated_at?: string;
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 export const cmsService = {
@@ -48,7 +48,7 @@ export const cmsService = {
       const { data, error } = await supabase
         .from("cms_pages")
         .select("*")
-        .order("created_at");
+        .order("createdAt");
 
       if (error) {
         console.error("Error fetching CMS pages:", error);
@@ -86,7 +86,7 @@ export const cmsService = {
     }
   },
 
-  async createPage(page: Omit<CmsPage, 'id' | 'created_at' | 'updated_at'>): Promise<CmsPage | null> {
+  async createPage(page: Omit<CmsPage, 'id' | 'createdAt' | 'updatedAt'>): Promise<CmsPage | null> {
     try {
       const { data, error } = await supabase
         .from("cms_pages")
@@ -108,7 +108,7 @@ export const cmsService = {
     }
   },
 
-  async updatePage(id: string, page: Partial<Omit<CmsPage, 'id' | 'created_at' | 'updated_at'>>): Promise<CmsPage | null> {
+  async updatePage(id: string, page: Partial<Omit<CmsPage, 'id' | 'createdAt' | 'updatedAt'>>): Promise<CmsPage | null> {
     try {
       const { data, error } = await supabase
         .from("cms_pages")
@@ -173,7 +173,7 @@ export const cmsService = {
     }
   },
 
-  async createNavItem(navItem: Omit<NavItem, 'id' | 'created_at' | 'updated_at'>): Promise<NavItem | null> {
+  async createNavItem(navItem: Omit<NavItem, 'id' | 'createdAt' | 'updatedAt'>): Promise<NavItem | null> {
     try {
       const { data, error } = await supabase
         .from("cms_nav_items")
@@ -195,7 +195,7 @@ export const cmsService = {
     }
   },
 
-  async updateNavItem(id: string, navItem: Partial<Omit<NavItem, 'id' | 'created_at' | 'updated_at'>>): Promise<NavItem | null> {
+  async updateNavItem(id: string, navItem: Partial<Omit<NavItem, 'id' | 'createdAt' | 'updatedAt'>>): Promise<NavItem | null> {
     try {
       const { data, error } = await supabase
         .from("cms_nav_items")
@@ -261,7 +261,7 @@ export const cmsService = {
     }
   },
 
-  async createContentBlock(block: Omit<ContentBlock, 'id' | 'created_at' | 'updated_at'>): Promise<ContentBlock | null> {
+  async createContentBlock(block: Omit<ContentBlock, 'id' | 'createdAt' | 'updatedAt'>): Promise<ContentBlock | null> {
     try {
       const { data, error } = await supabase
         .from("cms_content_blocks")
@@ -282,7 +282,7 @@ export const cmsService = {
     }
   },
 
-  async updateContentBlock(id: string, block: Partial<Omit<ContentBlock, 'id' | 'created_at' | 'updated_at'>>): Promise<ContentBlock | null> {
+  async updateContentBlock(id: string, block: Partial<Omit<ContentBlock, 'id' | 'createdAt' | 'updatedAt'>>): Promise<ContentBlock | null> {
     try {
       const { data, error } = await supabase
         .from("cms_content_blocks")

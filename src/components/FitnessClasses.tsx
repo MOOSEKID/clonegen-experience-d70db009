@@ -44,7 +44,7 @@ const fitnessClasses = {
       title: 'Spin Class',
       description: 'High-energy indoor cycling with motivating music and expert instruction.',
       image: 'https://images.unsplash.com/photo-1594737625785-a6cbdabd333c?q=80&w=2070&auto=format&fit=crop',
-      duration: '45 min',
+      durationMinutes: '45 min',
       maxParticipants: 20,
       instructor: 'Emma Johnson'
     },
@@ -53,7 +53,7 @@ const fitnessClasses = {
       title: 'Zumba',
       description: 'Dance-based cardio that feels like a party rather than a workout.',
       image: 'https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?q=80&w=2070&auto=format&fit=crop',
-      duration: '60 min',
+      durationMinutes: '60 min',
       maxParticipants: 25,
       instructor: 'Maria Rodriguez'
     },
@@ -62,7 +62,7 @@ const fitnessClasses = {
       title: 'Kickboxing',
       description: 'High-intensity cardio combining martial arts techniques and heart-pumping exercise.',
       image: 'https://images.unsplash.com/photo-1549576490-b0b4831ef60a?q=80&w=2070&auto=format&fit=crop',
-      duration: '50 min',
+      durationMinutes: '50 min',
       maxParticipants: 18,
       instructor: 'Alex Nguyen'
     }
@@ -73,7 +73,7 @@ const fitnessClasses = {
       title: 'BodyPump',
       description: 'Barbell workout that strengthens your entire body and challenges all major muscle groups.',
       image: 'https://images.unsplash.com/photo-1583454110551-21f2fa2afe61?q=80&w=2070&auto=format&fit=crop',
-      duration: '55 min',
+      durationMinutes: '55 min',
       maxParticipants: 15,
       instructor: 'Jason Smith'
     },
@@ -82,7 +82,7 @@ const fitnessClasses = {
       title: 'Core Power',
       description: 'Strengthen your core muscles including abs, obliques, and lower back.',
       image: 'https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?q=80&w=2070&auto=format&fit=crop',
-      duration: '40 min',
+      durationMinutes: '40 min',
       maxParticipants: 20,
       instructor: 'Mike Johnson'
     },
@@ -91,7 +91,7 @@ const fitnessClasses = {
       title: 'Powerlifting',
       description: 'Master the techniques of squats, bench press, and deadlift with expert coaching.',
       image: 'https://images.unsplash.com/photo-1603287681836-b174ce5074c2?q=80&w=2071&auto=format&fit=crop',
-      duration: '60 min',
+      durationMinutes: '60 min',
       maxParticipants: 12,
       instructor: 'Chris Taylor'
     }
@@ -102,7 +102,7 @@ const fitnessClasses = {
       title: 'Vinyasa Flow',
       description: 'Dynamic practice linking breath with movement in a flowing sequence.',
       image: 'https://images.unsplash.com/photo-1575052814086-f385e2e2ad1b?q=80&w=2070&auto=format&fit=crop',
-      duration: '60 min',
+      durationMinutes: '60 min',
       maxParticipants: 18,
       instructor: 'Sarah Adams'
     },
@@ -111,7 +111,7 @@ const fitnessClasses = {
       title: 'Hot Yoga',
       description: 'Practice in a heated room to detoxify the body and increase flexibility.',
       image: 'https://images.unsplash.com/photo-1506126613408-eca07ce68773?q=80&w=2022&auto=format&fit=crop',
-      duration: '75 min',
+      durationMinutes: '75 min',
       maxParticipants: 16,
       instructor: 'Lisa Chan'
     },
@@ -120,7 +120,7 @@ const fitnessClasses = {
       title: 'Restorative Yoga',
       description: 'Passive, deep stretches held for longer periods to promote relaxation.',
       image: 'https://images.unsplash.com/photo-1552196563-55cd4e45efb3?q=80&w=1926&auto=format&fit=crop',
-      duration: '60 min',
+      durationMinutes: '60 min',
       maxParticipants: 15,
       instructor: 'Priya Patel'
     }
@@ -131,7 +131,7 @@ const fitnessClasses = {
       title: 'Circuit Training',
       description: 'High-intensity workout stations combining cardio and strength for maximum calorie burn.',
       image: 'https://images.unsplash.com/photo-1534258936925-c58bed479fcb?q=80&w=1931&auto=format&fit=crop',
-      duration: '45 min',
+      durationMinutes: '45 min',
       maxParticipants: 16,
       instructor: 'Ryan Peters'
     },
@@ -140,7 +140,7 @@ const fitnessClasses = {
       title: 'Tabata',
       description: '20 seconds of intense work followed by 10 seconds of rest, repeated for 4 minutes per exercise.',
       image: 'https://images.unsplash.com/photo-1551215110-9bf21a2941ef?q=80&w=2070&auto=format&fit=crop',
-      duration: '30 min',
+      durationMinutes: '30 min',
       maxParticipants: 20,
       instructor: 'Jen Williams'
     },
@@ -149,7 +149,7 @@ const fitnessClasses = {
       title: 'Battle Ropes',
       description: 'Full-body workout using heavy ropes for intense cardio and strength training.',
       image: 'https://images.unsplash.com/photo-1520941066462-45f451bca908?q=80&w=1974&auto=format&fit=crop',
-      duration: '40 min',
+      durationMinutes: '40 min',
       maxParticipants: 12,
       instructor: 'Marcus Jones'
     }
@@ -186,7 +186,7 @@ const FitnessClasses = () => {
   return (
     <section 
       ref={sectionRef}
-      className="py-20 bg-gym-light text-gym-dark opacity-0 transition-opacity duration-1000"
+      className="py-20 bg-gym-light text-gym-dark opacity-0 transition-opacity durationMinutes-1000"
       id="classes-section"
     >
       <div className="container-custom">
@@ -215,12 +215,12 @@ const FitnessClasses = () => {
             <TabsContent key={category} value={category} className="pt-4">
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                 {classes.map((fitnessClass) => (
-                  <Card key={fitnessClass.id} className="overflow-hidden hover:shadow-lg transition-shadow duration-300 flex flex-col">
+                  <Card key={fitnessClass.id} className="overflow-hidden hover:shadow-lg transition-shadow durationMinutes-300 flex flex-col">
                     <div className="h-48 overflow-hidden">
                       <img 
                         src={fitnessClass.image} 
                         alt={fitnessClass.title} 
-                        className="w-full h-full object-cover transition-transform duration-500 hover:scale-110"
+                        className="w-full h-full object-cover transition-transform durationMinutes-500 hover:scale-110"
                       />
                     </div>
                     <CardHeader>
@@ -232,7 +232,7 @@ const FitnessClasses = () => {
                       <div className="flex justify-between text-sm text-gray-600">
                         <div className="flex items-center">
                           <Clock size={16} className="mr-1" />
-                          <span>{fitnessClass.duration}</span>
+                          <span>{fitnessClass.durationMinutes}</span>
                         </div>
                         <div className="flex items-center">
                           <Users size={16} className="mr-1" />
@@ -248,7 +248,7 @@ const FitnessClasses = () => {
                         href="/classes"
                       >
                         <span>Book Now</span>
-                        <ArrowRight className="ml-2 group-hover:translate-x-1 transition-transform duration-300" size={16} />
+                        <ArrowRight className="ml-2 group-hover:translate-x-1 transition-transform durationMinutes-300" size={16} />
                       </Button>
                     </CardFooter>
                   </Card>
@@ -262,7 +262,7 @@ const FitnessClasses = () => {
                   href="/classes"
                 >
                   <span>View All Classes</span>
-                  <ArrowRight className="ml-2 group-hover:translate-x-1 transition-transform duration-300" size={18} />
+                  <ArrowRight className="ml-2 group-hover:translate-x-1 transition-transform durationMinutes-300" size={18} />
                 </Button>
               </div>
             </TabsContent>

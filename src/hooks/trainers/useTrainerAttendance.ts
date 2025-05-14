@@ -10,8 +10,8 @@ export interface TrainerAttendanceRecord {
   check_in_time: string | null;
   check_out_time: string | null;
   notes: string | null;
-  created_at: string;
-  updated_at: string;
+  createdAt: string;
+  updatedAt: string;
   trainer_name?: string;
 }
 
@@ -242,8 +242,8 @@ export const useTrainerAttendance = (trainerId?: string) => {
           check_in_time: checkInTime.toISOString(),
           check_out_time: checkOutTime.toISOString(),
           notes: i % 3 === 0 ? "Regular shift" : null,
-          created_at: recordDate.toISOString(),
-          updated_at: recordDate.toISOString(),
+          createdAt: recordDate.toISOString(),
+          updatedAt: recordDate.toISOString(),
           trainer_name: "Mock Trainer"
         });
       }

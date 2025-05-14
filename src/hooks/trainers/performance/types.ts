@@ -32,7 +32,7 @@ export interface ClassAttendance {
   class_name: string;
   date: string;
   time: string;
-  duration: number;
+  durationMinutes: number;
   staff_id: string;
   expected_attendance: number;
   actual_attendance: number;

@@ -166,8 +166,8 @@ export const useStaffOperations = () => {
         .insert({
           staff_id: availability.staff_id,
           day_of_week: availability.day_of_week,
-          start_time: availability.start_time,
-          end_time: availability.end_time
+          startTime: availability.startTime,
+          endTime: availability.endTime
         })
         .select()
         .single();

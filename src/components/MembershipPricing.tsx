@@ -71,7 +71,7 @@ const MembershipPricing = () => {
   return (
     <section 
       ref={sectionRef}
-      className="py-20 bg-white opacity-0 transition-opacity duration-1000"
+      className="py-20 bg-white opacity-0 transition-opacity durationMinutes-1000"
       id="pricing-section"
     >
       <div className="container-custom">
@@ -92,7 +92,7 @@ const MembershipPricing = () => {
             {activePlans.map((plan) => (
               <div 
                 key={plan.id}
-                className={`rounded-lg overflow-hidden transition-all duration-300 hover:shadow-xl flex flex-col h-full ${
+                className={`rounded-lg overflow-hidden transition-all durationMinutes-300 hover:shadow-xl flex flex-col h-full ${
                   plan.recommended 
                     ? 'border-2 border-gym-orange shadow-lg relative transform hover:-translate-y-1' 
                     : 'border border-gray-200 hover:-translate-y-1'
@@ -135,7 +135,7 @@ const MembershipPricing = () => {
                     href="/membership"
                   >
                     <span>{plan.ctaText}</span>
-                    <ArrowRight className="ml-2 group-hover:translate-x-1 transition-transform duration-300" size={18} />
+                    <ArrowRight className="ml-2 group-hover:translate-x-1 transition-transform durationMinutes-300" size={18} />
                   </Button>
                 </div>
               </div>

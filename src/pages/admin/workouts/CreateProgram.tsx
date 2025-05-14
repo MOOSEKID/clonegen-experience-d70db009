@@ -48,7 +48,7 @@ const formSchema = z.object({
   description: z.string().min(10, { message: 'Please provide a description' }),
   category: z.string().min(1, { message: 'Category is required' }),
   level: z.string().min(1, { message: 'Difficulty level is required' }),
-  duration: z.string().min(1, { message: 'Duration is required' }),
+  durationMinutes: z.string().min(1, { message: 'Duration is required' }),
   imageUrl: z.string().optional()
 });
 
@@ -90,7 +90,7 @@ const CreateProgram = () => {
       description: '',
       category: '',
       level: '',
-      duration: '',
+      durationMinutes: '',
       imageUrl: ''
     }
   });
@@ -247,20 +247,20 @@ const CreateProgram = () => {
                     
                     <FormField
                       control={form.control}
-                      name="duration"
+                      name="durationMinutes"
                       render={({ field }) => (
                         <FormItem>
                           <FormLabel>Duration</FormLabel>
                           <Select onValueChange={field.onChange} defaultValue={field.value}>
                             <FormControl>
                               <SelectTrigger>
-                                <SelectValue placeholder="Select duration" />
+                                <SelectValue placeholder="Select durationMinutes" />
                               </SelectTrigger>
                             </FormControl>
                             <SelectContent>
-                              {durationOptions.map(duration => (
-                                <SelectItem key={duration} value={duration}>
-                                  {duration}
+                              {durationOptions.map(durationMinutes => (
+                                <SelectItem key={durationMinutes} value={durationMinutes}>
+                                  {durationMinutes}
                                 </SelectItem>
                               ))}
                             </SelectContent>

@@ -18,7 +18,7 @@ export const useCmsPages = () => {
 
   // Create page mutation
   const createPage = useMutation({
-    mutationFn: (page: Omit<CmsPage, 'id' | 'created_at' | 'updated_at'>) => 
+    mutationFn: (page: Omit<CmsPage, 'id' | 'createdAt' | 'updatedAt'>) => 
       cmsService.createPage(page),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['cms', 'pages'] });
@@ -27,7 +27,7 @@ export const useCmsPages = () => {
 
   // Update page mutation
   const updatePage = useMutation({
-    mutationFn: ({ id, page }: { id: string, page: Partial<Omit<CmsPage, 'id' | 'created_at' | 'updated_at'>> }) => 
+    mutationFn: ({ id, page }: { id: string, page: Partial<Omit<CmsPage, 'id' | 'createdAt' | 'updatedAt'>> }) => 
       cmsService.updatePage(id, page),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['cms', 'pages'] });

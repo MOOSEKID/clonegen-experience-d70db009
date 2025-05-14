@@ -102,7 +102,7 @@ const TestimonialSlider = () => {
               setCurrentTestimonial(index);
               startAutoRotation();
             }}
-            className={`h-2 rounded-full transition-all duration-300 ${
+            className={`h-2 rounded-full transition-all durationMinutes-300 ${
               index === currentTestimonial ? 'w-8 bg-gym-orange' : 'w-2 bg-white/60'
             }`}
             aria-label={`Go to testimonial ${index + 1}`}

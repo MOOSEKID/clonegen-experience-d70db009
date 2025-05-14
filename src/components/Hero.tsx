@@ -85,7 +85,7 @@ const Hero = () => {
         {SLIDE_IMAGES.map((image, index) => (
           <div
             key={index}
-            className={`absolute inset-0 bg-cover bg-center bg-no-repeat transition-opacity duration-1000 ${
+            className={`absolute inset-0 bg-cover bg-center bg-no-repeat transition-opacity durationMinutes-1000 ${
               index === currentSlide ? 'opacity-100' : 'opacity-0'
             }`}
             style={{ backgroundImage: `url(${image})` }}
@@ -124,7 +124,7 @@ const Hero = () => {
                   nextSlide();
                 }, 5000);
               }}
-              className={`h-2 rounded-full transition-all duration-300 ${
+              className={`h-2 rounded-full transition-all durationMinutes-300 ${
                 index === currentSlide ? 'w-8 bg-gym-orange' : 'w-2 bg-white/60'
               }`}
               aria-label={`Go to slide ${index + 1}`}
@@ -136,7 +136,7 @@ const Hero = () => {
       {/* Content Container */}
       <div ref={textRef} className="relative h-full flex items-center">
         <div className="container-custom h-full flex flex-col justify-center">
-          <div className="relative pl-8 max-w-3xl opacity-0 transition-all duration-700" style={{ transitionDelay: '0.3s' }}>
+          <div className="relative pl-8 max-w-3xl opacity-0 transition-all durationMinutes-700" style={{ transitionDelay: '0.3s' }}>
             <div className="vertical-orange-line"></div>
             <p className="text-white text-xl mb-4">Different From Others!</p>
             <h1 className="text-4xl md:text-5xl lg:text-6xl text-white font-bold mb-6">
@@ -150,7 +150,7 @@ const Hero = () => {
               onClick={() => window.open("#contact", "_self")}
             >
               <span>GET STARTED</span>
-              <ArrowRight className="ml-2 group-hover:translate-x-1 transition-transform duration-300" size={20} />
+              <ArrowRight className="ml-2 group-hover:translate-x-1 transition-transform durationMinutes-300" size={20} />
             </Button>
           </div>
         </div>

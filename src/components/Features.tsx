@@ -96,7 +96,7 @@ const Features = () => {
             style={{ transitionDelay: '0.7s' }}
           >
             <span>VIEW MORE</span>
-            <ArrowRight className="ml-2 group-hover:translate-x-1 transition-transform duration-300" size={18} />
+            <ArrowRight className="ml-2 group-hover:translate-x-1 transition-transform durationMinutes-300" size={18} />
           </Button>
         </div>
       </div>

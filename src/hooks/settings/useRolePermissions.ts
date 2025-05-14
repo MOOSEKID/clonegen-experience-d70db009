@@ -14,8 +14,8 @@ export interface Role {
   name: string;
   description: string;
   permissions: Permission[];
-  created_at?: string;
-  updated_at?: string;
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 export const useRolePermissions = () => {

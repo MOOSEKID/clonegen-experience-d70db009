@@ -136,7 +136,7 @@ const ClassesTable = ({
                 <TableCell>{classItem.trainer}</TableCell>
                 <TableCell>{classItem.day}</TableCell>
                 <TableCell>
-                  {classItem.time} ({classItem.duration} min)
+                  {classItem.time} ({classItem.durationMinutes} min)
                 </TableCell>
                 <TableCell>{classItem.room}</TableCell>
                 <TableCell>

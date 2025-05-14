@@ -17,7 +17,7 @@ interface ProgramData {
   name: string;
   level: string;
   category: string;
-  duration: string;
+  durationMinutes: string;
   exercises: number;
   assignedTo: number;
 }
@@ -53,7 +53,7 @@ const ProgramTable = ({ programs, onViewMembers, levelBadgeColors }: ProgramTabl
                 </Badge>
               </TableCell>
               <TableCell>{program.category}</TableCell>
-              <TableCell>{program.duration}</TableCell>
+              <TableCell>{program.durationMinutes}</TableCell>
               <TableCell>{program.exercises}</TableCell>
               <TableCell>
                 <Button 

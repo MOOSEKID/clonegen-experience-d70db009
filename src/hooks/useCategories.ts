@@ -12,8 +12,8 @@ export type Category = {
   icon: string | null;
   is_active: boolean;
   featured: boolean;
-  created_at: string;
-  updated_at: string;
+  createdAt: string;
+  updatedAt: string;
   parent_id: string | null;
   productCount?: number;
 };
@@ -61,7 +61,7 @@ export const useCategories = () => {
   };
 
   // Create a new category
-  const createCategory = async (formData: Omit<Category, 'id' | 'created_at' | 'updated_at' | 'productCount'>) => {
+  const createCategory = async (formData: Omit<Category, 'id' | 'createdAt' | 'updatedAt' | 'productCount'>) => {
     // If slug is empty, generate it from the name
     if (!formData.slug) {
       formData.slug = formData.name.toLowerCase()
@@ -88,7 +88,7 @@ export const useCategories = () => {
     data 
   }: { 
     id: string; 
-    data: Partial<Omit<Category, 'id' | 'created_at' | 'updated_at' | 'productCount'>> 
+    data: Partial<Omit<Category, 'id' | 'createdAt' | 'updatedAt' | 'productCount'>> 
   }) => {
     // If slug is empty, generate it from the name
     if (data.name && !data.slug) {

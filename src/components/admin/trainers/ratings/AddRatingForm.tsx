@@ -11,7 +11,7 @@ interface AddRatingFormProps {
   memberId: string;
   onSubmit: (data: {
     trainer_id: string;
-    member_id: string;
+    clientId: string;
     rating: number;
     review?: string | null;
   }) => Promise<void>;
@@ -35,7 +35,7 @@ const AddRatingForm = ({
     try {
       await onSubmit({
         trainer_id: trainerId,
-        member_id: memberId,
+        clientId: memberId,
         rating,
         review: review.trim() === '' ? null : review
       });

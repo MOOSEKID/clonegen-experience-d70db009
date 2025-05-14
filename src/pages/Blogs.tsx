@@ -62,13 +62,13 @@ const Blogs = () => {
           {blogs.map((blog, index) => (
             <div 
               key={index}
-              className="bg-white rounded-lg shadow-md overflow-hidden transition-all duration-300 hover:shadow-xl"
+              className="bg-white rounded-lg shadow-md overflow-hidden transition-all durationMinutes-300 hover:shadow-xl"
             >
               <div className="h-48 overflow-hidden">
                 <img 
                   src={blog.image} 
                   alt={blog.title} 
-                  className="w-full h-full object-cover transition-transform duration-500 hover:scale-110"
+                  className="w-full h-full object-cover transition-transform durationMinutes-500 hover:scale-110"
                 />
               </div>
               <div className="p-6">
@@ -82,7 +82,7 @@ const Blogs = () => {
                     <span>{blog.date}</span>
                   </div>
                 </div>
-                <h3 className="text-xl font-bold mb-2 text-gym-dark hover:text-gym-orange transition-colors duration-300">
+                <h3 className="text-xl font-bold mb-2 text-gym-dark hover:text-gym-orange transition-colors durationMinutes-300">
                   <a href="#">{blog.title}</a>
                 </h3>
                 <p className="text-gray-700 mb-4">{blog.excerpt}</p>
@@ -91,7 +91,7 @@ const Blogs = () => {
                   className="inline-flex items-center text-gym-orange font-medium hover:underline group"
                 >
                   Read More 
-                  <ArrowRight size={16} className="ml-1 group-hover:translate-x-1 transition-transform duration-300" />
+                  <ArrowRight size={16} className="ml-1 group-hover:translate-x-1 transition-transform durationMinutes-300" />
                 </a>
               </div>
             </div>

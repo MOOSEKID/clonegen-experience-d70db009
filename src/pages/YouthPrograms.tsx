@@ -57,7 +57,7 @@ const YouthPrograms = () => {
           {programs.map((program, index) => (
             <div 
               key={index}
-              className="bg-white rounded-lg shadow-md overflow-hidden transition-all duration-300 hover:shadow-lg p-6"
+              className="bg-white rounded-lg shadow-md overflow-hidden transition-all durationMinutes-300 hover:shadow-lg p-6"
             >
               <div className="mb-4">{program.icon}</div>
               <h3 className="text-xl font-bold mb-2 text-gym-dark">{program.title}</h3>

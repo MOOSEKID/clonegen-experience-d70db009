@@ -70,7 +70,7 @@ export const useProductFetching = () => {
               query = query.order('price', { ascending: false });
               break;
             case 'newest':
-              query = query.order('created_at', { ascending: false });
+              query = query.order('createdAt', { ascending: false });
               break;
             case 'name':
               query = query.order('name', { ascending: true });

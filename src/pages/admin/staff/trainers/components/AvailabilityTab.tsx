@@ -27,7 +27,7 @@ const AvailabilityTab: React.FC<AvailabilityTabProps> = ({ trainer, onAddAvailab
                   <span className="font-medium capitalize">{slot.day_of_week}</span>
                 </div>
                 <div>
-                  {slot.start_time} - {slot.end_time}
+                  {slot.startTime} - {slot.endTime}
                 </div>
                 <Button variant="ghost" size="sm">
                   <Trash2 className="h-4 w-4" />

@@ -38,8 +38,8 @@ export const generateMockAssignments = (trainerId?: string, clientId?: string): 
       notes: status === 'ended' ? 'Client completed their program' : 
              status === 'paused' ? 'Client on temporary pause' : 
              'Regular training sessions',
-      created_at: assignmentDate.toISOString(),
-      updated_at: new Date().toISOString()
+      createdAt: assignmentDate.toISOString(),
+      updatedAt: new Date().toISOString()
     });
   }
   

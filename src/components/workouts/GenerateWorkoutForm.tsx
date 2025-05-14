@@ -36,8 +36,8 @@ const formSchema = z.object({
   daysPerWeek: z.string().min(1, {
     message: "Please enter number of days per week",
   }),
-  duration: z.string().min(1, {
-    message: "Please enter workout duration",
+  durationMinutes: z.string().min(1, {
+    message: "Please enter workout durationMinutes",
   }),
   injuries: z.string().optional(),
   preferences: z.string().optional(),
@@ -58,7 +58,7 @@ const GenerateWorkoutForm = ({ onSubmit, onCancel }: GenerateWorkoutFormProps) =
       fitnessLevel: "",
       focusArea: "",
       daysPerWeek: "3",
-      duration: "45",
+      durationMinutes: "45",
       injuries: "",
       preferences: "",
     },
@@ -167,7 +167,7 @@ const GenerateWorkoutForm = ({ onSubmit, onCancel }: GenerateWorkoutFormProps) =
 
             <FormField
               control={form.control}
-              name="duration"
+              name="durationMinutes"
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Minutes / Session</FormLabel>

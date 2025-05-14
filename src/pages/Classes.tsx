@@ -62,13 +62,13 @@ const Classes = () => {
           {classes.map((classItem, index) => (
             <div 
               key={index}
-              className="bg-white rounded-lg shadow-md overflow-hidden transition-all duration-300 hover:shadow-xl transform hover:-translate-y-1"
+              className="bg-white rounded-lg shadow-md overflow-hidden transition-all durationMinutes-300 hover:shadow-xl transform hover:-translate-y-1"
             >
               <div className="h-56 overflow-hidden">
                 <img 
                   src={classItem.image} 
                   alt={classItem.name} 
-                  className="w-full h-full object-cover transition-transform duration-500 hover:scale-110"
+                  className="w-full h-full object-cover transition-transform durationMinutes-500 hover:scale-110"
                 />
               </div>
               <div className="p-6">

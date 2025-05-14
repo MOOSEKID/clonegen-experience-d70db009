@@ -14,10 +14,12 @@ import Settings from '@/pages/admin/Settings';
 import Support from '@/pages/admin/Support';
 import Workouts from '@/pages/admin/Workouts';
 import TestAccounts from '@/pages/admin/TestAccounts';
+import NotFound from '@/pages/NotFound';
+
 import { Subscriptions, Invoices, Methods } from '@/pages/admin/payments';
+import CMSSettingsPage from '@/pages/admin/settings/CMS'; // Make sure this exists
 import { useAdminSettingsRoutes } from './useAdminSettingsRoutes';
 
-// Import trainer pages
 import TrainerProfiles from '@/pages/admin/staff/trainers/TrainerProfiles';
 import TrainerProfileDetail from '@/pages/admin/staff/trainers/TrainerProfileDetail';
 import PlaceholderPage from '@/components/admin/PlaceholderPage';
@@ -30,131 +32,64 @@ export interface AdminRoute {
 
 export const useAdminRoutes = (): AdminRoute[] => {
   const settingsRoutes = useAdminSettingsRoutes();
-  
+
   return [
-    {
-      path: '/admin',
-      element: <AdminDashboard />
-    },
-    {
-      path: '/admin/members',
-      element: <Members />,
-    },
-    {
-      path: '/admin/classes',
-      element: <Classes />
-    },
-    {
-      path: '/admin/staff',
-      element: <Staff />
-    },
-    {
-      path: '/admin/staff/:id',
-      element: <StaffProfile />
-    },
-    {
-      path: '/admin/staff/add',
-      element: <AddStaff />
-    },
-    {
-      path: '/admin/staff/attendance',
-      element: <StaffAttendancePage />
-    },
-    
-    // Trainer specific routes
-    {
-      path: '/admin/staff/trainers/profiles',
-      element: <TrainerProfiles />
-    },
-    {
-      path: '/admin/staff/trainers/:id',
-      element: <TrainerProfileDetail />
-    },
+    { path: '/admin', element: <AdminDashboard /> },
+    { path: '/admin/members', element: <Members /> },
+    { path: '/admin/classes', element: <Classes /> },
+    { path: '/admin/staff', element: <Staff /> },
+    { path: '/admin/staff/:id', element: <StaffProfile /> },
+    { path: '/admin/staff/add', element: <AddStaff /> },
+    { path: '/admin/staff/attendance', element: <StaffAttendancePage /> },
+
+    // Trainers
+    { path: '/admin/staff/trainers/profiles', element: <TrainerProfiles /> },
+    { path: '/admin/staff/trainers/:id', element: <TrainerProfileDetail /> },
     {
       path: '/admin/staff/trainers/performance',
-      element: <PlaceholderPage 
-        title="Trainer Performance Tracking"
-        description="Track and analyze trainer performance metrics"
-        comingSoon={true}
-      />
+      element: <PlaceholderPage title="Trainer Performance" description="Coming soon..." comingSoon />
     },
     {
       path: '/admin/staff/trainers/ratings',
-      element: <PlaceholderPage 
-        title="Trainer Ratings & Reviews"
-        description="View and manage client feedback and ratings for trainers"
-        comingSoon={true}
-      />
+      element: <PlaceholderPage title="Trainer Ratings" description="Coming soon..." comingSoon />
     },
     {
       path: '/admin/staff/trainers/scheduling',
-      element: <PlaceholderPage 
-        title="Trainer Scheduling"
-        description="Manage trainer schedules, availability, and time-off"
-        comingSoon={true}
-      />
+      element: <PlaceholderPage title="Trainer Scheduling" description="Coming soon..." comingSoon />
     },
-    
-    // Manager specific routes
+
+    // Managers
     {
       path: '/admin/staff/managers/permissions',
-      element: <PlaceholderPage 
-        title="Admin Roles & Permissions"
-        description="Manage administrative access levels and permissions"
-        comingSoon={true}
-      />
+      element: <PlaceholderPage title="Admin Permissions" description="Coming soon..." comingSoon />
     },
     {
       path: '/admin/staff/managers/branches',
-      element: <PlaceholderPage 
-        title="Branch Assignments"
-        description="Assign managers to different gym locations and branches"
-        comingSoon={true}
-      />
+      element: <PlaceholderPage title="Branch Management" description="Coming soon..." comingSoon />
     },
     {
       path: '/admin/staff/managers/activity',
-      element: <PlaceholderPage 
-        title="Activity Logs"
-        description="View login history and administrative actions"
-        comingSoon={true}
-      />
+      element: <PlaceholderPage title="Activity Logs" description="Coming soon..." comingSoon />
     },
-    
-    // Reception & Sales specific routes
+
+    // Reception & Sales
     {
       path: '/admin/staff/reception-sales/leads',
-      element: <PlaceholderPage 
-        title="Lead Management"
-        description="Track and manage potential new member leads"
-        comingSoon={true}
-      />
+      element: <PlaceholderPage title="Lead Management" description="Coming soon..." comingSoon />
     },
     {
       path: '/admin/staff/reception-sales/onboarding',
-      element: <PlaceholderPage 
-        title="Onboarding History"
-        description="View history of new member registrations and onboarding"
-        comingSoon={true}
-      />
+      element: <PlaceholderPage title="Onboarding Tracker" description="Coming soon..." comingSoon />
     },
     {
       path: '/admin/staff/reception-sales/shifts',
-      element: <PlaceholderPage 
-        title="Shift Planner"
-        description="Schedule and manage front desk staff shifts"
-        comingSoon={true}
-      />
+      element: <PlaceholderPage title="Shift Planner" description="Coming soon..." comingSoon />
     },
-    
-    // Support Staff specific routes
+
+    // Support Staff
     {
       path: '/admin/staff/support/tasks',
-      element: <PlaceholderPage 
-        title="Task Assignment"
-        description="Assign and track maintenance and support tasks"
-        comingSoon={true}
-      />
+      element: <PlaceholderPage title="Task Assignments" description="Coming soon..." comingSoon />
     },
     {
       path: '/admin/staff/support/attendance',
@@ -162,86 +97,52 @@ export const useAdminRoutes = (): AdminRoute[] => {
     },
     {
       path: '/admin/staff/support/schedule',
-      element: <PlaceholderPage 
-        title="Duty Schedule"
-        description="Manage weekly schedule of support staff responsibilities"
-        comingSoon={true}
-      />
+      element: <PlaceholderPage title="Support Schedule" description="Coming soon..." comingSoon />
     },
-    
-    // Wellness Staff specific routes
+
+    // Wellness
     {
       path: '/admin/staff/wellness/massage',
-      element: <PlaceholderPage 
-        title="Massage Therapist Roster"
-        description="Manage massage therapist schedules and appointments"
-        comingSoon={true}
-      />
+      element: <PlaceholderPage title="Massage Scheduling" description="Coming soon..." comingSoon />
     },
     {
       path: '/admin/staff/wellness/sauna',
-      element: <PlaceholderPage 
-        title="Sauna Schedule"
-        description="Schedule sauna attendants and manage sauna sessions"
-        comingSoon={true}
-      />
+      element: <PlaceholderPage title="Sauna Management" description="Coming soon..." comingSoon />
     },
     {
       path: '/admin/staff/wellness/notes',
-      element: <PlaceholderPage 
-        title="Client Logs"
-        description="View and manage wellness session notes and client records"
-        comingSoon={true}
-      />
+      element: <PlaceholderPage title="Wellness Notes" description="Coming soon..." comingSoon />
     },
-    
+
+    { path: '/admin/shop', element: <Shop /> },
+    { path: '/admin/payments', element: <Payments /> },
     {
-      path: '/admin/shop',
-      element: <Shop />
+      path: '/admin/payments/subscriptions',
+      element: <Subscriptions />
     },
     {
-      path: '/admin/payments',
-      element: <Payments />,
-      children: [
-        {
-          path: '',
-          element: <Subscriptions />
-        },
-        {
-          path: 'invoices',
-          element: <Invoices />
-        },
-        {
-          path: 'methods',
-          element: <Methods />
-        }
-      ]
+      path: '/admin/payments/invoices',
+      element: <Invoices />
     },
     {
-      path: '/admin/workouts',
-      element: <Workouts />
+      path: '/admin/payments/methods',
+      element: <Methods />
     },
+    { path: '/admin/workouts', element: <Workouts /> },
+    { path: '/admin/reports', element: <Reports /> },
+    { path: '/admin/content', element: <Content /> },
+    { path: '/admin/support', element: <Support /> },
+    { path: '/admin/settings', element: <Settings /> },
+    { path: '/admin/settings/cms', element: <CMSSettingsPage /> },
+    { path: '/admin/test-accounts', element: <TestAccounts /> },
+
+    // Inject dynamic settings routes
+    ...settingsRoutes,
+
+    // Optional: Catch-all route
     {
-      path: '/admin/reports',
-      element: <Reports />
-    },
-    {
-      path: '/admin/content',
-      element: <Content />
-    },
-    {
-      path: '/admin/support',
-      element: <Support />
-    },
-    {
-      path: '/admin/settings',
-      element: <Settings />
-    },
-    {
-      path: '/admin/test-accounts',
-      element: <TestAccounts />
-    },
-    // Add all settings routes
-    ...settingsRoutes
+      path: '*',
+      element: <NotFound />
+    }
   ];
 };

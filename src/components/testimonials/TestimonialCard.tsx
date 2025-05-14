@@ -10,7 +10,7 @@ interface TestimonialCardProps {
 const TestimonialCard = ({ testimonial, isActive }: TestimonialCardProps) => {
   return (
     <div
-      className={`absolute inset-0 transition-all duration-500 transform ${
+      className={`absolute inset-0 transition-all durationMinutes-500 transform ${
         isActive 
           ? 'opacity-100 translate-x-0 z-10' 
           : 'opacity-0 translate-x-16 z-0 pointer-events-none'

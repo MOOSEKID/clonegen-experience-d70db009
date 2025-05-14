@@ -120,7 +120,7 @@ const StaffAvailabilityTab: React.FC<StaffAvailabilityTabProps> = ({ staffMember
                   <div className="flex items-center">
                     <Clock className="h-4 w-4 mr-2 text-gray-500" />
                     <span>
-                      {avail.start_time && formatTime(avail.start_time)} - {avail.end_time && formatTime(avail.end_time)}
+                      {avail.startTime && formatTime(avail.startTime)} - {avail.endTime && formatTime(avail.endTime)}
                     </span>
                   </div>
                 </div>

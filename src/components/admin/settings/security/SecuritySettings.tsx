@@ -18,7 +18,7 @@ interface SecuritySettingsData {
   require_numbers: boolean;
   require_uppercase: boolean;
   session_timeout_minutes: number;
-  updated_at?: string;
+  updatedAt?: string;
 }
 
 const SecuritySettings = () => {

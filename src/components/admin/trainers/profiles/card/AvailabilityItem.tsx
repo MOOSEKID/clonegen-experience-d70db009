@@ -15,7 +15,7 @@ const AvailabilityItem: React.FC<AvailabilityItemProps> = ({ availability, onDel
       <div>
         <span className="font-medium">{availability.day_of_week}: </span>
         <span>
-          {availability.start_time} - {availability.end_time}
+          {availability.startTime} - {availability.endTime}
         </span>
       </div>
       <Button

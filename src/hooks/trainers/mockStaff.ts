@@ -18,8 +18,8 @@ export const getMockStaff = (): StaffProfile[] => {
       availability: [],
       assigned_classes: [],
       assigned_members: [],
-      created_at: null,
-      updated_at: null,
+      createdAt: null,
+      updatedAt: null,
       experience_years: 10,
       experience_level: 'Expert'
     },
@@ -38,8 +38,8 @@ export const getMockStaff = (): StaffProfile[] => {
       availability: [],
       assigned_classes: [],
       assigned_members: [],
-      created_at: null,
-      updated_at: null,
+      createdAt: null,
+      updatedAt: null,
       experience_years: 5,
       experience_level: 'Intermediate'
     },
@@ -58,8 +58,8 @@ export const getMockStaff = (): StaffProfile[] => {
       availability: [],
       assigned_classes: [],
       assigned_members: [],
-      created_at: null,
-      updated_at: null,
+      createdAt: null,
+      updatedAt: null,
       experience_years: 3,
       experience_level: 'Advanced'
     }

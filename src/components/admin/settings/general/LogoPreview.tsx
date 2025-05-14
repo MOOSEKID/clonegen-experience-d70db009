@@ -44,7 +44,7 @@ export const LogoPreview: React.FC<LogoPreviewProps> = ({
         </Button>
       </div>
       
-      <Card className={`p-6 flex flex-col justify-center items-center h-40 transition-colors duration-200 ${isDarkMode ? 'bg-gray-900 text-white' : 'bg-white text-gray-900'}`}>
+      <Card className={`p-6 flex flex-col justify-center items-center h-40 transition-colors durationMinutes-200 ${isDarkMode ? 'bg-gray-900 text-white' : 'bg-white text-gray-900'}`}>
         {currentLogo ? (
           <>
             <img 

@@ -9,7 +9,7 @@ export interface WorkoutProgram {
   name: string;
   description: string;
   level: 'Beginner' | 'Intermediate' | 'Advanced';
-  duration: string;
+  durationMinutes: string;
   category: string;
   isPremium: boolean;
   imageUrl?: string;
@@ -36,7 +36,7 @@ export function useWorkoutPrograms() {
         name: 'Full Body Strength',
         description: 'Build overall strength with compound movements',
         level: 'Intermediate',
-        duration: '45 minutes',
+        durationMinutes: '45 minutes',
         category: 'Strength',
         isPremium: false,
       },
@@ -45,7 +45,7 @@ export function useWorkoutPrograms() {
         name: 'HIIT Cardio Burn',
         description: 'High intensity interval training for maximum calorie burn',
         level: 'Advanced',
-        duration: '30 minutes',
+        durationMinutes: '30 minutes',
         category: 'Cardio',
         isPremium: false,
       },
@@ -54,7 +54,7 @@ export function useWorkoutPrograms() {
         name: 'Beginner Weight Loss',
         description: 'Perfect for those just starting their fitness journey',
         level: 'Beginner',
-        duration: '40 minutes',
+        durationMinutes: '40 minutes',
         category: 'Weight Loss',
         isPremium: false,
       },
@@ -63,7 +63,7 @@ export function useWorkoutPrograms() {
         name: 'Custom AI Strength Plan',
         description: 'Personalized strength program based on your goals',
         level: 'Intermediate',
-        duration: 'Varies',
+        durationMinutes: 'Varies',
         category: 'AI Generated',
         isPremium: true,
       },
@@ -72,7 +72,7 @@ export function useWorkoutPrograms() {
         name: 'Custom AI Cardio Plan',
         description: 'AI-generated cardio program optimized for your fitness level',
         level: 'Intermediate',
-        duration: 'Varies',
+        durationMinutes: 'Varies',
         category: 'AI Generated',
         isPremium: true,
       }

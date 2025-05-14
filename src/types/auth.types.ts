@@ -13,13 +13,13 @@ export interface AuthUser {
   app_metadata?: any;
   confirmation_sent_at?: string;
   confirmed_at?: string;
-  created_at?: string;
+  createdAt?: string;
   factors?: any[];
   identities?: any[];
   last_sign_in_at?: string;
   phone?: string;
   recovery_sent_at?: string;
-  updated_at?: string;
+  updatedAt?: string;
   aud?: string;
 }
 

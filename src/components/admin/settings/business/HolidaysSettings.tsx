@@ -15,7 +15,7 @@ interface HolidayData {
   id: string;
   holiday_name: string;
   holiday_date: string;
-  updated_at?: string;
+  updatedAt?: string;
 }
 
 interface FormattedHoliday extends HolidayData {

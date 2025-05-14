@@ -19,8 +19,8 @@ export type Product = {
   is_public: boolean;
   is_instore: boolean;
   is_member_only: boolean;
-  created_at: string;
-  updated_at: string;
+  createdAt: string;
+  updatedAt: string;
 };
 
 export interface ProductFormData {
@@ -51,7 +51,7 @@ export const useProducts = () => {
     const { data, error } = await supabase
       .from('products')
       .select('*, category:categories(name)')
-      .order('created_at', { ascending: false });
+      .order('createdAt', { ascending: false });
 
     if (error) {
       throw new Error(error.message);

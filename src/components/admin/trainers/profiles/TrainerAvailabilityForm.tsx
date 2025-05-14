@@ -11,11 +11,11 @@ import { weekDays } from "@/utils/classFormUtils";
 
 const availabilityFormSchema = z.object({
   day_of_week: z.string().min(1, { message: "Please select a day." }),
-  start_time: z.string().min(1, { message: "Start time is required." }),
-  end_time: z.string().min(1, { message: "End time is required." }),
-}).refine(data => data.end_time > data.start_time, {
+  startTime: z.string().min(1, { message: "Start time is required." }),
+  endTime: z.string().min(1, { message: "End time is required." }),
+}).refine(data => data.endTime > data.startTime, {
   message: "End time must be after start time.",
-  path: ["end_time"],
+  path: ["endTime"],
 });
 
 type AvailabilityFormValues = z.infer<typeof availabilityFormSchema>;
@@ -31,8 +31,8 @@ const TrainerAvailabilityForm = ({ trainerId, onSubmit, onCancel }: TrainerAvail
     resolver: zodResolver(availabilityFormSchema),
     defaultValues: {
       day_of_week: "",
-      start_time: "",
-      end_time: "",
+      startTime: "",
+      endTime: "",
     },
   });
 
@@ -40,8 +40,8 @@ const TrainerAvailabilityForm = ({ trainerId, onSubmit, onCancel }: TrainerAvail
     const availabilityData: Omit<StaffAvailability, 'id'> = {
       staff_id: trainerId,
       day_of_week: data.day_of_week,
-      start_time: data.start_time,
-      end_time: data.end_time
+      startTime: data.startTime,
+      endTime: data.endTime
     };
     await onSubmit(availabilityData);
     form.reset();
@@ -76,7 +76,7 @@ const TrainerAvailabilityForm = ({ trainerId, onSubmit, onCancel }: TrainerAvail
         <div className="grid grid-cols-2 gap-4">
           <FormField
             control={form.control}
-            name="start_time"
+            name="startTime"
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Start Time*</FormLabel>
@@ -90,7 +90,7 @@ const TrainerAvailabilityForm = ({ trainerId, onSubmit, onCancel }: TrainerAvail
 
           <FormField
             control={form.control}
-            name="end_time"
+            name="endTime"
             render={({ field }) => (
               <FormItem>
                 <FormLabel>End Time*</FormLabel>

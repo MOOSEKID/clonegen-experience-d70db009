@@ -34,7 +34,7 @@ const Testimonials = () => {
   return (
     <section 
       ref={testimonialRef} 
-      className="py-20 bg-gym-dark text-white overflow-hidden opacity-0 transition-opacity duration-1000"
+      className="py-20 bg-gym-dark text-white overflow-hidden opacity-0 transition-opacity durationMinutes-1000"
       id="testimonials-section"
     >
       <div className="container-custom">

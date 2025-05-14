@@ -68,8 +68,8 @@ export interface Member {
   }>;
   
   // Timestamps
-  created_at?: string;
-  updated_at?: string;
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 // Need to add these types for form handling
@@ -108,7 +108,7 @@ export interface AttendanceRecord {
   date: string;
   checkInTime: string;
   checkOutTime?: string;
-  duration?: number; // In minutes
+  durationMinutes?: number; // In minutes
 }
 
 // User credentials for authentication

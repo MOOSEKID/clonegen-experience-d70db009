@@ -193,8 +193,8 @@ export const useStaffOperations = () => {
         .insert({
           trainer_id: data.staff_id,
           day_of_week: data.day_of_week,
-          start_time: data.start_time,
-          end_time: data.end_time
+          startTime: data.startTime,
+          endTime: data.endTime
         });
         
       if (error) throw error;

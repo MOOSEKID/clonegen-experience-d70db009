@@ -6,7 +6,7 @@ import { AlertCircle } from 'lucide-react';
 
 interface TimeAndDurationFieldsProps {
   time: string;
-  duration: number;
+  durationMinutes: number;
   errors?: Record<string, string>;
   handleChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   handleNumberChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
@@ -14,7 +14,7 @@ interface TimeAndDurationFieldsProps {
 
 const TimeAndDurationFields = ({
   time,
-  duration,
+  durationMinutes,
   errors = {},
   handleChange,
   handleNumberChange
@@ -43,24 +43,24 @@ const TimeAndDurationFields = ({
       </div>
       
       <div className="space-y-2">
-        <Label htmlFor="duration" className={cn(errors.duration && "text-red-500")}>
+        <Label htmlFor="durationMinutes" className={cn(errors.durationMinutes && "text-red-500")}>
           Duration (mins)*
         </Label>
         <Input 
-          id="duration" 
-          name="duration" 
+          id="durationMinutes" 
+          name="durationMinutes" 
           type="number"
           min="15"
           step="5"
-          value={duration} 
+          value={durationMinutes} 
           onChange={handleNumberChange}
-          className={cn(errors.duration && "border-red-500 focus-visible:ring-red-500")}
+          className={cn(errors.durationMinutes && "border-red-500 focus-visible:ring-red-500")}
           required
         />
-        {errors.duration && (
+        {errors.durationMinutes && (
           <div className="text-red-500 text-sm mt-1 flex items-center gap-1">
             <AlertCircle className="h-4 w-4" />
-            <span>{errors.duration}</span>
+            <span>{errors.durationMinutes}</span>
           </div>
         )}
       </div>

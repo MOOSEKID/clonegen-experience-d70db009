@@ -18,7 +18,7 @@ export const useContentBlocks = (pageId: string) => {
 
   // Create content block mutation
   const createContentBlock = useMutation({
-    mutationFn: (block: Omit<ContentBlock, 'id' | 'created_at' | 'updated_at'>) => 
+    mutationFn: (block: Omit<ContentBlock, 'id' | 'createdAt' | 'updatedAt'>) => 
       cmsService.createContentBlock(block),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['cms', 'contentBlocks', pageId] });
@@ -27,7 +27,7 @@ export const useContentBlocks = (pageId: string) => {
 
   // Update content block mutation
   const updateContentBlock = useMutation({
-    mutationFn: ({ id, block }: { id: string, block: Partial<Omit<ContentBlock, 'id' | 'created_at' | 'updated_at'>> }) => 
+    mutationFn: ({ id, block }: { id: string, block: Partial<Omit<ContentBlock, 'id' | 'createdAt' | 'updatedAt'>> }) => 
       cmsService.updateContentBlock(id, block),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['cms', 'contentBlocks', pageId] });

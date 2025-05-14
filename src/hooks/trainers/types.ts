@@ -13,8 +13,8 @@ export interface StaffProfile {
   hire_date?: string;
   assigned_classes?: string[];
   assigned_members?: string[];
-  created_at?: string;
-  updated_at?: string;
+  createdAt?: string;
+  updatedAt?: string;
   certifications?: StaffCertification[];
   availability?: StaffAvailability[];
   experience_years?: number;
@@ -30,18 +30,18 @@ export interface StaffCertification {
   expiry_date?: string;
   verified?: boolean;
   certification_file?: string;
-  created_at?: string;
-  updated_at?: string;
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 export interface StaffAvailability {
   id: string;
   staff_id: string;
   day_of_week: string;
-  start_time: string;
-  end_time: string;
-  created_at?: string;
-  updated_at?: string;
+  startTime: string;
+  endTime: string;
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 export interface ClientAssignment {
@@ -52,26 +52,26 @@ export interface ClientAssignment {
   end_date?: string;
   status?: string;
   notes?: string;
-  created_at?: string;
-  updated_at?: string;
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 export interface ClientSession {
   id: string;
   staff_id: string;
   client_id?: string;
-  session_date: string;
-  start_time: string;
-  end_time: string;
-  duration?: number;
-  session_type?: string;
+  date: string;
+  startTime: string;
+  endTime: string;
+  durationMinutes?: number;
+  sessionType?: string;
   location?: string;
   status?: string;
   notes?: string;
   focus_areas?: string[];
   achievements?: string;
-  created_at?: string;
-  updated_at?: string;
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 export interface ClientSessionInput extends Omit<ClientSession, 'id'> {}
@@ -88,7 +88,7 @@ export interface BusinessHour {
   open_time: string | null;
   close_time: string | null;
   is_closed: boolean;
-  updated_at?: string;
+  updatedAt?: string;
 }
 
 // Define the JSON type for better type safety

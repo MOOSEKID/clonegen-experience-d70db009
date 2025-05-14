@@ -18,11 +18,11 @@ export type ShopSettingsData = {
   low_stock_threshold: number;
   email_low_stock: boolean;
   hide_out_of_stock: boolean;
-  created_at?: string;
-  updated_at?: string;
+  createdAt?: string;
+  updatedAt?: string;
 };
 
-export type ShopSettingsUpdateData = Partial<Omit<ShopSettingsData, 'id' | 'created_at' | 'updated_at'>>;
+export type ShopSettingsUpdateData = Partial<Omit<ShopSettingsData, 'id' | 'createdAt' | 'updatedAt'>>;
 
 export enum SaveState {
   Idle = 'idle',
