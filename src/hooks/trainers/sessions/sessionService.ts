@@ -7,18 +7,18 @@ export const fetchSessions = async (trainerId?: string, clientId?: string): Prom
       .from('client_sessions')
       .select(`
         id,
-        staff_id,
-        client_id,
-        date,
-        startTime,
-        endTime,
-        durationMinutes,
+        assigned_trainer_id,
+        member_id,
+        session_date,
+        start_time,
+        end_time,
+        duration,
         status,
         notes,
         focus_areas,
         achievements,
-        createdAt,
-        updatedAt
+        created_at,
+        updated_at
       `);
 
     if (trainerId) {
@@ -29,17 +29,11 @@ export const fetchSessions = async (trainerId?: string, clientId?: string): Prom
       query = query.eq('member_id', clientId);
     }
 
-    const { data, error } = await query.order('date', { ascending: false });
+    const { data, error } = await query.order('session_date', { ascending: false });
 
     if (error) throw error;
-    
-    // Map the data to match our ClientSession type
-    const sessions = data.map((item: any) => ({
-      ...item,
-      staff_id: item.staff_id || item.trainer_id, // Handle both trainer_id and staff_id
-    })) as ClientSession[];
-    
-    return sessions;
+
+    return data as ClientSession[];
   } catch (error) {
     console.error('Error fetching sessions:', error);
     throw error;
