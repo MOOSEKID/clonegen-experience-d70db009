@@ -9,6 +9,30 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      admin_audit_logs: {
+        Row: {
+          action: string
+          admin_id: string
+          details: Json | null
+          id: string
+          timestamp: string
+        }
+        Insert: {
+          action: string
+          admin_id: string
+          details?: Json | null
+          id?: string
+          timestamp?: string
+        }
+        Update: {
+          action?: string
+          admin_id?: string
+          details?: Json | null
+          id?: string
+          timestamp?: string
+        }
+        Relationships: []
+      }
       categories: {
         Row: {
           createdAt: string
@@ -170,7 +194,7 @@ export type Database = {
             foreignKeyName: "classes_trainer_id_fkey"
             columns: ["trainer_id"]
             isOneToOne: false
-            referencedRelation: "trainers"
+            referencedRelation: "trainer_profiles"
             referencedColumns: ["id"]
           },
         ]
@@ -236,7 +260,7 @@ export type Database = {
             foreignKeyName: "client_progress_trainer_id_fkey"
             columns: ["trainer_id"]
             isOneToOne: false
-            referencedRelation: "trainers"
+            referencedRelation: "trainer_profiles"
             referencedColumns: ["id"]
           },
         ]
@@ -245,67 +269,67 @@ export type Database = {
         Row: {
           achievements: string | null
           client_id: string | null
-          createdAt: string | null
-          durationMinutes: number | null
-          endTime: string
+          created_at: string | null
+          duration: number | null
+          end_time: string
           focus_areas: string[] | null
           id: string
-          location: string | null
+          member_id: string | null
           notes: string | null
-          date: string
-          sessionType: string | null
-          startTime: string
+          session_date: string
+          session_type: string | null
+          start_time: string
           status: string | null
           trainer_id: string | null
-          updatedAt: string | null
+          updated_at: string | null
         }
         Insert: {
           achievements?: string | null
           client_id?: string | null
-          createdAt?: string | null
-          durationMinutes?: number | null
-          endTime: string
+          created_at?: string | null
+          duration?: number | null
+          end_time: string
           focus_areas?: string[] | null
           id?: string
-          location?: string | null
+          member_id?: string | null
           notes?: string | null
-          date: string
-          sessionType?: string | null
-          startTime: string
+          session_date: string
+          session_type?: string | null
+          start_time: string
           status?: string | null
           trainer_id?: string | null
-          updatedAt?: string | null
+          updated_at?: string | null
         }
         Update: {
           achievements?: string | null
           client_id?: string | null
-          createdAt?: string | null
-          durationMinutes?: number | null
-          endTime?: string
+          created_at?: string | null
+          duration?: number | null
+          end_time?: string
           focus_areas?: string[] | null
           id?: string
-          location?: string | null
+          member_id?: string | null
           notes?: string | null
-          date?: string
-          sessionType?: string | null
-          startTime?: string
+          session_date?: string
+          session_type?: string | null
+          start_time?: string
           status?: string | null
           trainer_id?: string | null
-          updatedAt?: string | null
+          updated_at?: string | null
         }
         Relationships: [
           {
             foreignKeyName: "client_sessions_client_id_fkey"
-            columns: ["client_id"]
+            columns: ["member_id"]
             isOneToOne: false
             referencedRelation: "members"
             referencedColumns: ["id"]
           },
           {
             foreignKeyName: "client_sessions_trainer_id_fkey"
-            columns: ["trainer_id"]
+            columns: ["assigned_trainer_id"]
             isOneToOne: false
-            referencedRelation: "trainers"
+            referencedRelation: "trainer_profiles"
             referencedColumns: ["id"]
           },
         ]
@@ -1687,7 +1711,7 @@ export type Database = {
             foreignKeyName: "staff_attendance_staff_id_fkey"
             columns: ["staff_id"]
             isOneToOne: false
-            referencedRelation: "trainers"
+            referencedRelation: "trainer_profiles"
             referencedColumns: ["id"]
           },
         ]
@@ -1813,7 +1837,7 @@ export type Database = {
             foreignKeyName: "trainer_attendance_trainer_id_fkey"
             columns: ["trainer_id"]
             isOneToOne: false
-            referencedRelation: "trainers"
+            referencedRelation: "trainer_profiles"
             referencedColumns: ["id"]
           },
         ]
@@ -1851,7 +1875,7 @@ export type Database = {
             foreignKeyName: "trainer_availability_trainer_id_fkey"
             columns: ["trainer_id"]
             isOneToOne: false
-            referencedRelation: "trainers"
+            referencedRelation: "trainer_profiles"
             referencedColumns: ["id"]
           },
         ]
@@ -1898,7 +1922,7 @@ export type Database = {
             foreignKeyName: "trainer_certifications_trainer_id_fkey"
             columns: ["trainer_id"]
             isOneToOne: false
-            referencedRelation: "trainers"
+            referencedRelation: "trainer_profiles"
             referencedColumns: ["id"]
           },
         ]
@@ -1949,43 +1973,43 @@ export type Database = {
             foreignKeyName: "trainer_client_assignments_trainer_id_fkey"
             columns: ["trainer_id"]
             isOneToOne: false
-            referencedRelation: "trainers"
+            referencedRelation: "trainer_profiles"
             referencedColumns: ["id"]
           },
         ]
       }
       trainer_ratings: {
         Row: {
-          createdAt: string | null
+          created_at: string | null
           id: string
-          clientId: string | null
+          member_id: string | null
           rating: number | null
           review: string | null
           trainer_id: string | null
-          updatedAt: string | null
+          updated_at: string | null
         }
         Insert: {
-          createdAt?: string | null
+          created_at?: string | null
           id?: string
-          clientId?: string | null
+          member_id?: string | null
           rating?: number | null
           review?: string | null
           trainer_id?: string | null
-          updatedAt?: string | null
+          updated_at?: string | null
         }
         Update: {
-          createdAt?: string | null
+          created_at?: string | null
           id?: string
-          clientId?: string | null
+          member_id?: string | null
           rating?: number | null
           review?: string | null
           trainer_id?: string | null
-          updatedAt?: string | null
+          updated_at?: string | null
         }
         Relationships: [
           {
             foreignKeyName: "trainer_ratings_member_id_fkey"
-            columns: ["clientId"]
+            columns: ["member_id"]
             isOneToOne: false
             referencedRelation: "members"
             referencedColumns: ["id"]
@@ -2004,51 +2028,119 @@ export type Database = {
           availability: Json | null
           bio: string | null
           certifications: string[] | null
-          createdAt: string | null
+          created_at: string | null
           email: string | null
+          experience_level: string | null
           hiredate: string | null
           hourlyrate: number | null
           id: string
+          last_synced_at: string | null
           name: string
           phone: string | null
+          photo_url: string | null
           profilepicture: string | null
           specialization: string[] | null
+          specializations: string[] | null
+          staff_id: string | null
           status: string | null
-          updatedAt: string | null
+          updated_at: string | null
         }
         Insert: {
           availability?: Json | null
           bio?: string | null
           certifications?: string[] | null
-          createdAt?: string | null
+          created_at?: string | null
           email?: string | null
+          experience_level?: string | null
           hiredate?: string | null
           hourlyrate?: number | null
           id?: string
+          last_synced_at?: string | null
           name: string
           phone?: string | null
+          photo_url?: string | null
           profilepicture?: string | null
           specialization?: string[] | null
+          specializations?: string[] | null
+          staff_id?: string | null
           status?: string | null
-          updatedAt?: string | null
+          updated_at?: string | null
         }
         Update: {
           availability?: Json | null
           bio?: string | null
           certifications?: string[] | null
-          createdAt?: string | null
+          created_at?: string | null
           email?: string | null
+          experience_level?: string | null
           hiredate?: string | null
           hourlyrate?: number | null
           id?: string
+          last_synced_at?: string | null
           name?: string
           phone?: string | null
+          photo_url?: string | null
           profilepicture?: string | null
           specialization?: string[] | null
+          specializations?: string[] | null
+          staff_id?: string | null
           status?: string | null
-          updatedAt?: string | null
+          updated_at?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "fk_staff_id"
+            columns: ["staff_id"]
+            isOneToOne: false
+            referencedRelation: "staff"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      trainer_ratings: {
+        Row: {
+          created_at: string | null
+          id: string
+          member_id: string | null
+          rating: number | null
+          review: string | null
+          trainer_id: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          member_id?: string | null
+          rating?: number | null
+          review?: string | null
+          trainer_id?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          member_id?: string | null
+          rating?: number | null
+          review?: string | null
+          trainer_id?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "trainer_ratings_member_id_fkey"
+            columns: ["member_id"]
+            isOneToOne: false
+            referencedRelation: "members"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "trainer_ratings_trainer_id_fkey"
+            columns: ["trainer_id"]
+            isOneToOne: false
+            referencedRelation: "trainer_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
     }
     Views: {
@@ -2070,6 +2162,22 @@ export type Database = {
       is_admin_safe: {
         Args: Record<PropertyKey, never>
         Returns: boolean
+      }
+      is_admin_user: {
+        Args: Record<PropertyKey, never>
+        Returns: boolean
+      }
+      is_superadmin: {
+        Args: Record<PropertyKey, never>
+        Returns: boolean
+      }
+      is_superadmin_user: {
+        Args: Record<PropertyKey, never>
+        Returns: boolean
+      }
+      sync_missing_trainer_profiles: {
+        Args: Record<PropertyKey, never>
+        Returns: undefined
       }
     }
     Enums: {

@@ -43,6 +43,27 @@ export const adaptTrainerToStaff = (trainer: any): StaffProfile => {
   };
 };
 
+// NEW: Convert from staff table to StaffProfile format
+export const adaptStaffMemberToStaffProfile = (staffMember: any): StaffProfile => {
+  return {
+    id: staffMember.id,
+    full_name: staffMember.full_name,
+    email: staffMember.email,
+    phone: staffMember.phone,
+    bio: staffMember.bio,
+    photo_url: staffMember.photo_url,
+    role: staffMember.role || 'support',
+    status: staffMember.status || 'Active',
+    specialties: staffMember.specialties || [],
+    hire_date: staffMember.hire_date,
+    certifications: [],  // Will be populated later if needed
+    availability: [],    // Will be populated later if needed
+    experience_years: staffMember.experience_years,
+    experience_level: staffMember.access_level,
+    access_level: staffMember.access_level
+  };
+};
+
 // Helper to convert between trainer_id and staff_id
 export const convertTrainerCertToStaffCert = (trainerCert: any): any => {
   const staffCert = { ...trainerCert };

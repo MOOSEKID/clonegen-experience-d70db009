@@ -9,12 +9,12 @@ export const useStaffOperations = () => {
   
   const addStaffMember = async (staffMember: Omit<StaffProfile, 'id' | 'certifications' | 'availability'>) => {
     try {
-      // Use trainers table for now since staff table might not exist yet
+      // Use trainer_profiles table for now since staff table might not exist yet
       // Convert from StaffProfile to trainer fields for backward compatibility
       const trainerData = adaptStaffToTrainer(staffMember);
       
       const { data, error } = await supabase
-        .from('trainers')
+        .from('trainer_profiles')
         .insert({
           name: trainerData.name,
           email: trainerData.email,
@@ -74,7 +74,7 @@ export const useStaffOperations = () => {
       });
       
       const { error } = await supabase
-        .from('trainers')
+        .from('trainer_profiles')
         .update(dbUpdates)
         .eq('id', id);
         
@@ -103,7 +103,7 @@ export const useStaffOperations = () => {
   const deleteStaffMember = async (id: string) => {
     try {
       const { error } = await supabase
-        .from('trainers')
+        .from('trainer_profiles')
         .delete()
         .eq('id', id);
         

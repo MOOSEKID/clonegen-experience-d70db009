@@ -6,8 +6,9 @@ import { Trash2, Mail, Phone, Calendar as CalendarIcon, Award, Clock } from 'luc
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { LoadingSpinner } from '@/components/ui/LoadingSpinner';
 import { Button } from '@/components/ui/button';
+import AdminBreadcrumb from '@/components/admin/common/AdminBreadcrumb';
 
-// Import our new components
+// Import our components
 import ProfileHeader from './components/ProfileHeader';
 import InfoCards from './components/InfoCards';
 import ProfileTab from './components/ProfileTab';
@@ -70,8 +71,18 @@ const TrainerProfileDetail: React.FC = () => {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 animate-fade-in">
       {/* Header with breadcrumb */}
+      <div>
+        <AdminBreadcrumb 
+          items={[
+            { label: 'Staff', href: '/admin/staff' },
+            { label: 'Trainers', href: '/admin/staff/trainers/profiles' },
+            { label: trainer.full_name || 'Trainer Profile' }
+          ]} 
+        />
+      </div>
+
       <ProfileHeader 
         trainer={trainer} 
         onDelete={() => setIsDeleteDialogOpen(true)} 
@@ -83,10 +94,22 @@ const TrainerProfileDetail: React.FC = () => {
       {/* Profile Tabs */}
       <Tabs defaultValue="profile" className="w-full">
         <TabsList className="w-full md:w-auto">
-          <TabsTrigger value="profile">Profile</TabsTrigger>
-          <TabsTrigger value="certifications">Certifications</TabsTrigger>
-          <TabsTrigger value="availability">Availability</TabsTrigger>
-          <TabsTrigger value="calendar">Calendar</TabsTrigger>
+          <TabsTrigger value="profile" className="flex items-center gap-1">
+            <Mail className="h-4 w-4" />
+            Profile
+          </TabsTrigger>
+          <TabsTrigger value="certifications" className="flex items-center gap-1">
+            <Award className="h-4 w-4" />
+            Certifications
+          </TabsTrigger>
+          <TabsTrigger value="availability" className="flex items-center gap-1">
+            <Clock className="h-4 w-4" />
+            Availability
+          </TabsTrigger>
+          <TabsTrigger value="calendar" className="flex items-center gap-1">
+            <CalendarIcon className="h-4 w-4" />
+            Calendar
+          </TabsTrigger>
         </TabsList>
         
         <TabsContent value="profile" className="mt-6">

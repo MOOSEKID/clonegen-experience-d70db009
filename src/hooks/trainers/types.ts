@@ -60,18 +60,18 @@ export interface ClientSession {
   id: string;
   staff_id: string;
   client_id?: string;
-  date: string;
-  startTime: string;
-  endTime: string;
-  durationMinutes?: number;
-  sessionType?: string;
+  session_date: string;
+  start_time: string;
+  end_time: string;
+  duration?: number;
+  session_type?: string;
   location?: string;
   status?: string;
   notes?: string;
   focus_areas?: string[];
   achievements?: string;
-  createdAt?: string;
-  updatedAt?: string;
+  created_at?: string;
+  updated_at?: string;
 }
 
 export interface ClientSessionInput extends Omit<ClientSession, 'id'> {}

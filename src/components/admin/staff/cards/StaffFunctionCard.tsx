@@ -3,6 +3,7 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
+import { motion } from 'framer-motion';
 
 interface StaffFunctionCardProps {
   title: string;
@@ -21,11 +22,11 @@ const StaffFunctionCard = ({
 }: StaffFunctionCardProps) => {
   return (
     <Link
-      to={link}
+      to={implemented ? link : "#"}
       className={cn(
         "block p-6 rounded-lg shadow-sm hover:shadow-md transition-all",
         "border border-gray-200 bg-white",
-        "hover:border-blue-200"
+        implemented ? "hover:border-blue-200" : "cursor-default opacity-80"
       )}
     >
       <div className="flex items-start space-x-4">

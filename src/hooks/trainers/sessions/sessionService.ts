@@ -22,18 +22,24 @@ export const fetchSessions = async (trainerId?: string, clientId?: string): Prom
       `);
 
     if (trainerId) {
-      query = query.eq('staff_id', trainerId);
+      query = query.eq('assigned_trainer_id', trainerId);
     }
 
     if (clientId) {
-      query = query.eq('client_id', clientId);
+      query = query.eq('member_id', clientId);
     }
 
     const { data, error } = await query.order('date', { ascending: false });
 
     if (error) throw error;
-
-    return data as ClientSession[];
+    
+    // Map the data to match our ClientSession type
+    const sessions = data.map((item: any) => ({
+      ...item,
+      staff_id: item.staff_id || item.trainer_id, // Handle both trainer_id and staff_id
+    })) as ClientSession[];
+    
+    return sessions;
   } catch (error) {
     console.error('Error fetching sessions:', error);
     throw error;

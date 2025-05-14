@@ -1,3 +1,4 @@
+
 import { useToast } from '@/components/ui/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { TrainerProfile } from './types';
@@ -12,7 +13,7 @@ export const useTrainerOperations = () => {
       const trainerData = adaptStaffToTrainer(trainer);
       
       const { data, error } = await supabase
-        .from('trainers')
+        .from('trainer_profiles')
         .insert({
           name: trainerData.name,
           email: trainerData.email,
@@ -71,7 +72,7 @@ export const useTrainerOperations = () => {
       });
       
       const { error } = await supabase
-        .from('trainers')
+        .from('trainer_profiles')
         .update(dbUpdates)
         .eq('id', id);
         
@@ -97,7 +98,7 @@ export const useTrainerOperations = () => {
   const deleteTrainer = async (id: string) => {
     try {
       const { error } = await supabase
-        .from('trainers')
+        .from('trainer_profiles')
         .delete()
         .eq('id', id);
         

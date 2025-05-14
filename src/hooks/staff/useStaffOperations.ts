@@ -1,7 +1,7 @@
 
-import { useToast } from '@/components/ui/use-toast';
-import { supabase } from '@/integrations/supabase/client';
-import { StaffProfile, StaffCertification, StaffAvailability } from '../trainers/types';
+import { useStaffMemberOperations } from './operations/staffMemberOperations';
+import { useCertificationOperations } from './operations/certificationOperations';
+import { useAvailabilityOperations } from './operations/availabilityOperations';
 
 export const useStaffOperations = () => {
   const { toast } = useToast();
@@ -166,8 +166,8 @@ export const useStaffOperations = () => {
         .insert({
           staff_id: availability.staff_id,
           day_of_week: availability.day_of_week,
-          startTime: availability.startTime,
-          endTime: availability.endTime
+          start_time: availability.start_time,
+          end_time: availability.end_time
         })
         .select()
         .single();
@@ -218,11 +218,16 @@ export const useStaffOperations = () => {
   };
 
   return {
+    // Staff member operations
     addStaffMember,
     updateStaffMember,
     deleteStaffMember,
+    
+    // Certification operations
     addCertification,
     deleteCertification,
+    
+    // Availability operations
     addAvailability,
     deleteAvailability
   };

@@ -3,10 +3,11 @@ import React from 'react';
 import { format } from 'date-fns';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { CalendarIcon, EditIcon, Trash2Icon, Eye } from 'lucide-react';
+import { CalendarIcon, EditIcon, Trash2Icon, Eye, User } from 'lucide-react';
 import { StaffProfile } from '@/hooks/trainers/types';
 import { Separator } from '@/components/ui/separator';
 import { useNavigate } from 'react-router-dom';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 
 // Import smaller components
 import TrainerStatusBadge from './card/TrainerStatusBadge';
@@ -41,17 +42,36 @@ const TrainerCard: React.FC<TrainerCardProps> = ({
   };
 
   return (
-    <Card className="overflow-hidden">
+    <Card className="overflow-hidden transition-all hover:shadow-md border-gray-200 hover:border-primary/20">
       <CardHeader className="pb-2">
         <div className="flex justify-between">
           <TrainerStatusBadge status={trainer.status || ''} />
           <div className="flex gap-1">
-            <Button variant="ghost" size="icon" onClick={onEdit} title="Edit trainer">
-              <EditIcon className="h-4 w-4" />
-            </Button>
-            <Button variant="ghost" size="icon" onClick={onDelete} title="Delete trainer">
-              <Trash2Icon className="h-4 w-4" />
-            </Button>
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button variant="ghost" size="icon" onClick={onEdit} className="hover:bg-blue-50 hover:text-blue-600" aria-label="Edit trainer">
+                    <EditIcon className="h-4 w-4" />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>Edit trainer profile</p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+            
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button variant="ghost" size="icon" onClick={onDelete} className="hover:bg-red-50 hover:text-red-600" aria-label="Delete trainer">
+                    <Trash2Icon className="h-4 w-4" />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>Delete trainer profile</p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
           </div>
         </div>
         <TrainerBasicInfo 
@@ -68,7 +88,7 @@ const TrainerCard: React.FC<TrainerCardProps> = ({
         
         {/* Hire Date */}
         <div className="flex items-center text-sm">
-          <CalendarIcon className="h-4 w-4 mr-2" />
+          <CalendarIcon className="h-4 w-4 mr-2 text-gray-500" />
           <span className="text-muted-foreground">Hire Date:</span>
           <span className="ml-1 font-medium">
             {trainer.hire_date ? format(new Date(trainer.hire_date), 'MMM d, yyyy') : 'Not specified'}
@@ -96,7 +116,7 @@ const TrainerCard: React.FC<TrainerCardProps> = ({
           <CardFooter className="pt-4">
             <div>
               <h4 className="text-sm font-semibold mb-1">Bio</h4>
-              <p className="text-sm">{trainer.bio}</p>
+              <p className="text-sm text-gray-600">{trainer.bio}</p>
             </div>
           </CardFooter>
         </>

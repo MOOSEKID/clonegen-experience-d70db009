@@ -34,14 +34,17 @@ const TrainerCalendar: React.FC = () => {
         
         // Fetch trainer basic info to get name
         const { data: trainer, error: trainerError } = await supabase
-          .from('trainers')
+          .from('trainer_profiles')
           .select('name')
           .eq('id', id)
           .single();
           
         if (trainerError) throw trainerError;
         
-        setTrainerName(trainer.name);
+        // Safely get the name if available
+        if (trainer && 'name' in trainer) {
+          setTrainerName(trainer.name || '');
+        }
         
         // In a real implementation, we would fetch events related to this trainer
         // For now, just setting mock data

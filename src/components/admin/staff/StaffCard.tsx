@@ -14,8 +14,14 @@ interface StaffCardProps {
 const StaffCard: React.FC<StaffCardProps> = ({ staffMember }) => {
   const navigate = useNavigate();
   
+  // Use safe defaults if data is missing
+  const fullName = staffMember.full_name || 'Unknown Staff';
+  const role = staffMember.role || 'staff';
+  const status = staffMember.status || 'Unknown';
+  const photoUrl = staffMember.photo_url || '';
+  
   const getRoleColor = (role: string) => {
-    switch (role) {
+    switch (role.toLowerCase()) {
       case 'trainer':
         return 'bg-blue-100 text-blue-800';
       case 'manager':
@@ -32,7 +38,11 @@ const StaffCard: React.FC<StaffCardProps> = ({ staffMember }) => {
   };
 
   const getStatusColor = (status: string) => {
-    return status === 'Active' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800';
+    const statusLower = status.toLowerCase();
+    if (statusLower === 'active') return 'bg-green-100 text-green-800';
+    if (statusLower === 'inactive') return 'bg-red-100 text-red-800';
+    if (statusLower === 'on leave') return 'bg-amber-100 text-amber-800';
+    return 'bg-gray-100 text-gray-800';
   };
 
   const handleViewProfile = () => {
@@ -45,22 +55,22 @@ const StaffCard: React.FC<StaffCardProps> = ({ staffMember }) => {
         <div className="flex items-start justify-between">
           <div className="flex items-center space-x-3">
             <Avatar className="h-12 w-12 border">
-              {staffMember.photo_url ? (
-                <img src={staffMember.photo_url} alt={staffMember.full_name} />
+              {photoUrl ? (
+                <img src={photoUrl} alt={fullName} />
               ) : (
                 <div className="flex h-full w-full items-center justify-center bg-gray-100 text-gray-500">
-                  {staffMember.full_name.charAt(0)}
+                  {fullName.charAt(0)}
                 </div>
               )}
             </Avatar>
             <div>
-              <h3 className="font-semibold">{staffMember.full_name}</h3>
+              <h3 className="font-semibold">{fullName}</h3>
               <div className="flex flex-wrap gap-1 mt-1">
-                <Badge variant="outline" className={getRoleColor(staffMember.role || '')}>
-                  {staffMember.role?.charAt(0).toUpperCase() + staffMember.role?.slice(1) || 'Staff'}
+                <Badge variant="outline" className={getRoleColor(role)}>
+                  {role.charAt(0).toUpperCase() + role.slice(1)}
                 </Badge>
-                <Badge variant="outline" className={getStatusColor(staffMember.status || '')}>
-                  {staffMember.status || 'Unknown'}
+                <Badge variant="outline" className={getStatusColor(status)}>
+                  {status}
                 </Badge>
               </div>
             </div>

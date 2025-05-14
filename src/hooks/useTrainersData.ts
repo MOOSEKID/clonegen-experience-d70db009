@@ -22,14 +22,14 @@ export const useTrainersData = () => {
       setIsLoading(true);
       try {
         const { data, error } = await supabase
-          .from('trainers')
+          .from('trainer_profiles')
           .select('id, name, specialization, email, phone, status')
           .eq('status', 'Active');
         
         if (error) throw error;
         
         if (data) {
-          setTrainers(data);
+          setTrainers(data as Trainer[]);
         } else {
           // Fallback to mock data if no data is returned
           setTrainers(getMockTrainers().map(trainer => ({

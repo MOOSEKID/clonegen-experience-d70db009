@@ -12,7 +12,7 @@ const generateMockSessions = (options: GenerateMockOptions = {}): ClientSession[
     assignedTrainerId = 'trainer-test-001',
     memberId = 'member-test-123',
     futureSessions = false,
-    count = Math.floor(Math.random() * 6) + 5,
+    count = Math.floor(Math.random() * 6) + 5, // 5–10 sessions
   } = options;
 
   const mockStatuses: ClientSession['status'][] = ['scheduled', 'completed', 'canceled', 'no-show'];
@@ -40,22 +40,22 @@ const generateMockSessions = (options: GenerateMockOptions = {}): ClientSession[
       .slice(0, Math.floor(Math.random() * 3) + 1);
 
     sessions.push({
-      id: `mock-${futureSessions ? 'future' : 'past'}-${i}`,
+      id: `mock-${i}`,
       assigned_trainer_id: assignedTrainerId,
       member_id: memberId,
       session_date: sessionDate.toISOString().split('T')[0],
       start_time: startTime,
       end_time: endTime,
-      duration,
-      status,
+      duration: duration,
+      status: status,
       notes:
         status === 'canceled'
-          ? 'Rescheduled by client'
+          ? 'Client had an emergency'
           : status === 'no-show'
-          ? 'Client didn’t show up'
-          : 'Standard training session',
-      // focus_areas: focusAreas,
-      achievements: status === 'completed' ? 'Achieved all workout goals' : null,
+          ? 'Client did not attend'
+          : 'Regular training session',
+      focus_areas: focusAreas,
+      achievements: status === 'completed' ? 'Completed all planned exercises' : null,
       created_at: sessionDate.toISOString(),
       updated_at: new Date().toISOString(),
     });
@@ -64,4 +64,4 @@ const generateMockSessions = (options: GenerateMockOptions = {}): ClientSession[
   return sessions;
 };
 
-export default generateMockSessions
+export default generateMockSessions;

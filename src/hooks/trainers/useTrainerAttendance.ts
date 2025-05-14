@@ -26,12 +26,10 @@ export const useTrainerAttendance = (trainerId?: string) => {
       setIsLoading(true);
       
       try {
+        // We need to use a basic query since the join relation isn't available in the types
         let query = supabase
           .from('trainer_attendance')
-          .select(`
-            *,
-            trainers(name)
-          `)
+          .select('*')
           .order('date', { ascending: false });
           
         if (trainerId) {
@@ -43,10 +41,30 @@ export const useTrainerAttendance = (trainerId?: string) => {
         if (error) throw error;
         
         if (data) {
+          // We need to manually add the trainer names by fetching them separately
+          const trainerIds = [...new Set(data.map(record => record.trainer_id))];
+          const trainerProfiles: Record<string, string> = {};
+          
+          // Get trainer names in a separate query
+          if (trainerIds.length > 0) {
+            const { data: trainers, error: trainersError } = await supabase
+              .from('trainer_profiles')
+              .select('id, name')
+              .in('id', trainerIds);
+              
+            if (!trainersError && trainers) {
+              trainers.forEach(trainer => {
+                trainerProfiles[trainer.id] = trainer.name;
+              });
+            }
+          }
+          
+          // Add trainer names to the records
           const formattedData = data.map(record => ({
             ...record,
-            trainer_name: record.trainers?.name
+            trainer_name: trainerProfiles[record.trainer_id] || 'Unknown'
           }));
+          
           setRecords(formattedData);
         }
       } catch (err) {
