@@ -267,67 +267,67 @@ export type Database = {
       }
       client_sessions: {
         Row: {
-          achievements: string | null
-          client_id: string | null
+          assigned_trainer_id: string | null
           created_at: string | null
           duration: number | null
           end_time: string
-          focus_areas: string[] | null
           id: string
-          location: string | null
+          member_id: string | null
           notes: string | null
           session_date: string
+          session_focus_tags: string[] | null
+          session_location: string | null
+          session_outcomes: string | null
           session_type: string | null
           start_time: string
           status: string | null
-          trainer_id: string | null
           updated_at: string | null
         }
         Insert: {
-          achievements?: string | null
-          client_id?: string | null
+          assigned_trainer_id?: string | null
           created_at?: string | null
           duration?: number | null
           end_time: string
-          focus_areas?: string[] | null
           id?: string
-          location?: string | null
+          member_id?: string | null
           notes?: string | null
           session_date: string
+          session_focus_tags?: string[] | null
+          session_location?: string | null
+          session_outcomes?: string | null
           session_type?: string | null
           start_time: string
           status?: string | null
-          trainer_id?: string | null
           updated_at?: string | null
         }
         Update: {
-          achievements?: string | null
-          client_id?: string | null
+          assigned_trainer_id?: string | null
           created_at?: string | null
           duration?: number | null
           end_time?: string
-          focus_areas?: string[] | null
           id?: string
-          location?: string | null
+          member_id?: string | null
           notes?: string | null
           session_date?: string
+          session_focus_tags?: string[] | null
+          session_location?: string | null
+          session_outcomes?: string | null
           session_type?: string | null
           start_time?: string
           status?: string | null
-          trainer_id?: string | null
           updated_at?: string | null
         }
         Relationships: [
           {
             foreignKeyName: "client_sessions_client_id_fkey"
-            columns: ["client_id"]
+            columns: ["member_id"]
             isOneToOne: false
             referencedRelation: "members"
             referencedColumns: ["id"]
           },
           {
             foreignKeyName: "client_sessions_trainer_id_fkey"
-            columns: ["trainer_id"]
+            columns: ["assigned_trainer_id"]
             isOneToOne: false
             referencedRelation: "trainer_profiles"
             referencedColumns: ["id"]
@@ -2132,6 +2132,10 @@ export type Database = {
         Returns: boolean
       }
       is_superadmin: {
+        Args: Record<PropertyKey, never>
+        Returns: boolean
+      }
+      is_superadmin_user: {
         Args: Record<PropertyKey, never>
         Returns: boolean
       }

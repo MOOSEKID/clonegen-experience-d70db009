@@ -58,18 +58,18 @@ export interface ClientAssignment {
 
 export interface ClientSession {
   id: string;
-  staff_id: string;
-  client_id?: string;
+  assigned_trainer_id: string;
+  member_id?: string;
   session_date: string;
   start_time: string;
   end_time: string;
   duration?: number;
   session_type?: string;
-  location?: string;
+  session_location?: string;
   status?: string;
   notes?: string;
-  focus_areas?: string[];
-  achievements?: string;
+  session_focus_tags?: string[];
+  session_outcomes?: string;
   created_at?: string;
   updated_at?: string;
 }

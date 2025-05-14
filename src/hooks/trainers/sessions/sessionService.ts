@@ -8,11 +8,11 @@ export const fetchSessions = async (trainerId?: string, clientId?: string): Prom
     let query = supabase.from('client_sessions').select('*') as any;
     
     if (trainerId) {
-      query = query.eq('staff_id', trainerId);
+      query = query.eq('assigned_trainer_id', trainerId);
     }
     
     if (clientId) {
-      query = query.eq('client_id', clientId);
+      query = query.eq('member_id', clientId);
     }
     
     const { data, error } = await query.order('session_date', { ascending: false });
@@ -22,7 +22,12 @@ export const fetchSessions = async (trainerId?: string, clientId?: string): Prom
     // Map the data to match our ClientSession type
     const sessions = data.map((item: any) => ({
       ...item,
-      staff_id: item.staff_id || item.trainer_id, // Handle both trainer_id and staff_id
+      // For backward compatibility or handling existing data
+      assigned_trainer_id: item.assigned_trainer_id || item.trainer_id || item.staff_id,
+      member_id: item.member_id || item.client_id,
+      session_focus_tags: item.session_focus_tags || item.focus_areas,
+      session_outcomes: item.session_outcomes || item.achievements,
+      session_location: item.session_location || item.location,
     })) as ClientSession[];
     
     return sessions;

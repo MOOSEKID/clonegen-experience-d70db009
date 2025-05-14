@@ -39,8 +39,8 @@ const generateMockSessions = (trainerId?: string, clientId?: string): ClientSess
     
     sessions.push({
       id: `mock-${i}`,
-      staff_id: actualTrainerId,
-      client_id: actualClientId,
+      assigned_trainer_id: actualTrainerId,
+      member_id: actualClientId,
       session_date: sessionDate.toISOString().split('T')[0],
       start_time: startTime,
       end_time: endTime,
@@ -49,10 +49,10 @@ const generateMockSessions = (trainerId?: string, clientId?: string): ClientSess
       notes: status === 'canceled' ? 'Client had an emergency' : 
              status === 'no-show' ? 'Client did not attend' : 
              'Regular training session',
-      focus_areas: focusAreas,
-      achievements: status === 'completed' ? 'Completed all planned exercises' : null,
-      // Do not include session_type as it's not in the ClientSession type
-      // location: ['Main Gym', 'Studio A', 'Studio B', 'Outdoor Area'][Math.floor(Math.random() * 4)],
+      session_focus_tags: focusAreas,
+      session_outcomes: status === 'completed' ? 'Completed all planned exercises' : null,
+      session_location: ['Main Gym', 'Studio A', 'Studio B', 'Outdoor Area'][Math.floor(Math.random() * 4)],
+      session_type: ['One-on-one', 'Group', 'Assessment', 'Specialty'][Math.floor(Math.random() * 4)],
       created_at: sessionDate.toISOString(),
       updated_at: new Date().toISOString()
     });
